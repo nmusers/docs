@@ -1,12 +1,12 @@
 +++
-title = "A Quick guide"
+title = "Quick start"
 author = ["Yi Zhang"]
 draft = false
 +++
 
 ## A simple PK model {#a-simple-pk-model}
 
-```f90
+```sh
 $PROB RUN# 402 POPULATION DATA
 $INPUT C ID TIME DV AMT
 $DATA  data.csv IGNORE=C
@@ -35,8 +35,8 @@ $SIGMA
 
 $ESTIMATION METHOD=1 MAXEVAL=9999 INTER
 $COV
-$TABLE ID TIME DV IPRE=CIPRED AMT CL V1 Q V2 ETA1 ETA2 ETA3 ETA4
-          CWRES NPD NPDE ESAMPLE=1000
+$TABLE ID TIME DV IPRE=CIPRED AMT KA K ETA1 ETA2
+          CWRES NPD NPDE
           NOPRINT FILE=output.tab
 ```
 
