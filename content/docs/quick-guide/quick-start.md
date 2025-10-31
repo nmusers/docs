@@ -1,0 +1,44 @@
++++
+title = "A Quick guide"
+author = ["Yi Zhang"]
+draft = false
++++
+
+## A simple PK model {#a-simple-pk-model}
+
+```f90
+$PROB RUN# 402 POPULATION DATA
+$INPUT C ID TIME DV AMT
+$DATA  data.csv IGNORE=C
+$SUBROUTINES ADVAN2 TRANS1
+
+$PK
+  TVKA=THETA(1)
+  KA=TVKA*EXP(ETA(1))
+
+  TVK=THETA(2)
+  K=TVK*EXP(ETA(2))
+
+$ERROR
+  Y=F*(1+EPS(1))
+
+$THETA
+(0,0.5) ;[KA]
+(0,0.1) ;[K]
+
+$OMEGA
+    0.02 ; [P]
+    0.02 ; [P]
+
+$SIGMA
+    0.02 ; [P]
+
+$ESTIMATION METHOD=1 MAXEVAL=9999 INTER
+$COV
+$TABLE ID TIME DV IPRE=CIPRED AMT CL V1 Q V2 ETA1 ETA2 ETA3 ETA4
+          CWRES NPD NPDE ESAMPLE=1000
+          NOPRINT FILE=output.tab
+```
+
+
+## Reference {#reference}
