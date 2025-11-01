@@ -6,6 +6,9 @@ draft = false
 
 ## A simple PK model {#a-simple-pk-model}
 
+use sh for slightly better highlighting
+Here is a simple one-compartment model.
+
 ```sh
 $PROB RUN# 402 POPULATION DATA
 $INPUT C ID TIME DV AMT
