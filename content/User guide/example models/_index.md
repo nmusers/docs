@@ -2,9 +2,8 @@
 title = "Example models"
 author = ["Yi Zhang"]
 draft = false
+weight = 2
+bookCollapseSection = true
 +++
 
-Example models
-
-
-## Model 1 {#model-1}
+This part contains examples.
