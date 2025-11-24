@@ -7,7 +7,8 @@ draft = false
 ## $AESINIT {#aesinit}
 
 MEANING: Marks the beginning of abbreviated code for the AES routine
-CONTEXT: NM-TRAN Control Record
+** CONTEXT
+ NM-TRAN Control Record
 
 USAGE:
 $AESINITIAL
