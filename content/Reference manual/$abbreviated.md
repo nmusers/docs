@@ -6,11 +6,7 @@ draft = false
 
 ## $ABBREVIATED {#abbreviated}
 
-Provides instructions about abbreviated code.  Optional.   May be used
-when $PK, $ERROR, or $PRED abbreviated code is present. Must precede
-all blocks of  abbreviated  code.   With  NONMEM 7.4, may also be used
-when there is no abbreviated code.  For example, $ABBR REPLACE may be
-used for  label  substitution  in  NONMEM  report files.
+Provides instructions about abbreviated code.
 
 
 ## CONTEXT {#context}
@@ -32,6 +28,15 @@ $ABBREVIATED  [COMRES=n1] [COMSAV=n2]
               [FUNCTION function_name(input_vector_name,dimension[,usage])]
               [VECTOR input_vector_name(dimension)]
 ```
+
+
+## DISCUSSION {#discussion}
+
+Optional.   May be used
+when $PK, $ERROR, or $PRED abbreviated code is present. Must precede
+all blocks of  abbreviated  code.   With  NONMEM 7.4, may also be used
+when there is no abbreviated code.  For example, $ABBR REPLACE may be
+used for  label  substitution  in  NONMEM  report files.
 
 
 ## SAMPLE {#sample}
