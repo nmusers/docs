@@ -1,12 +1,16 @@
 +++
-title = "$ABBREVIATED $ABBR"
+title = "$ABBREVIATED"
 author = ["Yi Zhang"]
 draft = false
 +++
 
-## $ABBREVIATED $ABBR {#abbreviated-abbr}
+## $ABBREVIATED {#abbreviated}
 
-Provides instructions about abbreviated code.
+Provides instructions about abbreviated code.  Optional.   May be used
+when $PK, $ERROR, or $PRED abbreviated code is present. Must precede
+all blocks of  abbreviated  code.   With  NONMEM 7.4, may also be used
+when there is no abbreviated code.  For example, $ABBR REPLACE may be
+used for  label  substitution  in  NONMEM  report files.
 
 
 ## CONTEXT {#context}
@@ -35,15 +39,6 @@ $ABBREVIATED  [COMRES=n1] [COMSAV=n2]
 ```sh
 $ABBREVIATED    COMRES=2
 ```
-
-
-## DISCUSSION {#discussion}
-
-Optional.   May be used when $PK, $ERROR, or $PRED abbreviated code is
-present. Must precede all blocks of  abbreviated  code.   With  NONMEM
-7.4, may also be used when there is no abbreviated code.  For example,
-$ABBR REPLACE may be used for  label  substitution  in  NONMEM  report
-files.
 
 
 ## OPTIONS {#options}
