@@ -6,15 +6,24 @@ draft = false
 
 ## $AESINIT {#aesinit}
 
-MEANING: Marks the beginning of abbreviated code for the AES routine
-** CONTEXT
- NM-TRAN Control Record
+Marks the beginning of abbreviated code for the AES routine
 
-USAGE:
+
+## CONTEXT {#context}
+
+NM-TRAN Control Record
+
+
+## USAGE {#usage}
+
+```sh
 $AESINITIAL
 abbreviated code
+```
 
-DISCUSSION:
+
+## DISCUSSION {#discussion}
+
 The  $AESINITIAL record is used to compute the amounts in the equilib-
 rium compartments at the beginning of an integration interval.  It  is
 used  with  PREDPP's  ADVAN9, ADVAN15, and ADVAN17.  May also be coded
@@ -24,7 +33,8 @@ General rules for abbreviated code are documented elsewhere
 (See abbreviated code).
 Specific rules follow.
 
-ASSIGNMENT AND CONDITIONAL STATEMENTS
+
+### ASSIGNMENT AND CONDITIONAL STATEMENTS {#assignment-and-conditional-statements}
 
 Left-hand quantities in assignment statements:
 
@@ -67,7 +77,8 @@ Forbidden Variable Names:
 
 IR DA DP DT E(n) ETA(n) EPS(n) ERR(n)
 
-PSEUDO ASSIGNMENT STATEMENTS
+
+### PSEUDO ASSIGNMENT STATEMENTS {#pseudo-assignment-statements}
 
 COMRES=-1
 
@@ -84,10 +95,18 @@ $AESINIT (EVERY EVENT)     ; same as CALLFL=-1 (default)
 
 (See calling protocol).
 
-RECORD ORDER:
+
+### RECORD ORDER: {#record-order}
 
 Follows $SUBROUTINES $INPUT $MODEL $PK
 Precedes $AES
 
-REFERENCES: Guide IV, section V.C.8
-REFERENCES: Guide VI, section VI.E
+
+## REFERENCES {#references}
+
+Guide IV, section V.C.8
+
+
+## REFERENCES {#references}
+
+Guide VI, section VI.E
