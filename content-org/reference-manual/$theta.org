@@ -16,15 +16,19 @@
 
 ** USAGE
 
+#+begin_src sh
  $THETA  value1  [value2]  [value3] ...
          [(value)xn] ...
          [label=value] ...
          [NAMES (label ...)value ...]
          [NUMBERPOINTS=n]
          [ABORT|NOABORT|NOABORTFIRST]
+#+end_src
 
 ** EXAMPLE
+#+begin_src sh
  $THETA  (0,3) 2 FIXED (0,.6,1) 10 (-INF,-2.7,0) (37 FIXED)
+#+end_src
 
 ** DISCUSSION
  Gives  initial  estimates and bounds for elements of the THETA matrix.
@@ -35,12 +39,12 @@
  Each value defines a theta and gives its initial estimate and  bounds.
  A value has one of 4 forms:
 
- init [FIXED]
+*** init [FIXED]
       Init is the initial estimate.  If FIXED is used, the final param-
       eter estimate is to be constrained to equal the initial parameter
       estimate.
 
- ([low,] init [,up] [FIXED])
+*** ([low,] init [,up] [FIXED])
       Low and up are lower and upper bounds respectively.  They are the
       boundaries for the minimization search.  Commas are optional.  If
       an  upper  bound  is used, a lower bound must also be used (e.g.,
@@ -56,20 +60,20 @@
       They  are  communicated  to NONMEM as numeric values -1000000 and
       1000000.
 
- ([low,] init [,up]) [FIXED]
+*** ([low,] init [,up]) [FIXED]
       This is just like the form described above  except  that  if  the
       FIXED  attribute is used, the attribute occurs outside the paren-
       theses, and then if moreover, a bound appears, the bound need not
       equal the initial estimate.
 
- (low,,up)
+*** (low,,up)
       The commas are required.  Because no initial estimate is given, a
       search for an initial estimate (the Initial  Estimates  Step)  is
       undertaken  by  NONMEM.  With NONMEM 7.4, when initial thetas are
       to be estimated,  evaluations  can  now  be  done  for  FOCE  and
       Laplace, not just for FO.
 
- (value)xn
+*** (value)xn
       Any  initial  value or group of initial values may be enclosed in
       parentheses and followed by "xn", which means  to  replicate  the
       values within parentheses n times ("repeated value").  The values
@@ -81,12 +85,12 @@
 
       $THETA (2)x4 (0.001,0.1,1000)x3 (0.5 FIXED)x2
 
- UNINT (NM75)
+*** UNINT (NM75)
       UNINT  is used during the Optimal Design Step to identify a theta
       as uninteresting.  UNINT may be used anywhere that FIXED  may  be
       used.
 
- label=value [FIXED] (NM75)
+*** label=value [FIXED] (NM75)
       This  is a compact method of defining an element of theta, speci-
       fying its initial estimate, and specifying a  symbolic  subscript
       for  this  element  of THETA.  The symbolic subscript may be used
@@ -116,32 +120,32 @@
       symbolic  label.  Therefore  these  records must be placed before
       $THETAI, $THETAR, and abbreviated code.
 
- NAMES (label ...)value ... (NM75)
+*** NAMES (label ...)value ... (NM75)
       A compact way of defining one or more thetas with labels and ini-
       tial values. For example
       $THETA NAMES(V1,CL,Q,V2) (0.0,7.0) (0.0,7.0) (0.0,7.0) 7
 
- NUMBERPOINTS=n
+*** NUMBERPOINTS=n
       During  NONMEM's  search  for  an  initial  estimate, a number of
       points will be  examined.   This  number  will  be  automatically
       determined  by  NONMEM,  or it can be specified with this option.
       May also be coded NUMBERPTS, NUMPOINTS, NUMPTS.
 
- ABORT
+*** ABORT
       During the Initial Estimates step, NONMEM is to abort  when  PRED
       sets  the  error return code to 1.  (The PRED error return code n
       is set by the statement "EXIT n [k]" in abbreviated code,  or  by
       the  statement  IERPRD=n in user-supplied code, or by PREDPP when
       it detects an error.)  This is the default.
 
- NOABORT
+*** NOABORT
       During the Initial Estimates step, NONMEM  is  simply  to  ignore
       values  of the theta vector that result in PRED error return code
       1.  (Ordinarily the first value of  the  theta  vector  is  never
       ignored.)  These will not be feasible values for an initial esti-
       mate.
 
- NOABORTFIRST
+*** NOABORTFIRST
       Same as NOABORT option, but also applies to the  first  value  of
       the  theta  vector  that  is  tried.  It cannot be shortened; all
       characters must be coded.  May be used with the  NOABORT  option,
