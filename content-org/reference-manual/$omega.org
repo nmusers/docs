@@ -16,7 +16,8 @@
 
 ** USAGE
 
- $OMEGA  [DIAGONAL(n) | BLOCK(n) | BLOCK(n) SAME(m) | BLOCK SAME(m)]
+#+begin_src sh
+$OMEGA  [DIAGONAL(n) | BLOCK(n) | BLOCK(n) SAME(m) | BLOCK SAME(m)]
          [[value1]  [value2]  [value3] ...
          [(value,value...) xn]
          [BLOCK(n) VALUES(diag,odiag)]
@@ -25,9 +26,12 @@
          [FIXED] [UNINT]
          [VARIANCE|STANDARD] [COVARIANCE|CORRELATON] [CHOLESKY]
          [SCALE(scalevalue)]
+#+end_src
 
 ** EXAMPLE
+#+begin_src sh
  $OMEGA BLOCK(3)  6. .005 .3 .0002 .006 .4
+#+end_src
 
 ** DISCUSSION
 
@@ -49,7 +53,7 @@
 
  There are seven forms:
 
- 1.   $OMEGA   [DIAGONAL(n)] [ v11 v22 v33 ... vnn ]
+***   $OMEGA   [DIAGONAL(n)] [ v11 v22 v33 ... vnn ]
 
       This  gives  the  initial estimates of the diagonal elements of a
       diagonal block of OMEGA.  E.g.,
@@ -88,7 +92,7 @@
       An initial estimate may be 0 only if  the  variance  or  standard
       deviation is fixed to this estimate.
 
- 2.   $OMEGA BLOCK(n) [ v11 v21 v22 v31 v32 v33 ... vn1 vn2 ... vnn ]
+***   $OMEGA BLOCK(n) [ v11 v21 v22 v31 v32 v33 ... vn1 vn2 ... vnn ]
 
       This  gives the initial estimates of all the elements of a nondi-
       agonal ("full") block of OMEGA.  E.g.,
@@ -184,10 +188,10 @@
       to the diagonal elements to make it positive definite. A  message
       in  the  NONMEM  report  file  will  indicate that this was done.
       E.g.,
-      DIAGONAL SHIFT OF  1.1000E-03 WAS IMPOSED TO ENSURE POSITIVE DEF-
+      DIAGONAL SHIFT OF 1.1000E-03 WAS IMPOSED TO ENSURE POSITIVE DEF-
       INITENESS
 
- 3.   $OMEGA BLOCK(n) SAME(m)
+***   $OMEGA BLOCK(n) SAME(m)
 
       This  describes a block whose initial estimates, as well as final
       estimates, are constrained to be equal to those of the  preceding
@@ -196,11 +200,14 @@
       record is equivalent to m identical records without (m).  E.g.,
       $OMEGA BLOCK(2) SAME(3)
       is equivalent to
+      #+begin_src sh
       $OMEGA BLOCK(2) SAME
       $OMEGA BLOCK(2) SAME
       $OMEGA BLOCK(2) SAME
+      #+end_src
 
- 4.   $OMEGA BLOCK(n) VALUES(diag,odiag)
+
+***   $OMEGA BLOCK(n) VALUES(diag,odiag)
 
       This supplies initial values for a block such  that  the  initial
       estimates of the diagonal elements are all the same, specified by
@@ -223,7 +230,7 @@
       For fixed block (such as for omega priors):
       $OMEGA BLOCK(6) FIX VALUES(0.15,0.0)
 
- 5.   $OMEGA label=value (NM75)
+***   $OMEGA label=value (NM75)
 
       The symbolic label substitution feature is new with  NONMEM  7.5.
       This is a compact method of defining an ETA (an element of OMEGA)
@@ -247,37 +254,44 @@
       elements of THETA and ETA.  Note that $OMEGA and  $THETA  records
       must be placed ahead of any records that use the symbolic label.
 
+      #+begin_src sh
       $THETA CL=(0.0,7.0)
       $OMEGA ECL= 0.3
       $PK
       MU_ECL=THETA(CL)
       CL=EXP(MU_ECL+ETA(ECL))
+      #+end_src
 
       This is equivalent to
 
+      #+begin_src sh
       $THETA (0.0,7.0)
       $OMEGA .3
       $PK
       MU_1+THETA(1)
       CL=EXP(MU_1+ETA(1))
+      #+end_src
 
       Another example defines symbolic labels for a block of OMEGA:
 
+      #+begin_src sh
       $OMEGA BLOCK(4)
       ECL=  0.3
       EV1=  0.01 0.35
       EQ=   0.01 0.01 0.54
       EV2=  0.01 0.01 0.01 0.67
-
+      #+end_src
       Or, for diagonals,
 
+      #+begin_src sh
       $OMEGA
       ECL= 0.3
       EV1= 0.35
       EQ=  0.54
       EV2= 0.67
+      #+end_src
 
- 6.   $OMEGA  BLOCK(n) NAMES  (label1,...,labeln)  VALUES  (odiag,diag)
+***   $OMEGA  BLOCK(n) NAMES  (label1,...,labeln)  VALUES  (odiag,diag)
       (NM75)
 
       With NONMEM 7.5, Symbolic label substitution may be specified for
@@ -285,15 +299,19 @@
       defining one or more etas with labels  and,  when  combined  with
       VALUES, with initial values. For example
 
+      #+begin_src sh
       $OMEGA BLOCK(4) NAMES(ECL,EV1,EQ,EV2) VALUES(0.03,0.01)
+      #+end_src
 
       This is equivalent to
 
+      #+begin_src sh
       $OMEGA BLOCK(4)
       ECL=  0.03
       EV1=  0.01 0.03
       EQ=   0.01 0.01 0.03
       EV2=  0.01 0.01 0.01 0.03
+      #+end_src
 
       If both are present, VALUES() must come after NAMES().
 
@@ -312,45 +330,51 @@
       each individual without any population constraint.   Paralleliza-
       tion is possible.
 
- 7    $OMEGA  SCALE(scalevalue) (NM760)                                 |
+***   $OMEGA  SCALE(scalevalue) (NM760)
 
-      As  of  nm760, you may have your OMEGA or SIGMA values multiplied |
-      by a SCALE value.  The SCALE value takes into affect on any OMEGA |
-      or SIGMA values that come after it in the record:                 |
+      As  of  nm760, you may have your OMEGA or SIGMA values multiplied
+      by a SCALE value.  The SCALE value takes into affect on any OMEGA
+      or SIGMA values that come after it in the record:
 
-      $OMEGA 0.5 0.7 SCALE(2.0) 0.8 0.9 SCALE(1.5) 0.1 0.2              |
+      #+begin_src sh
+	$OMEGA 0.5 0.7 SCALE(2.0) 0.8 0.9 SCALE(1.5) 0.1 0.2
+      #+end_src
 
-      is equivalent to                                                  |
+      is equivalent to
 
-      $OMEGA 0.5 0.7 1.6 1.8 0.15 0.3                                   |
+      #+begin_src sh
+	$OMEGA 0.5 0.7 1.6 1.8 0.15 0.3
+      #+end_src
 
-      Other examples:                                                   |
+      Other examples:
 
-      $OMEGAP SCALE(0.7) BLOCK(4) FIX VALUES(0.5,0.01)                  |
 
-      is equivalent to:                                                 |
+      $OMEGAP SCALE(0.7) BLOCK(4) FIX VALUES(0.5,0.01)
 
-      $OMEGAP BLOCK(4) FIX VALUES(0.35,0.07)                            |
 
-      $OMEGAP SCALE(0.7) BLOCK(4) FIX                                   |
-      0.5                                                               |
-      0.01 0.5                                                          |
-      SCALE(2.5)                                                        |
-      0.02 0.02 0.003                                                   |
+      is equivalent to:
 
-      Is equivalent to                                                  |
+      $OMEGAP BLOCK(4) FIX VALUES(0.35,0.07)
 
-      $OMEGAP SCALE(0.7) BLOCK(4) FIX                                   |
-      0.5                                                               |
-      0.01 0.5                                                          |
-      0.05 0.05 0.0075                                                  |
+      $OMEGAP SCALE(0.7) BLOCK(4) FIX
+      0.5
+      0.01 0.5
+      SCALE(2.5)
+      0.02 0.02 0.003
 
-      The  SCALE is most useful when it is desired to scale an informed |
-      prior OMEGA from a previous analysis that  differs  from  NONMEMs |
-      normal  treatment.   For example, you may wish to scale the omega |
-      prior by (df-p-1)/df, where df=degrees of freedom,  and  p=dimen- |
-      sion  of  omega  block.  Rather than always re-calculate by hand, |
-      you can change the scale on the fly.                              |
+      Is equivalent to
+
+      $OMEGAP SCALE(0.7) BLOCK(4) FIX
+      0.5
+      0.01 0.5
+      0.05 0.05 0.0075
+
+      The  SCALE is most useful when it is desired to scale an informed
+      prior OMEGA from a previous analysis that  differs  from  NONMEMs
+      normal  treatment.   For example, you may wish to scale the omega
+      prior by (df-p-1)/df, where df=degrees of freedom,  and  p=dimen-
+      sion  of  omega  block.  Rather than always re-calculate by hand,
+      you can change the scale on the fly.
 
 ** REFERENCES
 Guide I, section C.3.4.6 , D.5.2 , D.5.3

@@ -16,12 +16,11 @@
 
 ** USAGE
 
+#+begin_src sh
  $PRIOR subroutine  [(conditional" "clause1 ), (conditional" "clause2 ) ... ]
         [DISPLAY[=ALL|CNT]]   [ICMAX=n]
         [argument1 , argument2 ...]
-
-** EXAMPLE
- $PRIOR TNPRI (PROBLEM 2) PLEV=.9999 ISS=0 IVAR=1
+#+end_src
 
 ** DISCUSSION
  Optional. Specifies the use of the PRIOR feature of NONMEM.  Note that
@@ -32,15 +31,14 @@
 
 ** OPTIONS
 
- subroutine
+*** subroutine
 
    Required.  Either  TNPRI  or NWPRI.  The following options and argu-
    ments apply to calls to this subroutine.  Another subroutine  option
    (or another $PRIOR record) may follow, with a new set of options and
-   arguments.  Use only NWPRI for the new $ESTIMATION methods of NONMEM
-   7.
+   arguments.  Use only NWPRI for the new $ESTIMATION methods of NONMEM 7.
 
- conditional clause
+*** conditional clause
 
    Optional.   One  or more conditions, within parentheses.  The condi-
    tions are "AND"ed together, i.e., the subroutine is called when  all
@@ -50,7 +48,7 @@
    tional clause are true. See the Examples, below.  Conditions may  be
    one or more of:
 
-   ESTIMATION or SIMULATION
+***    ESTIMATION or SIMULATION
      Specifies  the  NONMEM  task  for  which  the  subroutine is to be
      called.  If omitted, PRIOR is called for all tasks (i.e., for  all
      values of ICALL).  ESTIMATION and SIMULATION may not both be spec-
@@ -60,13 +58,13 @@
      May  also  be specified as ICALL=n, ICALL.EQ.n, or ICALLn, where n
      is 2 (ESTIMATION) or 4 (SIMULATION).
 
-   PROBLEM=n
+***    PROBLEM=n
      Specifies the problem for which the subroutine is  to  be  called.
      May  also  be  specified as PROBLEM=n or PROBLEM.EQ.n or PROBLEMn.
      PROBLEM may also be coded as IPROB.  Instead of  =,  .EQ.  may  be
      used. Other permitted tests are .NE., .LT., .LE., .GT., and .GE.
 
- DISPLAY[=ALL|CNT]
+***  DISPLAY[=ALL|CNT]
 
    Optional.   The PRIOR subroutine will contain code to print items of
    interest in the NONMEM report.  This is to assist the user in check-
@@ -82,12 +80,12 @@
 
    PRIOR CNT:    -41.898951681785
 
- ICMAX=n
+***  ICMAX=n
 
    Optional.   The  PRIOR  subroutine will set the given value in ICMAX
    prior to calling the subroutine.  (See PRIOR Simulation: ICMAX).
 
- Subroutine arguments
+***  Subroutine arguments
 
    Optional.  The arguments are described in the help entries for NWPRI
    and  TNPRI.  They must be coded excatly as shown, i.e., no abbrevia-
@@ -104,24 +102,30 @@
    IFND, MODE, IVAR
      Arguments unique to for TNPRI
 
- EXAMPLES:
+**  EXAMPLES
 
+#+begin_src sh
  $PRIOR TNPRI (ESTIMATION, PROB .GE.3 ) IFND=1
+#+end_src
 
    TNPRI is called with the Estimation step of problems 3  and  higher.
    IFND is set to 1 with these calls; all other arguments are 0.
 
- $PRIOR TNPRI IFND=1
- (EST, PROB 3) (EST,PROB 4) (EST,PROB 5)
+   #+begin_src sh
+         $PRIOR TNPRI IFND=1
+         (EST, PROB 3) (EST,PROB 4) (EST,PROB 5)
+   #+end_src
 
    Same  as  the preceding example, if the run consists of exactly five
    problems.  TNPRI is called with the Estimation step of problems 3, 4
    and  5.   IFND is set to 1 with these calls; all other arguments are
    0.
 
+   #+begin_src sh
  $PRIOR TNPRI (EST, PROB 3) IFND=1
         TNPRI (EST, PROB 4) IFND=1
         TNPRI (EST, PROB 5) IFND=1
+   #+end_src
 
    Same as the preceding example.  TNPRI is called with the  Estimation
    step  of problem 3.  IFND=1 with this call.  Similarly with problems
