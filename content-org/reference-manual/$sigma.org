@@ -16,6 +16,7 @@
 
 ** USAGE
 
+#+begin_src sh
  $SIGMA  [DIAGONAL(n) | BLOCK(n) | BLOCK(n) SAME(m) | BLOCK SAME(m)]
          [[value1]  [value2]  [value3] ...
          [(value,value...) xn]
@@ -25,9 +26,12 @@
          [FIXED] [UNINT]
          [VARIANCE|STANDARD] [COVARIANCE|CORRELATON] [CHOLESKY]
          [SCALE(scalevalue)]
+#+end_src
 
 ** EXAMPLE
+#+begin_src sh
  $SIGMA BLOCK(3)  6. .005 .3 .0002 .006 .4
+#+end_src
 
 ** DISCUSSION
 
@@ -46,7 +50,7 @@
 
  There are seven forms:
 
- 1.   $SIGMA   [DIAGONAL(n)] [ v11 v22 v33 ... vnn ]
+***   $SIGMA   [DIAGONAL(n)] [ v11 v22 v33 ... vnn ]
 
       This gives the initial estimates of the diagonal  elements  of  a
       diagonal block of SIGMA.  E.g.,
@@ -85,7 +89,7 @@
       An  initial  estimate  may  be 0 only if the variance or standard
       deviation is fixed to this estimate.
 
- 2.   $SIGMA BLOCK(n) [ v11 v21 v22 v31 v32 v33 ... vn1 vn2 ... vnn ]
+***   $SIGMA BLOCK(n) [ v11 v21 v22 v31 v32 v33 ... vn1 vn2 ... vnn ]
 
       This gives the initial estimates of all the elements of a  nondi-
       agonal ("full") block of SIGMA.  E.g.,
@@ -138,6 +142,7 @@
       Examples:
 
       The following describe the same block (within rounding errors):
+      #+begin_src sh
       $SIGMA BLOCK(2) ; or $SIGMA VARIANCE COVARIANCE BLOCK(2)
       0.64
       -0.24 0.58
@@ -153,7 +158,7 @@
       $SIGMA CHOLESKY BLOCK(2)
       0.8
       -0.3 0.7
-
+      #+end_src
       The (entire) initial estimate of the block must be positive defi-
       nite.   The only exception is when the entire initial estimate of
       the block is 0, in which case it must be fixed to this  estimate.
@@ -184,20 +189,24 @@
       DIAGONAL SHIFT OF  1.1000E-03 WAS IMPOSED TO ENSURE POSITIVE DEF-
       INITENESS
 
- 3.   $SIGMA BLOCK(n) SAME(m)
+***   $SIGMA BLOCK(n) SAME(m)
 
       This describes a block whose initial estimates, as well as  final
       estimates,  are constrained to be equal to those of the preceding
       block. Values may not be given. "(n)" may be omitted.
       With NONMEM 7.3 (m) is permitted.  If (m) is present,  then  this
       record is equivalent to m identical records without (m).  E.g.,
+      #+begin_src sh
       $SIGMA BLOCK(2) SAME(3)
+      #+end_src
       is equivalent to
+      #+begin_src sh
       $SIGMA BLOCK(2) SAME
       $SIGMA BLOCK(2) SAME
       $SIGMA BLOCK(2) SAME
+      #+end_src
 
- 4.   $SIGMA BLOCK(n) VALUES(diag,odiag)
+***   $SIGMA BLOCK(n) VALUES(diag,odiag)
 
       This  supplies  initial  values for a block such that the initial
       estimates of the diagonal elements are all the same, specified by
@@ -207,8 +216,11 @@
       ANCE,STANDARD,COVARIANCE,CORRELATON, UNINT) may follow VALUES  or
       be placed between BLOCK and VALUES.
       E.g.,
+      #+begin_src sh
       $SIGMA BLOCK(6) VALUES(0.1,0.01)
+      #+end_src
       is the same as
+      #+begin_src sh
       $SIGMA BLOCK(6)
       0.1
       0.01 0.1
@@ -216,11 +228,14 @@
       (0.01)x3 0.1
       (0.01)x4 0.1
       (0.01)x5 0.1
+      #+end_src
 
       For fixed block (such as for sigma priors):
+      #+begin_src sh
       $SIGMA BLOCK(6) FIX VALUES(0.15,0.0)
+      #+end_src
 
- 5.   $SIGMA label=value (NM75)
+***   $SIGMA label=value (NM75)
 
       The  symbolic  label substitution feature is new with NONMEM 7.5.
       This is a compact method of defining an EPS (an element of SIGMA)
@@ -245,17 +260,20 @@
 
       Another example defines symbolic labels for a block of SIGMA:
 
+      #+begin_src sh
       $SIGMA BLOCK(2)
       RSW=  0.3
       EX=   0.01 0.35
-
+      #+end_src
       Or, for diagonals,
 
+      #+begin_src sh
       $SIGMA
       RSW= 0.3
       EX= 0.35
+      #+end_src
 
- 6.   $SIGMA  BLOCK(n) NAMES  (label1,...,labeln)  VALUES  (odiag,diag)
+***   $SIGMA  BLOCK(n) NAMES  (label1,...,labeln)  VALUES  (odiag,diag)
       (NM75)
 
       With NONMEM 7.5, Symbolic label substitution may be specified for
@@ -263,55 +281,71 @@
       defining one or more epsilons with labels and, when combined with
       VALUES, with initial values. For example
 
+      #+begin_src sh
       $SIGMA BLOCK(2) NAMES(RSW,EX) VALUES(0.03,0.01)
+      #+end_src
 
       This is equivalent to
 
+      #+begin_src sh
       $SIGMA BLOCK(2)
       RSW=  0.03
       EX=   0.01 0.03
+      #+end_src
 
       If both are present, VALUES() must come after NAMES().
 
- 7    $SIGMA  SCALE(scalevalue) (NM760)                                 |
+***    $SIGMA  SCALE(scalevalue) (NM760)
 
-      As  of  nm760, you may have your OMEGA or SIGMA values multiplied |
-      by a SCALE value.  The SCALE value takes into affect on any OMEGA |
-      or SIGMA values that come after it in the record:                 |
+      As  of  nm760, you may have your OMEGA or SIGMA values multiplied
+      by a SCALE value.  The SCALE value takes into affect on any OMEGA
+      or SIGMA values that come after it in the record:
 
-      $SIGMA 0.5 0.7 SCALE(2.0) 0.8 0.9 SCALE(1.5) 0.1 0.2              |
+      #+begin_src sh
+      $SIGMA 0.5 0.7 SCALE(2.0) 0.8 0.9 SCALE(1.5) 0.1 0.2
+      #+end_src
 
-      is equivalent to                                                  |
+      is equivalent to
 
-      $SIGMA 0.5 0.7 1.6 1.8 0.15 0.3                                   |
+      #+begin_src sh
+      $SIGMA 0.5 0.7 1.6 1.8 0.15 0.3
+      #+end_src
 
-      Other examples:                                                   |
+      Other examples:
 
-      $SIGMAP SCALE(0.7) BLOCK(4) FIX VALUES(0.5,0.01)                  |
+      #+begin_src sh
+      $SIGMAP SCALE(0.7) BLOCK(4) FIX VALUES(0.5,0.01)
+      #+end_src
 
-      is equivalent to:                                                 |
+      is equivalent to:
 
-      $SIGMAP BLOCK(4) FIX VALUES(0.35,0.07)                            |
+      #+begin_src sh
+      $SIGMAP BLOCK(4) FIX VALUES(0.35,0.07)
+      #+end_src
 
-      $SIGMAP SCALE(0.7) BLOCK(4) FIX                                   |
-      0.5                                                               |
-      0.01 0.5                                                          |
-      SCALE(2.5)                                                        |
-      0.02 0.02 0.003                                                   |
+      #+begin_src sh
+      $SIGMAP SCALE(0.7) BLOCK(4) FIX
+      0.5
+      0.01 0.5
+      SCALE(2.5)
+      0.02 0.02 0.003
+      #+end_src
 
-      Is equivalent to                                                  |
+      Is equivalent to
 
-      $SIGMAP SCALE(0.7) BLOCK(4) FIX                                   |
-      0.5                                                               |
-      0.01 0.5                                                          |
-      0.05 0.05 0.0075                                                  |
+      #+begin_src sh
+      $SIGMAP SCALE(0.7) BLOCK(4) FIX
+      0.5
+      0.01 0.5
+      0.05 0.05 0.0075
+      #+end_src
 
-      The  SCALE is most useful when it is desired to scale an informed |
-      prior SIGMA from a previous analysis that  differs  from  NONMEMs |
-      normal  treatment.   For example, you may wish to scale the sigma |
-      prior by (df-p-1)/df, where df=degrees of freedom,  and  p=dimen- |
-      sion  of  sigma  block.  Rather than always re-calculate by hand, |
-      you can change the scale on the fly.                              |
+      The  SCALE is most useful when it is desired to scale an informed
+      prior SIGMA from a previous analysis that  differs  from  NONMEMs
+      normal  treatment.   For example, you may wish to scale the sigma
+      prior by (df-p-1)/df, where df=degrees of freedom,  and  p=dimen-
+      sion  of  sigma  block.  Rather than always re-calculate by hand,
+      you can change the scale on the fly.
 
 ** REFERENCES
 Guide I, section C.3.4.6 , D.5.2 , D.5.3
