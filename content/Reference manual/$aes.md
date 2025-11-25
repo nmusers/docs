@@ -35,80 +35,92 @@ Specific rules follow.
 
 ### ASSIGNMENT AND CONDITIONAL STATEMENTS {#assignment-and-conditional-statements}
 
--   Left-hand quantities in assignment statements:
 
-    E(ncm1+1), E(ncm1+2), ...  (Required. Expressions which, when set to
-    0, constitute the system of  algebraic  expressions  describing  the
-    equilibrium  kinetics. ncm1 is the number of nonequilibrium compart-
-    ments.)  The indices "(...)" may be omitted, in which  case  NM-TRAN
-    will  supply  them  according  to the order in which the expressions
-    appear.  Indices are required when the expressions are defined  con-
-    ditionally (i.e., using an IF statement).
+#### Left-hand quantities in assignment statements: {#left-hand-quantities-in-assignment-statements}
 
-    AES-defined (i.e., PRED-defined) items.
+E(ncm1+1), E(ncm1+2), ...  (Required. Expressions which, when set to
+0, constitute the system of  algebraic  expressions  describing  the
+equilibrium  kinetics. ncm1 is the number of nonequilibrium compartments.)  The indices "(...)" may be omitted, in which  case  NM-TRAN
+will  supply  them  according  to the order in which the expressions
+appear.  Indices are required when the expressions are defined  conditionally (i.e., using an IF statement).
 
--   Right-hand quantities in assignment statement and in conditions:
+AES-defined (i.e., PRED-defined) items.
 
-    A(1),  A(2), ...   (Current compartment amounts; may be random vari-
-    ables.)
 
-    P(1), P(2), ...   (Post-translation basic PK parameters; may be ran-
-    dom variables.)
+#### Right-hand quantities in assignment statement and in conditions: {#right-hand-quantities-in-assignment-statement-and-in-conditions}
 
-    PK-defined  items (Implicit basic PK parameters; may be random vari-
-    ables.)
+A(1),  A(2), ...   (Current compartment amounts; may be random variables.)
 
-    T (Time; may be random variable. T takes values continuously over an
-    integration interval.)
+P(1), P(2), ...   (Post-translation basic PK parameters; may be random variables.)
 
-    AES-defined  variables that appeared earlier as left-hand quantities
-    in $AES, and  similarly  from  the  $AESINITIAL  record.   (Caution:
-    AESINITIAL-defined variables that depend on compartment amounts will
-    depend on the initial values of these compartment amounts,  not  the
-    current values.)
+PK-defined  items (Implicit basic PK parameters; may be random variables.)
 
-    Data item labels specified on the $INPUT statement.
+T (Time; may be random variable. T takes values continuously over an
+integration interval.)
 
-    THETA(n).
+AES-defined  variables that appeared earlier as left-hand quantities
+in $AES, and  similarly  from  the  $AESINITIAL  record.   (Caution:
+AESINITIAL-defined variables that depend on compartment amounts will
+depend on the initial values of these compartment amounts,  not  the
+current values.)
 
-    Global Variables in Modules
 
-    Certain variables in FORTRAN modules can be used.
-    (See Variables_in_Modules)
-    The following are of particular interest.
+#### Data item labels specified on the $INPUT statement. {#data-item-labels-specified-on-the-input-statement-dot}
 
-    DOSTIM
-     DOSTIM  is  the  time of a lagged dose or additional dose to which
-     the system is being advanced.  Abbreviated code in $AES  may  test
-     DOSTIM.  It may use DOSTIM on the right, unless DOSTIM is a random
-     variable.  However, it may be used on the right in a $PK block  to
-     define a random variable which may in turn be used on the right in
-     the $AES block.
+THETA(n).
 
-    DOSREC
-     DOSREC is the dose record corresponding to the  dose  entering  at
-     DOSTIM.   Abbreviated  code  in $AES may test items in DOSREC in a
-     logical condition, and DOSREC may always be used on the right.
 
-    ISFINL
-     During simulation or a copying pass, and during the advance  to  a
-     particular  time  (event  or  non-event time), ISFINL=1 at a final
-     call to AES at that time.  Otherwise, ISFINL=0.
+#### Global Variables in Modules {#global-variables-in-modules}
 
--   Forbidden Variable Names:
+Certain variables in FORTRAN modules can be used.
+(See Variables_in_Modules)
+The following are of particular interest.
+
+<!--list-separator-->
+
+-  DOSTIM
+
+    DOSTIM  is  the  time of a lagged dose or additional dose to which
+    the system is being advanced.  Abbreviated code in $AES  may  test
+    DOSTIM.  It may use DOSTIM on the right, unless DOSTIM is a random
+    variable.  However, it may be used on the right in a $PK block  to
+    define a random variable which may in turn be used on the right in
+    the $AES block.
+
+<!--list-separator-->
+
+-  DOSREC
+
+    DOSREC is the dose record corresponding to the  dose  entering  at
+    DOSTIM.   Abbreviated  code  in $AES may test items in DOSREC in a
+    logical condition, and DOSREC may always be used on the right.
+
+<!--list-separator-->
+
+-  ISFINL
+
+    During simulation or a copying pass, and during the advance  to  a
+    particular  time  (event  or  non-event time), ISFINL=1 at a final
+    call to AES at that time.  Otherwise, ISFINL=0.
+
+<!--list-separator-->
+
+-  Forbidden Variable Names
 
     IR DA DP DT ETA(n) EPS(n) ERR(n)
 
 
-### RECORD ORDER: {#record-order}
+### RECORD ORDER {#record-order}
 
 Follows $SUBROUTINES $INPUT $MODEL $PK
+
 Follows $AESINITIAL
 
 (See aes, advan9_15, advan9_17).
 
 
-## REFERENCES: Guide IV, section V.C.9 {#references-guide-iv-section-v-dot-c-dot-9}
+## REFERENCES {#references}
 
+Guide IV, section V.C.9
 
-## REFERENCES: Guide VI, section VI.E {#references-guide-vi-section-vi-dot-e}
+Guide VI, section VI.E
