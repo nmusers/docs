@@ -16,17 +16,20 @@
 
 ** USAGE
 
+#+begin_src sh
  $DES
  abbreviated code
-
+#+end_src
 ** EXAMPLE
 
  Suppose  differential  equations were used for ADVAN2, rather than the
  analytic solution.  The $DES block would be as follows:
+
+ #+begin_src sh
  $DES
  DADT(1)=-P(3)*A(1)
  DADT(2)=P(3)*A(1)-P(1)*A(2)
-
+ #+end_src
 ** DISCUSSION
  The $DES record is used to compute differential equations.  It is used
  with  PREDPP's  general  non-linear  models  (ADVAN6,  ADVAN8, ADVAN9,
@@ -35,7 +38,7 @@
  (See abbreviated code).
  Specific rules follow.
 
- ASSIGNMENT AND CONDITIONAL STATEMENTS
+*** ASSIGNMENT AND CONDITIONAL STATEMENTS
 
  Left-hand quantities in assignment statements:
 
@@ -94,7 +97,7 @@
  (See Variables_in_Modules)
  The following are of particular interest.
 
- DOSTIM
+*** DOSTIM
   DOSTIM  is  the time of a lagged dose or additional dose to which the
   system is being advanced.  Abbreviated code in $DES may test  DOSTIM.
   It  may  use DOSTIM on the right, unless DOSTIM is a random variable.
@@ -102,32 +105,32 @@
   random  variable  which  may in turn be used on the right in the $DES
   block.
 
- DOSREC
+*** DOSREC
   DOSREC is the dose record corresponding to the dose entering at  DOS-
   TIM.   Abbreviated code in $AES may test items in DOSREC in a logical
   condition, and DOSREC may always be used on the right.
 
- ISFINL
+*** ISFINL
   During simulation or a copying pass, and during the advance to a par-
   ticular  time  (event or non-event time), ISFINL=1 at a final call to
   DES at that time.  Otherwise, ISFINL=0.
 
-  DES_DER, MITER, METH
+***  DES_DER, MITER, METH
    See Diff Eq Solver Settings.
 
  Forbidden Variable Names:
 
  IR DA DP E(n) ETA(n) EPS(n) ERR(n)
 
- PSEUDO ASSIGNMENT STATEMENTS
+*** PSEUDO ASSIGNMENT STATEMENTS
 
- COMRES=-1
+  COMRES=-1
 
- RECORD ORDER:
+*** RECORD ORDER:
 
  Follows $SUBROUTINES $INPUT $MODEL $PK
 
- DISPLAYED VALUES
+*** DISPLAYED VALUES
 
  DES-defined variables may be listed for display in $TABLE or $SCATTER.
  The  values  displayed  for the first event record of the data set are
@@ -136,13 +139,12 @@
  vidual. This is because there is no call to DES with the  first  event
  record  of  the individual record, or with any other event record with
  the same value of TIME.  NM-TRAN provides a warning message.
+ #+begin_src txt
  (WARNING  48) DES-DEFINED ITEMS ARE COMPUTED ONLY WHEN EVENT TIME
   INCREASES. E.G., DISPLAYED VALUES ASSOCIATED  WITH  THE  FIRST  EVENT
- RECORD
-  OF  AN  INDIVIDUAL  RECORD ARE COMPUTED WITH (THE LAST ADVANCE TO) AN
- EVENT
-  TIME OF THE PRIOR INDIVIDUAL RECORD.
-
+ RECORD OF  AN  INDIVIDUAL  RECORD ARE COMPUTED WITH (THE LAST ADVANCE TO) AN
+ EVENT TIME OF THE PRIOR INDIVIDUAL RECORD.
+ #+end_src
  The values displayed for event records other than the first are evalu-
  ated  at  the event time (as are all other displayed items such as PK-
  defined values and data record items).

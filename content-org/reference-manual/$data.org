@@ -16,6 +16,7 @@
 
 ** USAGE
 
+#+begin_src sh
  $DATA  [filename|*] [(format)] [IGNORE=c1] [NULL=c2]
         [IGNORE=(list)...|ACCEPT=(list)...]
         [PRED_IGNORE_DATA]
@@ -27,9 +28,12 @@
         [MISDAT=r...]
         [FDATACSV...]
         [REPL=n...]
+#+end_src
 
 ** EXAMPLE
+#+begin_src sh
  $DATA       DATAFILE
+#+end_src
 
 ** DISCUSSION
  This  record  specifies  the data set to be used.  It is required with
@@ -44,7 +48,7 @@
 
 ** OPTIONS
 
- filename
+*** filename
       Name  of  the  file  containing  the data set.  Must be the first
       option.  If it contains commas, semicolons, or parentheses,  then
       it  must  be  surrounded  by  single quotes ' or double quotes ".
@@ -61,14 +65,14 @@
       re-use the previous data set), but allows the CHECKOUT option  to
       be included.  With *, no other option may be included.
 
- (format)
+*** (format)
       FORTRAN format specification to be used to read the data.  Format
       codes F, E, and X may be used, but not I.  When a format is  pro-
       vided,  the  label  DROP  cannot be used on the $INPUT record and
       options WIDE and NULL may not be coded.  If omitted, NM-TRAN will
       generate a suitable FORMAT specification.
 
- RECORDS=n1
+*** RECORDS=n1
       The number of records to be read from the NM-TRAN data set.  Com-
       ment records are not counted.   If  NM-TRAN  does  not  drop  any
       records from its data set (see IGNORE list and ACCEPT list), then
@@ -108,11 +112,11 @@
       specification, or all of them must include the same format speci-
       fication.  (See  records=id).
 
- LRECL=n2
+*** LRECL=n2
       The number of characters in a logical record.  Needed for certain
       operating systems (e.g., IBM/CMS).
 
- IGNORE=c1
+*** IGNORE=c1
       [Note: The following two options, IGNORE  and  ACCEPT  allow  the
       user  to drop records from the NM-TRAN data set prior to the run.
       With NONMEM 7.5, it is also possible to  drop  records  from  the
@@ -136,7 +140,7 @@
       A-Z and a-z.  This permits a table file having header lines to be
       used as an NM-TRAN data set.
 
- IGNORE=(list)
+*** IGNORE=(list)
       "List"  is  a  list of one or more data item labels, with logical
       operators   and    values,    of    the    form    "label=value",
       "label.EQ.value",       "label.NE.value",       "label.GT.value",
@@ -205,7 +209,7 @@
       Records having GEN equal to 1 or AGE greater than 60 are dropped.
       All others are accepted.
 
- ACCEPT=(list)
+*** ACCEPT=(list)
       The  ACCEPT  list  option is identical to the IGNORE list option,
       except that it specifies conditions for  acceptance  of  records.
       An ACCEPT list cannot be used together with an IGNORE list.  How-
@@ -222,7 +226,7 @@
       GEN=1 .AND. AGE > 60.  This may be done as follows:
       ACCEPT=(GEN.NE.1,AGE.LE.60)
 
- PRED_IGNORE_DATA (NM75)
+*** PRED_IGNORE_DATA (NM75)
       Informs  NONMEM that a PRED_IGNORE_DATA pass through the data set
       is  required.    If   the   abbreviated   code   uses   variables
       PRED_IGNORE_DATA  or  PRED_IGNORE_DATA_TEST,  this option is sup-
@@ -232,7 +236,7 @@
       (See Guide Introduction_7 "Extension to $DATA  IGNORE=st  filter-
       ing")
 
- NULL=c2
+*** NULL=c2
       Specifies  that null data items in the NM-TRAN data set are to be
       replaced in the NONMEM data  set  by  the  character  c2.   E.g.,
       NULL=0 or NULL=..
@@ -244,17 +248,17 @@
       If this option is omitted, NM-TRAN  replaces  each  null  with  a
       space.
 
- NOWIDE
+*** NOWIDE
       Requests  that  NM-TRAN  attempt  to  limit FDATA to 80-character
       records.  Space between adjacent columns may  be  suppressed  and
       multi-line records may be generated.  This is the default.
 
- WIDE Requests  that  FDATA  contain  single-line  records, and that at
+*** WIDE Requests  that  FDATA  contain  single-line  records, and that at
       least one space separate columns.  (Records in FDATA  will  never
       be  wider  than 300 characters.)  With this option, there will be
       no FINISH (FIN) record in the NONMEM data set.
 
- NOREWIND|REWIND
+*** NOREWIND|REWIND
       With the first problem specification in  a  control  stream,  the
       file is positioned at its initial point so that the first NM-TRAN
       data set in the file is used.  The options  REWIND  and  NOREWIND
@@ -277,7 +281,7 @@
       in the previous problem), so that NM-TRAN did not read to a phys-
       ical end-of-file.  This is the default.
 
-  CHECKOUT
+*** CHECKOUT
       Requests  that  NONMEM implement the data checkout mode, in which
       the PRED  routine  is  not  called  and  predictions,  residuals,
       weighted residuals and the objective function are not computed.
@@ -290,7 +294,7 @@
       data item is used, the replicated form of the data will appear in
       FDATA.csv.
 
- NOOPEN
+*** NOOPEN
       NM-TRAN will not open the named data file.  This permits the data
       file to be created by one problem and used in a subsequent  prob-
       lem  of the same run.  May not be used with options IGNORE, DROP,
@@ -298,7 +302,7 @@
       With  NOOPEN,  a  format  specification is required.  No day-time
       translation takes place.
 
- LAST20=n3
+*** LAST20=n3
       Override the LAST20 constant in  resource/TRGLOBAL.f90  (default:
       50).
       One or two digit years > LAST20 are assumed to be in the 1900's,
@@ -312,7 +316,7 @@
       If year is recorded with four digits, it is always processed cor-
       rectly and the value of LAST20 is of no consequence.
 
- TRANSLATE=(list)
+*** TRANSLATE=(list)
       "list"  describes modifications to be made to the contents of the
       data file.  It may contain one of:
       TIME/F, TIME/F/D
@@ -351,7 +355,7 @@
       computed by NM-TRAN).  Similarly, the value of II is divided by F
       whether or not ":" appears in any II data value.
 
- BLANKOK
+*** BLANKOK
       Specifies that blank lines are permitted in the NM-TRAN data set.
       With all versions prior to NONMEM VI 2.0 a blank line was permit-
       ted, and was copied to the NONMEM data set. A warning message was
@@ -361,14 +365,14 @@
       BLANKOK  restores  the  previous behavior.  There is no abbrevia-
       tion. BLANKOK must be coded in full.
 
- MISDAT=r (NM74)
+*** MISDAT=r (NM74)
       A numerical value indicating a missing data  value  in  the  data
       set,  which  is  displayed on $TABLE table outputs, but is safely
       interpreted as 0 by other steps of NONMEM. May be used up  to  20
       times.
       Example: $DATA mydatafile MISDAT=1.0E-99 MISDAT=1.0E-102.
 
- REPL=n (NM75)
+*** REPL=n (NM75)
       When  the REPL=n option of $DATA is coded, the NONMEM data set is
       considered to be a template data set.  NONMEM  itself  replicates
       the template data set n times at the start of the problem to cre-
@@ -389,7 +393,7 @@
       (See Guide Introduction_7 "Extension to $DATA  IGNORE=st  filter-
       ing")
 
- NOFDATACSV (NM760)                                                     |
+*** NOFDATACSV (NM760)                                                     |
       An  additional  file, FDATA.csv is produced that outputs the con- |
       tents of its input data file (typically FDATA) in a  comma  input |
       data.  The records in FDATA.csv may differ from those in FDATA in |

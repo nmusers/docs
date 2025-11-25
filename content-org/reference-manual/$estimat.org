@@ -16,6 +16,7 @@
 
 ** USAGE
 
+#+begin_src sh
  $ESTIMATION
               [ABORT|NOABORT|NOHABORT]
               [ATOL=n]
@@ -152,9 +153,12 @@
               [TPU=n]
               [TTDF=n]
               [ZERO=list]
+#+end_src
 
 ** EXAMPLE
+#+begin_src sh
  $ESTIMATION     MAXEVAL=450  PRINT=5
+#+end_src
 
 ** DISCUSSION
  Optional.  Requests  that  the  NONMEM Estimation Step be implemented.
@@ -175,14 +179,14 @@
 
 ** OPTIONS
 
- ABORT
+*** ABORT
       During  the  Estimation  Step,  NONMEM  does not implement theta-
       recovery when PRED sets the error return code to  1.   (The  PRED
       error  return  code  n  is  set  by the statement "EXIT n [k]" in
       abbreviated code, or by the statement IERPRD=n  in  user-supplied
       code, or by PREDPP when it detects errors.)  This is the default.
 
- NOABORT
+*** NOABORT
       During  the  Estimation  Step,  NONMEM implements theta-recovery,
       i.e., attempt to avoid values of theta which result in PRED error
       return  code  1.  In addition, most non-positive Hessian matrices
@@ -190,12 +194,12 @@
       continue,  and  abnormal  termination of the estimation step will
       occur less often.
 
- NOHABORT
+*** NOHABORT
       Perform positive definite correction at all levels of the estima-
       tion.   This  can  hide  a serious ill-posed problem, so use with
       care.
 
- ATOL=n  (NM72)
+*** ATOL=n  (NM72)
       Absolute tolerance. Used  only  with  ADVAN9,  ADVAN13,  ADVAN14,
       ADVAN15,  ADAN16,  and ADVAN17, ADVAN18, for which TOL is a rela-
       tive tolerance. Sets ANRD=ATOL. The default is 12 (that is, accu-
@@ -211,30 +215,30 @@
       With NONMEM 74, this feature is deprecated.  A user-supplied  TOL
       subroutine should test NM_STEP and set ANRD accordingly.
 
- AUTO=0 (NM73)
+*** AUTO=0 (NM73)
       NONMEM  does  not provide best settings of certain options.  This
       is the default.
 
- AUTO=1 (NM73)
+*** AUTO=1 (NM73)
       Several options will be set by NONMEM that will allow  best  set-
       tings  to  be determined.  User may still over-ride those options
       set by auto, by specifying them on the  same  $EST  record.   The
       AUTO option is ignored by the FO/FOCE/Laplace methods.
 
- AUTO=2 (NM74)
+*** AUTO=2 (NM74)
       AUTO=2  may be user with NUTS estimation to setup the alternative
       sampling strategy "Matt trick".
 
- AUTO=2 (NM74)
+*** AUTO=2 (NM74)
       AUTO=3 may be user with NUTS estimation to setup the  alternative
       sampling strategy of eta sampling.
       See INTRODUCTION TO NONMEM 7 for more information.
 
- BAYES_PHI_STORE=[0|1] (NM75)
+*** BAYES_PHI_STORE=[0|1] (NM75)
       If  BAYES_PHI_STORE=1  then  phi  and  eta values from each BAYES
       iteration will be stored in root.iph.
 
- BIONLY=[0|1] (NM75)
+*** BIONLY=[0|1] (NM75)
       BIONLY stands for Bayesian individual parameters only,  and  when
       set  to 1, will create new samples of individual parameters only,
       but will keep the population parameters fixed.  May be used  with
@@ -242,32 +246,32 @@
       parameters samples.  See INTRODUCTION TO NONMEM 7 for more infor-
       mation.
 
- BOOTDATA=[0|1] (NM75)
+*** BOOTDATA=[0|1] (NM75)
       By  default  (BOOTDATA=0),  when data are selected based on $SIML
       BOOSTRAP, the randomly selected subjects are analyzed during  the
       subsequent  estimation  method.  If BOOTDATA=1, then the subjects
       not selected are analyzed.
       See INTRODUCTION TO NONMEM 7 for more information.
 
- CALPHA=n
+*** CALPHA=n
       n is a value between 0.01 and 0.05.  Alpha error rate to use  for
       linear   regression  test  to  assess  statistical  significance.
       Default is 0.05.
 
- CENTERING
+*** CENTERING
       Requests that the average conditional estimates of  each  eta  be
       constrained  to  be  close to 0.  May only be used with METHOD=1.
       Not permitted with INTERACTION.
 
- NOCENTERING
+*** NOCENTERING
       Requests that the average conditional estimates of each  eta  not
       be constrained.  This is the default.
 
- CINTERVAL=n
+*** CINTERVAL=n
       Every  n  iterations is submitted to the convergence test system.
       If CINTERVAL=0, then a best CINTERVAL will be found, then used.
 
- CITER=n
+*** CITER=n
       n is the number of latest PRINT  or CINTERVAL iterations on which
       to  perform  a linear regression test (where independent variable
       is iteration number, dependent variable is parameter value).   If
@@ -276,7 +280,7 @@
       May  also  be  coded CNSAMP.  If CINTERVAL is not specified, then
       the PRINT option is used.
 
- CONSTRAIN=n (NM72)
+*** CONSTRAIN=n (NM72)
       Requests simulated annealing for parameters to slow the  rate  of
       reduction  of  the  elements of OMEGA during the burn-in phase of
       the SAEM method, allowing for a more global search of  parameters
@@ -307,7 +311,7 @@
       simulated annealing algorithm.
       (See additional_output_files, raw_output_file).
 
- CTYPE=[0|1|2|3|4]
+*** CTYPE=[0|1|2|3|4]
       CTYPE is used to define the termination test to be applied to the
       burn-in phases for SAEM and BAYES methods and to  the  estimation
       phases for the ITS, IMP, and IMPMAP methods.  (CTYPE=4 Applies to
@@ -327,7 +331,7 @@
       will terminate successfully. Applies to  FO/FOCE/Laplacean  meth-
       ods.
 
- DERCONT=[0|1] (NM73)
+*** DERCONT=[0|1] (NM73)
       The  derivative  continuity test (DERCONT) by default is off (0).
       When DERCONT=1, the partial derivative of the objective  function
       with  respect to thetas will perform an additional test to deter-
@@ -345,11 +349,11 @@
       SE in such models.  The DERCONT works only for the Monte Carlo EM
       algorithms such as IMP, DIRECT, IMPMAP, and SAEM.
 
- DF=n The proposal density is to be a t distribution with n degrees  of
+*** DF=n The proposal density is to be a t distribution with n degrees  of
       freedom.   Default is 0, a normal density.  Used with the IMP and
       IMPMAP methods.
 
- DFS=n (NM73)
+*** DFS=n (NM73)
       Degrees of freedom for the Sigma matrix for  simulation  purposes
       by CHAIN.
 
@@ -370,23 +374,23 @@
       DFS=>1000000
            SIGMA is fixed at its initial value.
 
- EONLY=[0|1]
+*** EONLY=[0|1]
       A value of 1 indicates the IMP objective function should be eval-
       uated  by  performing only the expectation step without advancing
       the population parameters. Default is 0.
 
- ETABARCHECK
+*** ETABARCHECK
       There is an etabar statistic (See etabar) from a  previous  prob-
       lem, and the P-value associated for the etabar statistic with the
       problem at hand relates to a hypothesis test that the true etabar
       is the same as that with the previous problem.
 
- NOETABARCHECK
+*** NOETABARCHECK
       The  P-value  associated  for  the  etabar statistic (See etabar)
       relates to a hypothesis test that the true etabar is 0.  This  is
       the default.
 
- ETADER=n (NM73)
+*** ETADER=n (NM73)
       For evaluating individual variances by numerical derivative meth-
       ods.   In  evaluating  the  MAP  objective  function,  the   term
       log(Det(V))  must  be evaluated to obtained the marginal or inte-
@@ -415,7 +419,7 @@
            equivalent to using the  "Laplace  NUMERICAL"  method,  even
            though FOCE may be selected.
 
- ETASAMPLES=[0|1] (NM74)
+*** ETASAMPLES=[0|1] (NM74)
       Used with $EST METHOD=SAEM or $EST METHOD=BAYES.  ETASAMPLES=0 is
       the default.  ETASAMPLES=1 causes individual ISAMPLE  random  eta
       samples per subject, to be written to root.ets, where root is the
@@ -423,22 +427,22 @@
       See "Stochastic  Approximation  Expectation  Maximization  (SAEM)
       Method" in Guide INTRODUCTION TO NONMEM 7.
 
- ETASTYPE=0 (NM73)
+*** ETASTYPE=0 (NM73)
       Eta shrinkage is averaged for all subjects.  This is the default.
 
- ETASTYPE=1
+*** ETASTYPE=1
       Eta  shrinkage  is  averaged  only among subjects that provided a
       non-zero derivative of their data likelihood with respect to that
       eta.  (See etasxi).
 
- EVALSHRINK=0 (NM760)                                                   |
+*** EVALSHRINK=0 (NM760)                                                   |
       By  default,  when  MAXEVAL=0,  and population parameters are not |
       inputted from an MSF file (using the $MSFI  record),  Etabar  and |
       shrinkage information is not calculated and displayed in the NON- |
       MEM report file.  If you wish to have this information  displayed |
       when MAXEVAL=0, then set EVALSHRINK=1 on the $EST record.         |
 
- FAST (NM74)
+*** FAST (NM74)
       The  FAST  option  is  available  for  FOCE/ITS methods. The FAST
       method allows use of analytical theta derivatives  to  facilitate
       FOCE  analysis.  All thetas should be MU-referenced in the manner
@@ -448,7 +452,7 @@
       addional  etas and assigning them to these thetas through MU ref-
       erencing, but set their associated omega values to 0.0 FIXED.
 
- FILE=filename
+*** FILE=filename
       Name for the raw output file.  Parameter estimates and  objective
       function  value will be printed to this file every printed itera-
       tion as indicated by the PRINT option.  Default: root.ext,  where
@@ -462,7 +466,7 @@
       "nmbayes" for root.
       (See additional_output_files, raw_output_file).
 
- FNLETA=n (NM72)
+*** FNLETA=n (NM72)
       For a thorough discussion:
       See INTRODUCTION TO NONMEM 7, General New Options for $ESTIMATION
       Record
@@ -491,7 +495,7 @@
       table outputs (diagnostics and  user  selected  items)  will  use
       EBE's from the FNLETA step (eta modes).
 
- FORMAT=s
+*** FORMAT=s
       Format  for  the raw output file and all additional output files.
       s defines the delimiter [,|s(pace)|t(ab)] followed by  a  Fortran
       format   specification.   The  default  is  s1PE12.5.   For  more
@@ -499,17 +503,18 @@
       (See format).
       May also be coded DELIM.
 
- DELIM=s
+*** DELIM=s
       Same as FORMAT option.
       See INTRODUCTION TO NONMEM 7, $EST: Format of Raw Output File
 
- FO   Requests that the First-Order Model be  used  with  METHOD=1  and
+*** FO
+      Requests that the First-Order Model be  used  with  METHOD=1  and
       CENTERING.  Cannot be used with LAPLACIAN.
 
- NOFO Requests that the First-Order Model not be used with METHOD=1 and
+*** NOFO Requests that the First-Order Model not be used with METHOD=1 and
       CENTERING.  This is the default.
 
- FPARAFILE=filename (NM74)
+*** FPARAFILE=filename (NM74)
       Final etas (empirical Bayes estimates; EBE's) are evaluated after
       the  last  Estimation  Step (when FNLETA=1).  This computation is
       parallelized if parallelization is on for  the  final  Estimation
@@ -521,7 +526,7 @@
       The FPARAFILE option may be specified on any $ESTIMATION  record,
       but applies only after the last Estimation Step.
 
- GRD=s
+*** GRD=s
       s  is  a  string  of  [G|N|D|S]'s with each symbol representing a
       THETA or SIGMA parameter in numerical order. The first m  letters
       of  GRD  refer  to the m THETA's. Then the m+1th letter refers to
@@ -535,7 +540,7 @@
       BAYES method.
       Default is DDDD...
 
- GRD=t1v1(n1):t2v2(n2):t3v3(n3)...
+*** GRD=t1v1(n1):t2v2(n2):t3v3(n3)...
       An alternative syntax may be used.  T is parameter  type  (T  for
       theta,  S for sigma-like theta).  V is a letter (S,D or N), and n
       is a number list.  For  example,  to  specify  thetas  3,  and  5
@@ -545,14 +550,14 @@
       Thetas and sigmas not specified are given a  default  D  designa-
       tion.
 
- GRDQ=0 (NM74)
+*** GRDQ=0 (NM74)
       Optional.   The gradient quick option, called GRDQ, allows thetas
       that must be gradient assessed (such as those that  are  not  mu-
       referenced) and SIGMAS to be more quickly evaluated by not evalu-
       ating the gradients for every one of the ISAMPLE random  samples,
       but chooses a subset of the most important samples.
 
- GRID=(nr,ns,r0,r1)
+*** GRID=(nr,ns,r0,r1)
       Optional.  May  be  used with STIELTJES.  For nr, ns, r0, and r1,
       see the detailed description to option STIELTJES below.  Briefly,
       a  grid  is  obtained by first taking the interval [r0,r1] of the
@@ -563,7 +568,7 @@
       region.  nr and ns should be integers.  The default  values  are:
       GRID=(3,1,.6,.9).
 
- IACCEPT=x
+*** IACCEPT=x
       Has  different  meanings, depending on the method.  With SAEM and
       BAYES, the scaling of OMEGA  is  adjusted  so  that  samples  are
       accepted x fraction of the time.  See ISAMPLE_M2. Default is 0.4.
@@ -575,24 +580,24 @@
       ties (such as with categorical data), you may want to decrease to
       0.1 to 0.3.
 
- IACCEPT=0
+*** IACCEPT=0
       For importance sampling only, you may set IACCEPT=0.0, and NONMEM
       will  determine  the most appropriate IACCEPT level for each sub-
       ject, and if necessary, will use a t- distribution  (by  altering
       the  DF  for each subject) as well.  If IACCEPT=0, the individual
       IACCEPT values and DF values will be listed in root.imp.
 
- IACCEPTL=x (NM74)
+*** IACCEPTL=x (NM74)
       A scale to a second multi-variate normal density, to  cover  long
       tails  in the posterior density (hence L for long tails), in com-
       bination with the normal IACCEPT value  to  cover  the  posterior
       density near the mode.
 
- IKAPPA=x] (NM74)
+*** IKAPPA=x] (NM74)
       Used in computing weight for individual parameters in ISAMPLE_M1B
       mode.  IKAPPA is 1.
 
- INTERACTION
+*** INTERACTION
       The dependence on etas of the model for  intra-individual  random
       error is preserved in the computation of the objective function.
       Cannot  be  used  with  CENTERING.   With NONMEM 7.3, This is the
@@ -600,17 +605,17 @@
       not  specified  by the user.  With NONMEM 7.4, INTERACTION is not
       supplied if LIKELIHOOD is present.
 
- NOINTERACTION
+*** NOINTERACTION
       Always set etas to 0 during the  computation  of  the  model  for
       intraindividual  random  error.   This  is  the default with non-
       EM/Bayes methods.
 
- ISAMPEND=n (NM73)
+*** ISAMPEND=n (NM73)
       For SAEM, if ISAMPEND is specified  as  an  upper  integer  value
       (usually  10),  then  NONMEM will perform a ISAMPLE preprocess to
       determine the best ISAMPLE value. See also STDOBJ.
 
- ISAMPLE=n
+*** ISAMPLE=n
       When used with the IMP or IMPMAP methods n is the number of  ran-
       dom  samples  per subject used for the expectation step.  Default
       is 300.  When used with the SAEM or BAYES method n is the  number
@@ -627,34 +632,34 @@
       retains a final sample for each subject, at the end of each iter-
       ation.
 
- ISAMPLE_M1=n
+*** ISAMPLE_M1=n
       n is the number of mode 1 iterations for  the  Metropolis-Hasting
       algorithm  for estimating individual parameters using the popula-
       tion means and variances as proposal density. Used with the  SAEM
       and BAYES methods.  Default is 2.
 
- ISAMPLE_M1A=n(NM72)
+*** ISAMPLE_M1A=n(NM72)
       n  is the number of mode 1A iterations for the Metropolis-Hasting
       algorithm, testing model parameters from other subjects as possi-
       ble values.  Used with the SAEM and BAYES methods.  Default is 0.
 
- ISAMPLE_M1B=n (NM74)
+*** ISAMPLE_M1B=n (NM74)
       n  is the number of mode 1B iterations for the Metropolis-Hasting
       algorithm Default is 2.
 
- ISAMPLE_M2=n
+*** ISAMPLE_M2=n
       n is the number of mode 2 iterations for  the  Metropolis-Hasting
       algorithm  for estimating individual parameters using the current
       parameter vector position as mean and a scaled variance of  OMEGA
       as variance. Used with the SAEM and BAY
 
- ISAMPLE_M3=n
+*** ISAMPLE_M3=n
       n  is  the number of mode 3 iterations for the Metropolis-Hasting
       algorithm for estimating individual parameters in  which  samples
       are  generated  for each parameter separately. Used with the SAEM
       and BAYES methods.  Default is 2.
 
- ISCALE_MIN=x ISCALE_MAX=x (NM72)
+*** ISCALE_MIN=x ISCALE_MAX=x (NM72)
       In importance sampling, the scale factor used to vary the size of
       the variance of the proposal density in order to meet the IACCEPT
       condition is  by  default  bounded  by  ISCALE_MIN  of  0.1,  and
@@ -662,10 +667,10 @@
       pling.  These options allow the scale factor boundary to be modi-
       fied.
 
- KAPPA=x (NM74)
+*** KAPPA=x (NM74)
       Used with NUTS method.  Default is 1.
 
- KNUTHSUMOFF=n] (NM74)
+*** KNUTHSUMOFF=n] (NM74)
       The  Knuth summing method is used to allow the most accurate sum-
       mation of individual objective function values, even  with  large
       variations  in  values  of the individual objective function.  To
@@ -675,7 +680,7 @@
       is  not  necessary.  Default is 0.  May also be set with $COVARI-
       ANCE record.
 
- LAPLACIAN
+*** LAPLACIAN
       Use the  Laplacian  method,  in  which  second  derivatives  with
       respect  to  eta  are  used.   Laplacian  may  not  be  used with
       METHOD=0.  It may be used with the  EM/Monte  Carlo  methods,  in
@@ -685,10 +690,10 @@
       Cannot  be  used  with  $ABBREVIATED  DERIV2=NO  unless NUMERICAL
       option is also specified.
 
- NOLAPLACIAN
+*** NOLAPLACIAN
       Do not use the Laplacian method.  This is the default.
 
- LEVCENTER=[0|1] (NM75)
+*** LEVCENTER=[0|1] (NM75)
       There is no default.  Required with $LEVEL and  $ESTIMATION.   If
       LEVCENTER=1,  this ensures the etas of super ID random levels sum
       to 0. In earlier versions of NONMEM, this was  the  default  (and
@@ -697,34 +702,34 @@
       If LEVCENTER=0, level etas are not forced to sum to 0.
       See INTRODUCTION TO NONMEM 7 for more information.
 
- LEVOBJTYPE=[0|1] (NM751)                                               |
-      If LEVOBJTYPE=0,  then  for  IMP/ITS/FOCE/Laplace,  the  reported |
-      ojective  function (and what is used for estimation) is the aver- |
-      age of two cycles of optimization.  The first optimization floats |
-      all  etas, and the second optimization fixes the super-ID etas to |
-      the appropriate average of etas per super-id group from the first |
-      optimization,  and then floats the ID (and below) level etas.  If |
-      LEVOBJTYPE=1, then the OBJ reported (and used for estimation)  is |
-      only that of the second optimization cycle. The LEVOBJTYPE=0 pro- |
-      vides the most consistent results between FOCE/Laplace and the EM |
-      and  Bayes methods, particularly with super-ID levels higher than |
-      1 (so, site ID and country ID, for  example).   The  LEVOBJTYPE=1 |
-      provides an OBJ more consistent with theory.                      |
-      By  default,  NONMEM  sets  the estimation process to SLOW when a |
-      $LEVEL option is used. As of nm751, you may set NOSLOW  or  FAST. |
-      While there is an increase in speed, but there may not be as good |
-      optimization progress as with the SLOW option.  It may be best to |
-      use  SLOW  for the $EST step, and use NOSLOW or FAST for the $COV |
-      step.                                                             |
-      See INTRODUCTION TO NONMEM 7 for more information.                |
+*** LEVOBJTYPE=[0|1] (NM751)
+      If LEVOBJTYPE=0,  then  for  IMP/ITS/FOCE/Laplace,  the  reported
+      ojective  function (and what is used for estimation) is the aver-
+      age of two cycles of optimization.  The first optimization floats
+      all  etas, and the second optimization fixes the super-ID etas to
+      the appropriate average of etas per super-id group from the first
+      optimization,  and then floats the ID (and below) level etas.  If
+      LEVOBJTYPE=1, then the OBJ reported (and used for estimation)  is
+      only that of the second optimization cycle. The LEVOBJTYPE=0 pro-
+      vides the most consistent results between FOCE/Laplace and the EM
+      and  Bayes methods, particularly with super-ID levels higher than
+      1 (so, site ID and country ID, for  example).   The  LEVOBJTYPE=1
+      provides an OBJ more consistent with theory.
+      By  default,  NONMEM  sets  the estimation process to SLOW when a
+      $LEVEL option is used. As of nm751, you may set NOSLOW  or  FAST.
+      While there is an increase in speed, but there may not be as good
+      optimization progress as with the SLOW option.  It may be best to
+      use  SLOW  for the $EST step, and use NOSLOW or FAST for the $COV
+      step.
+      See INTRODUCTION TO NONMEM 7 for more information.
 
- LEVWT=n (NM74)
+*** LEVWT=n (NM74)
       This option applies when $LEVEL record is present.   By  default,
       LEVWT=0, and weights each level value equally, regardless of num-
       ber of subjects per level value. To weight according to number of
       subjects for that value, set LEVWT=1.
 
- LIKELIHOOD
+*** LIKELIHOOD
       This  is  designed mainly, but not exclusively, for use with non-
       continuous observed responses ("odd-type data").  Indicates  that
       Y (with NM-TRAN abbreviated code) or F (with a user-supplied PRED
@@ -745,13 +750,13 @@
       lihood.   All  remarks  for  LIKELIHOOD apply.  May also be coded
       -2LLIKELIHOOD.  Compare with PREDICTION option.
 
- MADAPT=n (NM74)
+*** MADAPT=n (NM74)
       Used with NUTS method.  Default is -1.
 
- MAPCOV=1 (NM74)
+*** MAPCOV=1 (NM74)
       Unused. The default is 1.
 
- MAPINTER=n (NM72)
+*** MAPINTER=n (NM72)
       Every nth iteration, the MAP estimation should be used to provide
       parameters to the sampling density.  Thus, if MAPITER=20 and MAP-
       INTER=5, then for the first  20  iterations,  MAP  estimation  is
@@ -761,7 +766,7 @@
       tions.  Setting any of the above parameters to  -100  will  force
       NONMEM to select the default value for that parameter.
 
- MAPITER=n (NM72)
+*** MAPITER=n (NM72)
       The first n iterations are to use MAP estimation to assess param-
       eters for the sampling density.  After these  n  iterations,  the
       conditional  means  and  variances  of the pervious iteration are
@@ -770,7 +775,7 @@
       tional means and variances that are in memory.   These  may  have
       come from an MSF file, or from a previous estimation step.
 
- MAPITERS=[0|1] (NM75)
+*** MAPITERS=[0|1] (NM75)
       By  default,  no  MAP estimation is performed with SAEM or BAYES.
       To get good individual parameter values near the mode of the pos-
       terior  density  for  the  first  iteration  of SAEM, you can set
@@ -781,11 +786,11 @@
       or
       $EST METHOD=BAYES
 
- MASSRESET=n (NM74)
+*** MASSRESET=n (NM74)
       Mass matrix information accumulation for NUTS method.  Default is
       -1.
 
- MAXEVALS=n
+*** MAXEVALS=n
       Maximum allowable number of evaluations of the objective function
       during the Estimation Step.  Default: a generous  number.   (Each
       evaluation  of  the  objective function requires one pass through
@@ -797,7 +802,7 @@
       MAXEVALS=0 requests that the Estimation Step be omitted.  This is
       useful, for example, with POSTHOC (see above).
 
- MCETA=n (NM73)
+*** MCETA=n (NM73)
 
       MCETA=0
            Eta=0 is initial setting for MAP estimation  (eta  optimiza-
@@ -815,7 +820,7 @@
            objective function is used as initial setting  for  the  MAP
            optimization.
 
- METHOD=kind
+*** METHOD=kind
       Values for kind are:
 
       0 or ZERO
@@ -912,13 +917,13 @@
            parameters  from a file of rectangular (rows/column) format.
            Applies only to the Estimation Step.
 
- LNTWOPI (NM74)
+*** LNTWOPI (NM74)
       The objective function is reported including the N*LOG(2pi)  con-
       stant  term,  where N is the total number of normally distributed
       data values in the data set.  Compare OLNTWOPI.  Either  or  both
       may be used.
 
- MSFO=filename
+*** MSFO=filename
       A  Model  Specification  File  is output to a file with the given
       filename.  Filename may not contain embedded spaces.  If filename
       contains commas, semicolons, or parentheses, then it must be sur-
@@ -946,7 +951,7 @@
       specification file).
       (See model_specification_file).
 
- MUM=s
+*** MUM=s
       s  is  a  string  of  [M|N|D|X]'s with each letter representing a
       THETA parameter in numerical order. M indicates  that  the  THETA
       should  be  Mu   modeled.  N indicates the THETA should not be Mu
@@ -956,20 +961,20 @@
       the case.
       Default is DDDD...
 
- MUM=v1(n1):v2(n2):v3(n3)...
+*** MUM=v1(n1):v2(n2):v3(n3)...
       An  alternative syntax may be used.  V is a letter (N,M,D, or X),
       and n is a number list.  For example, to specify  that  thetas  3
       and 5 through 8 should not be MU modeled, theta 2 is a population
       mixture parameter, and thetas 6 and 12 are to be MU modeled:
       MUM=N(3,5-8):X(2):M(6,12)
 
- NBURN=n
+*** NBURN=n
       When used with the SAEM method n is the maximum number of  itera-
       tions  used  to  perform  the stochastic phase.  Default is 2000.
       When used with the BAYES method n is the maximum number of itera-
       tions used to perform the burn-in phase. Default is 4000.
 
- NITER=n
+*** NITER=n
       When  used with the ITS, IMP, and IMPMAP methods n is the maximum
       number of iterations. Default is 50.  When  used  with  the  SAEM
       method  n5  is  the  number  of iterations for the non-stochastic
@@ -978,7 +983,7 @@
       ary distribution.  Default is 10000.  NITER  may  also  be  coded
       NSAMPLE.
 
- NOCOV=[0|1] (NM73)
+*** NOCOV=[0|1] (NM73)
       If  covariance estimation is not desired for a particular estima-
       tion step, set NOCOV=1.  It may be turned on again for  the  next
       estimation  step  with  NOCOV=0.    If  NOCOV=1  is  set  for  an
@@ -995,12 +1000,12 @@
       estimation step, then standard error assessment for  it  will  be
       turned off.
 
- NOLABEL=[0|1]
+*** NOLABEL=[0|1]
       1 indicates that the row of item names for FILE will not be writ-
       ten, otherwise 0, the default.  Affects the raw output  file  and
       all additional output files.
 
- NONINFETA=[0|1] (NM73)
+*** NONINFETA=[0|1] (NM73)
       Sometimes,  gradients  are  not  properly evaluated for classical
       NONMEM methods, when not all etas are used for all subjects.  For
       example,  an eta to a ka absorption rate constant during a fit of
@@ -1011,7 +1016,7 @@
       the final objective function value.  Should this occur, add  NON-
       INFETA=1 to the $EST record.  NONINFETA=0 is the default.
 
- NOPRIOR=[0|1]
+*** NOPRIOR=[0|1]
       If  prior  information  was specified using the $PRIOR statement,
       then normally the analysis is set up for three stage hierarchical
       analysis.   By default NOPRIOR=0, and this prior information will
@@ -1027,18 +1032,18 @@
       FO/FOCE/Laplace  estimations).  In   previous versions of NONMEM,
       NOPRIOR=1 did not act on TNPRI priors.
 
- NOSUB=[0|1] (NM74)
+*** NOSUB=[0|1] (NM74)
       With NOSUB=0, label substitution  will  be  performed  for  final
       estimates  in  the NONMEM report file.  (See $ABBREVIATED).  This
       is the default.  With NOSUB=1, label  substitution  will  not  be
       performed.
 
- NOTITLE=[0|1]
+*** NOTITLE=[0|1]
       1 indicates the header for FILE will not be written, otherwise 0,
       the default.  Affects the raw output file and all additional out-
       put files.
 
- NUMDER=[0|1|2|3] (NM73)
+*** NUMDER=[0|1|2|3] (NM73)
       With NUMDER=1, NONMEM computes and displays numerically evaluated
       derivatives of Y or F with respect to eta  and  eps  (G  and  H).
       These  numeric values are displayed in root.fgh, but are not used
@@ -1049,67 +1054,67 @@
       root.agh
       With NUMDER=3, both root.agh and root.fgh are produced.
 
- NUMERICAL
+*** NUMERICAL
       Requests that second eta-derivatives for the Laplacian method  be
       obtained numerically.
 
- NONUMERICAL
+*** NONUMERICAL
       Requests  that second eta-derivatives for the Laplacian method be
       computed by PRED.  Not permitted with the  combination  LAPLACIAN
       and INTERACTION.  Otherwise, this is the default.
 
- NUTS_BASE (NM74)
+*** NUTS_BASE (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 0.025.
 
- NUTS_DELTA  (NM74)
+*** NUTS_DELTA  (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 0.8
 
- NUTS_EPARAM  (NM74)
+*** NUTS_EPARAM  (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 0
 
- NUTS_GAMMA  (NM74)
+*** NUTS_GAMMA  (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 0.05
 
- NUTS_INIT  (NM74)
+*** NUTS_INIT  (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 0.075.
 
- NUTS_MASS  (NM74)
+*** NUTS_MASS  (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is B
 
- NUTS_MAXDEPTH  (NM74)
+*** NUTS_MAXDEPTH  (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 10
 
- NUTS_OPARAM  (NM74)
+*** NUTS_OPARAM  (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 1
 
- NUTS_REG  (NM74)
+*** NUTS_REG  (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 0.0
 
- NUTS_SPARAM  (NM74)
+*** NUTS_SPARAM  (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 1
 
- NUTS_STEPINTER (NM74)
+*** NUTS_STEPINTER (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 0
 
- NUTS_STEPITER (NM74)
+*** NUTS_STEPITER (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 1
 
- NUTS_TERM (NM74)
+*** NUTS_TERM (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 0.05
 
- NUTS_TEST (NM74)
+*** NUTS_TEST (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 0
 
- NUTS_TRANSFORM (NM74)
+*** NUTS_TRANSFORM (NM74)
       See Guide INTRODUCTION TO NONMEM 7. Default is 0
 
- OACCEPT=n
+*** OACCEPT=n
       Used  only  with  the  BAYES method. n has meaning only for OMEGA
       sampled by the Metropolis-Hastings  algorithm.   The  scaling  of
       degrees  of  freedom  is  adjusted so that samples are accepted n
       fraction of the time. See OSAMPLE_M2=. Default is
 
- OLKJDF=n (NM74)
+*** OLKJDF=n (NM74)
       Used with NUTS  method,  OLKJDF  stands  for  Omega  LKJ  density
       degrees  of  freedom.  When 0, the usual inverse Wishart prior is
       used for Omegas. When OLKJDF>0, then the LKJ density is  used  as
@@ -1123,13 +1128,13 @@
       See record $OLKJDF (NM75) to specify LKJ correlation  degrees  of
       freedom for each omega block.
 
- OLNTWOPI (NM74)
+*** OLNTWOPI (NM74)
       The    objective    function    is    reported    including   the
       NETA*NIND*LOG(2pi) constant term for SAEM and BAYES,  where  NETA
       is  the  number of etas, and NIND is number of individuals.  Com-
       pare LNTWOPI. Either or both may be used.
 
- THETABOUNDTEST, OMEGABOUNDTEST, SIGMABOUNDTEST
+*** THETABOUNDTEST, OMEGABOUNDTEST, SIGMABOUNDTEST
       With NONMEM VI, the estimation step sometimes terminates with the
       message
       PARAMETER ESTIMATE IS NEAR ITS DEFAULT BOUNDARY.
@@ -1139,7 +1144,7 @@
       coded OBT or OBOUNDTEST; SIGMABOUNDTEST may also be coded SBT  or
       SBOUNDTEST.  These options are the defaults.
 
- NOTHETABOUNDTEST, NOOMEGABOUNDTEST, NOSIGMABOUNDTEST
+*** NOTHETABOUNDTEST, NOOMEGABOUNDTEST, NOSIGMABOUNDTEST
       Instructs  NONMEM  to  omit  the "default boundary test" for this
       type of variable, i.e., to behave like NONMEM V in  this  regard.
       Any  option  listed  above  may  be preceded by "NO".  The THETA,
@@ -1148,10 +1153,10 @@
       boundary test") and permit both the "default THETA boundary test"
       and "default SIGMA boundary test".
 
- OMITTED
+*** OMITTED
       The Estimation Step is not implemented.
 
- OPTMAP=n (NM73)
+*** OPTMAP=n (NM73)
       For  alternative  MAP (eta optimization) methods.  With OPTMAP>0,
       SLOW option may be needed.
 
@@ -1183,7 +1188,7 @@
            Nelder Mead method, which uses a secant method, rather  than
            relying on derivatives.
 
- ORDER=xxxf
+*** ORDER=xxxf
       The  values of x may be T (Theta), S (Sigma), and O (Order).  The
       value of f may be U (Upper) or L (Lower).  Affects the way theta,
       omega,  and  sigma are displayed in the raw and additional output
@@ -1193,19 +1198,19 @@
       triangular form.  Does not affect the NONMEM report file.
       (See order_option).
 
- OSAMPLE_M1=n
+*** OSAMPLE_M1=n
       Used  only  with  the BAYES method. n is the number of times each
       iteration that OMEGA is generated using  the  Metropolis-Hastings
       algorithm  and an inverse Wishart proposal density that has vari-
       ance based on the previous samples. If n < 0 this indicates that
 
- OSAMPLE_M2=n
+*** OSAMPLE_M2=n
       Used only with the BAYES method. n has  meaning  only  for  OMEGA
       sampled by the Metropolis-Hastings algorithm.  n is the number of
       times that OMEGA is generated using an inverse  Wishart  proposal
       density at the present OMEGA position and degrees of freedom
 
- OVARF=x (NM74)
+*** OVARF=x (NM74)
       Used  with  NUTS  method  and OLKJDF option.  OVARF is the weight
       factor to STD prior to the log sqrt OMEGA diagonal elements,  the
       normal density of the log square root of OMEGA centered about log
@@ -1217,13 +1222,13 @@
       Cauchy distribution.
       Default is 1.  See also $OVARF control record.
 
- PACCEPT=n
+*** PACCEPT=n
       Used  only  with the BAYES method. n has meaning only for popula-
       tion parameters sampled  by  the  Metropolis-Hastings  algorithm.
       The  scaling of variance is adjusted so that samples are accepted
       n fraction of the time. See PSAMPLE_M2=. Default is 0.5.
 
- PARAFILE=filename
+*** PARAFILE=filename
       Name of the "parallel file" (the  parallelization  profile)  that
       controls  parallelization  (distributed computing).  Default file
       name if not specified: parallel.pnm or parafile name specified on
@@ -1232,13 +1237,13 @@
       PARAFILE=OFF  turns  off  parallelization  for  this  $ESTIMATION
       record.
 
- PARAFPRINT=n (NM74)
+*** PARAFPRINT=n (NM74)
       The print iteration intervals to the parallelization log file can
       be controlled by this option during parallelization of  the  $EST
       step.   See also $COVARIANCE record and nmfe command.  Default is
       PARAFPRINT=1.
 
- PHYTYPE=n (NM74)
+*** PHYTYPE=n (NM74)
       Default is 0.  By default, after an estimation is performed,  the
       phi(),  conditional means of the individual parameters, and their
       variances, are reported in the root.phi file, where root  is  the
@@ -1247,7 +1252,7 @@
       See "Stochastic  Approximation  Expectation  Maximization  (SAEM)
       Method" in Guide INTRODUCTION TO NONMEM 7.
 
- POSTHOC
+*** POSTHOC
       This  option  may  be used when the FO method is used.  After the
       Estimation Step terminates, the eta values are estimated for each
       individual.   To estimate the etas based on the initial estimates
@@ -1256,11 +1261,11 @@
       omits the Estimation Step).  The  conditional  estimates  of  the
       etas are referred to as Conditional Parametric Etas (CPE).
 
- NOPOSTHOC
+*** NOPOSTHOC
       Etas  are not estimated.  This is the default with METHOD=0.  May
       not be used with METHOD=1.
 
- PREDICTION
+*** PREDICTION
       Indicates that Y (with NM-TRAN abbreviated code)  or  F  (with  a
       user-supplied  PRED  or  ERROR  code)  will serve as a prediction
       variable, i.e., it will be set to a prediction.  Upon simulation,
@@ -1270,35 +1275,35 @@
       only if epsilons also appear.  This is the default.  Compare with
       LIKELIHOOD, -2LOGLIKELIHOOD options.
 
- PRINT=n
+*** PRINT=n
       Iteration summaries are printed for the 0th, every nth iteration,
       and  last  iteration.   When  n=0,  no  summaries  are   printed.
       Default:  9999  (so  that  summaries are printed for 0th and last
       iterations).
 
- PRIORC (NM74)
+*** PRIORC (NM74)
       The objective function is reported including the  prior  constant
       term (constant term to the prior).
 
- PSAMPLE_M1=n
+*** PSAMPLE_M1=n
       Used  only  with the BAYES method. n has meaning only for popula-
       tion parameters sampled by the Metropolis-Hastings algorithm.   n
       is  the  number of times that a vector of THETA's and SIGMA's are
       generated using a multivariate normal proposal densit
 
- PSAMPLE_M2=n
+*** PSAMPLE_M2=n
       Used only with the BAYES method. n has meaning only  for  popula-
       tion  parameters sampled by the Metropolis-Hastings algorithm.  n
       is the number of times that a vector of THETA's and  SIGMA's  are
       generated using a multivariate normal proposal densit
 
- PSAMPLE_M3=n
+*** PSAMPLE_M3=n
       Used  only  with the BAYES method. n has meaning only for popula-
       tion parameters sampled by the Metropolis-Hastings algorithm.   n
       is the number of times in mode 3 that each parameter is individu-
       ally sampled. Default is 1.
 
- PSCALE_MIN=n, PSCALE_MAX=n (NM74)
+*** PSCALE_MIN=n, PSCALE_MAX=n (NM74)
       In MCMC sampling, the scale factor used to vary the size  of  the
       variance   of   the   proposal   density   population  parameters
       (theta/sigma) that are not Gibbs sampled, in order  to  meet  the
@@ -1307,7 +1312,7 @@
       but  on  occasion  there may be a reason to expand the boundaries
       (perhaps to PSCALE_MIN=1.0E-06, PSCALE_MAX=1.0E+06).
 
- RANMETHOD=[n|S|m|P] (NM72)
+*** RANMETHOD=[n|S|m|P] (NM72)
       See INTRODUCTION TO NONMEM 7, Reference [5] and [7].
       n: the random number generator used for all Monte  Carlo  EM  and
       Bayesian methods.
@@ -1333,44 +1338,44 @@
       in a given problem, but does not propagate to  $CHAIN  or  $TABLE
       records.
 
- REPEAT
+*** REPEAT
       The search is repeated with the initial estimates being the final
       estimates from the first search and with new UCP, so that  a  UCP
       value  of  0.1 now corresponds to a final estimate from the first
       search.  Cannot be used with STIELTJES.
 
- NOREPEAT
+*** NOREPEAT
       The estimate obtained at the end of the  minimization  search  is
       taken  to  be  the final parameter estimate. This is the default.
       Cannot be used with STIELTJES.
 
- REPEAT1
+*** REPEAT1
       The search of the first stage of the Stieltjes method is repeated
       with  the  initial  estimates  being the final estimates from the
       first search and with new UCP, so that a UCP  value  of  0.1  now
       corresponds  to a final estimate from the first search.  May only
       be used with STIELTJES.
 
- NOREPEAT1
+*** NOREPEAT1
       The estimate obtained at the end of the search of the first stage
       of  the Stieltjes method is taken to be the final parameter esti-
       mate at the first stage. This is the default. May  only  be  used
       with STIELTJES.
 
- REPEAT2
+*** REPEAT2
       The  search  of  the  second  stage  of  the  Stieltjes method is
       repeated with the initial estimates  being  the  final  estimates
       from  the  first  search and with new UCP, so that a UCP value of
       0.1 now corresponds to a final estimate from  the  first  search.
       May only be used with STIELTJES.
 
- NOREPEAT2
+*** NOREPEAT2
       The  estimate  obtained  at  the  end of the search of the second
       stage of the Stieltjes method is taken to be the final  parameter
       estimate  at  the  second stage. This is the default. May only be
       used with STIELTJES.
 
- SADDLE_HESS=n (NM74)
+*** SADDLE_HESS=n (NM74)
       SADDLE_HESS=0 selects the Hessian matrix last  generated  by  the
       variable metric method.  SADDLE_HESS=1 causes the full second de-
       rivative information matrix (identical to R matrix  in  the  $COV
@@ -1379,23 +1384,23 @@
       Detect Inestimable Parameters" in Guide INTRODUCTION TO NONMEM  7
       for a discussion of SADDLE_HESS and SADDLE_RESET options.
 
- SADDLE_RESET=n (NM74)
+*** SADDLE_RESET=n (NM74)
       SADDLE_RESET  is the number of times that a reset should occur in
       the course of the search.  Normally, should be set to 1.  Default
       is 0.
 
- SEED=n
+*** SEED=n
       The  initial  seed  for  the random number generator used for the
       Monte-Carlo methods. Default is 14455.
 
- CLOCKSEED=[0|1] (NM75)
+*** CLOCKSEED=[0|1] (NM75)
       If CLOCKSEED=1 (default is  0),  actual  starting  seed  will  be
       10000*(seconds  after  midnight)+SEED.   This  allows  a  control
       stream to produce  different  stochastic  results  for  automated
       replications,  without  the  need to modify the seed value in the
       control stream file in each replication.
 
- SELECT=[0|1|2|3] (NM73)
+*** SELECT=[0|1|2|3] (NM73)
       Used with METHOD=CHAIN and $CHAIN to specify how  the  sample  is
       selected.
       SELECT=0
@@ -1419,12 +1424,12 @@
       Uniform random selection of sample,  with  replacement  (this  is
       equivalent to SELECT=0 for $CHAIN).
 
- SIGDIGITS=n
+*** SIGDIGITS=n
       Number  of  significant  digits  required  in the final parameter
       estimate.  SIGDIGITS is not  used  by  the  Monte-Carlo  methods.
       Default: 3.  May also be coded NSIGDIGITS.
 
- SLKJDF=n (NM74)
+*** SLKJDF=n (NM74)
       Used  with  NUTS  method,  SLKJDF  stands  for  Sigma LKJ density
       degrees of freedom.  When 0, the usual inverse Wishart  prior  is
       used  for  Sigmas. When SLKJDF>0, then the LKJ density is used as
@@ -1438,14 +1443,14 @@
       See  record  $SLKJDF (NM75) to specify LKJ correlation degrees of
       freedom for each sigma block.
 
- SIGL=n
+*** SIGL=n
       n is used to calculate the step-size for finite difference deriv-
       atives  independent of the SIGDIGITS value.  If n=0 or n=100 then
       SIGL is ignored and SIGDIGITS is used as  in  versions  prior  to
       NONMEM 7.  SIGL should usually be 2 to 3 times the value of NSIG.
       It is not used by the SAEM or BAYES methods.
 
- SIGLO=n (NM72)
+*** SIGLO=n (NM72)
       The precision to which the individual etas  are  optimized.   The
       SIGL  value  set  by  the  user continues to be the precision (or
       delta ) setting for  the  finite  difference  algorithms  in  the
@@ -1457,10 +1462,11 @@
       SIGL<=SIGLO
       NSIG<=SIGL/3
 
- SIGMABOUNDTEST
+*** SIGMABOUNDTEST
       See OMEGABOUNDTEST.
 
- SLOW Requests a slower method of computation.  Required when either  a
+*** SLOW
+      Requests a slower method of computation.  Required when either  a
       mixture model is used along with CENTERING, or NUMERICAL is used.
       If not present, the option is automatically supplied in these two
       cases.   For  problems  where  NONMEM  VI does not behave as well
@@ -1468,27 +1474,27 @@
       inclusion of the SLOW option may sometimes, but not always, yield
       NONMEM VI results that are similar to NONMEM V.
 
- SLOW=1
+*** SLOW=1
       Same as SLOW.
 
- NOSLOW
+*** NOSLOW
       Requests a faster method of computation.   This  is  the  default
       (but see SLOW)
 
- SLOW=2
+*** SLOW=2
       This option is permitted with STIELTJES.
 
- SORT Individual contribution to the objective function value and indi-
+*** SORT Individual contribution to the objective function value and indi-
       vidual contributions to the gradients are sorted before they  are
       summed, so that smaller numbers are summed before larger numbers.
 
- NOSORT
+*** NOSORT
       Individual contribution to the objective function value and indi-
       vidual contributions to the gradients are summed in the order  in
       which  the  individual  records appear in the NONMEM data set, as
       was done prior to NONMEM VI.  This is the default.
 
- STDOBJ=x (NM74)
+*** STDOBJ=x (NM74)
       For importance sampling and direct sampling only, if ISAMPEND  is
       specified  as an upper integer value, and STDOBJ is set to a real
       value greater than 0, then NONMEM will vary the number  of  Monte
@@ -1496,7 +1502,7 @@
       until the stochastic standard deviation of the objective function
       falls below STDOBJ.
 
- STIELTJES
+*** STIELTJES
       A  set of tentative population estimates are first obtained using
       some 1st- or 2nd-order method (but not teh METHOD=HYBRID method).
       A  tentative  value  for the integral (i.e. an area) is obtained.
@@ -1555,7 +1561,7 @@
       the total number of orthants.  See the description to option GRID
       above to specify grid information.
 
- SVARF=x (NM74)
+*** SVARF=x (NM74)
       Used  with  NUTS  method  and SLKJDF option.  SVARF is the weight
       factor to STD prior to the log sqrt SIGMA diagonal elements,  the
       normal density of the log square root of SIGMA centered about log
@@ -1568,16 +1574,16 @@
       Default is 1.
       See also $SVARF control record.
 
- TBLN=n (NM75)
+*** TBLN=n (NM75)
       Used with $EST METHOD=CHAIN and $CHAIN records to allow selecting
       a table within a raw output file. See "Method for  creating  sev-
       eral  instances  for  a  problem starting at different randomized
       initial positions" in Guide INTRODUCTION TO NONMEM 7.
 
- THETABOUNDTEST
+*** THETABOUNDTEST
       See OMEGABOUNDTEST.
 
- THIN=n (NM74)
+*** THIN=n (NM74)
       The Bayesian records retained in  the  raw  output  file  may  be
       adjusted  by  every  THINth iteration. So, if THIN=10, then every
       10th iteration is recorded in the  raw  output  file.  The  PRINT
@@ -1585,7 +1591,7 @@
       NONMEM report file.
       Default is 1.
 
- TPU=n (NM75)
+*** TPU=n (NM75)
       If TPU>0, use THETA_PRIORU routine in ..\source\THETA_PRIORU.f90.
       You can make a copy of THETA_PRIORU.f90, modify it, call it USER-
       PRIORT.f90, for example, then specify it  as  an  OTHER  routine:
@@ -1593,7 +1599,7 @@
       OMEGA and SIMGA.
       Default is 0.
 
- TTDF=n (NM74)
+*** TTDF=n (NM74)
       TTDF stands for Theta t-density degrees of freedom.  It  is  used
       with  NUTS  method.  Default is 0.  When 0, the usual normal den-
       sity prior is used as a prior density for thetas.  When TTDF>0, a
@@ -1604,16 +1610,16 @@
       See also $TTDF control record (NM75) to specify degrees of  free-
       dom for each theta.  The value of TTDF overrides $TTDF.
 
- ZERO=list
+*** ZERO=list
       Required  with  METHOD=HYBRID.   A list of indices for etas which
       are fixed to zero during the Estimation  Step.   "list"  contains
       one  or more integers.  If more than one, they must be surrounded
       by parentheses.  The list must be contained entirely on one line.
       The indices may be separated by commas or spaces.
 
- Reserved Variables that are of Interest During the Estimation Step
+Reserved Variables that are of Interest During the Estimation Step
 
- MUFIRSTREC (NM74)
+*** MUFIRSTREC (NM74)
       The  MUFIRSTREC  option  can  speed  up the NUTS method, and also
       ordinary  BAYES,  FAST  FOCE,  ITS,  and  the  EM  methods.   Set
       MUFIRSTREC=1  in $PRED or $PK. MUFIRSTREC=1 selects the covariate
@@ -1622,7 +1628,7 @@
       The first statement of the $PRED or $PK block should be
       include nonmem_reserved_general.
 
- OBJQUICK (NM74)
+*** OBJQUICK (NM74)
       The  OBJQUICK option can speed up the NUTS method, and also ordi-
       nary BAYES, FAST FOCE, ITS, and the EM methods.  Set OBJQUICK  in
       $PRED or $PK.
