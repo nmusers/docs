@@ -16,36 +16,40 @@
 
 ** USAGE
 
+#+begin_src sh
  $MODEL   [NCOMPARTMENTS=n1] [NEQUILIBRIUM=n2] [NPARAMETERS=n3]
           [COMPARTMENT=([name] [attribute1] [attribute2] ...)] ...
           [LINK compnamea [TO|AND] compnameb BY k [l]] ...
           [I_SS=n]
+#+end_src
 
 ** EXAMPLE
+#+begin_src sh
  $MODEL   NPARAMETERS=3
           COMP=(DEPOT DEFDOSE INITIALOFF) COMP=(CENTRAL DEFOBS NOOFF)
+#+end_src
 
 ** DISCUSSION
  Required with a general ADVAN (ADVAN5,6,7,8,9,13,14,15,16,17,18).
 
 ** OPTIONS
 
- NCOMPARTMENTS=n1
+*** NCOMPARTMENTS=n1
       Total  number  of compartments other than the output compartment.
       Default: the number of COMPARTMENT options.  May  also  be  coded
       NCM or NCOMPS.
 
- NEQUILIBRIUM=n2
+*** NEQUILIBRIUM=n2
       Number of equilibrium compartments.  Default: 0
 
- NPARAMETERS=n3
+*** NPARAMETERS=n3
       Number  of  basic PK parameters.  Default: The number of basic PK
       parameters defined in the $PK  abbreviated  code.   May  also  be
       coded  NPARAMS.   May  be  0  with  the general non-linear models
       (ADVAN6, ADVAN8,  ADVAN9,  ADVAN13,  ADVAN14,  ADVAN15,  ADVAN16,
       ADVAN17, ADVAN18).
 
- COMPARTMENT= ([name] [attribute1] [attribute2] ...)
+*** COMPARTMENT= ([name] [attribute1] [attribute2] ...)
       Each  COMPARTMENT  option defines a single compartment.  Compart-
       ments are numbered in the order in which they are  defined.   The
       name  option gives the name for the compartment.  The name option
@@ -79,12 +83,12 @@
         DEPOT which may receive doses; otherwise, the first compartment
         which may receive doses.
 
- LINK compname [TO|AND] compname BY k [l]
+*** LINK compname [TO|AND] compname BY k [l]
       Link  clauses  are  used  with ADVAN5 and ADVAN7, but only in the
       absence of $PK abbreviated code.  They are rarely used,  and  are
       described in Guide IV.
 
- I_SS= n
+*** I_SS= n
       I_SS  may  be  used  with  the general non-linear models (ADVAN6,
       ADVAN8, ADVAN9, ADVAN13, ADVAN14, ADVAN15 ) to request  the  ini-
       tial state feature of PREDPP.  Values of n are
@@ -107,11 +111,11 @@
  (See advan68, advan9_15, $pk)
  (See Initial Steady State: I_SS,ISSMOD).
 
- RECORD ORDER:
+*** RECORD ORDER:
  Follows $SUBROUTINES
  Precedes $PK (if present)
 
- SYMBOLIC LABEL SUBSTITUTIONS OF MODEL COMPARTMENTS  (NM75)
+*** SYMBOLIC LABEL SUBSTITUTIONS OF MODEL COMPARTMENTS  (NM75)
 
  Compartment names defined in $MODEL are  automatically  available  for
  substitution  in  abbreviated code.  This is referred to as "implicit"
@@ -120,15 +124,18 @@
 
  For example:
 
+ #+begin_src sh
  $MODEL
  COMP=(GUT,DEFDOS)
  COMP=(CENTRAL,DEFOBS)
  COMP=(PERI)
+ #+end_src
 
  allows  susbsitutions  to  be  made for A(GUT), DADT(GUT), A(CENTRAL),
  DADT(CENTRAL), etc, so you may use these symbols in  your  abbreviated
  code, as in the following:
 
+ #+begin_src sh
  $DES
  DADT(GUT)=-KA*A(GUT)
  DADT(CENTRAL)=KA*A(GUT)-(KCP+KC0)*A(CENTRAL)+KPC*A(PERI)
@@ -136,6 +143,7 @@
   ...
  $ERROR
  IPRED=A(CENTRAL)/S2
+ #+end_src
 
  In the generated code, compartment names are replaced by the appropri-
  ate values 1, 2, etc.
