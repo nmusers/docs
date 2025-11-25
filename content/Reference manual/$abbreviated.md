@@ -52,15 +52,21 @@ $ABBREVIATED    COMRES=2
 ### COMRES=n1 ('common reserve') {#comres-n1--common-reserve}
 
 COMRES gives instructions to NM-TRAN.
-Values of n1:
 
--1 Do not store any variables in the global variable array, VRBL, in
-   the NMPRD4 module.
 
-0 Store  variables  in  NMPRD4  with  no  reserved  positions  (the
-  default)
+#### n=-1 {#n-1}
 
-n1 Store variables in NMPRD4, but reserve the first n1 positions
+Do not store any variables in the global variable array, VRBL, in the NMPRD4 module.
+
+
+#### n=0 {#n-0}
+
+Store  variables  in  NMPRD4  with  no  reserved  positions  (the default)
+
+
+#### n=n1 {#n-n1}
+
+Store variables in NMPRD4, but reserve the first n1 positions
 
 With  abbreviated  code, the Ith position in NMPRD4 is referenced
 by COM(I).
@@ -68,15 +74,11 @@ by COM(I).
 This option is intended for advanced users of NONMEM, e.g.,  when
 abbreviated  code  is  combined with user-supplied subroutines or
 verbatim code.  A user-supplied subroutine may reserve the  first
-n1 positions in NMPRD4 for its use, in which case the option COM-
-RES should be set to n1 to instruct NM-TRAN to skip  these  posi-
-tions;  the  first position used by NM-TRAN for storing variables
-defined in abbreviated code will be position {n1}+1.
+n1 positions in NMPRD4 for its use, in which case the option COMRES should be set to n1 to instruct NM-TRAN to skip  these  positions;  the  first position used by NM-TRAN for storing variables defined in abbreviated code will be position {n1}+1.
 
 $TABLE  and  $SCATTER  may  explicitly  reference  variables   in
 reserved  positions  1  through  n1  by  COM(1)  through COM(n1),
-respectively, in addition to listing variables defined in  abbre-
-viated code by name.
+respectively, in addition to listing variables defined in  abbreviated code by name.
 
 An  individual  block  of abbreviated code (e.g. $PK) may include
 the  pseudo-statement  COMRES=-1,  which  prevents  any  variable
@@ -90,20 +92,17 @@ obtained from NMPRD4.   There  are  particular  times  when  data
 records  are  passed  to  PRED for the purpose of obtaining these
 values; these are called copying  passes.   The  SAVE  region  of
 NMPRD4  is  the  initial  part  of  this array.  If a variable is
-stored in the SAVE region, then the value of  the  variable  com-
-puted  with  a  given  data  record during a copying pass will be
+stored in the SAVE region, then the value of  the  variable  computed  with  a  given  data  record during a copying pass will be
 found in NMPRD4 when the same record is passed  during  the  next
 copying  pass,  i.e.  it  will  have been saved from the previous
 copying pass.  This is in contrast to the usual behaviour,  where
-with  a  given data record, the value in NMPRD4 is the value com-
-puted with the previous data record.
+with  a  given data record, the value in NMPRD4 is the value computed with the previous data record.
 n2 is the initial size of the SAVE region,  i.e.  the  number  of
 positions  in  this  region.  n2 =0 is the default value.  n2 may
 not exceed n1.
 The SAVE region has size n2 initially, but NM-TRAN may extend  it
 if  SAVE variables are used.  However, if n2 =-1, the SAVE region
-is not to be extended, and there is to be no  SAVE  region  alto-
-gether.
+is not to be extended, and there is to be no  SAVE  region  altogether.
 (See copying block).
 
 When  PREDPP is used, and a $PK block is present, NM-TRAN inserts
@@ -133,21 +132,16 @@ only for the Laplacian method.
 Permits the computation of these derivatives, but  prevents  them
 from being stored in the global variable NMPRD4.
 $ESTIMATION METHOD=COND LAPLACIAN may be specified, but variables
-representing second derivatives are not stored in NMPRD4.  There-
-fore,  they  cannot  be displayed in tables and scatterplots.  In
-addition, no variables computed in the $PK block  may  be  refer-
-enced  in  the  $ERROR  block.  This is true whether or not these
+representing second derivatives are not stored in NMPRD4.  Therefore,  they  cannot  be displayed in tables and scatterplots.  In
+addition, no variables computed in the $PK block  may  be  referenced  in  the  $ERROR  block.  This is true whether or not these
 variables happen to have second derivatives, and whether  or  not
 the Laplacian method is used.
 
 
 ### FASTDER, NOFASTDER {#fastder-nofastder}
 
-With NONMEM 7.2 and higher, NM-TRAN collects statements that com-
-pute first-partial eta-derivatives together in  FSUBS,  and  they
-are  performed  only when NONMEM sets IFIRSTEM=1.  NOFASTDER pre-
-vents NM-TRAN from doing this, and restores the order  of  state-
-ments in FSUBS to what it was in previous versions.
+With NONMEM 7.2 and higher, NM-TRAN collects statements that compute first-partial eta-derivatives together in  FSUBS,  and  they
+are  performed  only when NONMEM sets IFIRSTEM=1.  NOFASTDER prevents NM-TRAN from doing this, and restores the order  of  statements in FSUBS to what it was in previous versions.
 
 FASTDER  requests  that  the  statements be collected, and is the
 default.
@@ -156,15 +150,12 @@ default.
 
 ### CHECKMU, NOCHECKMU {#checkmu-nocheckmu}
 
-With NONMEM 7.2 and higher, NM-TRAN checks the  MU  model  state-
-ments  in  abbreviated  code  and issues warning messages if they
+With NONMEM 7.2 and higher, NM-TRAN checks the  MU  model  statements  in  abbreviated  code  and issues warning messages if they
 appear to contain mistakes.  This can take a long time for  large
-control streams.  Also, in the examples directory, there are con-
-trol streams for which the check  is  too  difficult  for  NMTRAN
+control streams.  Also, in the examples directory, there are control streams for which the check  is  too  difficult  for  NMTRAN
 (tdist6_sim.ctl  and tdist7.ctl), and some for which the warnings
 are  inappropriate  (the  "superid"  control  streams  that   use
-$LEVEL).   NOCHECKMU can be used to prevent NM-TRAN from attempt-
-ing to check the MU model statements.
+$LEVEL).   NOCHECKMU can be used to prevent NM-TRAN from attempting to check the MU model statements.
 
 CHECKMU requests that MU model statements be checked, and is  the
 default.  Neither option affects the generated code.
@@ -191,8 +182,12 @@ default, except with ADVAN9 and ADVAN15 and ADVAN17.
 There are several different forms of the REPLACE option.  They do
 not affect verbatim code.  Case is ignored.
 
-(1)  Simple replacement
-  REPLACE left_string = right_string
+
+#### 1. Simple replacement {#1-dot-simple-replacement}
+
+```sh
+REPLACE left_string = right_string
+```
 
 May  be  used  in  all  blocks of abbreviated code and $TABLE and
 $SCATTER records.  Left_string is replaced by right_string.   The
@@ -230,8 +225,7 @@ be given symbolic names in abbreviated code, and $ABBR REPLACE is
 used  to  replace them with integer subscripts.  With NONMEM 7.4,
 this feature also requests label substitution  in  NONMEM  report
 files and table files.  For example, the following will cause all
-appearances of "ETA(CL)" to be replaced by "ETA(3)" in the gener-
-ated  subroutine,  and  will  cause  "ETA(3)"  to  be replaced by
+appearances of "ETA(CL)" to be replaced by "ETA(3)" in the generated  subroutine,  and  will  cause  "ETA(3)"  to  be replaced by
 "ETA(CL)" in the NONMEM  report  and  any  table  file  in  which
 "ETA(3)" is  listed.
 
@@ -245,11 +239,9 @@ turned  off for a specific NONMEM task (and all subsequent tasks)
 with the NOSUB=1 option of $TABLE, $SCAT, and $ESTIMATION.
 
 Substitutions will never be made in the additional  output  files
-\*.ext,  ,phi,  etc., to maintain their third party software read-
-ability.
+\*.ext,  ,phi,  etc., to maintain their third party software readability.
 
-With this feature, compartment names may be used instead of  com-
-partment numbers.  For example,
+With this feature, compartment names may be used instead of  compartment numbers.  For example,
 
 ```sh
 $ABBR REPLACE A(DEPOT)=A(1)
@@ -266,13 +258,18 @@ feature of the $MODEL record.
 See INTRODUCTION  TO  NONMEM  7,  Symbolic Label Substitutions of
 Model Compartments
 
-(2) Replacement with selection by data item
-  $ABBR REPLACE VAR(d)=VAR(n1,n2,..,nk)
-  May be used in $PK, $ERROR, $PRED blocks only.  VAR must  one  of
-  ETA,  EPS, THETA. (ERR is not permitted.)  d must be a data item.
-  The integer value of d (i.e., INT(d)) is used to  select  one  of
-  n1,n2,..,nk.   If  any  of the ni is 0, that position is skipped.
-  The effective code is:
+
+#### 2. Replacement with selection by data item {#2-dot-replacement-with-selection-by-data-item}
+
+```sh
+$ABBR REPLACE VAR(d)=VAR(n1,n2,..,nk)
+```
+
+May be used in $PK, $ERROR, $PRED blocks only.  VAR must  one  of
+ETA,  EPS, THETA. (ERR is not permitted.)  d must be a data item.
+The integer value of d (i.e., INT(d)) is used to  select  one  of
+n1,n2,..,nk.   If  any  of the ni is 0, that position is skipped.
+The effective code is:
 
 ```sh
 IF (d.eq.1) VAR(d)=VAR(n1)
@@ -319,12 +316,17 @@ $PK ....
   IF (DOSN>1) F1=1*EXP(ETA(DOSN))
 ```
 
-(3) Replacement with selection by data item and parameter
-  $ABBR REPLACE VAR(p_d)=VAR(n1,n2,..,nk)
-  p  is a user-defined variable in the abbreviated code.  The order
-  may be p_d or d_p This allows a given data item d to be used as a
-  selection  variable for more than one parameter, with a different
-  choice of elements of VAR.
+
+#### 3. Replacement with selection by data item and parameter {#3-dot-replacement-with-selection-by-data-item-and-parameter}
+
+```sh
+$ABBR REPLACE VAR(p_d)=VAR(n1,n2,..,nk)
+```
+
+p  is a user-defined variable in the abbreviated code.  The order
+may be p_d or d_p This allows a given data item d to be used as a
+selection  variable for more than one parameter, with a different
+choice of elements of VAR.
 
 Example 1:
 
@@ -371,13 +373,17 @@ IF (OCC==2) V=TVV(EXP(ETA(1)+ETA(4))
 The number of values specified for the selection data  item  must
 be consistent for all parameters in which it is used.
 
-(4) Replacement for multiple variables
-  $ABBR REPLACE VAR(p1,p2,...,pk)=VAR(n1,n2,...,nk)
-  This  form  is  new  to NONMEM 7.4.  The pi are character strings
-  separated by commas.  A  character  string  may  not  contain  an
-  embedded  space.   The lists on both left and right sides must be
-  of the same length.  VAR(pi) is replaced by VAR(ni).   For  exam-
-  ple,
+
+#### 4. Replacement for multiple variables {#4-dot-replacement-for-multiple-variables}
+
+```sh
+$ABBR REPLACE VAR(p1,p2,...,pk)=VAR(n1,n2,...,nk)
+```
+
+This  form  is  new  to NONMEM 7.4.  The pi are character strings
+separated by commas.  A  character  string  may  not  contain  an
+embedded  space.   The lists on both left and right sides must be
+of the same length.  VAR(pi) is replaced by VAR(ni).   For  example,
 
 ```sh
 $ABBR REPLACE THETA(CL,V1,Q,V2)=THETA(1,2,3,4)
@@ -392,8 +398,7 @@ $ABBR REPLACE THETA(Q)=THETA(3)
 $ABBR REPLACE THETA(V2)=THETA(4)
 ```
 
-Label  substition  occurs with this form, as with Simple replace-
-ment (1).
+Label  substition  occurs with this form, as with Simple replacement (1).
 
 Short-hand notation
   A short-hand notation may be used to describe a series of  values
@@ -437,20 +442,15 @@ Files FORIG and FREPL
 
 One  or  names  may  be  coded. They are referred to as "declared
 variables."  IF INTEGER or DOWHILE is  coded,  the  type  of  the
-variable is integer.  Otherwise, the type of the variable is dou-
-ble precision.  If one or two dimensions are declared, the  vari-
-able  being declared is an array.  Each dimension may be a number
+variable is integer.  Otherwise, the type of the variable is double precision.  If one or two dimensions are declared, the  variable  being declared is an array.  Each dimension may be a number
 or a variable or  an  expression.   Constants  defined  in  SIZES
 (e.g.,  NO,  LVR)  may  be used.  Multiple DECLARE options may be
 coded. The characters "DECLARE" are  optional  after  the  first.
 Commas  are  ignored, and type and dimensions must be respecified
 as needed.  No other  options  of  $ABBR  may  appear  after  the
 DECLARE  option(s).   Declared  variables  are  global, i.e., are
-defined in all blocks of abbreviated code.  The  number  of  sub-
-scripts  must agree with the number of dimensions in the declara-
-tion.  Declared variables that are not INTEGER or DOWHILE will be
-random variables if they are assigned in a statement whose right-
-side involves ETA's or EPS's.
+defined in all blocks of abbreviated code.  The  number  of  subscripts  must agree with the number of dimensions in the declaration.  Declared variables that are not INTEGER or DOWHILE will be
+random variables if they are assigned in a statement whose rightside involves ETA's or EPS's.
 
 Example:
 
@@ -460,8 +460,7 @@ $ABBR DECLARE A,B(10),C(1,NO-1),INTEGER I J
 
 Only I is INTEGER.
 
-Variables may be declared as INTEGER or DOWHILE for use  as  sub-
-scripts  of declared arrays or reserved variables that are arrays
+Variables may be declared as INTEGER or DOWHILE for use  as  subscripts  of declared arrays or reserved variables that are arrays
 (but not of ETA, ERR, or EPS).
 
 Variables used as looping indices in DOWHILE statements  must  be
@@ -470,8 +469,7 @@ declared as DOWHILE variables.
 Declared variables are automatically initialized to 0.
 
 Elements  of  a  declared  array  may be displayed in WRITE/PRINT
-statement, but not the entire array.  E.g., the following is per-
-mitted
+statement, but not the entire array.  E.g., the following is permitted
 
 ```sh
 PRINT *,B(1),B(2)
@@ -495,19 +493,14 @@ $TABLE.  The workaround is to code, e.g.,
 
 With NONMEM 7.4, a series of routines are available that  protect
 against  domain  violations,  divide  by zero, and floating point
-overflows.  Each of these routines start with the letter P,  fol-
-lowed  by the name of the mathematical operation they are to per-
-form.  For example, PLOG is the protective code routine that per-
-forms  the  LOG operation.  With $ABBR PROTECT, NMTRAN will auto-
-matically replace all relevant function names with the P name.
+overflows.  Each of these routines start with the letter P,  followed  by the name of the mathematical operation they are to perform.  For example, PLOG is the protective code routine that performs  the  LOG operation.  With $ABBR PROTECT, NMTRAN will automatically replace all relevant function names with the P name.
 
 (See protect functions).
 
 
 ### FUNCTION function_name(input_vector_name,dimension[,usage]) {#function-function-name--input-vector-name-dimension-usage}
 
-With all versions of NONMEM since NONMEM VI, user-supplied  func-
-tions  are permitted in abbreviated code with reserved names such
+With all versions of NONMEM since NONMEM VI, user-supplied  functions  are permitted in abbreviated code with reserved names such
 as FUNCA, FUNCB, ...,  and argument vectors with  reserved  names
 such as VECTRA, VECTRB, .....  With NONMEM 7.4, extended reserved
 names are recognized.  These are FUNCxy and FUNCxyz,  where  each
@@ -518,61 +511,55 @@ and arrays have dimension 9 and each reserved function may appear
 in abbreviated code at most 9 times.
 (See Abbreviated Function).
 
-In NONMEM 7.4 the $ABBR FUNCTION option allows user-defined func-
-tion names and user-defined argument vector  names.   The  dimen-
-sions  of  the  argument vector and the maximum number of times a
-given function name may appear in abbreviated code is user-speci-
-fied.
+In NONMEM 7.4 the $ABBR FUNCTION option allows user-defined function names and user-defined argument vector  names.   The  dimensions  of  the  argument vector and the maximum number of times a
+given function name may appear in abbreviated code is user-specified.
 
 A user-defined function may be declared as follows:
+
+```sh
 $ABBR FUNCTION function_name(input_vector_name,dimension,usage)
-
-function_name
-     is the name of the function.
-
-input_vector_name
-     is the name of an input vector that may be used to pass arguments
-     to the function.
-
-dimension
-     specifies how many input arguments function_name  will  use,  and
-     defines  input_vector_name as a vector with this length.  "Dimen-
-     sion" is a property of both the function and of the input vector.
-
-usage
-     is the maximum number of times the function  may  appear  in  the
-     abbreviated  code,  that  is, the maximum number of occurances of
-     function_name. It is not an error if there are fewer  occurances.
-     If  usage  is  omitted,  NMTRAN  will supply the exact number. If
-     usage is coded, NMTRAN will generate an error  message  if  func-
-     tion_name appears in abbreviated code more than "usage" number of
-     times.
-
-A vector and its length may be declared independently of a  func-
-tion,
-
-```sh
-$ABBR VECTOR input_vector_name (dimension)
 ```
 
-input_vector_name
-     is the name of an input vector.
+-   function_name
+    is the name of the function.
 
-dimension
-     The length of the vector.  The dimension of a vector should be no
-     less than the dimension of all the functions which  which  it  is
-     used.
+-   input_vector_name
+    is the name of an input vector that may be used to pass arguments
+    to the function.
 
-Example:
+-   dimension
+    specifies how many input arguments function_name  will  use,  and
+    defines  input_vector_name as a vector with this length.  "Dimension" is a property of both the function and of the input vector.
 
-```sh
-$ABBR FUNCTION BIVARIATE(VBI,5,3)
-```
+-   usage
+    is the maximum number of times the function  may  appear  in  the
+    abbreviated  code,  that  is, the maximum number of occurances of
+    function_name. It is not an error if there are fewer  occurances.
+    If  usage  is  omitted,  NMTRAN  will supply the exact number. If
+    usage is coded, NMTRAN will generate an error  message  if  function_name appears in abbreviated code more than "usage" number of
+    times.
+
+    A vector and its length may be declared independently of a  function,
+    ```sh
+    $ABBR VECTOR input_vector_name (dimension)
+    ```
+
+-   input_vector_name
+    is the name of an input vector.
+
+-   dimension
+    The length of the vector.  The dimension of a vector should be no
+    less than the dimension of all the functions which  which  it  is
+    used.
+
+    Example:
+    ```sh
+    $ABBR FUNCTION BIVARIATE(VBI,5,3)
+    ```
 
 A  vector VBI is defined of length 5.  There is a function called
 BIVARIATE.  When BIVARIATE is used, the value 5 is passed  to  it
-as  argument NDIM.  BIVARIATE uses 5 elements from the input vec-
-tor.  Function BIVARIATE may appear in abbreviated code at most 3
+as  argument NDIM.  BIVARIATE uses 5 elements from the input vector.  Function BIVARIATE may appear in abbreviated code at most 3
 times.   BIVARIATE should be present in a source code file listed
 in the $SUBROUTINES record:
 
@@ -583,8 +570,7 @@ $SUBROUTINES OTHER=filename
 Instructions for coding both reserved functions and  user_defined
 functions are in Abbreviated Function.
 
-Here is an example of abbreviated code that uses BVI and BIVARI-
-ATE:
+Here is an example of abbreviated code that uses BVI and BIVARIATE:
 
 ```sh
 $PK ...
@@ -600,12 +586,9 @@ BV=BIVARIATE(VBI)
 
 There is a fully worked out example.
 (See bivariate function).
-Files are  in  the  examples  directory:  bivariate.ctl,  bivari-
-ate.csv, bivariate.f90.
+Files are  in  the  examples  directory:  bivariate.ctl,  bivariate.csv, bivariate.f90.
 
-By  default,  there may be up to 100 different user-defined func-
-tions, which includes functions with  reserved  names  and  user-
-defined  names.  There may also be up to 100 different vectors of
+By  default,  there may be up to 100 different user-defined functions, which includes functions with  reserved  names  and  userdefined  names.  There may also be up to 100 different vectors of
 input arguments, which includes vectors with reserved  names  and
 user-defined  names.   Constants NFUNCX and NVECX in SIZES may be
 used to change these numbers.
@@ -638,8 +621,7 @@ NM-TRAN gives a warning:
 BVQI=BIVARIATEQ(VBI(001),FNC002_1(1,001),FNC002_2(1,1,001),10)
 ```
 
-This is because vector VBI has dimension 5 and  function  BIVARI-
-ATEQ  was declared with dimension 10.  Note that the results will
+This is because vector VBI has dimension 5 and  function  BIVARIATEQ  was declared with dimension 10.  Note that the results will
 be correct if BIVARIATEQ does not use more than  5  positions  in
 the argument vector.
 
@@ -654,16 +636,14 @@ $ABBR FUNCTION BIVARIATEQ(*,10)
 $ABBR VECTOR VQI(15)
 ```
 
-The $ABBREV FUNCTION record may be used to override the  default  set-
-tings for any of the reserved function or vectors.  For example,
+The $ABBREV FUNCTION record may be used to override the  default  settings for any of the reserved function or vectors.  For example,
 
 ```sh
 $ABBR FUNCTION FUNCA(VECTRA,25,5)
 ```
 
 VECTRA  will  be  defined with length 25, not 9 as for a reserved
-function.  The code for the function should have NDIM as an argu-
-ment:
+function.  The code for the function should have NDIM as an argument:
 
 ```sh
 FUNCTION VECTRA(X,X1,X2,NDIM)
@@ -673,7 +653,8 @@ NDIM should be used instead of 9 for vector and array dimensions,
 as shown in  the Abbreviated Function help item.
 
 
-## REFERENCES: Guide IV, section III.B.7 , IV {#references-guide-iv-section-iii-dot-b-dot-7-iv}
+## REFERENCES {#references}
 
+Guide IV, section III.B.7 , IV
 
-## REFERENCES: Guide Introduction_7 {#references-guide-introduction-7}
+Guide Introduction_7
