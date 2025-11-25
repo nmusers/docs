@@ -6,7 +6,7 @@ draft = false
 
 ## $AESINIT {#aesinit}
 
-Marks the beginning of abbreviated code for the AES routine
+Marks the beginning of abbreviated code for the AES routine.
 
 
 ## CONTEXT {#context}
@@ -24,8 +24,7 @@ abbreviated code
 
 ## DISCUSSION {#discussion}
 
-The  $AESINITIAL record is used to compute the amounts in the equilib-
-rium compartments at the beginning of an integration interval.  It  is
+The  $AESINITIAL record is used to compute the amounts in the equilibrium compartments at the beginning of an integration interval.  It  is
 used  with  PREDPP's  ADVAN9, ADVAN15, and ADVAN17.  May also be coded
 $AES0.
 (See $AES).
@@ -36,7 +35,8 @@ Specific rules follow.
 
 ### ASSIGNMENT AND CONDITIONAL STATEMENTS {#assignment-and-conditional-statements}
 
-Left-hand quantities in assignment statements:
+
+#### Left-hand quantities in assignment statements: {#left-hand-quantities-in-assignment-statements}
 
 A(ncm1+1), A(ncm1+2), ...  (Required. The amounts in  the  equilibrium
 compartments at the beginning of the integration interval. ncm1 is the
@@ -48,32 +48,33 @@ INIT  (Initialization flag.)
 
 AESINITIAL-defined (i.e., PRED-defined) items.
 
-Right-hand quantities in assignment statement and in conditions:
 
-A(1), A(2), ...   (Current compartment amounts; may be  random  vari-
-ables.)
+#### Right-hand quantities in assignment statement and in conditions: {#right-hand-quantities-in-assignment-statement-and-in-conditions}
 
-P(1),  P(2), ...   (Post-translation basic PK parameters; may be ran-
-dom variables.)
+A(1), A(2), ...   (Current compartment amounts; may be  random  variables.)
 
-PK-defined items (Implicit basic PK parameters; may be  random  vari-
-ables.)
+P(1),  P(2), ...   (Post-translation basic PK parameters; may be random variables.)
+
+PK-defined items (Implicit basic PK parameters; may be  random  variables.)
 
 T  (Time  at the beginning of the integration interval; may be random
 variables.)
 
-AESINITIAL-defined items that appeared earlier as  left-hand  quanti-
-ties.
+AESINITIAL-defined items that appeared earlier as  left-hand  quantities.
 
-Data item labels specified on the $INPUT statement.
+
+#### Data item labels specified on the $INPUT statement. {#data-item-labels-specified-on-the-input-statement-dot}
 
 THETA(n).
 
-Global Variables in Modules
- Certain variables in FORTRAN Modules can be used.
- (See Variables_in_modules)
 
-Forbidden Variable Names:
+#### Global Variables in Modules {#global-variables-in-modules}
+
+Certain variables in FORTRAN Modules can be used.
+(See Variables_in_modules)
+
+
+#### Forbidden Variable Names: {#forbidden-variable-names}
 
 IR DA DP DT E(n) ETA(n) EPS(n) ERR(n)
 
@@ -99,14 +100,12 @@ $AESINIT (EVERY EVENT)     ; same as CALLFL=-1 (default)
 ### RECORD ORDER: {#record-order}
 
 Follows $SUBROUTINES $INPUT $MODEL $PK
+
 Precedes $AES
 
 
 ## REFERENCES {#references}
 
 Guide IV, section V.C.8
-
-
-## REFERENCES {#references}
 
 Guide VI, section VI.E

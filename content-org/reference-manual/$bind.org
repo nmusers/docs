@@ -10,7 +10,7 @@
 
 # use cr- prefix for "control reference"
 ** $BIND
-Define data values used by $PK, $DES, and $AES
+Define data values used by $PK, $DES, and $AES.
 ** CONTEXT
  NM-TRAN Control Record
 
@@ -32,8 +32,7 @@ Define data values used by $PK, $DES, and $AES
 
  $BIND has no effect when PK is called at a model event time (MTIME).
 
- Let t be a time at which an additional or lagged dose enters the  sys-
- tem.   If t1 is the greatest event time not exceeding the time t, then
+ Let t be a time at which an additional or lagged dose enters the  system.   If t1 is the greatest event time not exceeding the time t, then
  the "last event record" is the last event record with event  time  t1,
  and  the  "next  event  record" is the event record following the last
  event record.
@@ -60,12 +59,12 @@ Define data values used by $PK, $DES, and $AES
  For  all other PREDPP or NONMEM data items, the default is DOSE.  Only
   -  or DOSE may be specified.
 
- Option DROP in the $BIND record is optional.  It  is  ignored  by  NM-
- TRAN,  but helps the user maintain a 1-to-1 relationship between posi-
- tions in $BIND and positions in $INPUT.
+ Option DROP in the $BIND record is optional.  It  is  ignored  by  NMTRAN,  but helps the user maintain a 1-to-1 relationship between positions in $BIND and positions in $INPUT.
 
  A $BIND record with all defaults specified, such as
+ #+begin_src sh
  $BIND - - - - - - -
+ #+end_src
  has the same effect as if no $BIND record were present.
 
  EXAMPLE:
@@ -102,16 +101,14 @@ Define data values used by $PK, $DES, and $AES
 
  The $BIND record only applies under the following circumstances:
 
- (1)  There exists a dose that is either one or both of the two follow-
-      ing types of doses:
+ (1)  There exists a dose that is either one or both of the two following types of doses:
 
       a)   An  additional  dose,  subsequent  to  the  initiating  dose
            (ADDL>0, II>0 in the dose event record).  Such a dose enters
            the system at the "additional dose time."
 
       b)   A lagged dose.  (with the corresponding dose  event  record,
-           PK  specifies ALAGi>0, where i is the index of the dose com-
-           partment).  Such a dose enters the  system  at  the  "lagged
+           PK  specifies ALAGi>0, where i is the index of the dose compartment).  Such a dose enters the  system  at  the  "lagged
            dose time."
 
  (2)  The  PK  subroutine  computes parameters that depend on values in
@@ -120,18 +117,13 @@ Define data values used by $PK, $DES, and $AES
 
  (3)  The PK subroutine is called when the dose enters the system.
       That  is, $PK contains the pseudo-statement CALLFL=-2, requesting
-      that the PK routine be called to compute values of the PK parame-
-      ters at additional and lagged dose times.  When $PK does not con-
-      tain this pseudo-statement, there is no  such  call,  and  at  an
-      additional or lagged dose time, the PK parameters have those val-
-      ues computed with the next event record.
+      that the PK routine be called to compute values of the PK parameters at additional and lagged dose times.  When $PK does not contain this pseudo-statement, there is no  such  call,  and  at  an
+      additional or lagged dose time, the PK parameters have those values computed with the next event record.
 
  When the $PK code is implemented with an event  record,  the  variable
  DOSTIM  is  0.  When it is implemented at an additional or lagged dose
  time, the value of this variable is the time in question.  By default,
- data items used in abbreviated code have values from either the initi-
- ating dose record (DOSREC) or the next event record (EVTREC),  accord-
- ing to this rule:
+ data items used in abbreviated code have values from either the initiating dose record (DOSREC) or the next event record (EVTREC),  according to this rule:
 
  NONMEM  data items and PREDPP data items (other than TIME) have values
  from the original dose event record (DOSREC).  These are:
