@@ -1,5 +1,5 @@
 +++
-title = "Data format"
+title = "Data"
 author = ["Yi Zhang"]
 draft = false
 bookCollapseSection = true
