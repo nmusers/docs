@@ -1,0 +1,1099 @@
+#+title: Abbreviated code
+
+* Abbreviated code
+
+Abbreviated  code  is  Fortran-like language within an NM-TRAN control
+stream that is used to specify a model.  The $PRED, $PK, $ERROR, $DES,
+$AES, $AESINITIAL, $TOL, $MIX, and $INFN records each initiates a
+block of abbreviated code.  Such a block ends with either  the
+appearance  of another  record(beginning with a "$"), or end of the
+control stream. The code blocks in NONMEM 7.2+ versions are case-insensitive.
+
+** Comments
+Semicolon character ";" marks the beginning of comments so that the
+ rest of the line is ignored.
+
+** Line continuation
+Continuation lines are permitted using the character & at the end of the line.
+
+** Variables
+User-defined variables are names used in code blocks that are not
+reserved words. They used to be restricted to 8 characters in length
+and could not include the char- acter in  previous  versions  of
+NONMEM.  With NONMEM 7 a user-defined  variable  name  consists  of
+1-20 letters (A-Z), numerals (0-9), and the character '_', beginning
+with a letter.  (The length 20 is specified by constant SD in SIZES)
+(See SIZES).
+
+All variables  are  all of double precision floating point type.
+
+** Assignment
+An assignment statement  =A=B=  uses  right-hand  quantities  in  an
+expression =B= in order to define a user-defined variable =A=.
+
+Permissible right-hand quantities =B= are expressions consisting of :
+  - previously  defined  quantities,  including  declared variables
+    that have also been used on the left side of an assignment
+    statement. (See $abbreviated);
+  - constants, e.g 1, 1.1, 3E+1 3E1, 3E01, 3E-1 3E-01, 3D+1, 3D1,  3D01, 3D-1 3D-01;
+  - THETA,  OMEGA  and  SIGMA elements, e.g. THETA(1), OMEGA(2,2).
+    When the two subscripts for an OMEGA or SIGMA element are the
+    same,  only one subscript is needed, e.g. OMEGA(2);
+  - data items defined in the $INPUT record variables;
+  - ETA(n), EPS(n), ERR(n), which are understood to have mean 0 and
+    variances and covariances given by elements of the  OMEGA  and
+    SIGMA arrays.
+  - operators =+= (add), =-= (substract,) =*= (multiply), =/=
+    (divide), =**= (exponentiate);
+  - parentheses (). Parentheses  may  be  nested in the right-hand side of an assignment statement. Except in certain blocks of  abbreviated  code  (i.e.  a  simulation block,   an   initialization   block,  a  finalization  block  or  a pred_ignore_data block), the variables ETA(n),  EPS(n),  ERR(n)  are considered to be (the base) random variables, and quantities defined in terms of these variables (directly or indirectly) are  themselves considered to be random variables.  NM-TRAN sets up computations for derivatives of random variables with  respect  to  the  base  random variables.
+  - built-in  functions:  LOG (natural log), LOG10, EXP, SQRT, SIN, COS,
+   ABS, TAN, ASIN, ACOS, ATAN, INT, MIN, MAX, MOD;
+  - NONMEM functions: PHI, GAMLN.
+
+If a Fortran function has  random  variable  arguments,  NONMEM
+computes the cooresponding partial derivatives.  The partial
+derivative of ABS(X) with respect to eta is mathematically undefined
+at X=0.  We are arbitrarily defining it to be dX/deta. If the
+prediction depends on X, X must always be either positive or
+negative. If  the  argument of GAMLN is a random variable, it must
+always be positive.  Function PHI may have a random argument but no
+partial derivates are computed.
+
+Similarly, INT,  MOD,  MIN,  and  MAX  functions  return  discontinuous
+values, and no partial derivatives are computed.  If they  are  used
+outside  of  a simulation block and the function value affects the
+value of the objective function, then an error in the NONMEM
+Estimation Step will probably occur.  If they are needed in the
+computations of DADT (differential equations; with ADVAN 6, 8, 9,
+13, 14,  15,  16, 17, 18), then the funcions should be used
+instead in the PK routine, and model event time (MTIME)
+parameters be used to set flags for DES.
+     (See Model Time examples)
+     (See Cirdadian example)
+   abbreviated functions (see below)
+   subscripted variables (see below)
+
+With previous versions of NONMEM, constants are limited to 12
+characters.  With NONMEM 7 a constant may be up to 30 characters.
+(The length is specified by constant SCO in SIZES)
+
+Left-hand quantities VECTRA(n), VECTRB(n), VECTRC(n) may be defined,
+and these become elements of  pre-defined  vectors  VECTRA,  VECTRB,
+VECTRC.   If  VECTRA, VECTRB, VECTRC is defined without a subscript,
+it is understood to be a simple variable.  A subscript  must  be  an
+integer constant, or a character string that is replaced by an integer
+constant using the $ABBR REPLACE feature.  Whereas  once  it  is
+defined,  a vector element may be used as a right-hand quantity - in
+the same way as any previously defined variable -  the vector itself
+may be used only as an argument to an abbreviated function.
+
+   (See VECTORS and ABBREVIATED FUNCTIONS, below.)
+
+   Values may be assigned to certain special variables: RPTO, RPTON and
+   PRDFL - with the repetition feature
+   (See Repetition Variables);
+   SKIP_ (but only in a finalization block)  -  with  superproblems  or
+   subproblems
+   (See SKIP).
+
+   Variables,  constants,  and  functions  are  all of double precision
+   floating point type.
+
+   Except  in  certain  blocks  of  abbreviated code (i.e. a simulation
+   block, an initialization block, or a finalization block), a label in
+   an  $INPUT record may not appear on the left in an assignment state-
+   ment.
+
+   There is a reserved storage area of module NMPRD4, and when defining
+   the  kth  variable  in  this  area,  it may be referenced as COM(k).
+   Then, even if the variable is defined in terms of random  variables,
+   it is not regarded as being a random variable; derivatives of COM(k)
+   with respect to the base random variables are not computed.
+
+ The general rules are:
+    One statement of abbreviated per line, starting anywhere on the line.
+    No statement numbers (unlike with FORTRAN).
+    Comments may be included on any line after the
+    No statement types other than assignment,
+    IF, THEN, ELSE, ELSEIF, ENDIF, DO WHILE,
+    ENDDO, CALL, WRITE, PRINT, RETURN, OPEN, CLOSE, REWIND.
+    (e.g., no GOTO, READ, FORMAT.)
+
+
+    A special statement type, EXIT, is permitted.
+
+** =IF=
+   Conditional statements have one of two forms:
+
+   #+begin_src f90
+       IF (condition) assignment statement
+   #+end_src
+   or
+   #+begin_src f90
+       IF (condition) THEN
+          abbreviated code ...
+       ELSEIF (condition) THEN
+          abbreviated code ...
+       ELSE
+          abbreviated code ...
+       ENDIF
+   #+end_src
+
+   See below for a restriction on ELSEIF.
+   Conditions may include the operators .EQ., .NE., .LE.,  .GE.,  .LT.,
+   .GT.,  .AND., and .OR..  The arthmetic operators may be coded as ==,
+   /=, <=, >=, <, and >, respectively.  They  may  include  expressions
+   that  can  be  used  as right-hand quantities with assignment state-
+   ments.  They may not include parentheses except in such expressions.
+   Valid:   IF (Q.EQ.(R+C)/D) ...
+   Invalid:  IF (Q.EQ.R.AND.(C.GT.D.OR.E.EQ.F)) ...
+
+   With $PRED, $PK, and $ERROR records, a condition may test the  ICALL
+   argument.   However,  if  the test is IF (ICALL.EQ.2), then ELSE may
+   not be used.  Special rules apply.  For  more  detail,  see  SPECIAL
+   STATEMENTS (below), and help entries for these records.
+
+   A condition may also test certain variables defined in modules
+   (See Variables_in_modules, NONMEM_modules, PREDPP_modules).
+
+   Abbreviated code in a particular THEN or ELSE clause may not contain
+   multiple definitions of the same random variable.  The code below is
+   invalid:
+      IF (condition) THEN
+      X=...an expression involving a random variable
+      X= ....
+      ENDIF
+
+   Random variables cannot be defined within nested conditionals, i.e.,
+   within a conditional structure beginning with an IF  and  containing
+   another  IF.   The  use  of  ELSEIF ... THEN implies a nested condi-
+   tional.
+
+   A special rule applies when random variables are defined via  condi-
+   tional  statements.  If a random variable is multiply defined within
+   a series of IF ... THEN structures, but all  conditions  are  false,
+   then  the  value  of the random variable is set to zero.  If an ELSE
+   appears, then not all conditions are false.
+   Consider two cases in which the following statements  are  the  only
+   ones defining TVK and K, respectively:
+      IF (WT.GT.0) TVK=THETA(1)*WT
+   If  the  condition is false, the non-random variable TVK retains the
+   value set with the previous data record.
+      IF (WT.GT.0) K=THETA(1)*WT*EXP(ETA(1))
+   If the condition is false, the value of the random variable K is set
+   to zero.
+   NM-TRAN prints a warning message when it detects such code.
+
+   In  $PK, $ERROR, and $PRED records, recursion code may be used in an
+   explicit manner, as in this example:
+
+      IF (WT.GT.0) THEN
+        K=THETA(1)*WT*EXP(ETA(1))
+      ELSE
+        K=K
+      ENDIF
+
+   If the condition is false, K retains its value set with the previous
+   data record.
+
+   Recursion  code  can  be  used in $PRED, $PK, and $ERROR records for
+   other purposes as well.  The following two fragments of code  illus-
+   trate how one can use abbreviated code to implement recursive kinet-
+   ics in $PRED.  The first example works with a single bolus dose  and
+   the second example works with single or multiple bolus doses.  Simi-
+   lar code can be used in $PK and $ERROR.
+
+      K=THETA(1)*EXP(ETA(1))
+      IF (TIME.EQ.0) THEN
+        OLDA=AMT
+        T=TIME
+      ENDIF
+      A=OLDA*EXP(-K*(TIME-T))
+      OLDA=A
+      T=TIME
+
+      K=THETA(1)*EXP(ETA(1))
+      IF (TIME.EQ.0) THEN
+        A=AMT
+        T=TIME
+      ELSE
+        A=A*EXP(-K*(TIME-T))+AMT
+      ENDIF
+      T=TIME
+
+   The above forms of recursion work for recursion from one data record
+   to  the next ("inter-record" recursion).  It is also possible to use
+   recursion in a do-while loop ("intra-record", or  "do-while"  recur-
+   sion).
+
+   Example of a do-while recursive loop using a random variable:
+
+    TERM=THETA(1)*EXP(ETA(1))
+    SUM=0
+    DO WHILE(condition)
+    SUM=SUM+TERM
+    ...
+    ENDDO
+
+   A product loop such as
+     PROD=PROD*TERM
+   is  also  possible, as are other ways the dowhile recursive variable
+   can be used, so long as the variable appears on both  sides  of  the
+   equal sign within the DOWHILE loop: V= ... V ...
+
+** =EXIT=
+   EXIT statement has three forms:
+   #+begin_src f90
+     EXIT
+     EXIT n
+     EXIT n k
+   #+end_src
+   n  is  called  the  "PRED error return code"; (also called the "PRED
+   exit code.")  It must be 1 or 2.  Default is 1.
+   k is the user error code.  It may be omitted; if present, it must be
+   integer-valued  in the range 0-999.  With NONMEM 7.5, it may also be
+   in the range 1000-9999  when  issued  during  the  Simulation  Step.
+   Default is 0.
+
+   With  all  versions  of  NONMEM, the value of k is part of the error
+   message in ETEXT, which is reported in the NONMEM output report  and
+   in  file  PRDERR.   With NONMEM 7.5 and later, k tells NONMEM how to
+   handle EXIT statements during the Simulation Step.
+   (See Simulation block).
+   (See nmprd1)
+
+   The EXIT statement causes an immediate exit from the routine and, if
+   PREDPP  is being used, a subsequent immediate exit from PREDPP, with
+   a return to NONMEM.  It is typically used  in  an  IF  statement  to
+   avoid  further  computation  of  the  users  code when the values of
+   theta/eta's set by NONMEM are inappropriate  or  would  lead  to  an
+   arithmetic  exception.   If such an exit occurs during a Covariance,
+   Table or Scatterplot Step, or  during  computation  of  the  initial
+   value  of  the  objective  function, NONMEM will abort.  If the exit
+   occurs during an Estimation  or  Initial  Estimates  Step,  NONMEM's
+   action depends on the error return code value:
+
+     n=1
+     Suppose  first  that  a  search  for  eta is not underway.  Then a
+     search for theta is underway, and when a search  is  underway  for
+     theta,  the following happens: If the NOABORT option is used, NON-
+     MEM will try to continue using different values  for  theta  (i.e.
+     "theta-recovery");  otherwise,  NONMEM  aborts.  If theta-recovery
+     fails, NONMEM aborts.
+     Next, suppose a search for eta is underway.  NONMEM  will  try  to
+     continue  using  different  values  for eta (i.e. "eta-recovery").
+     Suppose eta-recovery fails.  If a search for  theta  is  not  also
+     underway, NONMEM aborts.  Otherwise, the above procedure regarding
+     theta-recovery applies.
+     (See Guide VI, section III.K)
+
+     n=2
+     NONMEM aborts immediately.
+
+   If NONMEM aborts, and k>0, a user message such as the  following  is
+   printed in the output:
+   "PK SUBROUTINE: USER ERROR CODE = k"
+   This  message  is  intended  to help the user distinguish which EXIT
+   statement caused NONMEM to abort when more than one  EXIT  statement
+   is present in the abbreviated code.
+
+** =WRITE= and =PRINT=
+Example:
+#+begin_src f90
+   WRITE (50,*) 99,ID,CL,THETA(1),ETA(1)
+
+   IF (ICALL.EQ.3) THEN
+     WRITE (55,2) BIAS
+   ENDIF
+#+end_src
+
+Certain  forms of Fortran WRITE, PRINT, OPEN, CLOSE, and REWIND
+statements may be used anywhere in $PRED, $INFN, $PK, $ERROR,  $DES,
+$AES, $AESINITIAL blocks.
+
+#+begin_src f90
+   PRINT list ...
+   PRINT *,list ...
+   WRITE (unit,format) list ...
+   WRITE (*,format) list ...
+   WRITE (unit,*) list ...
+   WRITE (*,*) list ...
+   OPEN(unit)
+   OPEN(unit,FILE=filename)
+   CLOSE(unit)
+   REWIND(unit)
+#+end_src
+Single or double quotes around the filename are optional.  However,
+if the filename contains commas, semicolons, or parentheses, then it
+must be  surrounded  by  single  quotes ' or double quotes ".
+Filename may also contain equal signs if it is enclosed in quotes.
+
+If the file is opened by NM-TRAN, filename may contain embedded spaces
+if  it  is  enclosed in quotes, and may contain at most 80 characters.
+If the file is opened by NONMEM, filename  may  not  contain  embedded
+spaces, and may contain at most 71 characters.
+
+  - unit 6, n or *
+    + "6" indicates the unit connected to the NONMEM output file.
+    + "n" indicates the number of an alternative unit (40<n<2000).
+    + "*"  indicates  a FORTRAN system-dependent output (with most systems, this is equivalent to using unit 6, but see  the  FORTRAN documentation) With OPEN, CLOSE and REWIND, the unit may not be 6 or *.
+
+  - format *, 1, 2, 991, or 992  [fn:1] [fn:2]
+    + "*" indicates list-directed  output.  (FORTRAN  library
+      routines will select a format appropriate for the current
+      run-time value of the quantity when displayed.)
+    + 1 or 991 requests the built-in format specification: 991  FORMAT (35F14.4)
+    + 2 or 992 requests the built-in format specification: 992  FORMAT (35E15.7)
+
+[fn:1] Format specification numbers 991 and 992 are used in generated
+code  to  avoid conflict with statement numbers arising from DO WHILE
+statements.  The one digit versions are perhaps easier to remember.
+
+[fn:2] No  integer format specification is provided because constants
+are stored as floating point variables in generated and library
+routines.
+
+  - list. A  list  of one or more right-hand quantities, i.e.,
+    variables or constants that may appear on the right in abbreviated
+    code.   May not  include expressions or names of abbreviated
+    functions.  When subscripts are appropriate,  these  must  be
+    integer  constants, declared  integer  variables,  or expressions
+    involving such constants and variables.
+
+    With a PRINT statement, a list may also  include  character
+    constants.   A  character  constant is delimited by single or
+    double quotes (' or ").  As with any Fortran character constant, a
+    pair of  adjacent  delimiters  within the constant represents a
+    single character.  E.g.,
+    #+begin_src f90
+    PRINT *,'A isn''t B'
+    #+end_src
+    will output
+    #+begin_src txt
+    A isn't B
+    #+end_src
+
+    In  an  initialization  or finalization block, a list may include
+    elements of the OMEGA and SIGMA arrays.  In a finalization block,
+    a  list  may  include  elements  of  the  standard  error  arrays
+    (SETHET,SETHETR,SEOMEG and SESIGM).
+
+    Any array whose elements may be listed individually in a WRITE or
+    PRINT  statement  may also be written in its entirety, by listing
+    it without any subscripts.  Specifically, one or more of the
+    following may be included in a list:
+
+  #+begin_src f90
+        THETA THETAFR SETHET  SETHETR
+         THSIMP ETA  THSIMPR
+        OMEGA(BLOCK) OMEGA(DIAG) SEOMEG(BLOCK) SEOMEG(DIAG)
+        OMSIMP(BLOCK) OMSIMP(DIAG)
+        SIGMA(BLOCK) SIGMA(DIAG) SESIGM(BLOCK) SESIGM(DIAG)
+        SGSIMP(BLOCK) SGSIMP(DIAG)
+        IIDX CNTID IIDX,CNTID
+  #+end_src
+
+  Note that IIDX and CNTID are arrays in a module; (See Objective
+  Function Value Individual). When  "IIDX"  or "CNTID" is listed, then
+  only that array is written.  When "IIDX,CNTID" is specified, then
+  pairs  of  values  are written, one pair per line, one pair for each
+  individual record.
+
+  The  option  BLOCK  requests  that the entire array be written in
+  full symmetric form.  The option  DIAG  requests  that  only  the
+  diagonal  elements  be written.  DIAG may also be coded DIAGONAL.
+  Arrays of possibly different sizes (e.g., OMEGA  and  SIGMA)  may
+  not  be  listed together in the same WRITE statement.  If a WRITE
+  statement requests that an entire array be written, then the only
+  other  items  that  may  be  listed  with the statement are other
+  entire arrays.
+
+  When entire arrays are written, the format specification with a
+  WRITE statement  must  be  *.   With  either  a WRITE or PRINT
+  statement, an appropriate format is created by the NONMEM system.
+  With  these  for mats, elements of the standard error arrays that do
+  not exist have the value 1E10 and are printed as 0.1000000E+11.
+  (Such elements appear in NONMEM  output  as dots (.........).)  If
+  the covariance step fails or is not requested, all elements of the
+  standard error arrays are 0  and are printed as 0.0000000E+00. For
+  example, to write the omega matrix and its standard errors in
+  symmetric form code the following.  (Only as many elements will  be
+  written as are appropriate for the dimension of omega in the
+  problem.)
+
+  #+begin_src f90
+       IF (ICALL.EQ.3) WRITE (99,*) OMEGA(BLOCK),SEOMEG(BLOCK)
+  #+end_src
+
+ A  list  may  also  include  a vector element or the entire vector (by listing the vector without a subscript).
+
+ The OPEN, CLOSE, and REWIND statements are part of  the  FORTRAN
+ language.  For  details  (i.e.,  the  relationship  of  external
+ files to units), see the Language Reference Manual and the Users
+ Guide for your compiler.
+
+** =DO WHILE=
+#+begin_src f90
+DO WHILE( condition )
+#+end_src
+With NONMEM 7, DOWHILE may be used  in  all  blocks  of  abbreviated
+code.   DOWHILE  marks the beginning of a set of statements that are
+executed repeatedly until the condition is false.  The ending of the
+set of statements is marked by the statement ENDDO.  The non-FORTRAN
+syntax DO WHILE(DATA)  is  permitted  in  $PRED  initialization  and
+finalization blocks, and in the $INFN record. (See
+Initialization-Finalization block).
+
+
+** Special statements
+Optional.   Each of these special statements is permitted in special blocks of abbreviated code.
+(See Initialization-Finalization block, Simulation block).
+(See Expectation block, Data_Average block).
+(See Data_ingnore block).
+
+*** =PASS=
+#+begin_src f90
+CALL PASS(MODE)
+#+end_src
+must be coded exactly as shown.  May be used only in $PRED
+initialization-finalization blocks, and in $INFN records.  If present,
+MODE becomes a reserved variable with type INTEGER, and may not  be
+used outside the block(s).
+
+*** =SUPP=
+#+begin_src f90
+CALL SUPP(ie,ic)
+#+end_src
+must be coded as shown, with constant integer values 0 or 1 in place
+of ie and ic.  A value 1 for ie  (ic)  suppresses  output  from  the
+Estimation  (Covariance) step.  A value 0 does not suppress the output
+from the step.  May be used only in $PRED  initialization-finalization
+blocks, and in $INFN records.  The ie (ic) value remains in force
+until changed by a call to SUPP.
+
+*** =RANDOM=
+#+begin_src f90
+CALL RANDOM(n,R)
+#+end_src
+must be coded as shown, with a constant integer value 1-10 in  place
+of  n.  The value is the number of the random source.  R is a random
+number from this source.  May be used only in Simulation and
+Expectation  blocks.  If present, R becomes a reserved variable with
+type REAL, and may not be used outside the block(s).
+
+*** =SIMETA=
+#+begin_src f90
+CALL SIMETA(ETA)
+#+end_src
+must be coded exactly as shown.  May  only  be  used  in  Simulation
+blocks.   Note  that  NM-TRAN  itself provides the minimum necessary
+call to SIMETA.  This statement is used in abbreviated code only  to
+obtain  a different value of ETA, e.g., so that the eta distribution
+may be truncated:
+#+begin_src f90
+    DO WHILE (ETA(1).GT.5)
+       CALL SIMETA(ETA)
+    ENDDO
+#+end_src
+
+*** =SIMEPS=
+#+begin_src f90
+CALL SIMEPS(EPS)
+#+end_src
+Must be coded exactly as shown.  May  only  be  used  in  Simulation
+blocks.   Note  that  NM-TRAN provides the minimum necessary call to
+SIMEPS.  This statement is used in abbreviated code only to obtain a
+different  value of EPS, e.g., so that the distribution may be
+truncated (see SIMETA above).
+
+*** =RETURN=
+#+begin_src f90
+   RETURN
+#+end_src
+may  be  used in all special blocks.  RETURN statements must be used
+with caution because they by-pass certain normal  final  actions  of
+the routine.
+
+*** =PRED_IGNORE_DATA= block
+Another  kind  of special block is the pred_ignore_data block, which may be part of $PRED,$PK, or $INFN blocks.   It  uses  the  reserved variables  PRED_IGNORE_DATA_TEST  and  PRED_IGNORE_DATA.  By setting values of PRED_IGNORE_DATA=1 for certain  data  records,  it  causes these records to be dropped from the NONMEM data set.  Ordinary Fortran syntax is used in such blocks.
+   (See PRED_IGNORE_DATA block)
+   (See Guide Introduction_7 "Extension to $DATA IGNORE=st filtering")
+
+** Vectors
+The $ABBR FUNCTION and $ABBR  VECTOR  feature  allows  the  user  to
+declare the names of user-defined functions and  the names and sizes
+of user-defined argument vectors.  Restrictions such as  the  number
+of  user functions, the number of elements in a vector, and the num-
+ber of times a given function may appear  in  abbreviated  code  are
+more flexible and may be modified by the user.
+
+Reserved variable names VECTRA, VECTRB, VECTRC, etc. may be used for
+pre-defined  vectors.   Elements  can  be defined in any order.
+Vectors that are defined outside of $DES (or $AES) may not  be used in
+the  $DES (or $AES) code. Namely, a vector may not be an implicit
+basic PK parameter.
+
+** Functions
+User-defined function's names must be of form =FUNCx=, with =x=
+being =A=, =B=, ... etc. [fn:3] [fn:4] [fn:5]
+ #+begin_src f90
+   FUNCTION FUNCA(X,X1,X2)
+   DOUBLE PRECISION X,X1,X2,FUNCA
+   DIMENSION X(9),X1(9),X2(9,9)    ! The constant "9" must be used exactly as shown.
+   ...
+ #+end_src
+
+In abbreviated code, the function is referenced with a single
+argument, either a (scalar) expression  or a vector.  Certain reserved
+names such as VECTRA, VECTRB, etc.  may be used in the abbreviated
+code, but the name of the argument is  not  in the  code defining the
+function.  (See abbreviated code).  In the code defining the function,
+the function has three arguments.
+
+  - =X=:  input argument (can be a vector).
+  - =FUNCx=: function return.
+  - =X1=:  =X1(n)= is  the  first-partial  derivative  of  the  function  with
+      respect to the nth element of =X=, =X(n)=.
+      If  the  value  of =X(n)= is not value of a random variable, =X1(n)= need not be set.
+      If the argument X is a (scalar) expression, only X1(1) is needed.
+  - =X2=: =X2(n,m)= is the second-partial derivative  of  the  function  with
+      respect to the nth and mth elements of the argument.
+      If the value of either =X(n)= or =X(m)= will not be a value of a
+    random variable, =X2(n,m)= need not be set.  Nor need any value of
+    =X2= be set if a test of MSEC=1 is false (See Partial Derivative
+    indicators). If the argument is a (scalar) expression,  only
+    =X2(1,1)=  may  be needed.   If the argument is a vector and if
+    the value of =X2(n,m)= is needed, then the value of =X2(m,n)=  is
+    needed  as  well,  even though these two values will be identical.
+
+ The  Fortran  code  for  the functions should be placed in one or more
+ files.  Suppose there is one such file and its name  is funcfile.   It
+ should be listed on the $SUBROUTINES record.  It may contain more than
+ one FUNCTION.  E.g.,
+ #+begin_src php
+ $SUBROUTINES ... OTHER=funcfile
+ #+end_src
+
+[fn:3] With NONMEM VI 2.0, reserved function names are FUNCA  through
+FUNCC. reserved names for vectors are VECTRA through VECTRC.
+
+[fn:4] With NONMEM 7.3, reserved function names are FUNCA through FUNCI.
+
+[fn:5] With  NONMEM  7.4,  reserved  function  names are FUNCA through
+FUNCZ. Reserved names for vectors are VECTRA through VECTRZ. Extended
+reserved names are also recognized. These are FUNCxy and FUNCxyz,
+where each of x, y, z  stands  for  an  alphabetic character  A-Z,
+e.g.,  FUNCAB  or FUNCABC.  Similar extended reserved names for
+vectors are also recognized: e.g, VECTRAB or VECTRABC. If the
+abbreviated code uses one of these extended  reserved  function names,
+but the user does not supply the code via $SUBR OTHER, the NONMEM
+executable cannot be created, and there will be an  error  message
+from the Fortran compiler such as:
+ #+begin_src txt
+ Undefined Symbols
+ _funcaaa_
+ #+end_src
+
+If the abbreviated code uses one of these reserved function names, but the  user  does  not  supply the code via $SUBR OTHER, the NONMEM executable will be created, but there will be an  error  message  in  the
+ NONMEM report file such as:
+ #+begin_src txt
+ FUNCA WAS CALLED, BUT NO CODE WAS SUPPLIED.
+ #+end_src
+
+ (See Abbreviated function example).
+
+In NONMEM v7.4+, the  $ABBR  FUNCTION  allows the user to declare the
+name of the function, the name of the vector of input arguments (which
+is of no use to the  function), and the length of the vector of input
+arguments, which is passed to the function as argument NDIM.  Constant
+NVECX  in  SIZES gives the maximum value size of the vector of input
+arguments.
+
+#+begin_src php
+ $ABBR FUNCTION function_name(input_vector_name,dimension,usage)
+#+end_src
+
+ (See $ABBREVIATED).
+ (See VECTORS and ABBREVIATED FUNCTIONS)
+
+The function should be coded as follows:
+
+#+begin_src f90
+ FUNCTION function_name(X,X1,X2,NDIM)
+ USE SIZES, ONLY: DPSIZE,ISIZE
+ INTEGER(KIND=ISIZE) :: NDIM
+ REAL(KIND=DPSIZE), INTENT(IN)     :: X
+ REAL(KIND=DPSIZE), INTENT(IN OUT) :: X1,X2
+ REAL(KIND=DPSIZE):: function_name
+ DIMENSION X(NDIM),X1(NDIM),X2(NDIM,NDIM)
+#+end_src
+
+Function_name  must  be  exactly as specified via $ABBR FUNCTION.  The
+value coded as "dimension" is passed to the function  as  NDIM.   (The
+value coded as "usage" is optional and does not appear in code for the
+function.)
+
+The value of the function is to be stored  in  function_name.
+Otherwise, the function is coded exactly as described above, with X1
+and X2 as output arguments. The input_vector_name is never used in
+the  Fortran code for the function.
+
+If FUNCA, FUNCB, FUNCC, etc.  is defined without a subscript, it  is
+understood  to  be a simple variable, and then it may appear as such
+as a right-hand quantity.  If FUNCx appears for the first time as  a
+right-hand  quantity, it is understood to be the reserved name of an
+abbreviated function, and then it must include  a  single  argument,
+e.g.   FUNCA(VECTRA)) or FUNCA(THETA(1)).  Complete FORTRAN code for
+an abbreviated function is supplied by  the  user  (See  abbreviated
+function).
+
+
+** Pseudo assignment
+
+   Pseudo-assignment  statements  are optional and provide certain spe-
+   cial instructions.  If present, they must appear (in any  order)  at
+   the beginning of a record, before the rest of the essential abbrevi-
+   ated code comprising that record.  They may be enclosed in parenthe-
+   ses, but two or more pseudo-assignment statements enclosed by paren-
+   theses must be separated by a semicolon ";".  The following  pseudo-
+   statement may be used in all records except $MIX.
+
+   COMRES=-1  :  All  quantities  defined in abbreviated code are to be
+   stored locally; they are not to be stored  in  the  (global)  MODULE
+   NMPRD4.
+   (Variables  in  MODULE  NMPRD4 can be used for communication between
+   various user-routines, and can be displayed in tables  and  scatter-
+   plots.)
+
+   See  the  entries for specific records for information about pseudo-
+   assignment statements special to those records.
+
+** Reserved variables
+Reserved variable names include names of those variables  that  have
+   special meaning for the user, as well as names of variables that are
+   used internally by NM-TRAN.  Entries for $PRED, $PK,  $ERROR,  $DES,
+   $AES, $AESINITIAL, and $TOL describe the reserved variable names for
+   these abbreviated codes.
+
+A variable name that is reserved in an abbreviated code may  not  be
+   used as the name of a variable defined in this code, or in any other
+   abbreviated code unless the pseudo-assignment statement COMRES=-1 is
+   used (in some code).  If a reserved variable name is inappropriately
+   used, NM-TRAN will generate an error message.
+
+The following names are reserved in all abbreviated code:
+   #+begin_src f90
+     GETETA
+     SIMETA
+     SIMEPS
+     COMSAV
+     NWIND
+     ETEXT
+     IERPRD
+     IERPRDU
+     MSEC
+     MFIRST
+     NETEXT
+     ETA1, ETA2, ...ETA9
+     ETA10, ETA11, ...ETA99
+     Annnnn !! nnnnn is numeric 00000-99999, and nnnn is numeric 0000 -9999
+     ! Similarly
+     Bnnnnn,Cnnnnn,Dnnnnn,Ennnnn,Fnnnnn,Pnnnnn,Qnnnnn,MCnnnn,MEnnnn,MGnnnn,MTnnnn
+   #+end_src
+Names of modules and of variables in the modules are also reserved. [fn:6]
+Below  is  a list of blocks of abbreviated code and the modules and
+variables that may be used.  Second is a list of  modules,  the
+variables  in  the  modules,  and  the blocks of abbreviated code in
+which these variables may be used.
+
+#+begin_src f90
+  ! $AES
+  NMPRD_INT:  COMACT,COMSAV
+  NMPRD_INT:  NPROB,IPROB
+  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
+  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
+  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
+  PKERR_REAL: MTIME
+  PRMOD_INT:  ICALL,IDEFD,IDEFA
+  PRMOD_INT:  MTDIFF
+  PROCM_INT:  ISFINL
+  PROCM_INT:  MNOW,MPAST,MNEXT
+  PROCM_INT:  NVNT
+  PROCM_REAL: DOSREC
+  PROCM_REAL: DOSTIM
+  PROCM_REAL: EVTREC
+  PROCM_REAL: THETA
+  ROCM_INT:   MIXNUM,MIXEST
+  ROCM_INT:   NIREC,NDREC
+  ROCM_INT:   NREP,IREP
+  ROCM_REAL:  MIXP
+
+  ! $DES
+  NMPRD_INT:  COMACT,COMSAV
+  NMPRD_INT:  MSEC,MFIRST,IFIRSTEM
+  NMPRD_INT:  NPROB,IPROB
+  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
+  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
+  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
+  PKERR_REAL: MTIME
+  PRMOD_INT:  ICALL,IDEFD,IDEFA
+  PRMOD_INT:  MTDIFF
+  PROCM_INT:  ISFINL
+  PROCM_INT:  MNOW,MPAST,MNEXT
+  PROCM_INT:  NVNT
+  PROCM_REAL: DOSREC
+  PROCM_REAL: DOSTIM
+  PROCM_REAL: EVTREC
+  PROCM_REAL: THETA
+  ROCM_INT:   MIXNUM,MIXEST
+  ROCM_INT:   NIREC,NDREC
+  ROCM_INT:   NREP,IREP
+  ROCM_REAL:  MIXP
+
+  ! $ERROR
+  CMNM1_INT:  NIND_7
+  NMPRD_INT:  COMACT,COMSAV
+  NMPRD_INT:  MSEC,MFIRST,IFIRSTEM
+  NMPRD_INT:  NEWL2
+  NMPRD_INT:  NPROB,IPROB
+  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
+  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
+  NMPRD_INT:  MDVRES
+  NMPRD_INT:  NPDE_MODE
+  NMPRD_INT:  ETASXI
+  NMPRD_INT:  NOFIRSTDERCODE
+  NMPRD_REAL: CORRL2
+  NMPRD_REAL: ETA,EPS
+  NMPR_INT:   F_FLAG
+  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
+  NMPR_REAL:  CTLO
+  NMPR_REAL:  CTUP
+  NMPR_REAL:  YLO,YUP
+  NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR
+  PKERR_REAL: MTIME
+  PRMOD_INT:  MTDIFF
+  PROCM_INT:  MNOW,MPAST,MNEXT
+  PROCM_INT:  NEWIND
+  PROCM_REAL: A
+  ROCM_INT:   LIREC
+  ROCM_INT:   MIXNUM,MIXEST
+  ROCM_INT:   NINDR,INDR1,INDR2
+  ROCM_INT:   NIREC,NDREC
+  ROCM_INT:   NREP,IREP
+  ROCM_REAL:  CNTID
+  ROCM_REAL:  CDEN_,DEN_
+  ROCM_REAL:  IIDX
+  ROCM_REAL:  MIXP
+  ROCM_REAL:  OMEGA
+  ROCM_REAL:  PR_CT
+  ROCM_REAL:  PR_Y
+  ROCM_REAL:  TEMPLT
+
+  ! $INFN
+  CMNM1_INT:  NIND_7
+  NMPRD_INT:  NEWL2
+  NMPRD_INT:  NPROB,IPROB
+  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
+  NMPRD_INT:  NWIND
+  NMPRD_INT:  PRED_IGNORE_DATA,PRED_IGNORE_DATA_TEST
+  NMPRD_REAL: CORRL2
+  NMPRD_REAL: ETA,EPS
+  NMPRD_REAL: PASSRC
+  NMPR_INT:   F_FLAG
+  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
+  NMPR_INT:   SKIP_
+  NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR
+  PRMOD_INT:  I_SS,ISSMOD
+  ROCM_INT:   IERE,IERC
+  ROCM_INT:   LIREC
+  ROCM_INT:   MIXNUM,MIXEST
+  ROCM_INT:   NINDR,INDR1,INDR2
+  ROCM_INT:   NIREC,NDREC
+  ROCM_INT:   NREP,IREP
+  ROCM_REAL:  CDEN_,DEN_
+  ROCM_REAL:  CNTID
+  ROCM_REAL:  IIDX
+  ROCM_REAL:  MIXP
+  ROCM_REAL:  OBJECT
+  ROCM_REAL:  PR_CT
+  ROCM_REAL:  PR_Y
+  ROCM_REAL:  SETHET,SEOMEG,SESIGM,SETHETR
+  ROCM_REAL:  THETAF,OMEGAF,SIGMAF,THETAFR
+  ROCM_REAL:  PRED_,RES_,WRES_,NPRED_,NRES_,NWRES_
+  ROCM_REAL:  CPRED_,CRES_,CWRES_,PREDI_,RESI_,WRESI_,
+  ROCM_REAL:  CPREDI_,CRESI_,CWRESI_,EPRED_,ERES_,EWRES_
+  ROCM_REAL:  NPDE_,ECWRES_
+
+  ! $MIX
+  NMPRD_INT:  NPROB,IPROB
+  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
+  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
+  ROCM_INT:   NINDR,INDR1,INDR2
+  ROCM_INT:   NIREC,NDREC
+  ROCM_INT:   NREP,IREP
+  ROCM_REAL:  TEMPLT
+  ROCM_REAL:  THETA,DATA
+
+  ! $PK
+  CMNM1_INT:  NIND_7
+  NMPRD_INT:  COMACT,COMSAV
+  NMPRD_INT:  MSEC,MFIRST,IFIRSTEM
+  NMPRD_INT:  NPROB,IPROB
+  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
+  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
+  NMPRD_INT:  MDVRES
+  NMPRD_INT:  NPDE_MODE
+  NMPRD_INT:  ETASXI
+  NMPRD_INT:  NOFIRSTDERCODE
+  NMPRD_REAL: CORRL2
+  NMPRD_REAL: ETA,EPS
+  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
+  NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR
+  PKERR_REAL: MTIME
+  PRMOD_INT:  I_SS,ISSMOD
+  PRMOD_INT:  MTDIFF
+  PRMOD_REAL: A_0
+  PROCM_INT:  A_0FLG
+  PROCM_INT:  MNOW,MPAST,MNEXT
+  PROCM_INT:  NEWIND
+  PROCM_REAL: A
+  PROCM_REAL: DOSREC
+  PROCM_REAL: DOSTIM
+  PROCM_REAL: TSTATE
+  ROCM_INT:   LIREC
+  ROCM_INT:   MIXNUM,MIXEST
+  ROCM_INT:   NINDR,INDR1,INDR2
+  ROCM_INT:   NIREC,NDREC
+  ROCM_INT:   NREP,IREP
+  ROCM_REAL:  CNTID
+  ROCM_REAL:  CDEN_,DEN_
+  ROCM_REAL:  IIDX
+  ROCM_REAL:  MIXP
+  ROCM_REAL:  OMEGA
+  ROCM_REAL:  PR_CT
+  ROCM_REAL:  PR_Y
+
+  ! $PRED
+  CMNM1_INT:  NIND_7
+  NMPRD_INT:  COMACT,COMSAV
+  NMPRD_INT:  I_REC
+  NMPRD_INT:  MSEC,MFIRST,IFIRSTEM
+  NMPRD_INT:  NEWL2
+  NMPRD_INT:  NPROB,IPROB
+  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
+  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
+  NMPRD_INT:  MDVRES
+  NMPRD_INT:  NPDE_MODE
+  NMPRD_INT:  ETASXI
+  NMPRD_INT:  NOFIRSTDERCODE
+  NMPRD_INT:  PRED_IGNORE_DATA,PRED_IGNORE_DATA_TEST
+  NMPRD_REAL: CORRL2
+  NMPRD_REAL: ETA,EPS
+  NMPR_INT:   F_FLAG
+  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
+  NMPR_INT:   SKIP_
+  NMPR_REAL:  CTLO
+  NMPR_REAL:  CTUP
+  NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR
+  NMPR_REAL:  YLO,YUP
+  ROCM_INT:   IERE,IERC
+  ROCM_INT:   LIREC
+  ROCM_INT:   MIXNUM,MIXEST
+  ROCM_INT:   NINDR,INDR1,INDR2
+  ROCM_INT:   NIREC,NDREC
+  ROCM_INT:   NREP,IREP
+  ROCM_REAL:  CNTID
+  ROCM_REAL:  CDEN_,DEN_
+  ROCM_REAL:  IIDX
+  ROCM_REAL:  MIXP
+  ROCM_REAL:  OBJECT
+  ROCM_REAL:  OMEGA
+  ROCM_REAL:  PR_CT
+  ROCM_REAL:  PR_Y
+  ROCM_REAL:  SETHET,SEOMEG,SESIGM,SETHETR
+  ROCM_REAL:  TEMPLT
+  ROCM_REAL:  THETAF,OMEGAF,SIGMAF,THETAFR
+  ROCM_REAL:  PRED_,RES_,WRES_,NPRED_,NRES_,NWRES_
+  ROCM_REAL:  CPRED_,CRES_,CWRES_,PREDI_,RESI_,WRESI_,
+  ROCM_REAL:  CPREDI_,CRESI_,CWRESI_,EPRED_,ERES_,EWRES_
+  ROCM_REAL:  NPDE_,ECWRES_
+#+end_src
+
+Another view of the above list is through the Fortran modules
+
+#+begin_src f90
+!MODULES:   !VARIABLES                                 ! NONMEM CONTROL RECORD BLOCKS
+CMNM1_INT:  NIND_7                                     ! $ERROR $PK $PRED $INFN
+NMPRD_INT:  COMACT,COMSAV                              ! $DES $AES $ERROR $PK $PRED
+NMPRD_INT:  I_REC                                      ! $PRED
+NMPRD_INT:  MSEC,MFIRST,IFIRSTEM                       ! $DES $ERROR $PK $PRED
+NMPRD_INT:  NEWL2                                      ! $ERROR $PRED $INFN
+NMPRD_INT:  NPROB,IPROB                                ! $DES $AES $ERROR $MIX $PK $PRED $INFN
+NMPRD_INT:  NTHES_,NETAS_,NEPSS_                       ! $DES $AES $ERROR $MIX $PK $PRED
+NMPRD_INT:  NWIND                                      ! $INFN
+NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM          ! $DES $AES $ERROR $MIX $PK $PRED $INFN
+NMPRD_REAL: CORRL2                                     ! $ERROR $PK $PRED $INFN
+NMPRD_REAL: ETA,EPS                                    ! $ERROR $PK $PRED $INFN
+NMPRD_REAL: PASSRC                                     ! $INFN
+NMPR_INT:   F_FLAG                                     ! $ERROR $PRED $INFN
+NMPR_INT:   RPTI,RPTO,RPTON,PRDFL                      ! $DES $AES $ERROR $PK $PRED $INFN
+NMPR_INT:   SKIP_                                      ! $PRED $INFN
+NMPR_REAL:  CTLO                                       ! $ERROR $PRED $ERROR $PRED
+NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR               ! $PK $PRED $INFN
+NMPR_REAL:  YLO,YUP                                    ! $ERROR $PRED
+NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR               ! $ERROR
+PKERR_REAL: MTIME                                      ! $DES $AES $ERROR $PK
+PRMOD_INT:  ICALL,IDEFD,IDEFA                          ! $DES $AES
+PRMOD_INT:  I_SS,ISSMOD                                ! $PK $INFN
+PRMOD_INT:  MTDIFF                                     ! $DES $AES $ERROR $PK
+PRMOD_REAL: A_0                                        ! $PK
+PROCM_INT:  A_0FLG                                     ! $PK
+PROCM_INT:  ISFINL                                     ! $DES $AES
+PROCM_INT:  MNOW,MPAST,MNEXT                           ! $DES $AES $ERROR $PK
+PROCM_INT:  NEWIND                                     ! $ERROR $PK
+PROCM_INT:  NVNT                                       ! $DES $AES
+PROCM_REAL: A                                          ! $ERROR $PK
+PROCM_REAL: DOSREC                                     ! $DES $AES $PK
+PROCM_REAL: DOSTIM                                     ! $DES $AES $PK
+PROCM_REAL: EVTREC                                     ! $DES $AES
+PROCM_REAL: THETA                                      ! $DES $AES
+PROCM_REAL: TSTATE                                     ! $PK
+ROCM_INT:   IERE,IERC                                  ! $PRED $INFN
+ROCM_INT:   LIREC                                      ! $ERROR $PK $PRED $INFN
+ROCM_INT:   MIXNUM,MIXEST                              ! $DES $AES $ERROR $PK $PRED $INFN
+ROCM_INT:   NINDR,INDR1,INDR2                          ! $ERROR $MIX $PK $PRED $INFN
+ROCM_INT:   NIREC,NDREC                                ! $DES $AES $ERROR $MIX $PK $PRED $INFN
+ROCM_INT:   NREP,IREP                                  ! $DES $AES $ERROR $MIX $PK $PRED $INFN
+ROCM_REAL:  CDEN_,DEN_                                 ! $ERROR $PK $PRED $INFN
+ROCM_REAL:  CNTID                                      ! $ERROR $PK $PRED $INFN
+ROCM_REAL:  CPREDI_,CRESI_,CWRESI_,EPRED_,ERES_,EWRES_ ! $PRED $INFN
+ROCM_REAL:  CPRED_,CRES_,CWRES_,PREDI_,RESI_,WRESI_    ! $PRED $INFN
+ROCM_REAL:  IIDX                                       ! $ERROR $PK $PRED $INFN
+ROCM_REAL:  MIXP                                       ! $DES $AES $ERROR $PK $PRED $INFN
+ROCM_REAL:  NPDE_,ECWRES_                              ! $PRED $INFN
+ROCM_REAL:  OBJECT                                     ! $PRED $INFN
+ROCM_REAL:  OMEGA                                      ! $ERROR $PK $PRED
+ROCM_REAL:  PRED_,RES_,WRES_,NPRED_,NRES_,NWRES_       ! $PRED $INFN
+ROCM_REAL:  PR_CT                                      ! $ERROR $PK $PRED $INFN
+ROCM_REAL:  PR_Y                                       ! $ERROR $PK $PRED $INFN
+ROCM_REAL:  SETHET,SEOMEG,SESIGM,SETHETR               ! $PRED $INFN
+ROCM_REAL:  TEMPLT                                     ! $ERROR $MIX $PRED
+ROCM_REAL:  THETA,DATA                                 ! $MIX $PRED $INFN
+#+end_src
+
+[fn:6] With NONMEM 7.2 and higher, either upper or lower case may be
+used. Variables in modules whose names start ROCM or PROCM may be used
+only on the right. Variables  in  modules  whose  names start NMPR or
+PRDPK may always be used on the right and may sometimes be used on the
+left. Names of modules are reserved and may not be  used  in  any
+block  of abbreviated code.
+
+** Subscripts
+Subscripts may be used with user-defined variables that are declared
+   to  be  arrays using the $ABBR DECLARE record, and also with certain
+   reserved variables:
+
+#+begin_src f90
+  THETA,THETAFR,SETHET,THSIMP,SETHETR,THSIMPR
+  OMEGA,OMEGAF,SEOMEG,OMSIMP
+  SIGMA,SIGMAF,SESIGM,SGSIMP
+  CNTID,IIDX
+  CDEN_
+  A, A_0                       ! when used in a WRITE or PRINT statement
+  ETA, EPS, ERR                ! when used in a WRITE OR PRINT statement
+#+end_src
+
+Where a subscript is permitted or necessary, it may  be  an  integer
+   expression.   An  integer  expression  is  an  integer  constant,  a
+   declared integer variable that has appeared on the left  (i.e.,  has
+   been  given  a  value),  a  constant defined in SIZES, an expression
+   involving integer constants and  integer  variables  and  arithmetic
+   operators +, -, *, /, **.  It may also be a character string that is
+   replaced by an integer expression using the $ABBR  REPLACE  feature.
+   The  number of subscripts must be equal to the number of dimensions.
+   If there are two subscripts, either or  both  may  be  constants  or
+   expressions.   If  a  subscripted  variable  may be used on the left
+   side, then the subscript may also be an integer expression.  E.g.,
+
+#+begin_src php
+   $ABBR DECLARE INTEGER IND
+    ...
+   $PK
+    IND=1
+    X=THETA(IND+1)
+#+end_src
+
+   With reserved random variables such as
+   ETA(n) EPS(n) ERR(n) A(n) A_0(n)
+   integer expressions may be used only if they are listed in in  WRITE
+   or  PRINT statements.  Otherwise n must be an integer constant, or a
+   character string that is replaced by an integer constant  using  the
+   $ABBR REPLACE feature.
+
+** NONMEM reserved variables
+   There  are many variables that are generally internal to NONMEM, and
+   often are not needed by users except  occasionally,  which  are  not
+   explicitly  recognized  by NMTRAN, and so cannot be used in abbrevi-
+   ated code, but must be used with verbatim code ("  at  beginning  of
+   line).   A  convenient means of accessing such variables, as well as
+   letting NMTRAN allow you to use the variables in abbreviated code is
+   to  place the MODULE definitions in an include file that begins with
+   the name NONMEM_RESERVED (case insensitive).  Insert include  state-
+   ments for such files at the beginning of the block(s) of abbreviated
+   code in which you want to use them.  The user may use any  of  these
+   variables  without  using  verbatim  code.   NMTRAN "reads" the non-
+   mem_reserved file, and remembers the variables declared in there  as
+   acceptable to use.
+
+   A  list  of  useful  variables  and  their  meanings  are  listed in
+    ..\guides\useful_variables.pdf.  Be careful in their  use,  as  you
+   have  the  ability to change the values of these reserved variables,
+   and this could crash the system if you change the wrong thing.
+
+   NONMEM_RESERVED_GENERAL in the ..\util directory has a  few  of  the
+   quite useful variables listed.  It needs to be copied to the present
+   run directory so that NM-TRAN has access to it.  Note that there may
+   be  user-defined  variable names in the control stream that inadver-
+   tently have the same names as variables in  NONMEM_RESERVED_GENERAL,
+   which  may  cause compiler errors.  If so, make a smaller version of
+   NONMEM_RESERVED_GENERAL  with  a  name  also  starting  with   "NON-
+   MEM_RESERVED"  that contains only those reserved variables of inter-
+   est.
+
+   As an example,
+
+   NONMEM_RESERVED_GENERAL contains
+
+   " USE NMBAYES_INT, ONLY: ITER_REPORT,BAYES_EXTRA_REQUEST,BAYES_EXTRA
+
+   These variables can be used as shown in example 8:
+
+   $PK
+   include nonmem_reserved_general
+   BAYES_EXTRA_REQUEST=1
+    ....
+   IF(BAYES_EXTRA==1 .AND. ITER_REPORT>=0 .AND. TIME==0.0) THEN
+   WRITE(50,*) ITER_REPORT,ID,CL,V1,Q,V2
+   ENDIF
+
+   ITER_REPORT contains the present iteration number as reported to the
+   console  or NONMEM report file.  BAYES_EXTRA and BAYES_EXTRA_REQUEST
+   are described in example8.ctl.
+
+** RESERVED AND OTHER FUNCTIONS
+
+   The nonmem_reserved_general  file  contains  function  declarations,
+   such  as  TFI and TFD, which are convenient functions to easily con-
+   vert an integer to text ("text from integer" TFI) or  double  preci-
+   sion value to text ("text from double" TFD).
+
+   If  you wish to define your own function for use in abbreviated code
+   and have the information about its proper use of arguments  be  con-
+   veyed  upon  its  execution, so the compiler may detect errors, then
+   one method is to package the definition of the  function  in  a  USE
+   module,  such  as is done in the example User-defined Reserved Func-
+   tion.
+
+ REFERENCES: Guide IV, section IV
+ REFERENCES: Guide VI, section III.K
+ REFERENCES: Guide Introduction_7

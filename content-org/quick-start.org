@@ -1,0 +1,46 @@
+#+hugo_base_dir: ../
+#+hugo_section: ./
+
+* Quick start
+
+:EXPORT_FILE_NAME: quick-start
+
+
+** A simple PK model
+use sh for slightly better highlighting
+Here is a simple one-compartment model.
+
+#+begin_src php
+$PROB RUN# 402 POPULATION DATA
+$INPUT C ID TIME DV AMT
+$DATA  data.csv IGNORE=C
+$SUBROUTINES ADVAN2 TRANS1
+
+$PK
+  TVKA=THETA(1)
+  KA=TVKA*EXP(ETA(1))
+
+  TVK=THETA(2)
+  K=TVK*EXP(ETA(2))
+
+$ERROR
+  Y=F*(1+EPS(1))
+
+$THETA
+(0,0.5) ;[KA]
+(0,0.1) ;[K]
+
+$OMEGA
+    0.02 ; [P]
+    0.02 ; [P]
+
+$SIGMA
+    0.02 ; [P]
+
+$ESTIMATION METHOD=1 MAXEVAL=9999 INTER
+$COV
+$TABLE ID TIME DV IPRE=CIPRED AMT KA K ETA1 ETA2
+          CWRES NPD NPDE
+          NOPRINT FILE=output.tab
+#+end_src
+** Reference

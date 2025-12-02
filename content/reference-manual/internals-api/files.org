@@ -1,0 +1,476 @@
+#+title: Files
+
+* Files
+** NM-TRAN output files
+NM-TRAN  produces  several  output  files,  several of which are input files to NONMEM itself.
+
+In the first column, the files are listed by the  default  file  names supplied  by  constants  in NM-TRAN's ABLOCK routine.  (Some installations may use different names for these files.)
+
+The second column lists the inputs to NM-TRAN that contribute to these files.
+
+The third column indicates how the files are used.
+
+Note that file FSIZES is a convenient reference for users to view, but is not used.  SUBROUTINE FSIZESR in FSUBS is  what  is  actually  used during the NONMEM run.
+
+| File name | Relevant portion of NM-TRAN inputs                         | How file is used              |
+|---------+-------------------------------------------+-------------------------------|
+| FCON    | All                                       | NONMEM (control stream)       |
+|---------+-------------------------------------------+-------------------------------|
+| FDATA   | Data file, $DATA, $INPUT                  | NONMEM (data file)            |
+|---------+-------------------------------------------+-------------------------------|
+| FSTREAM | Filenames from $DATA,$MSFI, $MSFO, $TABLE | NONMEM (file control stream)  |
+|---------+-------------------------------------------+-------------------------------|
+| FSUBS   | Abbreviated code                          | Generated FORTRAN subroutines |
+|---------+-------------------------------------------+-------------------------------|
+| FREPORT | $SUBROUTINES                              | Input  to  whatever generates the commands that create  the NONMEM  executable (e.g., the NMLINK routine)|
+|---------+-------------------------------------------+-------------------------------|
+| FORIG   | Abbreviated code, $ABBR                   | When $ABBR REPLACE  is  used,this file contains the original abbreviated code.         |
+|---------+-------------------------------------------+-------------------------------|
+| FREPL   | Abbreviated code, $ABBR                   | When $ABBR REPLACE  is  used, this  file contains the postreplacement abbreviated code.|
+|---------+-------------------------------------------+-------------------------------|
+| FWORK   | Data file                                 | NM-TRAN (work file)           |
+|---------+-------------------------------------------+-------------------------------|
+| FWARN   | All                                       | Warning   and   informational messages.                     |
+|---------+-------------------------------------------+-------------------------------|
+| FSIZES  | Abbreviated code, $THETA, $OMEGA,  $SIGMA,$SIZES, SIZES.f90                        | Dynamic  array sizes for NONMEM  |
+|---------+-------------------------------------------+-------------------------------|
+| prsizes | Abbreviated code, $THETA,  $OMEGA, $SIGMA, $SIZES, SIZES.f90                       | Static array sizes for PREDPP |
++-------------------------------------------------------------------+
+
+
+ With NONMEM 7, files FSUBS2 and FSUBS_MU are used by  NMTRAN  as  work
+ files during the creation of FSUBS.
+
+ REFERENCES: Guide III, section V.6.0
+ REFERENCES: Guide Introduction_7
+
+
+
+** NONMEM CONTROL STREAM
+NONMEM control records contain the instructions to NONMEM. The set of
+control records is called the NONMEM control stream.  These  are  different from NM-TRAN control records.
+
+After NM-TRAN  run it creates the NONMEM control stream in a file
+named FCON.  User can also opt to create FCON file himself.
+
+Each  NONMEM  control  record  begins  with a 3 or 4-character preface
+(record label) which identifies the record.  They are listed  here  in
+the same order in which they must appear in the NONMEM control stream.
+For details of the contents of the records, see NONMEM Users  Guide  V
+"Introductory Guide", Appendix 4 - NONMEM Control Records (FCON).
+
+ | Record type   | Prefix | Corresponding NM-TRAN record |
+ |---------------+--------+------------------------------|
+ | FILE          | FILE   | none                         |
+ | SUPER PROBLEM | SUPR   | $SUPER                       |
+ | PROBLEM       | PROB   | $PROBLEM                     |
+ | DEFAULT       | DFLT   | $DEFAULT                     |
+
+ Data set specification records
+ | Record type   | Prefix | Corresponding NM-TRAN record |
+ |---------------+--------+------------------------------|
+ | DATA          | DATA   | $DATA                        |
+ | ITEM          | ITEM   | $INPUT                       |
+ | INDEX         | INDX   | $INDEX                       |
+ | LABEL         | LABL   | $INPUT,$TABLE,$SCATTER       |
+ | EXTRA EVID    | XVID   | $INPUT                       |
+ | FORMAT        | FORM   | $DATA                        |
+
+ Model specification records
+ | Record type | Prefix | Corresponding NM-TRAN record |
+ |-------------+--------+------------------------------|
+ | FIND        | FIND   | $MSFI                        |
+ | VERSION     | MSFV   | $MSFI                        |
+ | STRUCTURE   | STRC   | $THETA, $OMEGA, $SIGMA       |
+ | LEVEL       | OLEV   | $LEVEL                       |
+
+ Initial estimate records
+| Record type      | Prefix | Corresponding NM-TRAN record |
+|------------------+--------+------------------------------|
+| THETA CONSTRAINT | THCN   | $THETA                       |
+| THETA            | THTA   | $THETA                       |
+| LOWER BOUND      | LOWR   | $THETA                       |
+| UPPER BOUND      | UPPR   | $THETA                       |
+| DIAGONAL         | DIAG   | $OMEGA, $SIGMA               |
+| BLOCK SET        | BLST   | $OMEGA, $SIGMA               |
+| ETA VALUES       | ETA    | $ETAS                        |
+| PHI VALUES       | PHI    | $PHIS                        |
+| CHAIN            | CHN    | $CHAIN                       |
+| CHAIN FILE       | CFIL   | $CHAIN                       |
+| CHAIN DELIMITER  | CDLM   | $CHAIN                       |
+| CHAIN Order      | ORDR   | $CHAIN                       |
+| CHAIN PARAFILE   | CHFL   | $CHAIN (not used)            |
+| OMEGA VALUES     | ANNL   | $ANNEAL                      |
+
+ Task specification records
+| Record type            | Prefix | Corresponding NM-TRAN record |
+|------------------------+--------+------------------------------|
+| SIMULATION             | SIML   | $SIMULATION                  |
+| RANDOM SOURCE          | SORC   | $SIMULATION                  |
+| SIMULATION PARAFILE    | SFIL   | $SIMULATION                  |
+| ESTIMATION             | ESTM   | $ESTIMATION                  |
+| ESTIMATION             | BEST   | $ESTIMATION                  |
+| ESTIMATION PARAFILE    | BFIL   | $ESTIMATION                  |
+| ESTIMATION PARAFILE    | PFIL   | $ESTIMATION                  |
+| ESTIMATION FPARAFILE   | FFIL   | $ESTIMATION                  |
+| ZERO                   | ZERO   | $ESTIMATION                  |
+| OMIT                   | OMIT   | $OMIT                        |
+| ESTIMATION GRID        | GRID   | $ESTIMATION                  |
+| NONPARAMETRIC          | NONP   | $NONPARAMETRIC               |
+| COVARIANCE             | COVR   | $COVARIANCE                  |
+| COVARIANCE             | COVT   | $COVARIANCE                  |
+| COVARIANCE PARAFILE    | CPAR   | $COVARIANCE                  |
+| COVARIANCE SIRPARAFILE | SPAR   | $COVARIANCE                  |
+| TABLE                  | TABL   | $TABLE                       |
+| TABLE PARAFILE         | PPAR   | $TABLE                       |
+| SCATTERPLOT            | SCAT   | $SCATTERPLOT                 |
+
+ Output specification records
+| Record type                  | Prefix | Corresponding NM-TRAN record |
+|------------------------------+--------+------------------------------|
+| ESTIMATION DELIMITER         | BDLM   | $ESTIMATION                  |
+| ESTIMATION MUM               | BMUM   | $ESTIMATION                  |
+| ESTIMATION GRD               | BGRD   | $ESTIMATION                  |
+| ESTIMATION ORDER             | ORDR   | $ESTIMATION                  |
+| LFORMAT                      | FRML   | $TABLE                       |
+| RFORMAT                      | FRMR   | $TABLE                       |
+| ADDITIONAL DIAGNOSTIC LABELS | LBW1   | $TABLE,$SCATTER              |
+| SYMBOLIC LABELS              | LTHT   | $ABBR REPLACE                |
+| SYMBOLIC LABELS              | LETA   | $ABBR REPLACE                |
+| SYMBOLIC LABELS              | LEPS   | $ABBR REPLACE                |
+
+
+ REFERENCES: Guide I, section B.2
+
+ REFERENCES: Guide V, Appendix 4
+
+** NONMEM File Control Records
+ The NONMEM File Control Stream provides the names of optional files to
+ be opened by NONMEM.  It is read by NONMEM from a file whose  name  is
+ given on the FILE record of the NONMEM Control Stream.
+
+ When  NM-TRAN  is used, NM-TRAN creates the NONMEM File Control Stream
+ in a file named FSTREAM.
+
+ Each NONMEM File Control Record  begins  with  a  4-character  preface
+ (record label) which identifies the record.
+
+ | Record type                       |Prefix   |Corresponding NM-TRAN record |
+ |-----------------------------------|---------|-----------------------------|
+ | DATA                              |DATA     |$DATA ...                    |
+ | MODEL SPECIFICATION FILE INPUT    |MSFI     |$MSFI ...                    |
+ | MODEL SPECIFICATION FILE OUTPUT   |MSFO     |$ESTIMATION MSFO=...         |
+ | TABLE                             |TABL     |$TABLE FILE=...              |
+ | Problem delimiter                 |* * * *  |none                         |
+
+ Multiple  TABLE  records  may  be present for a given problem, one for
+ each table to be written to a new table file.
+
+ REFERENCES: Guide I, section B.3
+
+** NONMEM output files
+ NONMEM produces several output files.
+
+ First  is  the NONMEM report file.  The name of this file is
+ specified by the user on the nmfe command.  Help entries  describe
+ the  various sections of the report.
+
+ (See DATA_SET,DATA_RECORDS,DATA_ITEMS).
+
+ (See INITIAL_ESTIMATE,MONITORING_OF_SEARCH).
+
+ (See MINIMUM_VALUE_OF_OBJ._FUNCTION,FINAL_PARAMETER_ESTIMATE).
+
+ (See ETABAR,STANDARD_ERROR_OF_ESTIMATE).
+
+ (See SHRINKAGE).
+
+ (See CORRELATION_MATRIX_OF_ESTIMATE,COVARIANCE_MATRIX_OF_ESTIMATE).
+
+ With  NONMEM  7,  tag labels are present in the report file to allow
+ a third-party program to find the  appropriate  positions  in  the
+ file without  having  to  search  for  specific words in the text.
+ (a more efficient way of extracting numerical results  from  the
+ analysis  is from  the  raw  and  additional output files (see
+ below)).
+
+ |Tag labels   | Comment|
+ |-------------+--------|
+ |#PARA (NM72) | This tag identifies the parallelization file and number of  nodes used, if parallel estimation is performed.|
+ |#TBLN (NM72) | This  tag  specifies that following it, on the same line, will be found an integer that refers to the  number  of  this  estimation method.  This number is also the table number listed in the title to tables in the various output files  (raw  output  file,  .cov, .cor, etc).  The table number is incremented for each $EST statement, across all problems in the control stream file.|
+ |#METH        | This tag specifies that following it, on the same line,  will  be found  a  text that describes the method, for example First Order Conditional Estimation Method with Interaction.|
+ |#TERM        | This tag  indicates  that  beginning  on  the  next  lines,  text describes the termination status of the analysis.|
+ |#TERE        | This  tag  indicates the end of the lines describing the termina- tion status of the analysis.  Thus, a software program may trans- fer all lines between #TERM: and #TERE: to a summary file.|
+ |#OBJT        | Indicates  that  following  it,  on  the  same  line, is the text describing the objective  function,  such  as  Minimal  Value  Of Objective Function.|
+ |#OBJV        | Indicates  that  following it, on the same line, is the objective function value.|
+ |#OBJS        | Indicates that following it, on the same line, is  the  objective function standard deviation (MCMC Bayesian analysis only).|
+ |#OBJN (NM73) | Indicates that following it, on the same line, is the nonparamet- ric objective function value.|
+ |#CPUT (NM73) | Total CPU time.  It is an accurate representation of the computer usage, whether single or parallel process.  The same problem when run singly or in parallel will report a similar cpu  time.   This is  in  contrast with elapsed time, which is improved with parallelization.|
+
+ With NONMEM 7, raw and additional output files are generated  to  capture parts of the report file.
+
+ The raw output file is called root.ext, or named by the FILE option of the $ESTIMATION record. (See raw_output_file).
+
+ The additional output files capture portions of the report file. (See
+ additional_output_file). They are listed in the same order as in
+ additional_output_fil.
+
+| root.phi                          |
+| root.iph (NM75)                   |
+| root.phm (NM72)                   |
+| root.shk (NM72)                   |
+| root.shm (NM73)                   |
+| root.grd (NM72)                   |
+| root.xml (NM72)                   |
+| root.cov                          |
+| root.clt (NM74)                   |
+| root.cor                          |
+| root.coi                          |
+| root.cnv (NM72)                   |
+| root.smt (NM72)                   |
+| root.rmt (NM72)                   |
+| root.imp (NM73)                   |
+| root.npd (NM73)                   |
+| root.npe (NM73)                   |
+| root.npi (NM73)                   |
+| root.npl (NM74)                   |
+| root.fgh (NM73)                   |
+| root.agh (NM73)                   |
+| root.vpd (NM74)                   |
+| root.ets (NM74)                   |
+| root.bfm (NM75)                   |
+| root.cpu (NM73)                   |
+| msfroot_ETAS                      |
+| msfroot_RMAT, msfroot_SMAT (NM73) |
+
+
+ REFERENCES: Guide Introduction_7
+
+** Raw output file
+ With  NONMEM 7, a NONMEM run produces several additional output
+ files. These provide a more efficient way  of  way  of  extracting
+ numerical results  from  the  analysis  than  by  obtaining them from
+ the NONMEM report file.
+
+ (See additional_output_file).
+
+ Names of the files start with "root", where root is the root name
+ (not including  extension)  of the NM-TRAN control stream file given
+ at the nmfe7 command line, or root="nmbayes" if the control stream
+ file  name is  not passed as an argument to the NONMEM executable.
+ E.g., in this example the root is myexample.
+  #+begin_src sh
+ nmfe7 myexample.ctl myexample.res
+ #+end_src
+ The raw output file ("root.ext") will be named myexample.ext
+
+ A different name for this file may be specified using  the
+ FILE=filename  option of the $ESTIMATION record.  This filename is
+ used for all subsequent problems, until a new FILE=filename option is
+ coded.   The raw output file is only generated if the $ESTIMATION
+ record is present and accumulates information from each Estimation
+ step.
+
+ The first two lines of each file is the same.  First is a header  line that begins with the word TABLE, such as:
+
+ #+begin_src txt
+ TABLE NO.     n:
+ #+end_src
+
+ These  tables  are  not  related  to  the  ones produced by the
+ $TABLE record.  The value of n is incremented each time the
+ Estimation  Step is  implemented,  i.e.,  once per $ESTIM record,
+ when MAXEVAL is not 0 and $EST is not omitted.  The $EST records may
+ be in the same problem, or  in  subsequent  problems.  If $COV is
+ present in a problem without $EST (e.g., when $MSFI is used), then n
+ is also incremented.
+
+ Next on the header line is the analysis text (same  as  given  on
+ the #METH: line in the report file), e.g., "First Order".
+
+ In  the  raw  output  file,  the analysis text is followed by the goal function text (same as given on the #OBJT: line in the  report  file), e.g.,
+ #+begin_src txt
+ Goal Function=MINIMUM VALUE OF OBJECTIVE FUNCTION
+ #+end_src
+ At the end of the header line is:
+ #+begin_src txt
+ Problem=1 Subproblem=0 Superproblem1=0 Iteration1=0
+           Superproblem2=0 Iteration2=0
+ #+end_src
+
+ The  values  of Problem, Subproblem, Superproblem1, Iteration1,
+Superproblem2, Iteration2 are the same values as would be found in the
+following variables in modules during the run:
+#+begin_src txt
+IPROB IREP S1NUM S1IT  S2NUM S2IT
+#+end_src
+ (See Problem_Iteration_Counters).
+
+ The second line of the raw output file contains the column headers for the table, all on one line.
+
+ Options NOTITLE and NOLABEL and FORMAT of the $ESTIMATION  record  can be  used  to  supress the first and/or second lines, and to modify the format of the values in the table.  They apply to raw  and  additional output  files,  but only for the current Estimation Step.  The options must be re-specified with each $EST record.
+
+ Values of the Parameters and of the  objective function are printed to the raw output file every PRINT iterations.  The default order is: ITERATION  THETA,  SIGMA,  OMEGA, OBJ (Objective function).  Values of Sigma and Omega  are in the original parameterization, as in the  file INTER.   The  option  ORDER  of  the $ESTIMATION record may be used to change the order of THETA, SIGMA, and OMEGA.
+ (See order_option).
+
+ The iteration number, which is the first value in every line, is
+ typically  positive,  but  also may be negative under the following
+ conditions:
+
+      - The burn-in iterations of the MCMC Bayesian analysis are given
+        negative values, starting at -NBURN, the number of burn-in
+        iterations requested by the user.   These  are  followed  by
+        positive iterations of the stationary phase.
+
+      - The stochastic iterations of the SAEM analysis are given
+        negative values.  These are followed by positive  iterations
+        of  the accumulation phase.
+
+      - Iteration  -1000000000  (negative one billion) identifies the
+        line that contains the final result (thetas, omegas, and
+        sigmas, and  objective  function)  of the particular analysis.
+        These are the value in the NONMEM  output  file  that  are
+        labelled  FINAL PARAMETER ESTIMATE.  The order is theta,
+        sigma, omega.
+
+      - Iteration  -1000000001  identifies the line that contains the
+        standard errors of the final population  parameters.   These
+        are the  value  in  the NONMEM output file that are labelled
+        STANDARD ERROR OF ESTIMATE.  The order is theta, sigma, omega.
+        This  line is  present  if  the  Covariance  Step  is
+        successful,  or  with METHOD=BAYES.
+
+      - Iteration -1000000002 identifies the line  that  contains  the
+        eigenvalues  of  the  correlation  matrix of the variances of
+        the final parameters.
+
+      - Iteration -1000000003 identifies the line  that  contains
+        thet condition  number  , lowest, highest, Eigenvalues of the
+        correlation matrix of the variances of the final parameters.
+
+      - Iteration -1000000004 identifies the line  that  contains  the
+        OMEGA and SIGMA elements in standard deviation/correlation
+        format.
+
+      - Iteration  -1000000005  identifies the line that contains the
+        standard errors to the OMEGA and SIGMA elements in standard
+        deviation/correlation format.
+
+      - Iteration -1000000006 identifies the line that indicates 1 if parameter was fixed in estimation, 0 otherwise.
+
+      - Iteration -1000000007 lists termination status  (first  item) followed by termination codes.
+        In nm73, termination status catalogs the error status. For
+        traditional analyses, an error number is listed. If negative,
+        the analysis was user-interrupted. For EM/Bayes analysis, error numbers map as follows:
+           + 0,4: optimization was completed
+           + 1,5: optimization not completed (ran out of iterations)
+           + 2,6: optimization was not tested for convergence
+           + 3,7: optimization was not tested  for  convergence  and  was user interrupted
+           + 8,12:  objective  function  is  infinite  or  all individual objective fuctions are zero. problem ended
+           + 16,20: All individual objective fuctions are  zero.  problem ended
+           + 4,5,6,7,12,20: reduced stochastic/stationary portion was not completed prior to user interrupt
+
+      - Iteration -1000000008 lists the  partial  derivative  of  the likelihood  (-1/2OFV)  with  respect to each estimated parameter. This may be useful for using tests like the  Lagrange  multiplier test.
+
+      See the description of root.xml in Guide INTRODUCTION TO NONMEM 7 for versions 7.4 and higher.
+
+A file simliar to the raw output file is root.cnv.  This file contains convergence information for the Monte Carlo/EM methods, if CTYPE>0:
+
+      - Iteration  -2000000000  identifies the line that contains the
+        mean of last CITER values (mean objective  function  is  that
+        of second to last CITER values)
+
+      - Iteration  -2000000001  identifies the line that contains the
+        standard deviation of last CITER values (for objective
+        function, STD of second to last CITER values)
+
+
+      - Iteration  -2000000002  identifies the line that contains the
+        linear regression p-value of last CITER values against
+        iteration number.  (for objective function, p-value of second
+        to last CITER values)
+
+
+      - Iteration -2000000003 identifies the line  that  contains  the
+        Alpha used to assess statistical significance (p-value<alpha)
+
+      Please note the following: The Sigma values are in their Cholesky
+      format, as this is the form in which convergence of these  values
+      are  tested.  The Alpha are those based on ones actually used for
+      convergence test of that parameter, or which would have been used
+      on that parameter if CTYPE were of proper type.  The alpha may be
+      bonferoni corrected because of multiple comparisons, depending on
+      number  of parameters that were tested or would have been tested.
+      Objective function alphas are not bonferoni corrected.
+
+      For importance sampling and  iterative  two  stage,  the  average
+      objective  function listed in root.cnv could be used as an alter-
+      native to the  final  objective  function  for  likelihood  ratio
+      tests.
+
+ REFERENCES: Guide Introduction_7
+
+** Model Specification File (MSF)
+
+A Model Specification File (MSF) can be output by NONMEM.  It includes
+information from the Estimation Step  (initial  estimate  information,
+current  (or final) estimate information, search information) and from
+the Covariance Step (if this step is implemented).  It is requested in
+a certain field of the ESTIMATION control record (or, with NM-TRAN, by
+an option of the $ESTIMATION record).  NONMEM will use the information
+in the MSF in a later problem, either to continue the parameter search
+if the search did not terminate in the  current  run,  or  to  perform
+other  tasks  that  will  be based on final parameter estimates in the
+MSF.  These other tasks can be Simulation, Covariance, Table,
+Scatterplot,  or  Finalization  Steps.   If the MSF contains the
+results of a search that terminated successfully,  even  an
+additional  Estimation Step  can be performed, using the final
+parameter estimates in the MSF as initial estimates and an estimation
+method other than the one  used in  the  problem  with which the MSF
+was output.  If an MSF is output, and intermediate output with
+iteration summaries  is  requested,  then NONMEM  also writes the
+parameter estimates of these summaries to file INTER.
+
+MSF files are often used because they eliminate  needless  duplication
+of  computation  that has already occurred in the Estimation Step of a
+previous run.  If there should be a computer crash during or after the
+Estimation  Step  of  the previous run and a MSF was output, then with
+the current run, the MSF can be input, and the Estimation Step of  the
+current  run  will  continue  the  search begun with the previous run,
+starting from the last iteration whose summary was output  before  the
+crash occurred.
+
+With  NM-TRAN, specification that an existing Model Specification File
+is to be input is done by placing the file's name on the $MSFI record.
+
+With NONMEM 7.3, when MSF or MSFO option is used to  specify  an  MSFO file in the $EST record e.g.,
+ #+begin_src php
+ $EST ... MSFO=msfroot.msf
+ #+end_src
+ then  in addition to the main MSF file msfroot.msf, an extra file msfroot_ETAS.msf will also be produced, and provide  additional  information  when  a  $MSFI record is used in a subsequent problem or control stream.  File msfroot_ETAS.msf contains individual etas and phis  gen- erated  during  estimation  (except FO method, which does not generate non-zero etas during estimation, and not POSTHOC evaluated etas.)  The use  of  an  extension  in the file name, e.g., .msf, is optional.  If file _ETAS does not exist, NONMEM issues a warning, e.g.,
+
+ #+begin_src txt
+ WARNING: EXTRA MSF FILE COULD NOT BE OPENED: c5msf2x_ETAS
+ #+end_src
+
+If  the  Covariance  Step  is  also  implemented,  extra  files   msfroot_RMAT.msf and msfroot_SMAT.msf containing intermediate information on the R matrix and S matrix will also be produced.  These files  provide  information  when  a  $MSFI  record along with a $COV ... RESUME record is used in a subsequent problem or control stream.  There is no warning if files _SMAT and/or _RMAT are missing.
+
+For an example see the fragment of the control stream for the first run below.  The Estimation Step is run for a limited  num- ber of evaluations of the objective function (200).
+
+#+begin_src php
+ $THETA  (.1,3,5) (.008,.08,.5) (.004,.04,.9)
+ $OMEGA BLOCK(3)  6 .005 .0002 .3 .006 .4
+ $SIGMA  .4
+ $EST     MAXEVAL=200  PRINT=5 MSFO=msf1
+#+end_src
+ After  review  of  the  first  run's  output, it is decided to let the search continue.  The continuation will start from the iteration  during which the 200th objective function evaluation occurred in the previous search.  A fragment of the control stream  for  the  second  run follows.   $THETA,  $OMEGA,  and  $SIGMA  need  not,  and  may not, be present.  The Estimation Step is allowed to  run  to  completion,  and standard  errors  and  a  table are requested.  A new MSF is obtained, which will allow additional tables and  scatterplots  to  be  obtained later.
+
+ #+begin_src php
+ $MSFI msf1
+ $EST PRINT=5 MSFO=msf2
+ $COV
+ $TABLE ID TIME
+ #+end_src
+
+ REFERENCES: Guide I, section B.3
+ REFERENCES: Guide IV, section III.B.12
