@@ -1,9 +1,10 @@
 +++
-title = "Example models"
+title = "User guide"
 author = ["Yi Zhang"]
 draft = false
-weight = 2
 bookCollapseSection = true
 +++
 
-This part contains examples.
+## User guide {#user-guide}
+
+TODO
