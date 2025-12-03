@@ -1,191 +1,381 @@
 * $PK
- Marks the beginning of abbreviated code for the PK Routine.
-
-
+Marks the beginning of abbreviated code for the PK Routine. The
+record  is  used to model the values of basic and additional
+pharmacokinetic parameters.
 
 ** USAGE
-
 #+begin_src php
  $PK
  abbreviated code
 #+end_src
 
-** DISCUSSION
- The  $PK  record  is  used to model the values of basic and additional
- pharmacokinetic parameters.  It is used with PREDPP.
+Basic PK parameters are  typically  the  rate  constants
+("micro-constants") for use in kinetic formulas.  $PK can compute
+instead parameters such as clearance and volume, and a translator
+("TRANS")  subroutine  can  be  used to convert these to rate
+constants.  See additional PK parameters below.
 
- Basic PK parameters are  typically  the  rate  constants  ("micro-con-
- stants") for use in kinetic formulas.  $PK can compute instead parame-
- ters such as clearance and volume, and a translator ("TRANS")  subrou-
- tine  can  be  used to convert these to rate constants.  Additional PK
- parameters include compartment scale parameters, which PREDPP uses  to
- convert compartment amounts to concentrations, and dose-related param-
- eters such as modeled infusion rates.  General rules  for  abbreviated
- code are documented elsewhere
- (See abbreviated code).
- Specific rules for $PK follow.
+See @@html:<a href="http://localhost:1313/reference-manual/abbr/">abbreviated code</a>@@ for general rules for abbreviated code.
 
-*** ASSIGNMENT AND CONDITIONAL STATEMENTS
+Left-hand quantities in assignment statements must include Basic  PK
+parameters  according to the  ADVAN and TRANS routines used, as well
+as additional optional parameters.
 
- Left-hand quantities in assignment statements:
+Basic PK parameters:
+| Basic  PK  parameters                                   | ADVAN routines                                                                 |
+|---------------------------------------------------------+--------------------------------------------------------------------------------|
+| K CL V                                                  | (ADVAN1)                                                                       |
+| KA K CL V                                               | (ADVAN2)                                                                       |
+| K K12 K21 CL V Q VSS V1 V2 ALPHA BETA AOB               | (ADVAN3)                                                                       |
+| KA K K23 K32 CL V Q VSS V1 V2 V3 ALPHA BETA AOB         | (ADVAN4)                                                                       |
+| Km0 Kmn                                                 | (ADVAN5, ADVAN7)                                                               |
+| P(n)                                                    | (ADVAN6, ADVAN8, ADVAN9, ADVAN13, ADVAN14, ADVAN15, ADVAN16, ADVAN17, ADVAN18) |
+| VM, KM                                                  | (ADVAN10)                                                                      |
+| K K12 K21 K13 K31 CL Q2 Q3 V1 V2 V3 ALPHA BETA GAMMA    | (ADVAN11)                                                                      |
+| KA K K23 K32 K24 K42 CL Q3 Q4 V2 V3 V4 ALPHA BETA GAMMA | (ADVAN12)                                                                      |
 
-   Basic  PK  parameters  for  the  ADVAN and TRANS routines (Required,
-   except with the General Nonlinear Kinetics  Models  ADVAN6,  ADVAN8,
-   ADVAN9,  ADVAN13, ADVAN14, ADVAN15, ADVAN16, ADVAN17, ADVAN18).  One
-   or more of the following, depending on which  ADVAN  and  TRANS  are
-   being used.
-   #+begin_src php
-          K CL V ; (ADVAN1)
-          KA K CL V ; (ADVAN2)
-          K K12 K21 CL V Q VSS V1 V2 ALPHA BETA AOB ; (ADVAN3)
-          KA K K23 K32 CL V Q VSS V1 V2 V3 ALPHA BETA AOB ; (ADVAN4)
-          Km0 Kmn ; (ADVAN5, ADVAN7)
-          P(n) ; (ADVAN6, ADVAN8, ADVAN9, ADVAN13, ADVAN14, ADVAN15, ADVAN16, ADVAN17, ADVAN18)
-          VM, KM ; (ADVAN10)
-          K K12 K21 K13 K31 CL Q2 Q3 V1 V2 V3 ALPHA BETA GAMMA ; (ADVAN11)
-          KA K K23 K32 K24 K42 CL Q3 Q4 V2 V3 V4 ALPHA BETA GAMMA ; (ADVAN12)
-   #+end_src
+P(n) are referred to as "explicit" basic PK parameters. Any variable
+defined in $PK may be used on the right-hand side in a $DES or $AES
+block; these are "implicit" basic PK parameters.
 
-     P(n) are referred to as "explicit" basic PK parameters.
-     Any variable defined in $PK may be used on the right-hand side in a
-     $DES or $AES block; these are "implicit" basic PK parameters.
+Additional optional PK parameters inlucde (the digit following the letter indicates compartment number).
 
-   Additional PK parameters (Optional)
-   One or more of the following,
-   depending on the compartments defined for the model.
-   The digit following the letter is the compartment number.
-     Scale parameters Sn, e.g.: S1 S2 S3 S4 SC S0.
-     Bio-availability fractions Fn, e.g.: F1 F2 F3.
-     Output fractions Fn, e.g.: F2 F3 F4 F0 FO.
-     Infusion rates Rn, e.g.: R1 R2 R3.
-     Infusion durations Dn, e.g.: D1 D2 D3.
-     Absorption lags ALAGn, e.g.: ALAG1 ALAG2 ALAG3.
-     Time scale: TSCALE (may be written XSCALE).
-     Model event times MTIME(i), e.g.: MTIME(1) MTIME(2).
+** Scale parameters Sn
+For each observation (or at any time other than  an  observation  time
+for which a prediction is needed), PREDPP computes a prediction
+available to the ERROR routine.  Associated with  each  observation
+is  an observation  compartment.  The amount A in the observation
+compartment at the time of observation, divided by the value of a
+parameter S,  is used as the prediction. The parameter S is called a
+scaling parameter. There is one such parameter associated with every
+compartment  of  the kinetic model (including the output compartment).
+
+Scaling  parameters  are optional in the sense that scaling parameters
+associated with compartments with which predictions are not needed may
+be  ignored. The values of scaling parameters that are not computed in
+PK are always understood to be 1.
+
+A scaling parameter is computed by the PK routine  using,  if  needed,
+information in the event record.
+
+(See cmt, pcmt, pk, $pk, default_compartment).
+
+With  all  versions  of PREDPP and all ADVAN routines, observations of
+urine concentration Cu, as well as plasma concentrations  Cp,  may  be
+included  in  the  data.  The default output compartment of all ADVANs
+may be used to accumulate urine data.
+
+See Chapter  6,  Section  9, The Output Compartment: Urine Collections and
+ Observations
+ Chapter 7, Secton 4.3.3. Scaling by a Data Item
+
+ REFERENCES: Guide IV, section V.C.5
+
+ REFERENCES: Guide V, section 3.2.2 , 7.4.3
+
+ REFERENCES: Guide V, section 6.9
+
+ REFERENCES: Guide V, section 7.4.1
+
+ REFERENCES: Guide VI, section III.F.1 , V.H
+
+** Bio-availability fractions Fn
+With each possible  dose  compartment  of  the  kinetic model (the output compartment is not a possible
+ dose compartment), there is associated  one  bioavailability  fraction
+ parameter Fn.
+
+If the amount on a dose record is A, and the bioavailability  fraction
+ is  F,  only the fraction F of A actually appears in the dose compartment (either instantaneously at the time the dose enters the  compartment  -  with  a bolus dose, or over a period of time - with a regular
+ infusion; the bioavailability fraction does not  apply  to  a  steady-
+ state infusion).
+
+Bioavailability fractions are optional such that bioavailability
+fractions associated with compartments never used as dose compartments
+may be ignored. The default values is 1.
+
+When additional doses are  specified  on  a  dose  event  record,  the
+bioavailability fraction applies to the dose and to all the additional
+doses.  When a steady-state dose is specified on a dose event  record,
+the  bioavailability  fraction  applies to the dose and to all implied
+doses leading to the steady-state.
+
+ (See cmt, pk, default_compartment).
+
+ REFERENCES: Guide IV, section V.C.5
+
+ REFERENCES: Guide V, section 6.8 , 7.4.4
+
+ REFERENCES: Guide VI, section III.F.6 , V.F.1 , V.H
+
+
+
+** Output fractions Fn, F0, FO.
+With any of the kinetic models a (peripheral)  output  compartment  is
+always  present.  Associated  with this compartment is a PK parameter,
+the output fraction. Of the entire amount, Ao, of drug  introduced
+into  the system by various dosage patterns and then eliminated from
+the system during a given time interval, a fraction FO of AO goes into
+this output compartment.
+
+If  the output compartment is not used, the output fraction is
+ignored. The default value is 1.
+
+The  use  of  FO  depends on the assumption that the rate of change of
+drug amount in the output compartment is linear in the other
+compartment amounts. Other than this linearity restriction, the system
+can be nonlinear.
+
+Tyically, the output compartment is used for urine  observations,  and
+the central for plasma observations, with any ADVAN.
+
+ (See cmt, pk, default_compartment).
+
+ REFERENCES: Guide IV, section V.C.5
+
+ REFERENCES: Guide V, section 6.9
+
+ REFERENCES: Guide V, section 7.4.1
+
+ REFERENCES: Guide V, section 7.4.5
+
+ REFERENCES: Guide V, section 7.4.3.3
+
+ REFERENCES: Guide VI, section III.F.7
+
+** Infusion rates Rn
+There is one rate parameter associated with every possible  dose
+compartment  of the kinetic model (the output compartment is not a
+possible dose compartment) and the rate parameter used for a given
+dose  is that  one associated with the compartment into which the dose
+is given (the dose compartment).
+
+A rate-modeled zero-order bolus dose is actually an infusion, but  one
+whose rate is given by the rate parameter computed by the PK routine.
+
+Rate parameters are optional in the sense that rate parameters
+associated with compartments never receiving rate-modeled  zero-order
+bolus doses or rate-modeled steady-state infusions may be ignored.
+However, if the RATE data item on some dose event record contains the
+value -1, then a rate parameter for the dose compartment must be
+computed in the PK routine.
+
+Rate parameters act continuously. PREDPP obtains the value of  a  rate
+parameter, holding over the state-interval ( t1 , t2 ), from a call to
+PK with the record associated with t2, even if  the  dose  event  time
+occurs before t2.  Therefore, if there are state times (e.g. t2)
+falling within the time  interval  over  which  a  zero-order  bolus
+dose appears  in  the system, there exists the possibility that the
+rate of drug input can change during the interval. For this to occur,
+the rate parameter  would  need  to be modeled in terms of time
+varying covariates.  As a result, a zero-order bolus dose where the
+rate is  modeled might be better described as a piecewise zero-order
+process.
+
+When  additional  doses  are specified on a dose event record the rate
+parameter applies to the dose and to all the additional doses.
+
+ (See cmt, rate, pk, default_compartment).
+
+ (See exogenous supplementation example).
+
+ REFERENCES: Guide IV, section V.C.5
+
+ REFERENCES: Guide V, section 12.2.3
+
+ REFERENCES: Guide VI, section III.F.4-5
+
+
+** Infusion durations Dn, e.g.: D1 D2 D3.
+There is one duration parameter associated with  every  possible  dose
+compartment of the kinetic model (the output compartment is not a
+possible dose compartment) and the duration parameter used  for  a
+given dose  is  that one associated with the compartment into which
+the dose is given (the dose compartment).
+
+A duration-modeled zero-order bolus dose is actually an infusion,  but
+one  whose  duration is given by the rate parameter computed by the PK
+routine.
+
+Duration parameters are optional in the sense that duration parameters
+associated  with  compartments  never receiving duration-modeled
+zero-order bolus doses may be ignored.  However, if the RATE data
+item  on some  dose event record contains the value -2, then a
+duration parameter for the dose compartment must be computed in the PK
+routine.
+
+A duration parameter is computed by the PK routine using,  if  needed,
+information  in  the  dose record.  Therefore, its value for the given
+dose is constant over time.
+
+When additional doses are specified on a dose event record  the
+duration parameter applies to the dose and to all the additional
+doses.
+
+(See cmt, rate, pk, default_compartment).
+
+(See multiple dose example).
+
+REFERENCES: Guide IV, section V.C.5
+
+REFERENCES: Guide V, section 12.2.3
+
+REFERENCES: Guide VI, section III.F.3
+
+** Absorption lags ALAGn
+There is one absorption lag time  (parameter)  associated  with  every
+possible dose compartment of the kinetic model (the output compartment
+is not a possible dose compartment) and the absorption lag  time  used
+for  a  given  dose  is  that one associated with the compartment into
+which the dose is given (the dose compartment).
+
+The event time t on a dose record refers to the recorded time the dose
+was administered. In the case of a regular infusion, t is the time the
+infusion was initiated.  An absorption lag time  is  an  increment  of
+time  L  such  that  the time that the dose is regarded (by PREDPP) as
+entering (or starting to enter) the system is t+L.
+
+Absorption lag times are optional in the  sense  that  absorption  lag
+times associated with compartments never used as dose compartments may
+be ignored. The values of absorption lag times that are  not  computed
+in PK are always understood to be 0.
+
+An absorption lag time for a dose is computed by the PK routine using, if needed, information in the dose record.  When additional doses  are specified  on  a dose event record, the absorption lag time applies to the dose and to all the additional doses.  With a steady-state  multiple  dose  the  absorption lag time applies not only to this dose, but also to all the preceding implied doses. With a steady-state dose, the lag time should be less than the interdose interval.
+
+(See cmt, pk, default_compartment).
+
+REFERENCES: Guide IV, section V.C.5
+
+REFERENCES:  Guide VI, section III.F.6 , V.F.1 , V.H
+
+** Time scale: TSCALE (may be written XSCALE).
+If  a  time  scale parameter is modeled by PK, then time itself may be
+scaled differently between individuals.  There is a single time  scale
+parameter  that multiplies all rate constants. The parameter acts
+continuously (and could therefore theoretically  itself  vary  with
+time measured  on  an  external  clock).  It  can  only be used with
+linear kinetic models. If it is not used, it can be ignored. If the
+value  of the  time  scale  parameter is not computed in PK, it is
+always under- stood to be 1.
+
+The time scale parameter does not scale the duration parameter D of a
+duration-modeled zero-order bolus dose.
+
+PREDPP ignores the time scale parameter with general nonlinear models (ADVAN6, 8, 9, 13,14,15,16,17,18).
+
+(See pk).
+
+REFERENCES: Guide IV, section V.C.5
+
+REFERENCES: Guide VI, section III.F.8
+
+** Model event times MTIME(i), e.g.: MTIME(1) MTIME(2).
      (The subscript i is not a compartment number.)
      (See MTIME)
 
-   Initial compartment amounts (Optional), e.g..: A_0(1) A_0(2).
+** Initial compartment amounts (Optional), e.g..: A_0(1) A_0(2).
    (See Compartment Initialization Block)
 
-   Initial steady state flag I_SS (Optional).
+**   Initial steady state flag I_SS (Optional).
    (See advan68, advan9,  $model)
    (See Initial Steady State: I_SS,ISSMOD).
 
-   PK-defined (i.e., PRED-defined) items
+**   PK-defined (i.e., PRED-defined) items
 
-   Right-hand quantities in assignment statement and in conditions:
+** Right-hand quantities
 
-     Data item labels specified on the $INPUT statement.
+- Data item labels specified on the $INPUT statement.
 
-     THETA(n).
+- THETA(n).
 
-     ETA(n) (Used if the data are population.)
+- ETA(n) (Used if the data are population.)
 
-     PK-defined items that appeared earlier as left-hand
-     quantities.
+- PK-defined items that appeared earlier as left-hand quantities.
 
-     NEWIND
-      Same as the NEWIND argument passed by NONMEM to PREDPP.
-      NEWIND=0:
-      First record of the data set.
-      THETA value may differ from value at last call with this record.
-      NEWIND=1:
-      First record of the data set, THETA value does not differ from
-      value at last call with this record, and PRED is nonrecursive
-      (see I_REC), or,
-      First record of a subsequent individual record.
-      NEWIND=2:
-      Subsequent data record of an individual record.
+- NEWIND: same as the NEWIND argument passed by NONMEM to PREDPP.
+  + NEWIND=0: First record of the data set. THETA value may differ
+    from value at last call with this record.
+  + NEWIND=1: First record of the data set, THETA value does not
+    differ from value at last call with this record, and PRED is
+    nonrecursive (see I_REC), or, First record of a subsequent
+    individual record.
+  + NEWIND=2: Subsequent data record of an individual record.
 
-     ICALL
-      Same as the ICALL argument passed by NONMEM to PREDPP.
-      ICALL=1: Initialization.
-      ICALL=2: Normal call.
-      ICALL=3: Finalization.
-      ICALL=4: Simulation.
-      ICALL=5: Expectation.
-      ICALL=6: Raw data averages.
-      Special rules apply to blocks of abbreviated
-      code that are executed when ICALL is not 2.
+- ICALL Same as the ICALL argument passed by NONMEM to PREDPP.
+  + ICALL=1: Initialization.
+  + ICALL=2: Normal call.
+  + ICALL=3: Finalization.
+  + ICALL=4: Simulation.
+  + ICALL=5: Expectation.
+  + ICALL=6: Raw data averages.
+  + Special rules apply to blocks of abbreviated code that are executed when ICALL is not 2.
       (See Initialization-Finalization block, Simulation block).
       (See Expectation block, Data_Average block).
 
- Global Variables in Modules
+- Global Variables in Modules
 
-  Certain variables in FORTRAN modules can be used.
+- Certain variables in FORTRAN modules can be used.
   (See Variables_in_modules)
-  The following are of particular interest.
 
-  DOSTIM DOSREC(n)
+- DOSTIM DOSREC(n)
+  + If PK is not being called at an additional or lagged dose time,
+    then DOSTIM = 0 and all elements of DOSREC are 0.
 
-   If PK is not being called at an additional or lagged dose time, then
-   DOSTIM = 0 and all elements of DOSREC are 0.
-
-   If PK is called at an additional or lagged dose time  t,  then  DOS-
-   TIM=t
+  + If PK is called at an additional or lagged dose time  t,  then  DOSTIM=t
    (See Guide VI, Chapter III)
-   DOSREC  contains a copy of the dose event record which initiated the
-   additional  or  lagged  dose  (actually,  only  of  the  final  row:
-   EVTREC(NVNT,*)).   Data  items  may be referred to by position or by
-   label, e.g., DOSREC(1) or DOSREC(ID).  In DOSREC, TIME and all  user
-   (concomitant)  data  items  have  values from the next event record.
-   All other NONMEM/PREDPP reserved data items  have  values  from  the
-   initiating  dose  event  record.   (The  $BIND record may be used to
-   override this.)
+  + DOSREC  contains a copy of the dose event record which initiated
+    the additional  or  lagged  dose  (actually,  only  of  the  final
+    row: EVTREC(NVNT,*)).   Data  items  may be referred to by
+    position or by label, e.g., DOSREC(1) or DOSREC(ID).  In DOSREC,
+    TIME and all  user (concomitant)  data  items  have  values from
+    the next event record. All other NONMEM/PREDPP reserved data items
+    have  values  from  the initiating  dose  event  record.   (The
+    $BIND record may be used to override this.)
 
-  A(n) TSTATE
+- A(n), TSTATE: A(n) are the latest computed compartment amounts, and
+  TSTATE is  the time  at which they were computed.  That is, A(n) are
+  the amounts at the previous event time, or if at a later time, but
+  before the  time for which PK is being called, a lagged or
+  additional dose was given, or a regular infusion was terminated, or
+  a modeled  event  occurred, then  A(n)  are  the  amounts at the
+  latest such time.  If there are population etas, and A(n) are used
+  in the $PK abbreviated code, then any  $OMEGA  records  referring to
+  etas explicitly used in this code should precede the $PK record, or
+  if an $MSFI  record  is  used,  it should precede the $PK record and
+  include the option NPOP=m. Note:  If  there  is  no verbatim code
+  and no explicit use of a sub- scripted variable A in the $PK record,
+  then the symbol A can be used as a data item label or as a name of a
+  PK-defined item.
 
-   A(n) are the latest computed compartment amounts, and TSTATE is  the
-   time  at which they were computed.  That is, A(n) are the amounts at
-   the previous event time, or if at a later time, but before the  time
-   for which PK is being called, a lagged or additional dose was given,
-   or a regular infusion was terminated, or a modeled  event  occurred,
-   then  A(n)  are  the  amounts at the latest such time.  If there are
-   population etas, and A(n) are used in the $PK abbreviated code, then
-   any  $OMEGA  records  referring to etas explicitly used in this code
-   should precede the $PK record, or if an $MSFI  record  is  used,  it
-   should precede the $PK record and include the option NPOP=m.
-   Note:  If  there  is  no verbatim code and no explicit use of a sub-
-   scripted variable A in the $PK record, then the symbol A can be used
-   as a data item label or as a name of a PK-defined item.
-
-  A_0FLG
-
-   A_0FLG  signals  a  record with which it is possible to initialize a
-   compartment amount.
+- A_0FLG:  signals  a  record with which it is possible to initialize a compartment amount.
    (See Compartment Initialization Block)
 
- Forbidden Variable Names:
+- Forbidden Variable Names:
+  IDEF IREV EVTREC NVNT INDXS IRGG GG NETAS DADT(n) E(n) EPS(n)
 
-   IDEF IREV EVTREC NVNT INDXS IRGG GG NETAS DADT(n) E(n) EPS(n)
+** PSEUDO ASSIGNMENT STATEMENTS
+- COMRES=-1
 
-*** PSEUDO ASSIGNMENT STATEMENTS
+- CALLFL=-2: Call with every event record and at additional and lagged dose times.
+- CALLFL=-1: Call with every event record.
+- CALLFL=0: Call with first event record and new TIME values.
+- CALLFL=1: Call once per individual record.
+  Of  the  last four, CALLFL=-2 is the default when DOSREC, DOSTIM, or
+  MTIME are used  explicitly  in  the  abbreviated  code.   Otherwise,
+  CALLFL=-1 is the default.
 
-   COMRES=-1
-
-   CALLFL=-2: Call with every event record and at additional and lagged
-   dose times.
-   CALLFL=-1: Call with every event record.
-   CALLFL=0: Call with first event record and new TIME values.
-   CALLFL=1: Call once per individual record.
-
-   Of  the  last four, CALLFL=-2 is the default when DOSREC, DOSTIM, or
-   MTIME are used  explicitly  in  the  abbreviated  code.   Otherwise,
-   CALLFL=-1 is the default.
-
-   The  pseudo-assignments  statements  may be enclosed in parentheses.
-   If two of them are present in the same set of parentheses,  separate
-   them with a semicolon.  A calling protocol phrase may be used within
-   parentheses instead of a  pseudo-assignment  statement,  and  either
-   upper or lower case may be used. E.g.,
-
-   $PK (ONCE PER IR)      ; same as CALLFL=1
-   $PK (NEW TIME)         ; same as CALLFL=0
-   $PK (EVERY EVENT)      ; same as CALLFL=-1
-   $PK (NONEVENT)         ; same as CALLFL=-2
-
-*** RECORD ORDER:
+- The  pseudo-assignments  statements  may be enclosed in
+  parentheses. If two of them are present in the same set of
+  parentheses,  separate them with a semicolon.  A calling protocol
+  phrase may be used within parentheses instead of a
+  pseudo-assignment  statement,  and  either upper or lower case may
+  be used. E.g.,
+  #+begin_src php
+     $PK (ONCE PER IR)      ; same as CALLFL=1
+     $PK (NEW TIME)         ; same as CALLFL=0
+     $PK (EVERY EVENT)      ; same as CALLFL=-1
+     $PK (NONEVENT)         ; same as CALLFL=-2
+  #+end_src
+** RECORD ORDER:
    Follows $SUBROUTINES and $INPUT
    Follows  $MODEL  (with  General  Nonlinear  Kinetics  Models ADVAN6,
    ADVAN8,  ADVAN9,  ADVAN13,  ADVAN14,  ADVAN15,   ADVAN16,   ADVAN17,

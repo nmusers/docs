@@ -1,0 +1,931 @@
+* $SUBROUTINES
+Lists certain subroutine choices for the NONMEM Executable. Optional.  Describes  the  choice  of  subroutines for the NONMEM executable (also called the NONMEM  load  module).   May  also  be  coded $SUBS.
+
+
+
+** USAGE
+#+begin_src php
+ $SUBROUTINES  [subname1 = name1] [subname2 = name2] ...
+               [TOL=n] [ATOL=n] [SSTOL=n] [SSATOL=n]
+               [SUBROUTINES=kind]
+#+end_src
+
+One of the following is required:
+#+begin_src php
+ADVAN=name (specifies using PREDPP).
+PRED=name  (specifies a user-supplied PRED routine).
+#+end_src
+
+** EXAMPLE
+#+begin_src php
+ $SUBROUTINES  PRED=pred
+ $SUBROUTINES  ADVAN1 TRANS2
+ $SUBROUTINES  ADVAN=ADVAN6 SS=SS6
+#+end_src
+
+
+** Subname
+Subname  is  the  entry  name of a user-supplied subroutine to be
+included in the NONMEM executable.  Name is thename  of  a  file
+containing  FORTRAN source code for the subroutine.  Name is used by
+NM-TRAN as documentation (in FREPORT)  and  for  inclusion  of source
+code (in FSUBS).  More than one such option may be specified.  The
+names need not be unique.  Name may not contain embed- ded spaces.
+Name  may  contain  as  many characters as fit a single line.  It must
+not start with a digit.   If  name  contains  commas,  semicolons,
+equal  signs,  or  parentheses, it must be surrounded by single quotes
+' or double quotes ".
+
+Subname may be chosen from the following categories.
+- User-supplied NONMEM routines: CRIT MIX PRED CRIT MIX PRIOR CONTR CCONTR USMETA SPTWO
+
+- User-supplied PRED routine: PRED
+
+- Subroutines from the PREDPP library: ADVAN TRANS SS
+
+- User-supplied PREDPP routines: PK ERROR MODEL DES AES TOL INFN
+
+- Other user-supplied subroutines: OTHER. It specifies the name of a
+  file that will be copied  into FSUBS  (e.g.,  OTHER=filename).  A
+  subroutine or function in file filename might be called by a
+  user-supplied routine  or by  verbatim code.  With NONMEM 7.4, it
+  might be listed on a $ABBR FUNCTION record.  The OTHER option may be
+  used  up  to 40  times, to specify the names of up to 40 such files;
+  each file may contain multiple subroutines and functions.   These
+  routines must be in Fortran 90 format.
+
+
+The ADVAN routines "advance" the kinetic system from one state time point to the next.  They are:
+
+| ADVAN1  | One Compartment Linear Model                                                 |
+| ADVAN2  | One Compartment Linear Model with First Order Absorption                     |
+| ADVAN3  | Two Compartment Linear Model                                                 |
+| ADVAN4  | Two Compartment Linear Model with First Order Absorption                     |
+| ADVAN5  | General Linear Model                                                         |
+| ADVAN6  | General Nonlinear Model                                                      |
+| ADVAN7  | General Linear Model with Real Eigenvalues                                   |
+| ADVAN8  | General Nonlinear Model with Stiff Differential Equations                    |
+| ADVAN9  | General Nonlinear Model with Equilibrium Compartments                        |
+| ADVAN10 | One Compartment Model with Michaelis-Menten Elimination                      |
+| ADVAN11 | Three Compartment Linear Model                                               |
+| ADVAN12 | Three Compartment Linear Model with First Order Absorption                   |
+| ADVAN13 | General Nonlinear Model using LSODA                                          |
+| ADVAN14 | General Nonlinear Model using CVODA                                          |
+| ADVAN15 | General Nonlinear Model with Equilibrium Compartments using IDA              |
+| ADVAN16 | Delay Differential Equation Model using RADAR5                               |
+| ADVAN17 | Delay Differential Equation Model with Equilibrium Compartments using RADAR5 |
+| ADVAN18 | Delay Differential Equation Model using DDE_SOLVER                           |
+
+With  a general ADVAN (numbered 5 and above, except for 10, 11, 12), a
+$MODEL record (or user-supplied MODEL subroutine) must be provided  to
+specify certain details of the model.  With ADVAN 6, 8, 9, 13, 14, 15,
+16, 17, 18, a $DES block (or DES subroutine) must be provided to
+evaluate the differential equations.  With ADVAN9 and ADVAN15 and
+ADVAN17, $AES and $AESINITIAL blocks (or AES subroutine) may also  be
+provided to  evaluate the algebraic expressions.  With any ADVAN for
+which $DES is required, and with ADVAN10 or SS6, TOL must be specified
+by  means of  the  TOL option of the $SUBROUTINES record (or a $TOL
+block or TOL subroutine).
+
+TRANSn, the translator routines, which perform re-parameterization of
+the basic PK parameters  computed by  the  PK  routine.
+      | TRANS1 | Dummy, or null, translator; may be used with all ADVAN routines.  It is the default. |
+      | TRANS2 | Used with ADVAN1 and ADVAN2.                                                         |
+      | TRANS3 | Used with ADVAN3 and ADVAN4.                                                         |
+      | TRANS4 | Used with ADVAN3, ADVAN4, ADVAN11, ADVAN12                                           |
+      | TRANS5 | Used with ADVAN3 and ADVAN4.                                                         |
+      | TRANS6 | Used with ADVAN3, ADVAN4, ADVAN11, ADVAN12                                           |
+
+*** ADVAN1
+The kinetic equations for the One Compartment Linear Model.
+
+| Compt.No. | Function Status | Initial allowed | On/Off Allowed | Dose | Default Dose | Default Obs. |
+|-----------+-----------------+-----------------+----------------+------+--------------+--------------|
+|         1 | Central         | On              | No             | Yes  | Yes          | Yes          |
+|         2 | Output          | Off             | Yes            | No   | No           | No           |
+
+- TRANS routines that may be used: TRANS1, TRANS2.
+
+- Basic PK parameter with TRANS1: K (rate constant of elimination)
+
+- Basic PK parameters with TRANS2: (See TRANS2).
+
+- Additional PK parameters:
+      + S1 - Scale for central compartment (also called SC)
+      + S2 - Scale for output compartment (also called S0)
+      + F1 - Bioavailability for central compartment
+      + R1 - Rate for central compartment
+      + D1 - Duration for central compartment
+      + ALAG1 - Absorption lag for central compartment
+      + F0 - Output fraction (also called F2, FO)
+      + XSCALE - Time scale
+      + MTIME(i) - Model event times
+
+
+- REFERENCES: Guide VI, section I , III.A , VII.C
+
+- REFERENCES: Guide IV, section V.C.3 , V.C.5
+
+*** ADVAN2
+The kinetic equations for the  One  Compartment  Linear  Model  with  First  Order Absorption.
+
+| Compt.No. | Function Status | Initial allowed | On/Off Allowed | Dose | Default Dose | Default Obs. |
+|-----------+-----------------+-----------------+----------------+------+--------------+--------------|
+|         1 | Depot           | Off             | Yes            | Yes  | Yes          | No           |
+|         2 | Central         | On              | No             | Yes  | No           | Yes          |
+|         3 | Output          | Off             | Yes            | No   | No           | No           |
+
+- TRANS routines that may be used: TRANS1, TRANS2
+
+- Basic PK parameters with TRANS1:
+      + K  (rate constant of elimination)
+      + KA (rate constant of absorption)
+
+- Basic PK parameters with TRANS2: (See TRANS2).
+
+- Additional PK parameters:
+      + S1 - Scale for depot compartment
+      + S2 - Scale for central compartment (also called SC)
+      + S3 - Scale for output compartment (also called S0)
+      + F1 - Bioavailability for depot compartment
+      + F2 - Bioavailability for central compartment
+      + R1 - Rate for depot compartment
+      + R2 - Rate for central compartment
+      + D1 - Duration for depot compartment
+      + D2 - Duration for central compartment
+      + ALAG1 - Absorption lag for depot compartment
+      + ALAG2 - Absorption lag for central compartment
+      + F0 - Output fraction (also called F3, FO)
+      + XSCALE - Time scale
+      + MTIME(i) - Model event times
+
+- REFERENCES: Guide VI, section VII.C.2
+
+*** ADVAN3
+The kinetic equations for the Two Compartment Linear Model.
+
+| Compt.No. | Function Status | Initial allowed | On/Off Allowed | Dose | Default Dose | Default Obs. |
+|-----------+-----------------+-----------------+----------------+------+--------------+--------------|
+|         1 | Central         | On              | No             | Yes  | Yes          | Yes          |
+|         2 | Peripheral      | On              | No             | Yes  | No           | No           |
+|         3 | Output          | Off             | Yes            | No   | No           | No           |
+
+- TRANS routines that may  be  used:  TRANS1,  TRANS3,  TRANS4,  TRANS5, TRANS6
+- Basic PK parameters with TRANS1:
+      + K (rate constant of elimination)
+      + K12 (rate constant from central to peripheral)
+      + K21 (rate constant from peripheral to central)
+- Basic PK parameters with TRANS3: (See TRANS3).
+
+- Basic PK parameters with TRANS4: (See TRANS4).
+
+- Basic PK parameters with TRANS5: (See TRANS5).
+
+- Basic PK parameters with TRANS6: (See TRANS6).
+
+- Additional PK parameters:
+      + S1 - Scale for central compartment (also called SC)
+      + S2 - Scale for peripheral compartment
+      + S3 - Scale for output compartment (also called S0)
+      + F1 - Bioavailability for central compartment
+      + F2 - Bioavailability for peripheral compartment
+      + R1 - Rate for central compartment
+      + R2 - Rate for peripheral compartment
+      + D1 - Duration for central compartment
+      + D2 - Duration for peripheral compartment
+      + ALAG1 - Absorption lag for central compartment
+      + ALAG2 - Absorption lag for peripheral compartment
+      + F0 - Output fraction (also called F3, FO)
+      + XSCALE - Time scale
+      + MTIME(i) - Model event times
+
+- REFERENCES: Guide VI, section VII.C.3
+
+*** ADVAN4
+The kinetic equations for the  Two  Compartment  Linear  Model  with  First  Order Absorption.
+
+| Compt.No. | Function Status | Initial allowed | On/Off Allowed | Dose | Default Dose | Default Obs. |
+|-----------+-----------------+-----------------+----------------+------+--------------+--------------|
+|         1 | Depot           | Off             | Yes            | Yes  | Yes          | No           |
+|         2 | Central         | On              | No             | Yes  | No           | Yes          |
+|         3 | Peripheral      | On              | No             | Yes  | No           | No           |
+|         4 | Output          | Off             | Yes            | No   | No           | No           |
+
+- TRANS  routines  that  may  be  used:  TRANS1, TRANS3, TRANS4, TRANS5, TRANS6
+
+- Basic PK parameters with TRANS1:
+      + K   (rate constant of elimination)
+      + K23 (rate constant from central to peripheral)
+      + K32 (rate constant from peripheral to central)
+      + KA  (rate constant of absorption)
+
+- Basic PK parameters with TRANS3: (See TRANS3).
+
+- Basic PK parameters with TRANS4: (See TRANS4).
+
+- Basic PK parameters with TRANS5: (See TRANS5).
+
+- Basic PK parameters with TRANS6: (See TRANS6).
+
+- Additional PK parameters:
+      + S1 - Scale for depot compartment
+      + S2 - Scale for central compartment (also called SC)
+      + S3 - Scale for peripheral compartment
+      + S4 - Scale for output compartment (also called S0)
+      + F1 - Bioavailability for depot compartment
+      + F2 - Bioavailability for central compartment
+      + F3 - Bioavailability for peripheral compartment
+      + R1 - Rate for depot compartment
+      + R2 - Rate for central compartment
+      + R3 - Rate for peripheral compartment
+      + D1 - Duration for depot compartment
+      + D2 - Duration for central compartment
+      + D3 - Duration for peripheral compartment
+      + ALAG1 - Absorption lag for depot compartment
+      + ALAG2 - Absorption lag for central compartment
+      + ALAG3 - Absorption lag for peripheral compartment
+      + F0 - Output fraction (also called F4, FO)
+      + XSCALE - Time scale
+      + MTIME(i) - Model event times
+
+- REFERENCES: Guide VI, section VII.C.4
+
+*** ADVAN5/7
+The general linear model is used for systems in which  a  drug is distributed between compartments according to linear processes.  ADVAN7 may be used when the eigenvalues of the  rate  con- stant  matrix are known to be real (which is true for many pharmacoki- netic systems such as mammillary models).  It is generally faster than ADVAN5.
+
+- A  $MODEL  record  is  required to describe the compartments and their attributes.  The $PK record (or, if  a  user-supplied  PK  routine  is used, the $MODEL record) describes how the compartments are linked.
+
+- TRANS routines that may be used: TRANS1
+
+- Basic PK parameters with TRANS1 (assum m compartments in the system, including the output compartment.)
+      + Kij (rate constant from compartment i to compartment j)
+      + Ki0 (alternate name for Kim)
+      + The letter T may be used as a separator between the two
+        compartment numbers, e.g., KiTj.  The letter T is optional
+        when there is no ambiguity, but required when there are two
+        possible  interpretations  of  the  numbers  that follow K.
+        E.g., with 12 compartments, K111 is ambiguous.  It should be
+        coded  K1T11  or  K11T1, depending  if  it symbolizes the rate
+        constant from compartment 1 to compartment 11 or from
+        compartment 11 to compartment 1.
+- Additional PK parameters (for each compartment n in the system (n=1, ..., m)):
+      + Sn - Scale for nth compartment
+      + S0 - Alternate name for scale for output compartment
+
+- For each dosable compartment n in the system:
+      + Fn - Bioavailability for nth compartment
+      + Rn - Rate for nth compartment
+      + Dn - Duration for nth compartment
+      + ALAGn - Absorption lag for nth compartment
+
+- Other additional PK parameters:
+      + F0 - Output fraction (also called Fm, FO)
+      + XSCALE - Time scale
+      + MTIME(i) - Model event times
+
+- Required PREDPP Library subroutines:
+ + ADVAN5 - REXPON, RXSUBS
+ + ADVAN7 - RRXPON, RXSUBS
+
+- Notes: analytical second derivatives used with the Laplacian method  are not  obtained  with  ADVAN5 and ADVAN7.  Numerical second derivatives must be used.
+
+- REFERENCES: Guide VI, section VII.C.5 , VII.C.7
+- REFERENCES: Guide IV, section V.C.4
+
+*** ADVAN6/8/13/14/16/18
+ADVAN6,  ADVAN8,  ADVAN13,  ADVAN14,  ADVAN16, ADVAN18 are for the
+general  nonlinear  models, used for systems in which a drug is
+distributed between compartments according to first-order processes.
+The differences  are  in the package of code that performs the
+integration of the differential equations.
+
+- ADVAN6 uses IMSL's DVERK, a Runge-Kutta-Verner  fifth  and  sixth order method of integration, for nonstiff problems.
+
+- ADVAN8  uses  IMSL's DGEAR, the Gear method of numerical integra- tion, for stiff problems.
+
+- ADVAN13 uses the LLNL solver for ordinary differential  equations (LSODA), with automatic method switching for stiff (BDF) and nonstiff (Adams method) problems. It is a decendent of ADVAN8.
+
+- ADVAN14 uses CVODES from the LLNL SUNDIALS  system  for  ordinary differential  equations  and  is a descendent of LSODA (ADVAN13). ADVAN14 also has a root-finding algorithm. The user may choose to make  modifications  to  ..\pr\CVODEU.f90. See ..\guides\cvs_guide.pdf and ..\guides\cv_guide.pdf.
+
+- ADVAN16 uses the RADAR5 delay differential equation solver.
+  See  INTRODUCTION TO NONMEM 7, Using the Delay differential equation
+  Solvers with the ddexpand program, also ..\guides\manrad5-v2.pdf, and ..\examples\dde\advan16_dde.pdf.
+
+- ADVAN18 uses the DDE_SOLVER delay differential equation solver. See INTRODUCTION TO NONMEM 7, Using the Delay differential  equation Solvers with the ddexpand program. See also ..\guides\ddes_f90.pdf. See also ..\examples\dde\advan16_dde.pdf
+
+- ADVAN8 may be used in preference to ADVAN6 when the differential
+  equations describing the processes are stiff.  ADVAN13 may  be
+  preferable with  a  mixed  system  (both stiff and non-stiff).  For
+  discussion of ADVAN14 as well as changes to ADVAN13, see Guide
+  INTRODUCTION TO  NONMEM 7.
+
+- A  $MODEL  record  is  required to describe the compartments and
+  their attributes.  The $DES record is required to describe the
+  differential equations.
+
+- TRANS routines that may be used: TRANS1
+
+- Explicit Basic PK parameters: P(n) (nth basic PK parameter)
+
+- Implicit basic PK parameters: PK-defined variables used also in $DES block
+
+- Additional PK parameters (assume m compartments in the system, including the output compartment.  For each compartment n in the system (n=1, ..., m)):
+      + Sn - Scale for nth compartment
+      + S0 - Alternate name for scale for output compartment
+
+- For each dosable compartment n in the system:
+      + Fn - Bioavailability for nth compartment
+      + Rn - Rate for nth compartment
+      + Dn - Duration for nth compartment
+      + ALAGn - Absorption lag for nth compartment
+
+- Other additional PK parameters:
+      + F0 - Output fraction (also called Fm, FO)
+      + XSCALE - Time scale
+      + MTIME(i) - Model event times
+
+- TOLERANCE values TOL (Relative Tolerance) is required; this can be
+  supplied  with the  $SUBROUTINE  or $TOL record, or a user-supplied
+  TOL routine, which sets NRD=TOL. (See $SUBROUTINES, $TOL) With
+  NONMEM 7.4, ATOL (Absolute tolerance) may be  specified  for ADVAN9,
+  ADVAN13, ADVAN14, ADVAN16, ADVAN18. For example, $SUBROUTINE ...
+  ATOL=n. The  default is 12 (that is, accuracy is 10**(-12)). Usually
+  the problem runs quickly when using this setting.  On occasion,
+  how- ever,  you  may want to reduce ATOL (usually set it equal to
+  that of TOL), and improve speeds of up to 3 to 4 fold. Values of
+  TOL and  ATOL  may  also be specified for evaluations of Steady
+  State amounts, and also for the Covariance Step.
+
+  See options ATOL, TOLC, ATOLC, SSATOL, SSATOLC of the $SUBROUTINE and $TOL records.
+
+  A  user-supplied  TOL  routine  may assign values of NRD and ANRD
+  specifically for the initial (base) setting and each NONMEM  step
+  (estimation,   covariance,  simulation, table/scatter step, simu-
+  lation, initial parameters estimate, nonparametric).  It may also
+  supply specific values for each compartment, and for Steady State
+  amounts. (See TOL).
+
+  With ADVAN13, the user may find that the TOL option should  specify
+  larger NRD values than for other ADVANs (e.g., ADVAN6).  Val- ues of
+  7 or 8 may not be unreasonable with double precision.
+
+  See INTRODUCTION TO NONMEM 7, Controlling  the  Accuracy  of  the
+  Gradient Evaluation and Individual Objective Function Evaluation.
+
+- Reserved  variable MXSTEP (the  maximum  number  of integration steps)
+ can be specified for ADVAN13 and ADVAN14 and ADVAN16.
+ (See mxstep).
+
+- With ADVAN13, if there is a period of time during which some
+  compartment's  amount  should be zero, that compartment should be
+  turned off. Otherwise, very small amounts can appear in the
+  compartment, which can cause difficulties during subsequent time
+  periods.
+
+- By  default,  the  initial  conditions (i.e., compartment amounts) are
+ zero at the start of each individual record. Different initial  condi-
+ tions may be specified using a compartment initialization block in PK.
+ When endogenous drug is specified in the differential equations,  non-
+ zero initial conditions may also be computed using a steady-state dose
+ event record with SS>0 and AMT=0 and RATE=0, or using the  I_SS  (Ini-
+ tial Steady State) feature of MODEL and/or PK.
+ (See Compartment_Initialization_Block, SS_dose).
+ (See $model, $pk).
+ (See model, pk).
+ (See Initial_Steady_State:_I_SS,ISSMOD).
+
+- Required PREDPP Library subroutines:
+  + ADVAN6 - DVERK1, FCN1
+  + ADVAN8 - DGEAR1, FCN1, FCN3
+  + ADVAN13 - LSODA, FCN1, JAC2
+  + ADVAN14 - CVODE, FCN1, JAC2
+  + ADVAN16 - RADAR5NM, FCN1, JAC2
+  + ADVAN18 - ADDELSV, FCN1, JAC2
+
+- REFERENCES: Guide VI, section VII.C.6 , VII.C.8
+- REFERENCES: Guide IV, section V.C.4 , V.C.5
+
+*** ADVAN9/15/17
+ADVAN9  and ADVAN15 and ADVAN17 are routines in PREDPP's library which
+implement the general non-linear model with equilibrium  compartments.
+This  general  non-linear model is used for systems in which a drug is
+distributed between compartments according to a system of  first-order
+differential-algebraic  processes.   It  may be useful when the system
+consists of only stiff differential equations, and there are no
+equilibrium  compartments  (i.e., no algebraic equations).  It may
+also be used when the system consists of only algebraic  equations
+(i.e.,  no differential equations).
+
+A  $MODEL  record  is  required to describe the compartments and their
+attributes.  The $DES record describes the differential equations,  if
+any.   The $AES and $AESINITIAL records describe the algebraic
+expressions, if any.
+
+- TOL is required; (See $SUBROUTINES).
+
+- TRANS routines that may be used: TRANS1
+
+- Explicit Basic PK parameters: P(n) (nth basic PK parameter)
+
+- Implicit basic PK parameters: PK-defined variables used also in $AES or $DES blocks
+
+- Additional PK parameters (assume m compartments in the system, including  the  output compartment.  For each compartment n in the system (n=1, ..., m)):
+      + Sn - Scale for nth compartment
+      + S0 - Alternate name for scale for output compartment
+
+- For each dosable compartment n in the system:
+      + Fn - Bioavailability for nth compartment
+      + Rn - Rate for nth compartment
+      + Dn - Duration for nth compartment
+      + ALAGn - Absorption lag for nth compartment
+
+- Other additional PK parameters:
+      + F0 - Output fraction (also called Fm, FO)
+      + XSCALE - Time scale
+      + MTIME(i) - Model event times
+
+- With  NONMEM  7.4,  ATOL  may  be  specified  for  ADVAN9 and
+  ADVAN15. (ADVAN17 is new with NONMEM 7.5. The following applies to
+  ADVAN17  as well.)   TOL (relative tolerance) and ATOL (Absolute
+  tolerance) may be specified on the $SUBROUTINE record, the $TOL
+  record, or  by  a  usersupplied  TOL subroutine.  See also the ATOL
+  option of the $ESTIMATION and $COVARIANCE records.
+
+- ATOL is not required.   The  default  is  12  (that  is,  accuracy
+  is 10**(-12)).  Usually the problem runs quickly when using this
+  setting. On occasion, however, you may want to  reduce  ATOL
+  (usually  set  it equal to that of TOL), and improve speeds of up to
+  3 to 4 fold.
+
+- With  ADVAN9,  the  user  may  find that the TOL option should
+  specify larger NRD values than for other ADVANs (e.g., ADVAN6).
+  Values  of  7 or 8 may not be unreasonable.
+
+
+- Reserved  variable MXSTEP (the  maximum  number  of integration
+  steps) can be specified for ADVAN9 and ADVAN15 and ADVAN17, as  well
+  as  for ADVAN13 and ADVAN14 and ADVAN16. (See mxstep).
+
+- With  ADVAN9,  if there is a period of time during which some
+  compartment's amount should be zero, that compartment should be
+  turned  off. Otherwise, very small amounts can appear in the
+  compartment, which can cause difficulties during subsequent time
+  periods.
+
+- By default, the initial conditions  (i.e.,  compartment  amounts)  are
+ zero  at the start of each individual record. Different initial conditions may be specified using a compartment initialization block in PK.
+ When  endogenous  drug is provided in the differential equations, non-
+ zero initial conditions can be  computed  using  a  steady-state  dose
+ event  record  with SS>0 and AMT=0 and RATE=0, or using the I_SS (Initial Steady State) feature of MODEL and/or PK.  Note that with  either
+ method,  steady-state  is  computed only for compartments specified by
+ differential equations.  The equilibrium compartments are not computed
+ (i.e.,  the algebraic equations are not evaluated) until the system is
+ advanced beyond the initial value of TIME.
+ The CALL data item may be used to force a call to  ADVAN,  which  will
+ then evaluate the algebraic equations.
+ (See Compartment_Initialization_Block, SS_dose).
+ (See $model, $pk, model, pk).
+ (See Initial_Steady_State:_I_SS,ISSMOD).
+
+- ADVAN9  uses  the Lawrence Livermore National Laboratory (LLNL) solver
+ for differential-algebraic equations, implicit form (LSODI), using the
+ backward differentiation formulas (BDF) for stiff problems.
+
+- ADVAN15  uses IDA from the LLNL SUNDIALS system for differential-alge-
+ braic equations and is a descendent of  the  LSODI1  (ADVAN9)  system.
+ ADVAN15  also  has  a  root-finding algorithm.  The user may choose to
+ make modifications to parameters in ..\pr\IDAU.f90.
+ See ..\guides\idas_guide.pdf and ..\guides\ida_guide.pdf.
+ See INTRODUCTION TO NONMEM 7, $SUBROUTINES: Yet Another New  Differen-
+ tial Equation Solving Method: IDAS (ADVAN15)
+
+- ADVAN16 and ADVAN17 use the RADAR5 Delay Differential Equation Solver.
+ ADVAN17 may be used when there are equilibrium compartments.
+ See INTRODUCTION TO NONMEM 7,  Using  the  RADAR5  Delay  differential
+ equation Solver with the ddexpand program.
+ See also ..\guides\manrad5-v2.pdf.
+
+- Required PREDPP Library subroutines:
+ ADVAN9 - ADDA, FCN5, JAC, LEQT22, LSODI1, RES, ZSPOW2
+ ADVAN15 - ADDA, FCN5, JAC, LEQT22, IDA, RES, ZSPOW2
+ ADVAN17  -  JAC,  LEQT22,  RADAR5NM, RADAR5U, RES, ZSPOW2, FCN2, FCN4,
+ FCN5
+
+- Note: Analytical second derivatives used with the Laplacian method  are
+      not obtained with ADVAN9 and ADVAN15 and ADVAN17.  Numerical sec-
+      ond derivatives must be used.
+
+- REFERENCES: Guide VI, section VI.B , VII.C.9
+- REFERENCES: Guide IV, section V.C.8
+
+
+*** ADVAN10
+The kinetic equations for the One Compartment Model with Michaelis-Menten Elimination.
+
+| Compt.No. | Function Status | Initial allowed | On/Off Allowed | Dose | Default Dose | Default Obs. |
+|-----------+-----------------+-----------------+----------------+------+--------------+--------------|
+|         1 | Central         | On              | No             | Yes  | Yes          | Yes          |
+|         2 | Output          | Off             | Yes            | No   | No           | No           |
+
+- TOL is required.
+
+- If  steady-state  doses are present, steady-state routine SS6 is
+  used, and consequently a  $DES  block  (or  user-supplied  DES
+  routine)  is required.  Unless there are steady-state infusions, it
+  may be a "dummy routine". (See Guide VI, section VII.C.6)
+
+
+- TRANS routines that may be used: TRANS1
+
+- Basic PK parameter with TRANS1:
+      + VM (maximum rate)
+      + KM (Michaelis constant)
+
+- Additional PK parameters:
+      + S1 - Scale for central compartment (also called SC)
+      + S2 - Scale for output compartment (also called S0)
+      + F1 - Bioavailability for central compartment
+      + R1 - Rate for central compartment
+      + D1 - Duration for central compartment
+      + ALAG1 - Absorption lag for central compartment
+      + F0 - Output fraction (also called F2, FO)
+      + XSCALE - Time scale
+      + MTIME(i) - Model event times
+
+
+- Required internal PREDPP Library subroutines: ADVAN10 - MMPHI
+
+- REFERENCES: Guide VI, section VII.C.6 , VII.C.10
+
+*** ADVAN11
+The kinetic equations for the Three Compartment Linear Model.
+
+| Compt.No. | Function Status | Initial allowed | On/Off Allowed | Dose | Default Dose | Default Obs. |
+|-----------+-----------------+-----------------+----------------+------+--------------+--------------|
+|         1 | Central         | On              | No             | Yes  | Yes          | Yes          |
+|         2 | Peripheral 1    | On              | No             | Yes  | No           | No           |
+|         3 | Peripheral 2    | On              | No             | Yes  | No           | No           |
+|         4 | Output          | Off             | Yes            | No   | No           | No           |
+
+- TRANS routines that may be used: TRANS1, TRANS4, TRANS6
+- Basic PK parameters with TRANS1:
+      + K (rate constant of elimination)
+      + K12 (rate constant from central to peripheral 1)
+      + K21 (rate constant from peripheral 1 to central)
+      + K13 (rate constant from central to peripheral 2)
+      + K31 (rate constant from peripheral 2 to central)
+- Basic PK parameters with TRANS4: (See TRANS4).
+- Basic PK parameters with TRANS6: (See TRANS6).
+- Additional PK parameters:
+      + S1 - Scale for central compartment (also called SC)
+      + S2 - Scale for peripheral compartment 1
+      + S3 - Scale for peripheral compartment 2
+      + S4 - Scale for output compartment (also called S0)
+      + F1 - Bioavailability for central compartment
+      + F2 - Bioavailability for peripheral compartment 1
+      + F3 - Bioavailability for peripheral compartment 2
+      + R1 - Rate for central compartment
+      + R2 - Rate for peripheral compartment 1
+      + R3 - Rate for peripheral compartment 2
+      + D1 - Duration for central compartment
+      + D2 - Duration for peripheral compartment 1
+      + D3 - Duration for peripheral compartment 2
+      + ALAG1 - Absorption lag for central compartment
+      + ALAG2 - Absorption lag for peripheral compartment 1
+      + ALAG3 - Absorption lag for peripheral compartment 2
+      + F0 - Output fraction (also called F4, FO)
+      + XSCALE - Time scale
+      + MTIME(i) - Model event times
+- Steady-state subroutines:  SS11, SS6
+- Other required user or library routines: EXP3
+- Notes:
+  + Analytical second derivatives used with the Laplacian method  are not  obtained with ADVAN11.  Numerical second derivatives must be used.
+  + Can be greatly speeded up if calls to PK can  be  limited.   (Use CALLFL=1  in  $PK to call once per IR, and use the CALL data item to force additional calls  if  and  when  necessary;  e.g.,  when covariates used in the PK model change.)
+
+*** ADVAN12
+The kinetic equations for the Three Compartment  Linear  Model  with
+First  Order Absorption.
+
+| Compt.No. | Function Status | Initial allowed | On/Off Allowed | Dose | Default Dose | Default Obs. |
+|-----------+-----------------+-----------------+----------------+------+--------------+--------------|
+|         1 | Depot           | Off             | Yes            | Yes  | Yes          | No           |
+|         2 | Central         | On              | No             | Yes  | No           | Yes          |
+|         3 | Peripheral1     | On              | No             | Yes  | No           | No           |
+|         4 | Peripheral2     | On              | No             | Yes  | No           | No           |
+|         5 | Output          | Off             | Yes            | No   | No           | No           |
+
+- TRANS routines that may be used: TRANS1, TRANS4, TRANS6
+
+- Basic PK parameters with TRANS1:
+      + K (rate constant of elimination)
+      + K23 (rate constant from central to peripheral 1)
+      + K32 (rate constant from peripheral 1 to central)
+      + K24 (rate constant from central to peripheral 2)
+      + K42 (rate constant from peripheral 2 to central)
+      + KA (rate constant of absorption)
+
+- Basic PK parameters with TRANS4: (See TRANS4).
+
+- Basic PK parameters with TRANS6: (See TRANS6).
+
+- Additional PK parameters:
+      + S1 - Scale for depot compartment
+      + S2 - Scale for central compartment (also called SC)
+      + S3 - Scale for peripheral compartment 1
+      + S4 - Scale for peripheral compartment 2
+      + S5 - Scale for output compartment (also called S0)
+      + F1 - Bioavailability for depot compartment
+      + F2 - Bioavailability for central compartment
+      + F3 - Bioavailability for peripheral compartment 1
+      + F4 - Bioavailability for peripheral compartment 2
+      + R1 - Rate for depot compartment
+      + R2 - Rate for central compartment
+      + R3 - Rate for peripheral compartment 1
+      + R4 - Rate for peripheral compartment 2
+      + D1 - Duration for depot compartment
+      + D2 - Duration for central compartment
+      + D3 - Duration for peripheral compartment 1
+      + D4 - Duration for peripheral compartment 2
+      + ALAG1 - Absorption lag for depot compartment
+      + ALAG2 - Absorption lag for central compartment
+      + ALAG3 - Absorption lag for peripheral compartment 1
+      + ALAG4 - Absorption lag for peripheral compartment 2
+      + F0 - Output fraction (also called F5, FO)
+      + XSCALE - Time scale
+      + MTIME(i) - Model event times
+
+- Steady-state subroutines:  SS12, SS6
+
+- Other required user or library routines: EXP3,  EXP4
+- Notes:
+ + Analytical  second derivatives used with the Laplacian method are not obtained with ADVAN12.  Numerical second derivatives must  be used.
+
+ + Can  be  greatly  speeded up if calls to PK can be limited.  (Use CALLFL=1 in $PK to call once per IR, and use the CALL  data  item to  force  additional  calls  if  and  when necessary; e.g., when covariates used in the PK model change.)
+
+*** TRANS2
+Used with ADVAN1 or ADVAN2.  It performs a reparameterization of the
+basic  PK  parameters to the internal parameters K and KA.
+
+- Basic PK parameters for ADVAN1, TRANS2:
+      + CL   clearance
+      + V    volume of distribution
+      + Relationship: K=CL/V
+
+- Basic PK parameters for ADVAN2, TRANS2:
+      + CL   clearance
+      + V    volume of distribution
+      + KA   rate constant of absorption
+      + Relationship: K=CL/V, KA=KA
+
+
+- REFERENCES: Guide VI, section III.A , VII.C.1
+
+*** TRANS3
+Used with ADVAN3 or ADVAN4.  It performs a reparameterization of the
+basic  PK  parameters to the internal parameters K, K12, K21, and KA.
+
+- Basic PK parameters for ADVAN3, TRANS3:
+      + CL    clearance
+      + V     central volume
+      + Q     intercompartmental clearance
+      + VSS   volume of distribution at steady-state
+      + Relationship: K=CL/V, K12=Q/V, K21=Q/(VSS-V).
+
+- Basic PK parameters for ADVAN4, TRANS3:
+      + CL    clearance
+      + V     central volume
+      + Q     intercompartmental clearance
+      + VSS   volume of distribution at steady-state
+      + KA    absorption rate constant
+      + Relationship: K=CL/V, K23=Q/V, K32=Q/(VSS-V), KA=KA
+
+
+- REFERENCES: Guide VI, section III.A , VII.C.3
+
+*** TRANS4
+Used with ADVAN3, ADVAN4, ADVAN11, or ADVAN12.  It performs a
+reparameterization of  the basic PK parameters to the internal
+parameters K, K12, K21, and KA.
+
+- Basic PK parameters for ADVAN3, TRANS4:
+      + CL   clearance
+      + V1   central volume
+      + Q    intercompartmental clearance
+      + V2   peripheral volume
+      + Relationship: K=CL/V1, K12=Q/V1, K21=Q/V2
+
+- Basic PK parameters for ADVAN4, TRANS4:
+      + CL   clearance
+      + V2   central volume
+      + Q    intercompartmental clearance
+      + V3   peripheral volume
+      + KA   absorption rate constant
+      + Relationship: K=CL/V2, K23=Q/V2, K32=Q/V3, KA is unchanged
+
+- Basic PK parameters for ADVAN11, TRANS4:
+      + CL   clearance
+      + V1   central volume
+      + Q2   intercompartmental clearance (central and periph. 1)
+      + V2   peripheral 1 volume
+      + Q3   intercompartmental clearance (central and periph. 2)
+      + V3   peripheral 2 volume
+      + Relationship: K=CL/V1, K12=Q2/V1, K21=Q2/V2, K13=Q3/V1, K31=Q3/V3
+
+- Basic PK parameters for ADVAN12, TRANS4:
+      + CL   clearance
+      + V2   central volume
+      + Q3   intercompartmental clearance (central and periph 1)
+      + V3   peripheral 1 volume
+      + Q4   intercompartmental clearance (central and periph 2)
+      + V4   peripheral 2 volume
+      + KA   absorption rate constant
+      + Relationship: K=CL/V2, K23=Q3/V2, K32=Q3/V3, K24=Q4/V2, K42=Q4/V4, KA=KA
+
+
+- REFERENCES: Guide VI, section VII.C.3 , VII.C.4
+
+*** TRANS5
+Used with ADVAN3 or ADVAN4.  It performs a reparameterization of the
+basic  PK  parameters to the internal parameters K, K12, K21, and KA.
+
+- Basic PK parameters for ADVAN3, TRANS5:
+      + AOB     A/B
+      + ALPHA   alpha
+      + BETA    beta
+      + Relationship:
+         - K21=(AOB*BETA+ALPHA)/(AOB+1)
+         - K=(ALPHA*BETA)/K21
+         - K12=ALPHA+BETA-K21-K
+
+- Basic PK parameters for ADVAN4, TRANS5:
+      + AOB     A/B
+      + ALPHA   alpha
+      + BETA    beta
+      + KA      absorption rate constant
+      + Relationship:
+        - K32=(AOB*BETA+ALPHA)/(AOB+1)
+        - K=(ALPHA*BETA)/K32
+        - K23=ALPHA+BETA-K32-K
+        - KA=KA
+
+
+- REFERENCES: Guide VI, section VII.C.3 , VII.C.4
+
+*** TRANS6
+Used with ADVAN3, ADVAN4, ADVAN11, and ADVAN12.  It performs a
+reparameterization of the basic PK parameters.
+
+- Basic PK parameters for ADVAN3, TRANS6:
+      + ALPHA   alpha
+      + BETA    beta
+      + K21     rate constant (peripheral to central)
+      + Relationship:
+        - K=ALPHA*BETA/K21
+        - K12=ALPHA+BETA-K21-K
+      + Constraint: Assuming that ALPHA < BETA, then ALPHA < K21 < BETA.
+      The roles of ALPHA and BETA are exchangeable.
+
+- Basic PK parameters for ADVAN4, TRANS6:
+      + ALPHA   alpha
+      + BETA    beta
+      + K32     rate constant (peripheral to central)
+      + KA      absorption rate constant
+      + Relationship:
+        - K=ALPHA*BETA/K32
+        - K23=ALPHA+BETA-K32-K
+        - KA is unchanged
+      + Constraint: assuming that ALPHA < BETA, then ALPHA < K32 < BETA. The roles of ALPHA and BETA are exchangeable.
+
+- Basic PK parameters for ADVAN11, TRANS6:
+      + ALPHA   alpha
+      + BETA    beta
+      + GAMMA   gamma
+      + K21     rate constant (peripheral 1 to central)
+      + K31     rate constant (peripheral 2 to central)
+      + Relationship:
+        - K=ALPHA*BETA*GAMMA/(K21*K31)
+        - K13=(P+K31*K31-K31*S-K*K21)/(K21-K31)
+        - K12=S-K-K13-K21-K31
+        - S=ALPHA+BETA+GAMMA
+        - P=ALPHA*BETA+ALPHA*GAMMA+BETA*GAMMA
+
+      + Constraint: Assuming that ALPHA<BETA<GAMMA, then
+        ALPHA<K21<BETA<K31<GAMMA, or ALPHA<K31<BETA<K21<GAMMA. The
+        roles of ALPHA, BETA, GAMMA, K21, K31, K12, and K13 are
+        symmetric and are exchangeable.
+
+- Basic PK parameters for ADVAN12, TRANS6:
+      + ALPHA   alpha
+      + BETA    beta
+      + GAMMA   gamma
+      + K32     rate constant (peripheral 1 to central)
+      + K42     rate constant (peripheral 2 to central)
+      + KA      absorption rate constant
+      + Relationship:
+        - K=ALPHA*BETA*GAMMA/(K32*K42)
+        - K24=(P+K42*K42-K42*S-K*K32)/(K32-K42)
+        - K23=S-K-K24-K32-K42
+        - S=ALPHA+BETA+GAMMA
+        - P=ALPHA*BETA+ALPHA*GAMMA+BETA*GAMMA
+        - KA is unchanged
+      + Constraint: assuming that ALPHA<BETA<GAMMA, then
+        ALPHA<K32<BETA<K42<GAMMA or ALPHA<K42<BETA<K32<GAMMA. The
+        roles of ALPHA, BETA, GAMMA, K32, K42, K23, and K24 are
+        symmetric and are exchangeable.
+
+*** SS
+The  SS  option tells NM-TRAN that a SS routine should be included in
+the NONMEM/PREDPP executable.  It is optional.
+
+Most analytic ADVAN routines have a corresponding internal specific SS routine,
+except for ADVAN8 and ADVAN10, for which SS6 is used.
+
+If  the  SS data item is present in the $INPUT record, then an SS routine is required in the NONMEM/PREDPP executable.  NM-TRAN will supply the  SS  option  of the $SUBROUTINES record if it is not present.  The default pairing of ADVAN and SS routines is:
+| ADVAN1  | SS1  |
+| ADVAN2  | SS2  |
+| ADVAN3  | SS3  |
+| ADVAN4  | SS4  |
+| ADVAN5  | SS5  |
+| ADVAN6  | SS6  |
+| ADVAN7  | SS7  |
+| ADVAN8  | SS6  |
+| ADVAN9  | SS9  |
+| ADVAN10 | SS6  |
+| ADVAN11 | SS11 |
+| ADVAN12 | SS12 |
+| ADVAN13 | SS6  |
+| ADVAN14 | SS6  |
+| ADVAN15 | SS9  |
+| ADVAN16 | SS6  |
+| ADVAN17 | SS9  |
+| ADVAN18 | SS6  |
+
+The SS option can be used to request creation of a NONMEM/PREDPP
+executable which contains an SS routine even though the current data
+set does not contain the SS data item.
+
+The  only  real  effect  of  the  SS option is to include
+corresponding SS routine into executible building process.
+
+When the SS option is not included on the $SUBROUTINES record, and the
+SS data item does not appear on the $DATA record, an internal dummy
+SSS  routine (SSS0) is used.
+
+- The SS6 subroutine computes steady-state kinetics in  a  very
+  general way  and  may  be  used  with  any choice of ADVAN (other
+  than ADVAN9, ADVAN15, or ADVAN17, with which only SS9 can be  used).
+  With  NONMEM 7.4,  SS6  is  the  only  steady-state  routine  that
+  can be used with ADVAN6, ADVAN8, ADVAN10, ADVAN13, ADVAN14, ADVAN16,
+  ADVAN18 (With earlier versions of NONMEM 7, SS13 was used with
+  ADVAN13.)
+  + A DES subroutine (or $DES block) is required to use SS6 & SS9.
+  + TOL is required.
+  + With NONMEM 7.4, values of TOL and ATOL may be specified  for
+    evaluations of Steady State amounts. See  options  SSATOL  and
+    SSATOLC of the $SUBROUTINE and $TOL records, and the TOL routine.
+  + Required PREDPP Library internal subroutines:
+    - With SS6: ZSPOW1, FCN1, FCN2
+    - With SS9: ZSPOW1, FCN2, FCN4
+
+REFERENCES: Guide VI, section VI.C , VII.B , VII.C.6 , VI.C.9
+
+REFERENCES: Guide IV, section V.C.3 , V.C.10
+
+REFERENCES: Guide VI, section VII
+
+
+** Other options
+*** SUBROUTINES=kind
+      Specifies  the  kind  of subroutines to be included in the NONMEM
+      executable ("kind" must be DP - double precision).
+
+*** TOL=n
+      When PREDPP is specified with an ADVAN that requires a  TOL  rou-
+      tine,  this  option  can  be  used  to  supply  a NRD ("number of
+      required digits") value. "n" is an integer.  This is  a  relative
+      tolerance.
+
+      For  TOL and the options that follow (ATOL, SSTOL, SSATOL), it is
+      also possible to code TOL=name to specify the name of a user-sup-
+      plied TOL routine, or to include $TOL abbreviated code, either of
+      which allows all these values to be assigned by  compartment.   A
+      user-supplied  TOL  routine  also allows values to be assigned by
+      compartment and for each NONMEM step.  See also the TOL option of
+      the $COVARIANCE record.  Required.
+
+*** ATOL=n
+      Specifies  the  absolute  tolerance for ADVAN9, ADVAN13, ADVAN14,
+      ADVAN15, ADVAN16, ADVAN17, and  ADVAN18.   Optional.  Default  is
+      1.0E-12.   See  also  the  ATOL  option  of  the  $ESTIMATION and
+      $COVARIANCE records.
+
+*** SSTOL=n
+      Specifies the relative tolerance  for  Steady  State  evaluation.
+      Optional. Default is TOL.
+
+*** SSATOL=n
+      Specifies  the  absolute  tolerance  for Steady State evaluation.
+      Optional. Default is ATOL.
+
+** REFERENCES
+Guide IV, section III.B.6
