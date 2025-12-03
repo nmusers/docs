@@ -694,56 +694,6 @@ Where a subscript is permitted or necessary, it may  be  an  integer
    character string that is replaced by an integer constant  using  the
    $ABBR REPLACE feature.
 
-** NONMEM_RESERVED
-   There  are many variables that are generally internal to NONMEM, and
-   often are not needed by users except  occasionally,  which  are  not
-   explicitly  recognized  by NMTRAN, and so cannot be used in abbrevi-
-   ated code, but must be used with verbatim code ("  at  beginning  of
-   line).   A  convenient means of accessing such variables, as well as
-   letting NMTRAN allow you to use the variables in abbreviated code is
-   to  place the MODULE definitions in an include file that begins with
-   the name NONMEM_RESERVED (case insensitive).  Insert include  state-
-   ments for such files at the beginning of the block(s) of abbreviated
-   code in which you want to use them.  The user may use any  of  these
-   variables  without  using  verbatim  code.   NMTRAN "reads" the non-
-   mem_reserved file, and remembers the variables declared in there  as
-   acceptable to use.
-
-   A  list  of  useful  variables  and  their  meanings  are  listed in
-    ..\guides\useful_variables.pdf.  Be careful in their  use,  as  you
-   have  the  ability to change the values of these reserved variables,
-   and this could crash the system if you change the wrong thing.
-
-   NONMEM_RESERVED_GENERAL in the ..\util directory has a  few  of  the
-   quite useful variables listed.  It needs to be copied to the present
-   run directory so that NM-TRAN has access to it.  Note that there may
-   be  user-defined  variable names in the control stream that inadver-
-   tently have the same names as variables in  NONMEM_RESERVED_GENERAL,
-   which  may  cause compiler errors.  If so, make a smaller version of
-   NONMEM_RESERVED_GENERAL  with  a  name  also  starting  with   "NON-
-   MEM_RESERVED"  that contains only those reserved variables of inter-
-   est.
-
-   As an example,
-
-   NONMEM_RESERVED_GENERAL contains
-
-   " USE NMBAYES_INT, ONLY: ITER_REPORT,BAYES_EXTRA_REQUEST,BAYES_EXTRA
-
-   These variables can be used as shown in example 8:
-
-   $PK
-   include nonmem_reserved_general
-   BAYES_EXTRA_REQUEST=1
-    ....
-   IF(BAYES_EXTRA==1 .AND. ITER_REPORT>=0 .AND. TIME==0.0) THEN
-   WRITE(50,*) ITER_REPORT,ID,CL,V1,Q,V2
-   ENDIF
-
-   ITER_REPORT contains the present iteration number as reported to the
-   console  or NONMEM report file.  BAYES_EXTRA and BAYES_EXTRA_REQUEST
-   are described in example8.ctl.
-
 ** Reserved and other functions
    The nonmem_reserved_general  file  contains  function  declarations,
    such  as  TFI and TFD, which are convenient functions to easily

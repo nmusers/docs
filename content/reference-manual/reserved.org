@@ -301,6 +301,44 @@ ROCM_REAL:  TEMPLT                                     ! $ERROR $MIX $PRED
 ROCM_REAL:  THETA,DATA                                 ! $MIX $PRED $INFN
 #+end_src
 
+** NONMEM_RESERVED
+Some internal NONMEM variables are not directly available in NM-TRAN
+abbreviated code and normally require verbatim code. A way around this
+is to put their MODULE definitions in an include file whose name
+starts with NONMEM_RESERVED (case-insensitive), then include that file
+at the start of any abbreviated-code block that needs them. After
+that, NM-TRAN treats those variables as allowed in abbreviated code,
+so they can be used without verbatim sections.
+
+A  list  of  [[guides/useful_variables.pdf][variables]] has been compiled. They require judicious use.
+
+The =NONMEM_RESERVED_GENERAL= file in the ..\util directory has a  few
+of  the quite useful variables listed.  It needs to be copied to the
+present run directory so that NM-TRAN has access to it.  Note that
+there may be  user-defined  variable names in the control stream that
+inadvertently have the same names as variables in
+NONMEM_RESERVED_GENERAL, which  may  cause compiler errors.  If so,
+make a smaller version of NONMEM_RESERVED_GENERAL  with  a  name  also
+starting  with   "NONMEM_RESERVED"  that contains only those reserved
+variables of interest.
+
+For example, =NONMEM_RESERVED_GENERAL= contains
+#+begin_src f90
+USE NMBAYES_INT, ONLY: ITER_REPORT,BAYES_EXTRA_REQUEST,BAYES_EXTRA
+#+end_src
+These variables can be used as shown in example 8:
+#+begin_src php
+$PK
+include nonmem_reserved_general
+BAYES_EXTRA_REQUEST=1
+ ....
+IF(BAYES_EXTRA==1 .AND. ITER_REPORT>=0 .AND. TIME==0.0) THEN
+WRITE(50,*) ITER_REPORT,ID,CL,V1,Q,V2
+ENDIF
+#+end_src
+ITER_REPORT contains the present iteration number as reported to the
+console  or NONMEM report file.  BAYES_EXTRA and BAYES_EXTRA_REQUEST
+are described in example8.ctl.
 
 ** Model event times
 Model event times are additional PK parameters defined in the PK
