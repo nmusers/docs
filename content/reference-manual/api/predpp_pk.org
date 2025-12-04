@@ -1,6 +1,1144 @@
 #+title: PREDPP variales
 * PREDPP global variales
+** PRED global variables
+*** Prior simulation: ICMAX
+#+begin_src f90
+ USAGE:
+      USE NMPR_INT, ONLY: ICMAX=>IMAXSIM
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: IMAXSIM
+#+end_src
+This variable allows the user to control the behavior of the NWPRI and
+TNPRI NONMEM utility routines.  It is relevant during simulation  when
+PRIOR  sets  ISS  to  a  non-zero  value.  By default, NWPRI and TNPRI
+attempt at most 100 times to obtain a sample.  After  that  number  of
+attempts, they terminate with the message
+#+begin_src txt
+ MAXIMUM ATTEMPTS TO OBTAIN SAMPLE EXCEEDED
+#+end_src
+
+- ICMAX: setting ICMAX overrides the default value of 100, e.g., in a PRIOR subroutine:
+  #+begin_src f90
+       USE NMPR_INT, ONLY: ICMAX=>IMAXSIM
+   ... other code ...
+       ICMAX=500
+  #+end_src
+
+*** Simulation: SIMEPS error code
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: IERSQ
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: IERSQ
+#+end_src
+For user-defined PRED and ERROR routines.
+
+SIMEPS is only relevant when correlations are stored in CORRL2. (See Correlation_Across_L2_Records).
+
+- IERSQ: the SIMEPS error return code.
+   + IERSQ=0: Normal return
+   + IERSQ=1:  Correlation  matrix  obtained  using  the  correlations
+     stored in CORRL2 is not positive definite.
+
+  PRED may attempt corrective action; if it does  so  successfully, it should reset IERSQ to 0.
+
+Up to NONMEM through 7.2, C was used rather than CORRL2; Up to  NONMEM
+7.3, the value of IERSQ is not checked in generated code.
+
+*** Correlation across L2 records
+#+begin_src f90
+ USAGE:
+      CORRL2(n,m)=...
+#+end_src
+For PRED and ERROR routines.
+
+An  individual  record  is  divided into L2 records.  An L2 record may
+contain one or more observations (on one or more separate data records
+respectively),  in  which  case it is called an observation-L2 record.
+The values of epsilons used in the intraindividual model may be
+correlated across the observations contained in the L2 record, and
+thus the L2 record may define a multivariate observation - the L2
+observation. (When  all  L2  observations  in  the data set are
+univariate, L2 data items need not appear, and when L2 data items do
+not  appear,  NONMEM assumes that each data record is a distinct L2
+record.)
+
+By  default,  the values of a given epsilon are statistically
+independent across  L2  observations  within  an  individual  record.
+Using CORRL2,  however, these values may be correlated.  More
+precisely, the values of the epsilons associated with the mth diagonal
+block of SIGMA may  be  correlated  across L2 observations, and it
+will be understood that for two different epsilons (eps1 and eps2,
+say)  associated  with the  mth  block,  the  correlation  between
+the values of eps1 for L2 observations A and B will be taken to be the
+same as  the  correlation between the values of eps2 for these same
+two L2 observations.
+
+With NONMEM 7.3, reserved variable CORRL2 is used and code such as the
+following may be used in $ERROR and $PRED blocks.
+
+Proceed as follows.  With the first data record of  the  nth
+observation-L2 record, and with respect to the values of the epsilons
+associated with the mth diagonal block of SIGMA, the PRED routine
+should set CORRL2(k,m), for k=1,...,n, to the correlation  between the
+values for the kth L2 observation  and  the  nth  L2  observation.
+(CORRL2(n,m) should be set to 1.0; in particular, with the first data
+record of the 1st observation-L2 record, CORRL2(1,m) should be set to
+1.0.)
+
+For example, assume bivariate L2 observations chronologically ordered
+by TIME, additionally that the intraindividual model has two Epsilons
+(one for each element of the bivariate  L2 observation),  each
+associated with the same diagonal block of SIGMA. Then the values of
+these epsilons may be autocorrelated across the  L2 observations,  as
+specified by the above code. But if the two epsilons are associated
+with two different diagonal blocks, then one might  use this  code,
+in  which  each sigma  block has its own autocorrelation parameter
+theta(4) or theta(5):
+
+#+begin_src php
+ $ABBREVIATED DECLARE T1(NO)
+ $ABBREVIATED DECLARE INTEGER I1
+ $ABBREVIATED DECLARE DOWHILE J1
+
+ IF (NEWL2==1.AND.EVID==0) THEN
+   I1=I1+1
+   T1(I1)=TIME
+   J1=1
+   DO WHILE (J1<=I1)
+   CORRL2(J1,1)=EXP(-THETA(4)*(TIME-T1(J1))) ; Sigma block 1
+   CORRL2(J1,2)=EXP(-THETA(5)*(TIME-T1(J1))) ; Sigma block 2
+   J1=J1+1
+   ENDDO
+ ENDIF
+
+ $THETA 2  ;[CL]
+ $THETA 30 ;[V]
+ $THETA 0.05 ;[Rho1]
+ $THETA 0.075 ;[Rho2]
+#+end_src
+If you wish to have more control as to when  the  CORRL2  is  used  to
+model  among  the  individual data records within the L2 records,
+consider the following example:
+
+#+begin_src php
+ $ABBR DECLARE T1(NO),
+ $ABBR DECLARE INTEGER I1, DOWHILE J1
+
+ $ERROR
+ IF (NEWIND.NE.2) I1=0
+
+ IF (NEWL2==1) THEN
+   I1=I1+1
+   T1(I1)=TIME
+   J1=1
+   DO WHILE (J1<=I1)
+   IF(MV1==0.0) CORRL2(J1,1)=EXP(-THETA(4)*(TIME-T1(J1)))
+   IF(MV2==0.0) CORRL2(J1,2)=EXP(-THETA(5)*(TIME-T1(J1)))
+   J1=J1+1
+   ENDDO
+ ENDIF
+ IF(CMT==1) Y=F+F*EPS(1)+EPS(2)
+ IF(CMT==2) Y=F+F*EPS(3)+EPS(4)
+  ...
+ $SIGMA BLOCK(2)
+ 0.3
+ 0.001 0.04
+ $SIGMA BLOCK(2)
+ 0.7
+ 0.001 0.08
+#+end_src
+Here MV1 and MV2  data item that is assumed to exist in the data  set,
+and MV signals the desire to use CORRL2 on an L2 observation within an
+L2 record,  on the first data record of the L2 record.  The  following
+is a section of data to indicate more clearly how this may be set up:
+#+begin_src f90
+ ID   TIME L2 MV1 MV2 CMT DV
+ 1    2.0  1  0   0   1   0.8
+ 1    2.0  1  0   0   2   10.0
+ 1    4.0  2  0   0   1   0.6
+ 1    4.0  2  0   0   2   12.0
+ 1    6.0  3  1   1   1   0.3
+ 1    6.0  3  1   1   2   20.0
+ 1   10.0  4  1   0   1   0.1
+ 1   10.0  4  1   0   2   15.0
+ 1   14.0  5  1   1   1   0.03
+#+end_src
+Only  data  points  with times 2, 4, and 10 hours will incorporate the
+correlation of the CORRL2 model. Furthermore the  record  of  time  10
+hours has MV1=1 and MV2=0, so the observation record in the 10 hour L2
+record that uses Sigma block 2 will have a CORRL2 assessment,  whereas
+the observtation in the 10 hour L2 record that uses Sigma block 1 will
+not be CORRL2 modeled.  In the above example, Sigma block  1  consists
+of EPS(1) and EPS(2), and Sigma block 2 consists of EPS(3) and EPS(4),
+with the CMT value determining which  data  records  use  which  Sigma
+blocks (epsilons sets) based on how Y is evaluated.
+
+ RESTRICTIONS:
+
+ With  versions  of  NONMEM  before  7.3,  C should be used rather than
+ CORRL2.  Because C is not recognized by NM-TRAN, and because of  other
+ restrictions  regarding  abbreviated  code,  a  specification of C, as
+ above, within a block of abbreviated code, must be done using verbatim
+ code.  See help for that version of NONMEM.
+
+ SIMULATION WITH POPULATION DATA AND AUTO-CORRELATION
+
+ If  population  data are simulated, the correlations must be stored in
+ CORRL2 before the NONMEM utility routine SIMEPS is called.  With  NON-
+ MEM  7.3,  code  such as the following may be used in $ERROR and $PRED
+ blocks.  Because the value of CORRL2 is set before SIMEPS  is  called,
+ NM-TRAN omits the usual default call to SIMEPS.
+
+ $ABBR DECLARE T(NO), INTEGER I, DOWHILE J
+
+ IF (ICALL == 4) THEN
+ IF (NEWIND /= 2) I=0
+ IF (MDV == 0) THEN
+    I=I+1
+    T(I)=TIME
+    J=1
+    DO WHILE (J <= I)
+    CORRL2(J,1)=EXP(-THETA(4)*(TIME-T(J)))
+    J=J+1
+    ENDDO
+ ENDIF
+ CALL SIMEPS(EPS)
+ ENDIF
+
+ RESTRICTIONS:
+
+ With  versions  of  NONMEM  before  7.3,  C should be used rather than
+ CORRL2.  Because C is not recognized by NM-TRAN, and because of  other
+ restrictions  regarding  abbreviated  code,  a  specification of C, as
+ above, within a block of abbreviated code, must be done using verbatim
+ code.  Since NM-TRAN generated code has a call to SIMEPS in its second
+ section (see Guide IV), this means that correlations must be  computed
+ and  stored  using  verbatim code in the "FIRST block. (Details can be
+ supplied on request.)
+
+ SINGLE-SUBJECT DATA
+
+ "Single-subject data" with correlated residual error, can be simulated
+ and  analyzed.   To  do  this, though, a technique is needed which can
+ always be used with such data: the data are handled  as  data  from  a
+ population  sample  with a single individual, and OMEGA is constrained
+ to be 0.
+
+ (See Simulation:_SIMEPS_Error_Code)
+
+
+*** PRED: EXIT
+With versions of NONMEM before 7.4.2:
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: IERPRD,NETEXT
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: IERPRD,NETEXT
+#+end_src
+With versions of NONMEM starting with 7.4.2:
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: IERPRD,IERPRDU,NETEXT
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: IERPRD,IERPRDU,NETEXT
+#+end_src
+- IERPRD: the  PRED  error return code; also called the PRED exit code.  Is set to 0 before PRED is called.
+  + IERPRD=0: Normal return
+  + IERPRD=1: PRED is unable to compute.  If possible, NONMEM  should attempt recovery.
+  + IERPRD=2:  PRED  is  unable  to compute.  NONMEM should abort the run.
+
+- NETEXT:
+  + NETEXT=0 to 3: the number of lines of text of  an  error  message
+    stored by PRED in ETEXT (See PRED Error Message).
+
+- Values may be stored in IERPRD two ways. PREDPP may store error
+  messages such as PK  PARAMETER  FOR  KA  IS NON-POSITIVE in ETEXT
+  and set IERPRD=1 and K=1.  (In effect, EXIT 1 1).
+
+- In abbreviated code, whether or not  PREDPP  is  used,  the
+  statement "EXIT n k" causes n to be stored in IERPRD.  The value of
+  k is part of the error message in ETEXT, which is reported  in  the
+  NONMEM  output report and in file PRDERR.
+
+- With NONMEM 7.4.2, there is a new variable, IERPRDU.  Both n and k
+  are stored in IERPRDU.  k must be between 0 and 999. The value
+  stored  is n*10000+k.  E.g., "EXIT 1 500" is stored in IERPRDU
+  as 10500.
+
+- With  NONMEM 7.5 and later, values of k between 1000 and 9999 are
+  permitted.  E.g., "EXIT 1 2000" is stored in IERPRDU as 12000.
+
+- PREDPP will not set these values; only the EXIT statement in
+  abbreviated  code can do this.  IERPRDU is ignored if it is not the
+  Simuation Step.  For NONMEM 7.5 use of the error code during
+  simulation, (See Simulation Block) and look for "Simulation Error
+  Forgiveness".
+
+REFERENCES: Guide V, section 12.4.15
+
+REFERENCES: Guide VI, section III.K.2 , IV.F
+
+REFERENCES: Guide IV, section IV.G
+
+REFERENCES: Guide Introduction_7
+
+*** NPD,NPDE,NPDE_MODE,DV_LOQ,CDF_L,DV_LAQ_CDF_LA
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: NPDE_MODE
+      USE NMPRD_REAL, ONLY: DV_LOQ
+
+ GLOBAL DECLARATION:
+             INTEGER(KIND=ISIZE) ::  NPDE_MODE
+             REAL(KIND=DPSIZE) :: DV_LOQ
+#+end_src
+- NPDE: Monte-Carlo generated normalized probability distribution error.
+
+- NPD:  the correlated (or non-decorrelated) NPDE value.
+
+- NPD and NPDE are calculated at the Table Step if listed in $TABLE or
+  $SCATTER, in that case, NONMEM sets NPDE_MODE=1, otherwise
+  NPDE_MODE=0.
+
+- Example: the code below incorporates Limit of Quantification (LOQ) data into NPDE assessments.
+  #+begin_src php
+  ; TYPE and LOQ are user-defined in previous code, or data item.
+  $ERROR
+  SD = THETA(5)
+  IPRED = LOG(F)
+  DUM = (LOQ - IPRED) / SD
+  CUMD = PHI(DUM)
+  IF (TYPE .EQ. 1.OR.NPDE_MODE.EQ.1) THEN
+        F_FLAG = 0
+        Y = IPRED + SD * ERR(1)
+  ENDIF
+  IF (TYPE .EQ. 2.AND.NPDE_MODE.EQ.0) THEN
+        F_FLAG = 1
+        Y = CUMD
+        MDVRES=1
+  ENDIF
+  IF(TYPE.EQ.2) DV_LOQ=LOQ
+    ....
+  $TABLE NPD NPDE
+  #+end_src
+
+  By default, DV_LOQ is set to -1.0d-300  by  the  NONMEM  routine
+  that calls PREDPP/PRED.  If the user's ERROR/PRED sets DV_LOQ to
+  some other value and NPDE_MODE=1, then the NPDE is being  evaluated
+  during  that time,  and this censored value is to be treated as if
+  it is a non-censored datum with value of LOQ (DV_LOQ=LOQ), utilizing
+  a  standard  F_FLAG=0  definition  for Y.  Note that during
+  estimation of the objective function (when NPDE_MODE=0), NPDE  is
+  not being evaluated, and censored values should be treated using
+  F_FLAG=1, and Y must be defined as the integral of the normal
+  density from  -inf to LOQ.
+
+- New in nm74, for use with NPD, the user may supply the cumulative
+  distribution function using the reserved variable CDF_L; New in
+  nm743, you can specify an above  quantifiable  limit  with  the
+  reserved  parameter DV_LAQ as well.  The CDF reserved variable
+  associated with above quantitation level DV_LAQ is CDF_LA. The
+  DV_LOQ/CDF_L and DV_LAQ/CDF_LA reserved variables may be also used
+  for evaluating NPD diagnostics for categorical data.
+
+REFERENCES: Guide Introduction_7
+
+*** ETASXI
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: ETASXI
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE), ALLOCATABLE, DIMENSION(:)   :: ETASXI
+#+end_src
+With NONMEM 7, an alternative ETA shrinkage evaluation using empirical
+Bayes variances (EBVs, or conditional mean  variances)  are reported.
+By default the $ESTIMATION record option ETASTYPE=0 requests that ETA
+shrinkage be averaged for all subjects.  With ETASTYPE=1,  ETA
+shrinkage  is averaged only among subjects with non-zero derivative of
+their data likelihood with  respect  to that ETA.
+
+- ETASXI(i): used to specify certain ETAs of particular subjects to be
+  included, or to specify certain etas of certain  subjects  to be
+  excluded, from the average eta shrinkage assessment.  ETASXI stands
+  for eta shrinkage exclude/include.  The subscript i refers to
+  ETA(i). ETASXI(i) overrides ETASTYPE.
+  + If ETASXI(i) is set to 2, ETA(i) is included.
+  + If ETASXI(i) is set to 1, ETA(i) is excluded.
+  ETASXI may be set only in $PK and $PRED blocks.
+
+For example, with
+#+begin_src f90
+ ETASXI(3)=1
+ ETASXI(4)=2
+#+end_src
+for all subjects, ETA(3) is excluded and ETA(4) is included.
+while with
+#+begin_src f90
+ IF(ID==3)  ETASXI(1)=1
+ IF(ID==23) ETASXI(3)=2
+#+end_src
+ETA(1) is excluded for subject 1, and ETA(3) included for subject 23.
+
+The additional output file root.shm ("shrinkage  map") contains
+information which ETAs are excluded in the ETA shrinkage assessment.
+
+REFERENCES: Guide Introduction_7
+
+*** PRED error message
+#+begin_src f90
+ USAGE:
+      USE NMPRD_CHAR, ONLY :: ETEXT
+
+ GLOBAL DECLARATION:
+      CHARACTER(LEN=132) :: ETEXT(3)
+#+end_src
+- ETEXT: user message which appears as part of the PRED error message.
+  When PRED returns to NONMEM with IERPRD>0, PRED  may  store  here
+  one  to  three  lines of text explaining the error, for printing.
+  The number of lines of text to  be  printed  must  be  stored  in
+  NETEXT. (See PRED Exit Code)
+
+When  abbreviated  code is used, the EXIT statement causes appropriate text to be stored in ETEXT.
+
+
+REFERENCES: Guide VI, section III.K.2 , IV.F
+
+REFERENCES: Guide IV, section IV.G
+
+*** CTUP
+#+begin_src f90
+ USAGE:
+      USE NMPR_REAL, ONLY CTUP,DCTUP,DDCTUP
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: DPSIZE,LVR
+      REAL(KIND=DPSIZE) :: CTUP,DCTUP(LVR),DDCTUP(LVR,LVR)
+#+end_src
+An observation can represent the event that a normally distributed variable falls within a specified interval. NONMEM automatically computes the likelihood for this event. In the data record, specify the variable’s mean and variance as usual, and set CTUP to the interval’s upper endpoint.
+
+If the endpoint depends on an ETA variable (for population data), also provide its first and second derivatives with respect to ETAs. Derivatives equal to 0 need not be set, and only the lower-triangular elements of DDCTUP are required.
+
+CTUP may be assigned in $PRED or $ERROR code, where NM-TRAN automatically sets derivatives. NONMEM detects when CTUP is unset. When CTUP is used, the Laplacian estimation method is required.
+
+CTLO may be used in conjunction with CTUP. (See CTLO).
+
+PR_CT  is the estimated probability that an observation will be of the category in question.
+ (See pr_ct, CTLO_TUP_Probability:_PR_CT).
+
+Limitation: may not be used with the LIKELIHOOD or -2LOGLIKELIHOOD options.
+
+*** CTLO
+#+begin_src f90
+ USAGE:
+      USE NMPR_REAL, ONLY:CTLO=>CTLW,DCTLO=>DCTLW,DDCTLO=>DDCTLW
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LVR,DPSIZE
+      REAL(KIND=DPSIZE) :: CTLW,DCTLW(LVR),DDCTLW(LVR,LVR)
+#+end_src
+An  observation may be the event that the value of a normally
+distributed variable falls in a given  interval.   The  likelihood
+for  this event  may be automatically computed.  With the data record
+containing the observation, one specifies the mean and variance of
+the  variable for  NONMEM,  as usual, and one sets CTLO to the lower
+endpoint of the interval.  If with population data, this endpoint
+depends  on  an  eta variable,  then the first- and second-derivatives
+of the endpoint with respect to etas should also be set.  Derivatives
+equal to 0  need  not be  explicitly  set,  and the only elements of
+DDCTLO that need be set are those in the lower triangle.  CTLO may be
+set in a $PRED or $ERROR abbreviated code, and then NM-TRAN
+automatically sets the derivatives. NONMEM can detect when CTLO is not
+set.  When CTLO is set, the  Laplacian estimation method must be used.
+
+CTUP may be used in conjunction with CTLO. (See ctup).
+
+PR_CT  is the estimated probability that an observation will be of the
+category in question. (See pr_ct, CTLO_CTUP_Probability:_PR_CT).
+
+
+Limitation: may not be used with the LIKELIHOOD or -2LOGLIKELIHOOD options.
+
+
+
+*** SKIP
+#+begin_src f90
+ USAGE:
+      USE NMPR_INT, ONLY SKIP_=>SKIP
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: SKIP
+#+end_src
+- SKIP_: controls premature termination of a problem (with
+  subproblems), superproblem or superproblem iteration.  It may  be
+  set as follows during (sub)problem-finalization.
+
+ + SKIP_=1: With  a  subproblem:  terminate the entire problem and
+   proceed to the next problem, if this exists.
+
+ + SKIP_=2: With a problem during an iteration of a second-level
+   superproblem A nested within a first-level superproblem B:
+   terminate the iteration and proceed to the next iteration, if this
+   exists,  and  if this does not exist, to the following
+   (second-level super)problem of B, if this exists, and if this does
+   not  exist,  to  the  next iteration of B.
+
+ + SKIP_=3: With a problem during an iteration of a second-level
+   superproblem A nested within  a  first-level  superproblem  B:
+   terminate  the entire  superproblem A and proceed to the following
+   (second-level super)problem of B, if this exists, and if this does
+   not  exist, to the next iteration of B.
+
+
+ + SKIP_=4: With a problem during an iteration of a first-level
+   superproblem: terminate the iteration and proceed to  the  next
+   iteration,  if this exists, and if this does not exist, to the
+   following (first- evel super)problem, if this exists.
+
+ + SKIP_=5: With a problem during an iteration of a first-level
+   superproblem: terminate  the  entire  superproblem and proceed to
+   the following (first-level super)problem, if this exists.
+
+With NM-TRAN, in a finalization block of abbreviated code one may set SKIP_ and/or use the following phrases:
+
+#+begin_src php
+ END PROBLEM                              ;same as SKIP_=1
+ END SECOND-LEVEL SUPERPROBLEM            ;same as SKIP_=3
+ END FIRST-LEVEL SUPERPROBLEM             ;same as SKIP_=5
+ END SECOND-LEVEL SUPERPROBLEM ITERATION  ;same as SKIP_=2
+ END FIRST-LEVEL SUPERPROBLEM ITERATION   ;same as SKIP_=4
+#+end_src
+
+In other words, the following three are equivalent:
+#+begin_src php
+      SKIP_=2
+
+      IF (...) THEN
+         END SECOND-LEVEL SUPERPROBLEM ITERATION
+      ENDIF
+
+      IF (...) THEN
+         ENDSECONDLEVELSUPERPROBLEMITERATION
+      ENDIF
+#+end_src
+*** F_FLAG
+#+begin_src f90
+ USAGE:
+      USE NMPR_INT, ONLY: F_FLAG=>IPRDFLG1
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: IPRDFLG1
+#+end_src
+- F_FLAG=1: when LIKELIHOOD or -2LOGLIKIHOOD options are used in
+  $ESTIMATION, F_FLAG=1, indicating  that  for  all  observations,
+  the variable Y (in NM-TRAN abbreviated code) or F (in user-supplied
+  PRED or ERROR routine) is being set to a LIKELIHOOD/-2LOGLIKIHOOD
+  value for the observation.
+- F_FLAG=0: when neither LIKELIHOOD or -2LOGLIKIHOOD used, for a given
+  observation, F_FLAG=0, and Y  or  F  is being set to a "prediction"
+  of the observation. One can manually set F_FLAG=1 or F_FLAG=2 in the
+  PRED or ERROR routine, so that Y or F  will be  set  to
+  LIKELIHOOD/-2LOGLIKIHOOD value for this particular observation.
+
+- F_FLAG may be set in NM-TRAN abbreviated code:
+  #+begin_src php
+   IF (TYPE.EQ.1) THEN
+      Y=THETA(1)+ETA(1)+ERR(1) ; a prediction
+   ELSE
+      F_FLAG=1
+      A=EXP(THETA(2)+ETA(2))
+      B=1+A
+      Y=DV*A/B+(1-DV)*1/B      ; a likelihood
+   ENDIF
+  #+end_src
+
+TODO: rewrite the following
+
+ A nonzero value of F_FLAG has no effect during a Simulation Step.  But
+ note:  When single-subject data are simulated for which, when the data
+ are later analyzed, Y (F) would always be set  to  a  likelihood,  and
+ when the ONLYSIMULATION option is used in the $SIMULATION record, then
+ usually the NOPREDICTION option can also be used.  When the  NOPREDIC-
+ TION  option is used, if any eta's are used in the model, the data are
+ regarded as population data, but the model for the  data  in  question
+ usually does not involve eta variables.  When, however, single-subject
+ data are simulated for which, when the data are analyzed, Y (F)  would
+ sometimes  be set to a likelihood and sometimes to a "prediction", and
+ when the ONLYSIMULATION option is used in the $SIMULATION record, then
+ the  PREDICTION  option  will  need  to  be  used (this is the default
+ option!).  The reason is that the expression of  residual  variability
+ associated with the predictions will involve eta variables.
+
+
+- When F_FLAG/=0 for some observation, neither the LIKELIHOOD or
+  -2LOGLIKIHOOD option may be used, and the  Laplacian estimation
+  method must be used.
+
+- F_FLAG=0 except with all observations within an individual record.
+  In that case RES and WRES will be 0 for all data records for the individual.
+
+- When F_FLAG/=0 for an observation within an individual record,
+  inter-L2 correlated epsilons are not  allowed  with the observations
+  within the individual record. (See Correlation Across L2 Records)
+
+- If  the  data are population data, a nonzero F_FLAG cannot be used
+  within a multiple-observation L2 record.  If the data are
+  single-subject data, a nonzero value of F_FLAG cannot be used within
+  a multi-ple-observation L1 record.
+
+*** Prior Simulation: parameters
+#+begin_src f90
+ USAGE:
+      USE NMPR_REAL, ONLY: THSIMP=>THET_P,OMSIMP=>OMEG_P,SGSIMP=>SIGM_P,THSIMPR
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LTH,LVR,DPSIZE
+      REAL(KIND=DPSIZE) :: THET_P(LTH),OMEG_P(LVR,LVR),SIGM_P(LVR,LVR)
+#+end_src
+THETA, OMEGA, and SIGMA from a Simulation Step using the user-supplied
+routine PRIOR must  be  stored  in THSIMP, OMSIMP, and SGSIMP,
+respectively. This is done automatically when NONMEM utility routines
+NWPRI or TNPRI is used to generate THETA, OMEGA, and SIGMA values.
+
+- Without $THETAR, THSIMPR  contains  the  same  values  as  THSIMP
+- With $THETAR, THSIMP contains the internal theta values, and THSIMPR
+  contains the reported values  (THSIMP  values  transformed  by
+  equations of the $THETAR record).
+
+The entire THETA, OMEGA and SIGMA arrays are stored by NPWRI and
+TNPRI, not just the the  inital sub-vectors (prior-affected parts).
+(See NWPRI, TNPRI).
+
+These  variables  may be used as right-hand quantities in $PK, $ERROR,
+$INFN and $PRED blocks.  After being set during the  Simulation  Step,
+they remain available during problem finalization (i.e., ICALL=3).
+
+*** YLO, YUP
+#+begin_src f90
+ USAGE:
+      USE NMPR_REAL, ONLY: YLO,YUP
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: DPSIZE
+      REAL(KIND=DPSIZE) :: YLO,YUP
+#+end_src
+If an observation is assumed to be normally distributed, with mean and
+variance specified for NONMEM as usual, then the  likelihood  for  the
+observation is conditioned on the observation being in (or outside) an
+interval defined by the values YLO and YUP.  If YLO is less than  YUP,
+then  the likelihood of the observation is conditioned on the
+observation being in the interval with lower bound YLO and upper
+bound  YUP. If  YLO is greater than YUP, then the likelihood of the
+observation is conditioned on the observation being outside the
+interval  with  lower bound  YUP and upper bound YLO.  These values
+may be set with the data record containing the observation.  They  may
+be  set  in  $PRED  and $ERROR  abbreviated codes.  If YLO or YUP is
+not set, it is assumed to be minus infinity or plus infinity,
+respectively.  When YLO or YUP  is set, the Laplacian estimation
+method must be used.
+
+PR_Y is the estimated probability that an observation will fall within (or  outside) the  interval.
+
+(See pr_y, YLO_YUP_Probability:_PR_Y).
+
+*** PASS: PASSRC
+#+begin_src f90
+ USAGE:
+      USE NMPRD_REAL, ONLY: PASSRC
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: VSIZE,DPSIZE
+      REAL(KIND=DPSIZE) :: PASSRC(VSIZE)
+#+end_src
+PASSRC  contains  the  data  record  at  ICALL values 0, 1 and 3. PASSRC changes in conjunction with calls to PASS, at  which  time transgeneration is permitted.
+
+*** Repetition variables
+#+begin_src f90
+ USAGE:
+      USE NMPR_INT, ONLY: RPTI=>NRPT_IN,RPTO=>NRPT_OUT, &
+                          RPTON=>NRPT_ON,PRDFL=>IUSEPRD
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: NRPT_IN,NRPT_OUT,NRPT_ON,IUSEPRD
+#+end_src
+- RPTO: the "repetition output value", can be used  in PRED, or as a
+  left-hand quantity  in  $PRED,  $PK  and  $ERROR.
+  + RPTO=0: no effect.
+  + RPTO=n (n between 1 and 5): the current record is thus marked as a
+    "repetition base with value n", i.e.  as the  first  of  a  series
+    of  contiguous records  of  the current individual record (with
+    single-sub- ject data, contiguous records of the data set) which
+    will be repeated.  See the repeat data item (See RPT_).
+  + RPTO=-n (n between 1 and 5): the current record thus becomes a
+    "repetition initiator with value n", i.e.  before the next record
+    is passed to PRED all preceding records of the individual record
+    (with single-subject data, all records of the data set), starting
+    with  the last  such  record marked as a repetition base with
+    value n, and up to and including the current  record,  will  be
+    once again  passed  to PRED (will be "repeated").  The value n is
+    put onto the top of a stack - the "repetition stack".
+
+    The series of records from base to initiator is  called  the
+    "repetition  series  for n".  The series may be repeated any
+    number of times (see RPTON).  After all repetitions are complete,
+    the value n is removed from the repetition stack.
+
+    While  the  series  is being repeated, RPTO may be set again with
+    any record R of the series.  If the (unsigned)  repetition  output
+    value  is  a  value  already on the repetition stack, this value
+    is ignored.  Otherwise, the  output  value is not ignored, and it
+    may be set so as to mark R as a repetition base or as a repetition
+    initiator.   In  the  latter case the current value on the top of
+    the stack (m) is pushed down to the next lower position, the value
+    n is put onto the top  of the stack, and a new repetition series
+    is initiated. After the new series has been fully repeated, the
+    value n is removed  from  the  stack, the value m is again put
+    onto the top of the stack, and repetition of the series for m is
+    continued with the record following R.
+  + RPTO=-1: used as the repetition output value with a  given
+    record.   If  a  previous record  has  been  marked as a
+    repetition base with value 1, then the record in question becomes
+    a  repetition  initiator with  value  1  in the usual way.  But if
+    no previous record has been marked as a repetition base,  then  it
+    is  assumed that the first record of the individual record (with
+    singlesubject data, the first record of the data set) is a
+    repetition  base with value 1.  That is, before the next record is
+    passed to PRED  all  preceding  records  of  the  individual
+    record  (with  single-subject  data, all records of the data set),
+    starting with the first such  record  and  up  to  and including
+    the  current record, will be once again passed to PRED (will be
+    "repeated").  The value 1 is put onto the  top of the repetition
+    stack.
+
+    In  addition, for the repetition feature to work, it must be
+    enabled at the outset.  This will be done if the repeat data item
+    appears in the data set, or if RPTO is set to a nonzero value at
+    ICALL=0 or ICALL=1.
+
+- RPTON: when the repetition output value is non-negative, RPTON is
+  ignored.  Otherwise, RPTON may be  set  to  an integer that gives
+  the number of times the repetition series ini- tiated by the data
+  record is to be repeated.  With the  value  0, the  series  is
+  repeated once.  RPTON may be used as a left-hand quantity in $PRED,
+  $PK and $ERROR blocks.
+
+- RPTI: "repetition input value".  With each data record,  it is  set
+  by NONMEM, and it conveys information to PRED.  RPTI may be used as
+  a right-hand quantity in $PRED, $PK, $ERROR, $DES, and $AES blocks.
+  + RPTI=0: the record being passed is not "being repeated".
+  + RPTI!=0: the  record  being passed  to PRED is "being repeated".
+    The nonzero value is the length of  the  repetition  stack  (see
+    above).
+
+By  default, with each pass through an individual record (with
+single-subject data, with each pass through the data set), and with
+any  data record  that  is  being  passed for the first time and is
+other than a repetition initiator, the output from PRED is used by
+NONMEM.  If  the record  is  a  repetition  initiator, NONMEM uses the
+output from PRED only when the repetition output value n has appeared
+on the repetition stack  for  the  first  time (as a result of RPTO
+being set to -n with this record) and when the record is being passed
+for  the  last  time before  the output value is subsequently removed
+from the stack.  Otherwise, NONMEM ignores all output from PRED,
+except for the values set for these variables.
+
+For  example, in the case where a record is a repetition initiator, as
+is a subsequent record, where both records set RPTO to -1,  and  where
+both  records  set  RPTON  to 0, the first record is passed (at least)
+four times, and NONMEM uses the output from the first record  when  it
+is passed for the second time.
+
+
+- PRDFL: the "PRED output control flag".  With each data record, it
+  may be set by PRED, and  it  conveys  information  to  NONMEM. PRDFL
+  may  be  used  as  a  left-hand quantity in $PRED, $PK and $ERROR
+  blocks.
+
+  The PRED output control flag is used with very advanced
+  applications  with the repetition feature.  With it, some of the
+  default behaviour for when NONMEM pays  attention  to  PRED  output
+  (see above) - may be overridden.
+  + PRDFL!=1: the output from PRED with a passed record (except for
+    the values of the repetition variables) is to be ignored by
+    NONMEM.
+
+  + PRDFL=1: the output from PRED with a passed record is to be used by NONMEM.
+
+  With the PRED output control flag, PRED specifies when it is that
+  NONMEM  is  to  use  PRED's  output.   However,  just as with the
+  default behavior, where during a pass through  the  data,  NONMEM
+  uses the output from a given data record once and once only, with
+  each data record, PRDFL must be set to  1  once  and  once  only,
+  either  when  the  record  is  passed  initially  or  when  it is
+  repeated.  Moreover, as with the default behavior, PRDFL  can  be
+  set  to  1 with a given record only after PRDFL has been set to 1
+  with the previous data record of the individual record (for
+  single-subject data, with the previous data record of the data set).
+
+  In addition, for the PRED output control flag to work, it must be
+  enabled at the outset, i.e., PRDFL must be set to 1 at ICALL=0 or
+  ICALL=1.   It may be enabled only when the repetition feature has
+  also been enabled.
+
+  (See repeti1, repeti2)
+
+  Help file repeti1 discusses the following files in the examples direc-
+  tory:
+
+  repeat1.ctl
+  repeat1s.ctl
+  repeat1t.ctl
+  repeatf.ctl
+
+*** Recursive PRED indicator
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: I_REC=>IRECRSIV
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: IRECRSIV
+#+end_src
+A PRED routine may be recursive: for single-subject data, with a
+given data record, the PRED computation depends on the values of
+variables  that PRED computes with any of the previous records.
+This is the case for PREDPP.
+
+- PRED is nonrecursive by default.  At ICALL=0 or  1,  one can declare
+  PRED recursive by setting I_REC=1. This can be  changed  from
+  problem to  problem. For a problem with population data I_REC is
+  always reset to 0.
+
+
+- When I_REC=1 while PRED does not use repetition, the  SPECIAL option  needs
+  not  appear on the $COVARIANCE record, as the special computation is
+  automatically applied.
+
+
+- PREDPP sets I_REC to 1 at ICALL=1.
+
+- I_REC can be set explicitly in abbreviated code.  With recursive
+  $PRED abbreviated  code and with single-subject data, if I_REC is
+  not setin $PRED, NM-TRAN sets I_REC=1.
+
+
+*** PRED-defined variables
+#+begin_src f90
+ USAGE:
+      USE NMPRD4, ONLY: COM=>VRBL
+
+ GLOBAL DECLARATION:
+      MODULE NMPRD4
+      USE SIZES, ONLY: DPSIZE
+      IMPLICIT NONE
+      SAVE
+       REAL(KIND=DPSIZE), ALLOCATABLE, TARGET :: VRBL(:)
+      END MODULE
+#+end_src
+NMPRD4  is  a  module for PRED-defined variables (including PK-defined
+and ERROR-defined variables).  It contains an  array  VRBL.   (COM  is
+suggested above as an alternate to the name VRBL to be consistent with
+generated code, but this is optional.)  The VRBL  array  is  allocated
+dynamically  by NONMEM.  The default size is given by constant LNP4 in
+resource/sizes.f90, but this can be changed using the $SIZES record.
+
+Variables are stored in NMPRD4 for communication with other blocks  of
+abbreviated  code  or  with  user-written codes, or so that NONMEM has
+access to these variables  for  display  in  tables  or  scatterplots.
+(See $table, $scatter).   Values are stored by PRED and by subroutines
+of PREDPP. A SAVE region of NMPRD4 may be designated; (See COMACT,COMSAV).
+
+When  abbreviated  code  is  used,  by default NM-TRAN lists all
+PRED-defined variables in the module, as well  as  certain
+NM-TRAN-defined variables which give the values of partial
+derivatives.  Comment lines in the generated code (file FSUBS)
+identify  these  variables.   This makes the listed variables globally
+accessible to all blocks of abbreviated code, which may not be
+desirable.  (An exception  is  made  for initialization-finalization
+variables;  these  are PRED-defined variables that are first defined
+within a block that tests for ICALL 0, 1, 3.   Such variables are
+stored locally and will not be changed by NONMEM at ICALL 2 or 4.)
+(See INFN-defined_variables.)
+
+Variables from a given block of abbreviated code can be excluded  from
+the module by including the following pseudo-statement in that block:
+#+begin_src php
+COMRES=-1
+#+end_src
+Variables from all blocks of abbreviated code can be
+excluded from the module by including the above code
+on the  $ABBREVIATED record.
+
+Variables  from  NMPRD4  can be used in a user-written subroutine by adding
+#+begin_src f90
+USE NMPRD4
+#+end_src
+statement. The  variables are COM(1), COM(2), ...., so that they can
+ be used as
+#+begin_src f90
+ X=COM(1)/COM(1)
+#+end_src
+One can also use variables $PRED, $PK or $ERROR, e.g., for variables
+CL and V from $PK, and the following in the generated PK routine:
+
+#+begin_src f90
+  CL=>COM(00001); V=>COM(00002)
+#+end_src
+Then in the user-written subroutine, after the last declaration, one can include:
+#+begin_src f90
+ POINTER :: CL,V
+#+end_src
+ Prior to the first executable statement, include:
+#+begin_src f90
+ CL=>COM(1); V=>COM(2)
+#+end_src
+Now the code can be written as
+#+begin_src f90
+ X=CL/V
+#+end_src
+
+REFERENCES: Guide III, section V.3.3
+
+REFERENCES: Guide IV, section  III.B.7  ,  III.B.16  , III.B.17 , IV.H , V.C.5-9
+
+REFERENCES: Guide VI, section III.J , III.L.2 , IV.E , IV.G.4  Figures 5, 14
+
+*** Simulation: ETA, EPS
+#+begin_src f90
+ USAGE:
+      USE NMPRD_REAL, ONLY: ETA,EPS
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LVR,DPSIZE
+      REAL(KIND=DPSIZE) :: ETA(LVR),EPS(LVR)
+#+end_src
+When  the ONLYSIMULATION option on the $SIMULATION record is used, the
+displayed eta values are those that PRED stores in ETA during the
+Simulation Step (i.e., at ICALL=4).
+
+In generated subroutines, ETA values are automatically stored in variale ETA.
+
+When using the PRED repetition feature, epsilon  values  generated  in
+PRED for simulation purposes (with or without the use of the
+ONLYSIMULATION option) should be  stored  in  EPS.    Then  when
+records  are repeated,  these  same  epsilons  values  will  be
+available in EPS as input.  In particular, with every repeated
+record,  the  values  that were  stored  in  EPS  the  last  time the
+record was passed, are made available as input to PRED.
+
+In generated subroutines, epsilon values are automatically  stored  in
+EPS,  and  thus automatically, the simulated epsilons are available as
+input with repeated records.
+
+When using the repetition feature with single-subject data, eta values
+generated  in  PRED  for  simulation purposes should be stored in ETA.
+What happens in this case is analogous to what happens in the case  of
+population data with epsilon values.
+
+In  generated subroutines, eta values are automatically stored in ETA,
+and thus automatically, the simulated etas are available as input with
+repeated records.
+
+
+*** Simulation: IETAOL, IEPSOL
+#+begin_src f90
+ USAGE:
+      USE NMPR_INT, ONLY: IETAOL,IEPSOL
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: IETAOL,IEPSOL
+#+end_src
+IETAOL and IEPSOL override the NEW option in $SIMULATION. This can  be
+useful when the PRED repetition feature is used. They also allow calls
+to SIMETA and SIMEPS to be ignored.  This may be useful  when  a
+simulation  was undertaken with user code where SIMEPS is called with
+every data record (as happens automatically with NM-TRAN  generated
+codes), and the exact same simulation is now to be repeated, but with
+a data set obtained from the  earlier  one  by  the addition  of  new
+nonobservation records (with which SIMEPS output is not needed).  If
+calls to SIMEPS with the new records are not ignored, SIMEPS  output
+will be generated with all the records, and in particular, SIMEPS
+output will be generated with the original records,  which will differ
+from what it was earlier, thus resulting in the simulation of a
+different set of observations.
+
+
+- IETAOL
+  + IETAOL=-1: Next call to SIMETA will be ignored
+  + IETAOL=0: Next call to SIMETA will behave as usual.
+  + IETAOL=1: Next call to SIMETA will behave as though NEW  had  not
+    been  specified.   If  SIMETA has been called previously with the
+    individual record, SIMETA will produce the previous eta values.
+- IEPSOL
+  + IEPSOL=-1: Next call to SIMEPS will be ignored.
+  + IEPSOL=0: Next call to SIMEPS will behave as usual.
+  + IEPSOL=1: Next call to SIMEPS will behave as though NEW  had  not
+    been  specified.   If  SIMEPS has been called previously with the
+    level-two record, SIMEPS will produce the previous  epsilon
+    values.
+
+Values must be stored before PRED calls SIMETA (SIMEPS).  NM-TRAN
+generated or Library code has a call to SIMETA  (SIMEPS)  in  its
+second section  (see  Guide IV).  If this call is to be affected,
+values must be stored using verbatim code in the FIRST block.
+*** MDVRES
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: MDVRES
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: MDVRES
+#+end_src
+MDVRES stands for missing dependent variable (MDV) for residual (RES).
+Setting MDVRES=1 temporarily declares an observation  as  missing
+during  the  computation  of residuals and weighted residuals.
+MDVRES=0 by default.
+
+- MDVRES can be set in $ERROR or $PRED.
+
+- Example:  when  F_FLAG  is  used, by default,  if  F_FLAG/=0 for any
+  observation within an individual record, the RES and WRES items
+  will  be  0  for  all  data records  for that  individual.  MDVRES=1
+  overrides this default so that  NONMEM will compute RES  and WRES
+  for observations.  MDVRES should be set to 1 with all observations
+  having F_FLAG=1 or F_FLAG=2, but may be set to 1 for other
+  observations as well.
+
+  Supose  that  some observations are assessed by a non-normal
+  distribution likelihood such as the PHI() function for below
+  detection  limit values, in which F_FLAG is set.  By setting
+  MDVRES=1 to these particular below detection values, the weighted
+  residual algorithm can assess the remaining normally distributed
+  values for that subject.
+
+  #+begin_src php
+  $ERROR
+  SD = THETA(5)
+  IPRED = LOG(F)
+  DUM = (LOQ - IPRED) / SD
+  CUMD = PHI(DUM)
+  IF (TYPE .EQ. 1) THEN
+        F_FLAG = 0
+        Y = IPRED + SD * ERR(1)
+  ENDIF
+  IF (TYPE .EQ. 2) THEN
+        F_FLAG = 1
+        Y = CUMD
+        MDVRES=1
+  ENDIF
+  #+end_src
+
+REFERENCES: Guide Introduction_7
+
 ** PREDPP read-only global variables
+*** Active ETA list for PREDPP
+#+begin_src f90
+ USAGE:
+      USE PROCM_INT, ONLY: NACTIV,M=>IDXETA
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LVR
+      INTEGER(KIND=ISIZE) :: NACTIV,IDXETA(LVR)
+#+end_src
+- NACTIV: NACTIV = number of ETAs in the problem - NRETA. (See
+  Non-Active_ETA_list_for_PRED). It is the number of ETAs that NONMEM is currently
+  calculating partial derivatives for.
+- M: M(k) is the index of the  kth  0-valued  element  of  LVOUT  (for
+  k=1,...,NACTIV).
+
+Suppose  a user-written TRANS routine modifies the kth. element of GG.
+ Here is code that might be used to modify only those of its first  eta
+ derivatives that are of current interest to NONMEM:
+#+begin_src f90
+         DO 100 I=1,NACTIV
+     100 GG(K,M(I)+1,1)=GG(K,M(I)+1,1)  + ...
+#+end_src
+*** Event record: EVTREC
+#+begin_src f90
+ USAGE:
+      USE PROCM_REAL, ONLY: EVTREC
+      USE PROCM_INT, ONLY: NVNT=>NEVENT
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: PD,DPSIZE
+      REAL(KIND=DPSIZE) :: EVTREC(5,PD+1)
+      INTEGER(KIND=ISIZE) :: NEVENT
+#+end_src
+For user-supplied DES and AES routines.
+
+- EVTREC: same as EVTREC passed by PREDPP to PK and ERROR routine
+
+- NVNT: same as NVNT passed by PREDPP to PK  and  ERROR routines.
+
+REFERENCES: Guide VI, section III.C
+*** Dose time non-event: DOSTIM
+#+begin_src f90
+ USAGE:
+      USE PROCM_REAL, ONLY: DOSTIM,DDOST,D2DOST
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LVR,DPSIZE
+      REAL(KIND=DPSIZE) :: DOSTIM,DDOST(LVR),D2DOST(LVR,LVR)
+#+end_src
+For user-supplied PK, DES, AES routines.
+
+- DOSTIM
+  + DOSTIM=0:  this  call  to  PK  occurs  at  an event time.  DDOST, D2DOST, and DOSREC contain zeros.
+
+  + DOSTIM>0: this call to PK occurs at a non-event dose time DOSTIM,
+    i.e.,  at  the  time  of  an  additional  or lagged dose.  DDOST,
+    D2DOST, and DOSREC contain values of interest.  (See Dose Record:
+    DOSREC).
+
+- DDOST: DDOST(i) = Partial derivative of DOSTIM with respect to eta(i).
+
+- D2DOST: D2DOST(i,j) = Second-order partial derivative of DOSTIM with respect to
+  eta(i), eta(j) (lower-triangular; j=1, ..., i).
+
+When DOSTIM>0, TIME and all user (concomitant) data  items  in  EVTREC
+are from the next event record.  All other NONMEM/PREDPP reserved data
+items are from the initiating dose event record.   (The  $BIND  record
+may be used to override this; (See bind)
+
+REFERENCES: Guide VI, section III.I
+*** Dose record: DOSREC
+#+begin_src f90
+ USAGE:
+      USE PROCM_REAL, ONLY: DOSREC
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: VSIZE,DPSIZE
+      REAL(KIND=DPSIZE) :: DOSREC(VSIZE)
+#+end_src
+For user-supplied PK, DES, AES routines.
+- DOSREC: at  a  call to PK which occurs at a non-event dose time
+  (i.e., at the time of an additional or lagged dose),  DOSREC
+  contains  the (last data record of the) event record describing the
+  dose.
+
+  When PK is called at an event time, DOSREC contains 0's.
+
+(See Dose Time Non-Event: DOSTIM).
+
+REFERENCES: Guide VI, section III.I
+*** New individual indicator: NEWIND
+#+begin_src f90
+ USAGE:
+      USE PROCM_INT, ONLY: NEWIND=>PNEWIF
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: PNEWIF
+#+end_src
+For user-supplied PK and ERROR routines.
+NEWIND  is  of interest only when ICALL=2, 4, 5, or 6.  It is the same
+as the NEWIND argument passed by NONMEM to PREDPP.
+
+REFERENCES: Guide VI, section III.I
+
 *** Write formats
 #+begin_src f90
  USAGE:
@@ -66,6 +1204,79 @@ given in the variable TSTATE, which may also be used in $PK
 abbreviated code.
 
  REFERENCES: Guide VI, section IV.D , Figure 14
+
+*** DES AES: ISFINL
+#+begin_src f90
+ USAGE:
+      USE PROCM_INT, ONLY: ISFINL
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: ISFINL
+#+end_src
+When   NONMEM   is   performing  simulation  or  a  copying  pass
+(COMACT>0), DES and AES are called immediately after the advance to
+an  event  time or non-event time, with a value of T equal to this
+time. ISFINL = 1 at such a call; otherwise =0.
+
+NM-TRAN includes this global variable in the DES or AES  routine  when
+the $DES or $AES block includes references to variable ISFINL, or when
+verbatim code is present.
+
+*** DES AES: ICALL,IDEFD,IDEFA
+#+begin_src f90
+ USAGE:
+      USE PRMOD_INT, ONLY ICALL=>ICALLD,IDEFD,IDEFA
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: ICALLD,IDEFD(2),IDEFA(2)
+#+end_src
+- ICALL: identical to the argument ICALL passed by NONMEM to PREDPP.
+
+- IDEFD: DES may set IDEFD when ICALL = 1, as follows.
+  + IDEFD(1) may optionally be set by DES to indicate how many thetas
+    it uses.  Set to 0 if none.  Otherwise, set to the index  of  the
+    highest   numbered  theta  used.   IDEFD(1)=-9  means  "unknown".
+    PREDPP determines from the value stored in IDEFD(1) how many
+    elements of theta to copy from its input argument THETA to THETAS.
+    (See DES_AES:_THETA).
+
+  + When IDEFD(1)  is  set by DES to -9, PREDPP copies all thetas in
+    the  problem  to  THETAS  (See DES AES: THETA).   With   NM-TRAN,
+    IDEFD(1) is set to -9 when the $DES block contains verbatim code.
+    If a user-written DES leaves IDEFD(1) unchanged, it  defaults  to
+    -9,  which  does no harm, but may cause the run to be slower than
+    necessary.
+
+  + IDEFD(2) is full/compact flag for DES: when IDEFD(2)=0 DES will
+    return compact arrays; when IDEFD(2)=1 DES will return full arrays
+    (the default).
+
+- IDEFA: AES may set IDEFA when ICALL is 1, as follows.
+  + IDEFA(1) is set by AES to indicate how many thetas it uses.   See
+    above remarks for IDEFD and DES.
+  + IDEFA(2) for the calling protocol for ADVAN9 and ADVAN15 and
+    ADVAN17. AES sets this as follows: IDEFA(2)=-1 "call with every
+    event record" (the default); IDEFA(2)=1 "call once per individual
+    record". IDEFA(2) applies only when no TIME data item is defined.
+    It is ignored when the TIME data item is defined.
+
+
+ Location prior to NONMEM 7: prdde1
+
+ REFERENCES: None.
+
+*** DES AES: THETA
+#+begin_src f90
+ USAGE:
+      USE PROCM_REAL, ONLY: THETA=>THETAS
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LTH,DPSIZE
+      REAL(KIND=DPSIZE) :: THETAS(LTH)
+#+end_src
+The THETA  vector  passed  as an argument by NONMEM to PRED, PK, ERROR.
+IDEFD(1) and IDEFA(1) affect how many elements are copied.
+(See DES_AES:_ICALL,IDEFD,IDEFA)
 
 ** PK global variables
 Internal variables used by PREDPP can also be accessed by "using" specific
@@ -171,7 +1382,7 @@ The  maximum  number  of integration steps for ADVAN9 and ADVAN13 and ADVAN14 an
 - This  variable is only a reserved variable for ADVAN9 and ADVAN13
   and ADVAN14 and ADVAN15 and ADVAN16 and ADVAN17 and ADVAN18.
 
-** STOP_TIME,ITASK_ (NM75)
+*** STOP_TIME,ITASK_ (NM75)
 #+begin_src f90
    USAGE:
         USE PRLS01_REAL, ONLY: STOP_TIME
@@ -213,58 +1424,48 @@ by setting ITASK_=4 in $PK or $ERROR. E.g.,
   STOP_TIME=-1.0d+300
   #+end_src
 *** HINIT_,HMIN_,HMAX_ (NM760)
- |
- |                                                                    |
- +--------------------------------------------------------------------+
+#+begin_src f90
+  USAGE:
+        USE PRLS01_REAL, ONLY: HINIT_,HMIN_,HMAX_
 
- MEANING: PREDPP-PK global variables                                    |
- CONTEXT: User-supplied routines                                        |
+  GLOBAL DECLARATION:
+        USE SIZES, ONLY: DPSIZE
+        REAL (KIND=DPSIZE) HINIT_,HMIN_,HMAX_
+#+end_src
+These  reserved variables are used to modify the integration step size
+behavior in ADVAN9, ADVAN13, ADVAN14, and  ADVAN15.   When  a  modeled
+short,  large  rate  input  occurs at some time during the simulation,
+that is not a scheduled bolus event or is not  easily  specified  with
+MTIME(), the LSODA type ODE solvers can miss this event.  For example,
+a gamma function shaped input with a large N>20 parameter, can  create
+a stiff, pseudo-bolus input that may be missed by one of these ADVANs.
+One way to avoid missing this input is to  set  the  integration  step
+size to an upper limit:
+#+begin_src php
+ $PK HMAX_=0.01
+#+end_src
+One  may also set the initial step size (HINIT_), or minimal step size
+(HMIN_) within the $PK block in a similar manner.
 
- USAGE:                                                                 |
-      USE PRLS01_REAL, ONLY: HINIT_,HMIN_,HMAX_                         |
+The usual technique for handling short-term rate inputs is to set the
+RTOL and ATOL to very high levels, such as between 13 and 15, but this
+may not work for every problem, and one may need to resort to
+explicitly limiting the HMAX_ or HINIT_ in the manner shown above.
 
- GLOBAL DECLARATION:                                                    |
-      USE SIZES, ONLY: DPSIZE                                           |
-      REAL (KIND=DPSIZE) HINIT_,HMIN_,HMAX_                             |
+For a discussion of these variables,
+ See INTRODUCTION  TO  NONMEM  7, "HMIN_, HINIT_,HMAX_: Avoiding missed
+ short events in ADVAN9, ADVAN13, ADVAN14, and ADVAN15 (nm760)"
 
- DISCUSSION:                                                            |
-
- These  reserved variables are used to modify the integration step size |
- behavior in ADVAN9, ADVAN13, ADVAN14, and  ADVAN15.   When  a  modeled |
- short,  large  rate  input  occurs at some time during the simulation, |
- that is not a scheduled bolus event or is not  easily  specified  with |
- MTIME(), the LSODA type ODE solvers can miss this event.  For example, |
- a gamma function shaped input with a large N>20 parameter, can  create |
- a stiff, pseudo-bolus input that may be missed by one of these ADVANs. |
- One way to avoid missing this input is to  set  the  integration  step |
- size to an upper limit:                                                |
-
- $PK HMAX_=0.01                                                         |
-
- One  may also set the initial step size (HINIT_), or minimal step size |
- (HMIN_) within the $PK block in a similar manner.                      |
-
- The usual technique for handling short-term rate inputs is to set  the |
- RTOL and ATOL to very high levels, such as between 13 and 15, but this |
- may not work for every problem, and one may need to resort to  explic- |
- itly limiting the HMAX_ or HINIT_ in the manner shown above.           |
-
- For a discussion of these variables,                                   |
- See INTRODUCTION  TO  NONMEM  7, "HMIN_, HINIT_,HMAX_: Avoiding missed |
- short events in ADVAN9, ADVAN13, ADVAN14, and ADVAN15 (nm760)"         |
-
- REFERENCES: Guide Introduction_7
 *** MODEL EVENT TIME: MTIME
+#+begin_src f90
 USAGE:
       USE PKERR_REAL, ONLY :: MTIME
 
- GLOBAL DECLARATION:
+GLOBAL DECLARATION:
       USE SIZES, ONLY: PCT,DPSIZE
       REAL(KIND=DPSIZE) :: MTIME(PCT)
-
- DISCUSSION:
-
- Model time parameters MTIME are stored in MTIME if they are defined in
+#+end_src
+Model time parameters MTIME are stored in MTIME if they are defined in
  $PK abbreviated code or if verbatim code  is  present  in  $PK.   This
  makes  them  also  available to the ERROR routine.  However, their eta
  derivatives (if any) are not included.  Hence the ERROR routine should
@@ -311,3 +1512,12 @@ USAGE:
  if the times are in fact changed when MTDIFF=0.
 
  (See mtime, model time examples).
+*** Model event time: MNOW,MPAST,MNEXT
+#+begin_src f90
+ USAGE:
+      USE ROCM_INT, ONLY: MNOW=>MTNOW,MPAST=>MTPAST,MNEXT=>MTNEXT
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: PCT
+      INTEGER(KIND=ISIZE) :: MTNOW,MTPAST(PCT),MTNEXT(PCT)
+#+end_src
