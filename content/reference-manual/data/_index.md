@@ -5,6 +5,6 @@ draft = false
 bookCollapseSection = true
 +++
 
-## Data format {#user-guide}
+## Data specification {#user-guide}
 
 fdaf

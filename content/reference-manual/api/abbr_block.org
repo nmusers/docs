@@ -1,0 +1,1223 @@
+#+title: Code blocks
+* Code blocks
+Abbreviated code blocks are used to achieve special tasks.
+| Block                             | Usage                                           |
+|-----------------------------------+-------------------------------------------------|
+| Compartment initialization block  | $PK abbreviated code                            |
+| Compartment update block          | $PK abbreviated code                            |
+| DATA_AVERAGE block                | Abbreviated  code                               |
+| PRED_IGNORE_DATA block            | $PRED, $PK, $INFN abbreviated code              |
+| Initialization-finalization block | $PRED, $PK, $ERROR, $INFN abbreviated code      |
+| Copying block                     | $PRED, $PK, $ERROR, $AES, $DES abbreviated code |
+| Simulation block                  | Abbreviated code                                |
+| Expectation block                 | Abbreviated code                                |
+
+The code blocks heavily utilize reserved variable =ICALL= to
+distinguish NONMEM executation stages.
+
+** =ICALL=
+=ICALL=  is  an  argument  passed by NONMEM to user-supplied
+subroutines CCONTR, CONTR, CRIT, PRED, PRIOR and MIX. It is also
+selectively passed to PK,  ERROR,  and  INFN. It can  be  used  in
+$PK, $ERROR, and $PRED abbreviated code.  The discussion below
+describes the values of ICALL as seen by PRED.
+
+- ICALL=-1: the routine has been called for the PRED_IGNORE_DATA
+  feature of  NONMEM  7.5.   One  call per data record, at the start
+  of the run. These  calls  occur  only   if   abbreviated   code
+  uses   variables PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if
+  the PRED_IGNORE_DATA option of $DATA is used.  Otherwise, there are
+  no calls to  PRED  with ICALL=-1.
+
+- ICALL=0:  the routine has been called for initialization at the
+  beginning of the NONMEM run; one such call per run.
+
+- ICALL=1: the routine has been called for initialization at the
+  beginning of a NONMEM problem; one such call per problem.
+
+- ICALL=2:  the routine has been called for a prediction. Multiple
+  calls occur.
+
+- ICALL=3: the routine has been called for finalization at the end of
+  a NONMEM problem; one such call per problem.
+
+- ICALL=4:  the routine has been called during the Simulation Step;
+  multiple calls occur, as with ICALL=2.
+
+- ICALL=5: the routine has been called when expectations are being
+  computed; multiple calls occur.
+
+- ICALL=6:  the routine has been called when raw data averages are
+  being computed; multiple calls occur.
+
+- Note: Some subroutines are called with only a subset of  the  possible values of ICALL.
+
+- REFERENCES: Guide  I, section C,4.2; Guide IV, section IV.D ,
+  IV.E.1; Guide VI, section III.C , IV.B.1
+
+** Compartment initialization
+Usage:
+#+begin_src php
+$PK
+IF (A_0FLG.EQ.1) THEN
+ ... compartment initialization block ...
+ENDIF
+#+end_src
+
+A  "compartment  initialization  block" is a block of abbreviated code
+that sets the initial state of the kinetic system.  It is to  be
+executed  only  when  A_0FLG=1.  Such a block may be present only in
+$PK. PREDPP sets A_0FLG to 1 at a call to PK with the first event
+record of an individual record (if the data are population data), with
+the first event record of the data set (if the data  are
+single-subject  data), and with a reset record.
+
+*** =A_0FLG=
+Read-only global variable =A_0FLG= can be used in $PK record or User-supplied PK routine.
+#+begin_src f90
+ USAGE:
+      USE PROCM_INT, ONLY: A_0FLG
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: A_0FLG
+#+end_src
+- When  ICALL>=2,  at  a  call to PK with the first record of of an
+  individual record or with a reset record, PREDPP sets  A_0FLAG=1. At
+  such  a call, the state vector A and its first and second eta
+  partials (DAETA and D2AETA) have been set to zero.   A_0FLG=0  at
+  all other calls to PK.
+
+- When  A_0FLG=1,  PK  may  initialize  compartments.  It can do this
+  by storing the initial values for the state vector and  its
+  partials  in A_0,DA_0,D2A_0.
+
+- NM-TRAN  includes A_0FLG in the PK routine when the $PK block
+  includes references to variables A_0FLG, A_0(n), or A_INITIAL(n), or
+  when  verbatim code is present.
+*** =A_0=
+#+begin_src f90
+ USAGE:
+      USE PRMOD_REAL, ONLY: A_0,DA_0,D2A_0
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: PC,LVR,DPSIZE
+      REAL(KIND=DPSIZE) :: A_0(PC),DA_0(PC,LVR),D2A_0(PC,LVR,LVR)
+#+end_src
+When =A_0FLG==1= the amounts in the various compartments can be set by
+the PK routine.  It can do this by storing  the  initial  values  for
+the state  vector  and its partials in A_0,DA_0,D2A_0.   The amount in
+the output compartment can not be set.
+- A_0: A_0(n) = the amount for compartment n
+
+- DA_0: DA_0(n,i) = the derivative of A_0(n) w.r.t. ETA(i)
+
+- D2A_0: D2A_0(n,i,j) = the second derivative of A_0(n) w.r.t. ETA(i), ETA(j) (lower-triangular; j=1, ..., i)
+
+- There  is  a  one-to-one  correspondence  between  A_0,DA_0,D2A_0
+  and A,DAETA,D2AETA.
+
+- NM-TRAN includes A_0,DA_0,D2A_0 in the PK routine when the  $PK
+  block includes  references  to  variables A_0FLG, A_0, or A_INITIAL,
+  or when verbatim code is present.
+
+ (See State Vector: A).
+
+*** Special rules:
+- Values may be assigned to reserved variables A_0(n), but only in a
+  compartment initialization block.  The value of the  amount  in the
+  nth compartment (the nth element of the state vector) is set to the
+  value assigned to A_0(n).   If PK is called  with  a  dose record
+  or  a  dose-reset record where the dose is input into the nth
+  compartment, this amount is then increased by the  amount  of the
+  (bioavailable) dose.  If a value is assigned to A_0(n), then it is
+  not necessary that values be assigned to any of the remaining
+  variables  A_0(m).  A value to the output compartment cannot be
+  assigned.  A_INITIAL(n) is a synonym for A_0(n).
+
+- The statement "IF (A_0FLG.EQ.1)" and  the  corresponding  "ENDIF"
+  statement  may  be  included explicitly in abbreviated code, thus
+  defining an  explicit  compartment  initialization  block. See
+  example below.
+
+- A_0(n)  may  be assigned a value with an unconditional statement.
+  This defines an implicit compartment initialization block; NMTRAN
+  inserts  "IF  (A_0FLG.EQ.1) ..." before the statement and "ENDIF"
+  after it.  (See example 2 below.) Indicator variables may be
+  included in the  unconditional  statement. See example below.
+
+- An  IF statement testing ICALL and A_0FLG together is not permitted.
+  Instead, two separate nested IF statements must be used: an IF
+  statement testing ICALL must occur as the outermost statement, and
+  an IF statement testing A_0FLG must occur  as  the  innermost
+  statement.   The latter may be supplied by NM-TRAN as a result of
+  using an implicit initialization block. See example below.
+
+- Within an explicit compartment initialization block,  A_0(n)  may be
+  assigned conditionally.  The usual rules apply if A_0(n) is a random
+  variable. E.g., A_0(n) cannot be assigned within a  nested IF,  and
+  it  defaults  to  0 if it is assigned conditionally but
+  incompletely.  However, in checking for a  nested  IF,  tests  of
+  A_0FLG and of ICALL are ignored. See example below.
+
+- User-defined  variables may be defined in compartment initialization
+  blocks, but not reserved variables such as  basic  or  additional
+  PK parameters.
+
+*** Examples
+- The following two fragments of code yield identical results:
+  Explicit compartment initialization block:
+  #+begin_src php
+  IF (A_0FLG.EQ.1) THEN
+   A_0(1)=THETA(1)*(1+ETA(1))
+  ENDIF
+  #+end_src
+  Implicit compartment initialization block:
+  #+begin_src php
+   A_0(1)=THETA(1)*(1+ETA(1))
+  #+end_src
+
+- Conditional assignment of A_0(n), depending on a data item or user-defined variable X.
+  #+begin_src php
+  IF (A_0FLG.EQ.1) THEN
+      IF (X.EQ.1) THEN
+      A_0(1)=THETA(1)*(1+ETA(1))
+      ELSE
+      A_0(1)=THETA(2)*(1+ETA(2))
+      ENDIF
+  ENDIF
+  #+end_src
+  An alternative is to use an indicator  variable.  E.g.,  if X is a 0/1 variable, then the above is
+  equivalent to
+  #+begin_src php
+    A_0(1)=X*THETA(1)*(1+ETA(1))+(1-X)*A_0(1)=THETA(2)*(1+ETA(2))
+  #+end_src
+
+- Suppose compartment initialization should occur only during the
+  Simulation step.  The following is not permitted:
+  #+begin_src php
+    IF (ICALL.EQ.4.AND.A_0FLG.EQ.1) A_0(1)=THETA(1)*(1+ETA(1))
+  #+end_src
+  Instead, use:
+  #+begin_src php
+  IF (ICALL.EQ.4) THEN
+    IF (A_0FLG.EQ.1) A_0(1)=THETA(1)*(1+ETA(1))
+  ENDIF
+  #+end_src
+  or simply
+  #+begin_src php
+  IF (ICALL.EQ.4) THEN
+    A_0(1)=THETA(1)*(1+ETA(1))
+  ENDIF
+  #+end_src
+  or even better
+  #+begin_src php
+  IF (ICALL.EQ.4) A_0(1)=THETA(1)*(1+ETA(1))
+  #+end_src
+
+ (See pk).
+
+** Compartment update (NM75)
+Usage
+#+begin_src php
+ $PK
+ IF (A_UFLG.EQ.1) THEN
+  ... compartment update block ...
+ ENDIF
+#+end_src
+Similar to compartment initialization block, in a compartment update
+block, the user sets A_UFLG  to  1  in  PK to indicate  to  PREDPP
+that PK is going to update the compartments.  The desired compartment
+values may be set in the array A_U(n).   The  user should  use  MTIME
+to  designate a variable time position at which an abrupt change in
+compartment amounts occurs.  One could input  a  dose as follows:
+
+#+begin_src php
+ MTIME(1)=wtime
+ MTDIFF=1
+ AZTEST=A_0FLG
+ IF(TSTATE==MTIME(1).AND.AZTEST==0) A_UFLG=1
+ IF(A_UFLG==1) THEN
+ A_U(1)=A(1)+wdose
+ A_U(2)=A(2)
+ A_U(3)=A(3)
+ ENDIF
+#+end_src
+The A_UFLG event  must  be  triggered with  an =IF(TSTATE==MTIME())=
+condition as indicated in the above example.  Values may be assigned
+to reserved variables A_U(n).  The  value of  the  amount  in the  nth
+compartment (the nth element of the state vector) is set to the  value
+assigned  to  A_U(n).   Any  A_U(x)  not explicitly  defined are set
+to 0.  An un-assigned A_U(k) should retain its value, A_u(k)=A_u(k).
+
+- The code "IF(A_UFLG==1)...THEN...ENDIF" is optional,  as  NMTRAN
+  will insert  it if not present.  A_0FLG must be 0 whenever A_UFLG is
+  set to 1, as shown in the example above.
+
+- The rules for compartment update blocks are similar to those for
+  compartent initialization blocks.
+
+- PREDPP  expects to find the A_U values in the A_0 arrays. NMTRAN
+  converts A_U() in abbreviated code to A_0() during FSUBS  code
+  construction.
+
+- See  Guide  Introduction_7,  "Updating Amounts in Compartments at any
+ Time: The A_UFLG Flag (NM75)"
+
+** DATA_AVERAGE
+Usage:
+#+begin_src php
+ $ERROR
+ IF (ICALL.EQ.6) THEN
+  ... data average block ...
+ ENDIF
+#+end_src
+A data average block is a block of abbreviated code that is only
+executed when ICALL=6.  This value of ICALL  occurs  when  the
+raw-data-average (RAW_) data item is defined in the data set and has a
+non-zero value for some records.  Data average blocks are not required
+when the raw-data-average  data  item is present, but they allow the
+user additional functionality.  Such blocks may be present in $PRED
+and $ERROR. If  for  a given observation record matching a template
+record, a data average block sets the DV variable to a value different
+from  the  one in the record, this value is the one included in the
+average.
+
+In  the following  example,  the displayed DV value for each template
+record is the proportion of DV items greater than 10 on those  records
+matching the template record.
+#+begin_src php
+  Y=...
+  TRDV=DV
+  IF (ICALL.EQ.6) THEN
+     DV=0
+     IF (TRDV.GT.10) DV=1
+  ENDIF
+#+end_src
+PRED  may return a value of 1 in F, indicating that the DV item in the
+record is not to be included in the  average.   Continuing  the  above
+example,  suppose  that the DV variable is set to a value only when it
+exceeds 2, so that the  average  is  the  proportion  of  observations
+exceeding  10 among those that exceed 2.  The code is as follows.  See
+note 2 below on the returned value of F.
+#+begin_src php
+ Y=...
+ TRDV=DV
+ IF (ICALL.EQ.6) THEN
+    IF (TRDV.LE.2) Y=1
+    DV=0
+    IF (TRDV.GT.10) DV=1
+ ENDIF
+#+end_src
+When ICALL=6, PRED and ERROR are called  with  successive  records  as
+usual.   However,  with each observation record, all output from these
+routines other than a value set for the DV data item  and  values  set
+for  PRED-defined  (ERROR-defined) items V used in a table or
+scatterplot and located in the SAVE region (See save_region (and the F
+value, in  so  far as it is or is not 1) is ignored.  In the same way
+that an average is formed for the DV, averages are formed for the
+elements  of V.   Upon  entry  into PRED or ERROR with a given record,
+the value of the DV item is the one on the record, and the values  for
+V  are  the values  that  will  be used in a table and/or scatterplot.
+If PRED or ERROR changes one of these values, the new value is the
+one  used  in the  average.   If a value is not changed, the unchanged
+value is used in the average.  (For a nonobservation record, the
+output  from  that record is completely ignored.)
+
+The  following  series  of  examples  concern taking averages of PRED-
+defined items.  They involve a mixture model, where, under each of the
+subpopulations, there is a parameter PA whose value depends on an ETA.
+There is a template record.
+
+*** Example A
+Suppose first that PA does not depend  on  (interindividually-varying)
+covariate  values.  Suppose moreover, that during copying passes, with
+each individual record a value of the quantity  Q=P1*PA1+P2*PA2+P3*PA3
+has  been  computed  and stored in the SAVE region.  Here, the P's are
+the mixture probabilities, and the PA's are conditional  estimates  of
+PA  under  the different models for the different subpopulations.  Due
+to the presence of the template record, at ICALL=6, the average  of  Q
+across  the  eta  estimates  (from individuals with the same covariate
+values as are contained in the template record)  will  be  computed  -
+without any need for a data average block.  More precisely, at ICALL=6
+a pass through the data set occurs, during  which  a  value  of  Q  is
+obtained  with each of the observation records that match the template
+record.  However, the average of the Q values is an average of
+within-individual  averages,  and  since Q does not vary within an
+individual record, the within-individual average computed for that
+record is  the same value of Q as is obtained with each of the
+observation records of the individual record (matching the template
+record).   The  resulting average  of  the  Q  values is an estimate
+of the expected value of PA over the subpopulations and the
+randomly-varying PA's.
+
+
+*** Example B
+Suppose that PA depends on a covariate X E.g.
+PA=THETA(1)*X**THETA(2)*EXP(ETA(1)), and that one is interested in an
+estimate of the expected value of  PA for  X=x.  Suppose also that the
+value for X in the template record is x.  Once again, suppose that
+during copying passes, with each individual  record  a  value  of  Q
+has been computed and stored in the SAVE region - using whatever value
+of X appears in the  individual  record. At  ICALL=6, if and only if
+the observation records within an individual record have the value X=x
+and  match  the  template  record  with respect  to  the other
+relevant data items, will the within-individual average be included in
+the average  Q.   Moreover,  these  observation records are the very
+ones whose value for Q is of interest.
+
+*** Example C
+Under a well-specifed model, ETA(1) should be independent of
+ X, and so one might want to use an average of Q across the  eta  estimates from all individuals (with observation records).  Then one might (i) during copying passes, for each individual record compute Q  using the  specific value X=x - regardless of what value of X appears in the individual record, and (ii) include the record
+
+#+begin_src php
+ $OMIT X
+#+end_src
+to prevent the values of X from affecting the match with the  template record.
+
+*** Example D
+The  strategy  in example C fails if it is necessary to match on X for
+the purpose of forming averages other than the average Q, and it is at
+least  awkward  if one is interested in the expected value of PA for a
+variety of values of X.  Here is an alternative strategy.
+
+#+begin_src php
+ $ABB COMRES=4 COMSAV=4
+ $ERROR
+  ...
+ Y=...
+ IF (COMACT.EQ.2) THEN
+    IF (MIXNUM.EQ.1) COM(1)=ETA(1)
+    IF (MIXNUM.EQ.2) COM(2)=ETA(2)
+    IF (MIXNUM.EQ.3) COM(3)=ETA(3)
+ ENDIF
+ IF (ICALL.EQ.6) THEN
+    PA1=THETA(1)*TEMPLT(X)**THETA(2)*EXP(COM(1))
+    PA2=THETA(1)*TEMPLT(X)**THETA(2)*EXP(COM(2))
+    PA3=THETA(1)*TEMPLT(X)**THETA(2)*EXP(COM(3))
+    COM(4)=MIXP(1)*PA1+MIXP(2)*PA2+MIXP(3)*PA3
+ ENDIF
+
+ $TABLE COM(1) COM(2) COM(3) NOPRINT FILE=junk
+ $TABLE ID ... COM(4) ...
+#+end_src
+During the copying passes, the values of the eta estimates are  stored
+(in  items  COM(1),  COM(2) and COM(3) of the SAVE region) rather than
+the value of Q.  The first table record  appears  because  unless  the
+items  COM(1), COM(2), and COM(3) are displayed, at ICALL=6 their
+values are 0.  TEMPLT(X) refers generically to the value of X on the
+template record (see Special Rule 4 below); so there can be numerous
+template records with different values of X.
+
+
+*** Example E
+Examples A-C are not explicit about how the mixture probabilities  are computed.   They  might be obtained via MIXP, in which case during the copying passes (similar to what happens at ICALL=6  with  example  D), with  a given individual record, they are the probabilities pertaining to that record.  As long as the mixture probabilities do not depend on interindividual-varying  covariates, the mixture probabilities are the same no matter what individual record it is  to  which  they  pertain. But if the probabilities depend on interindividual-varying covariates, and especially if one wants to estimate the expected value  of  Q  for numerous different sets of values for these covariates, then one might use:
+
+#+begin_src php
+ $ERROR
+ include nonmem_reserved_general
+ Y=...
+ IF (COMACT.EQ.2) THEN
+    IF (MIXNUM.EQ.1) COM(1)=ETA(1)
+    IF (MIXNUM.EQ.2) COM(2)=ETA(2)
+    IF (MIXNUM.EQ.3) COM(3)=ETA(3)
+ ENDIF
+ IF (ICALL.EQ.6) THEN
+    PA1=THETA(1)*TEMPLT(X)**THETA(2)*EXP(COM(1))
+    PA2=THETA(1)*TEMPLT(X)**THETA(2)*EXP(COM(2))
+    PA3=THETA(1)*TEMPLT(X)**THETA(2)*EXP(COM(3))
+    COM(4)=MIXPT(1)*PA1+MIXPT(2)*PA2+MIXPT(3)*PA3
+ ENDIF
+#+end_src
+The mixture probabilities found in MIXPT  pertain  to  the  individual
+record  containing  the  template  record  (see Special Rule 7 below).
+Because they have been computed using the  covariate  values  in  that
+record,  they  are  commensurate with the way PA has been computed for
+the different subpopulations.  With versions prior to NONMEM 7.3,  the
+probabilities  in MIXPT must be referenced via verbatim code (note the
+double quotes).
+
+#+begin_src php
+ $ERROR
+ " USE ROCM_REAL MIXPT=>MIXP_RAW
+  ...
+ "  COM(4)=MIXPT(1)*PA1+MIXPT(2)*PA2+MIXPT(3)*PA3
+#+end_src
+
+*** Special rules
+
+- No ETA derivatives are computed in a data average block.
+
+- A  RETURN  statement  may be used in a data average block.  If Y=
+  appears (i.e. Y is assigned a value)  in  a  data  average  block
+  before  the  RETURN (not necessarily in the same block containing
+  the RETURN), then F is set to Y (F=Y); otherwise F is set to to 0
+  (F=0).   If there is no RETURN statement in a data average block,
+  then as usual, F is set to the value of Y assigned  by  the  time
+  PRED (ERROR) exits.
+
+- Loops  are  permitted  in a data average block.  The syntax is as follows.
+  #+begin_src php
+    DO WHILE (condition)
+     .. statements ..
+    END DO
+  #+end_src
+- During calls with ICALL=6, the template data record is  found  in
+  NONMEM global variable TEMPLT.  Items in the template data record
+  may be referred to in abbreviated code of the data average  block by
+  position or by label, e.g., TEMPLT(1) or TEMPLT(ID).
+
+- During  calls  with  ICALL=6,  the  repetition feature may not be used.
+
+- If a mixture model is used, then during calls with ICALL=6,  both
+  MIXNUM  and  MIXEST are the index of the subpopulation into which
+  the individual (whose data record is being passed) has been
+  classified.
+
+- If a mixture model is being used, then during calls with ICALL=6,
+  (the final estimates of)  the  mixture  probabilities  associated
+  with  the  individual  record  containing the template record are
+  found in NONMEM global variable  MIXPT.   Code  that  uses  these
+  probabilities must be verbatim code.
+
+ (See raw_).
+ (See MIX CONTR: TEMPLT)
+ (See Mixture model: MIXPT).
+
+** PRED_IGNORE_DATA (NM75)                    |
+Usage:
+#+begin_src php
+ $INFN
+     IF(PRED_IGNORE_DATA_TEST==1) THEN
+     PRED_IGNORE_DATA=0
+     IF(AGE>35.0) PRED_IGNORE_DATA=1
+     IF( ID>10.AND.ID<18.OR.ID>60.AND.ID<70 ) PRED_IGNORE_DATA=1
+     RETURN ;Assures no additional computation code in INFN is executed
+     ENDIF
+#+end_src
+Usage (in user-defined function):
+#+begin_src f90
+ USAGE:
+       SUBROUTINE INFN (ICALL,THETA,DATREC,INDXS,NEWIND)
+       USE NMPRD_INT, ONLY: PRED_IGNORE_DATA,PRED_IGNORE_DATA_TEST
+#+end_src
+The IGNORE=(list) and ACCEPT=(list) options of $DATA provide a limited
+means of filtering the input data set, which is performed  by  NMTRAN.
+To  provide  more  elaborate  filtering  for  excluding data, PRED can
+request that NONMEM filter out additional data records at  the
+beginning of the run. This  is  done  by setting the reserved variable
+PRED_IGNORE_DATA to a non-zero value within $INFN, $PK, or $PRED,  for
+each  record  to  be ignored.
+
+- It may be useful to package PRED_IGNORE_DATA statements within
+  #+begin_src php
+  IF(PRED_IGNORE_DATA_TEST==1) THEN
+  ...
+  RETURN
+  ENDIF
+  #+end_src
+  structures to avoid unnecessary code execution.
+
+- If  the  PRED_IGNORE_DATA_TEST or PRED_IGNORE_DATA variables appear
+  in abbreviated code, or the option $DATA ... PRED_IGNORE_DATA is
+  used in the NM-TRAN control stream, then  a  PRED_IGNORE_DATA  pass
+  through the NONMEN data file with PRED_IGNORE_DATA_TEST=1 and
+  ICALL=-1 occurs.  Otherwise it does not.  Therefore, existing code
+  such as  "IF (ICALL<=1) THEN ...ENDIF" does not need to be changed.
+
+- The following variables have properly defined values:
+  + ICALL
+  + Data record items in DATREC
+  + NEWIND,NEWL2
+  + NPROB,IPROB, S1NUM, S2NUM,
+  + S1NIT,S2NIT, S1IT, S2IT
+  + No  other variables are properly defined when
+    PRED_IGNORE_DATA_TEST=1. For example, the following should not be
+    used: THETA, OMEGA, SIGMA, NREP, IREP ETA may be used but will be
+    0 there  are  no  random  variables  in  a pred_ignore_data block.
+
+- Typically the NONMEM file that is  input to the pred_ignore_data
+  block is FDATA.  FDATA is unaffected by the  pred_ignore_data
+  block.   However,  with  NONMEM  7.5  there  is a new file,
+  FDATA.csv, and records excluded by PRED_IGNORE_DATA will not be
+  present in FDATA.csv.
+
+- In a  pred_ignore_data block, the data record has been read by
+  NONMEM and  all  data  record  items  have numeric values.  The
+  (non-Fortran) operators .EQN. and .NEN. that can be used with the
+  $DATA  IGNORE  and ACCEPT options are not needed and cannot be used
+  in a pred_ignore_data block.
+
+- Any other functions of $INFN, such as DATA  item  modification
+  (i.e., transgeneration  of  the data), RANDOM calls, etc. should be
+  made with ICALL==1 or ICALL==0 IF blocks, as before.
+
+
+- It is possible to restrict PRED_IGNORE_DATA actions  to  a  particular problem number:
+  #+begin_src php
+  IF(IPROB==2.AND.PRED_IGNORE_DATA_TEST==1) THEN
+  PRED_IGNORE_DATA=0
+  IF(AGE>35.0) PRED_IGNORE_DATA=1
+  IF( ID>10.AND.ID<18.OR.ID>60.AND.ID<70 ) PRED_IGNORE_DATA=1
+  RETURN
+  ENDIF
+  #+end_src
+
+- RETURN statements may be used.
+
+- EXIT statements may be used.  They act like a RETURN but are otherwise ignored.
+
+- REFERENCES: Guide Introduction_7
+
+** Initialization-finalization
+Usage:
+#+begin_src php
+ $PRED
+    IF (ICALL.EQ.1) CALL SUPP(0,1)
+ ...
+#+end_src
+A  run  consists of one or more problems, and each problem consists of
+one or more subproblems, which are iterations of various tasks
+specified  in  the  problem. The "end" of a subproblem refers to the
+end of such an iteration.  Problems themselves may be organized  into
+super-problems,  which  may  be  iterated.   The  "beginning" and
+"end" of a superproblem refers to the beginning and end of  the  first
+and  last iterations  of the superproblem.  There are opportunities to
+make some rudimentary computations at:
+
+- the beginning of a run (run initialization)
+- the beginning of a superproblem (superproblem initialization)
+- the beginning of a problem (problem initialization)
+- the end of a subproblem (subproblem finalization)
+- the end of a problem (problem finalization)
+- the end of a superproblem (superproblem finalization)
+- the end of a run (run finalization)
+
+For example, data transgeneration may take place at  problem
+initialization.   Or, a variable may be initialized at problem
+initialization and modified at each subproblem  finalization,  and
+its  final  value written  to a user file at problem finalization.
+There is no opportunity to do subproblem initialization.  When  using
+abbreviated  code, initialization  and finalization opportunities are
+signalled by values of the variable ICALL:
+
+- ICALL=0: Run initialization.
+
+- ICALL=1: Superproblem and Problem initialization. ICALL is set to 1
+  to signal problem  initialization.   When  this happens, if a
+  superproblem requires initialization, test
+  1. S1IT  (number  of current superproblem iteration) equals 1 (or S2IT=1),
+  2. S1NUM (number of current superproblem)  equals  appropriate value, and
+  3. IPROB  (number  of current problem) equals number of first problem in superproblem,
+  If 1-3 are true, do superproblem initialization (See Problem_Iteration_Counters).
+
+- ICALL=3: Subproblem, Problem, Superproblem and Run finalization.
+  ICALL is set to 3 to signal problem finalization.  When this
+  happens:
+  + If a problem with subproblems requires finalization, test
+     IREP=NREP  (number  of the current subproblem equals total number
+     of subproblems) and if true, do problem finalization (See
+     Simulation: NREP,IREP).
+  + If a superproblem requires finalization, test
+    1. S1IT=S1NIT (number of  the  current  superproblem  iteration equals total number of superproblem iterations) (or S2IT=S2NIT),
+    2. S1NUM  (number of current superproblem) equals appropriate value,
+    3. IPROB (number of current problem)  equals  number  of  last problem in the superproblem, and
+    4. IREP=NREP,  if there are subproblems with the last problem in the superproblem
+    If (i)-(iv) are true, do superproblem finalization.
+  + If a run having multiple problems requires finalization, test
+    1. S1IT=S1NIT (or S2IT=S2NIT), if there are superproblems
+    2. S1NUM equals number of  last  superproblem,  if  there  are superproblems,
+    3. IPROB=NPROB  (number  of  the current problem equals total number of problems), and
+    4. IREP=NREP, if there are subproblems with the  last  problem in the superproblem.
+    If (i)-(iv) are true, do run finalization.
+
+An  initialization  block  is a block of abbreviated code that is only
+executed at ICALL=0 or ICALL=1.  A finalization block is  a  block  of
+abbreviated code that is only executed at ICALL=3.  E.g.,
+#+begin_src php
+  IF (ICALL.EQ.1) THEN
+   ... initialization block ...
+  ENDIF
+#+end_src
+Such  blocks may be present in $PRED, $PK, $ERROR, and $INFN blocks of
+abbreviated code.  If such blocks are present in  $PK  or  $ERROR,  an
+INFN routine is used to implement the logic in these blocks.
+Initialization and finalization blocks will be implemented by means of
+a generated FORTRAN subroutine.
+
+Variables  may  be  used as right-hand quantities even before they are
+defined; if an expression which  uses  such  a  variable  is  computed
+before  any  value of the variable is computed, the computation of the
+expression will be uncertain.
+
+Assignment, conditional, WRITE and PRINT statements may be used.
+
+In addition, these rules apply:
+
+-  Defined quantities are not regarded as random variables;  eta
+  derivatives are not computed in an initialization or finalization
+  block.
+
+- Transgeneration  of  the  data is permitted.  NONMEM data items ID
+  and MDV may not be changed.  If a data item label may appear on  the
+  left of  an  assignment statement, then NM-TRAN generates assignment
+  statements changing first the data item in the event or  data
+  record,  and then  the  value  of the local variable having that
+  label.  Note, however, that at ICALL=0,1,or 3, by default,
+  references to data items are references  to those data items in the
+  first data or event record.  To transgenerate an item in any  data
+  or  event  record  (including  the first),  use  of  the  NONMEM
+  utility  routine PASS is required.  See below.
+
+- Calls to certain NONMEM routines are permitted:
+
+  #+begin_src php
+       CALL PASS(MODE)
+       CALL RANDOM(n,R)
+       CALL SUPP(ie,ic)
+  #+end_src
+  CALL PASS(MODE) must be coded  exactly  in  this  way.   If  CALL
+  PASS(MODE)  is  present, MODE becomes a reserved variable and may be
+  used only with other instances of CALL  PASS(MODE).   Multiple calls
+  to PASS may be present.
+
+  If CALL RANDOM(n,R) is present, R becomes a reserved variable and
+  may be used only with other instances of CALL RANDOM(n,R).  n may
+  only be an integer value 1-10.
+
+- SUPP  is  used  to suppress portions of the NONMEM output report.
+  (See supp).  The arguments ie and ic may only be 0 or 1.
+
+- The following variables may be used on the right (their values  change
+  with calls to PASS):
+
+       Data record items (See PASS: PASSRC).
+       NEWIND (See PASS NEWIND: NWIND).
+       NIREC, NDREC (See Record Counters: NIREC,NDREC).
+       NEWL2 (See PASS New L2 record: NEWL2).
+       ETA when ICALL=3 (See Simulation: ETA,EPS)
+       LIREC (See Size of Individual Record)
+       PRED_, RES_, WRES_ when ICALL=3 (See PRED,RES,WRES).
+       IERE, IERC when ICALL=3 (See Estim Covar Error Codes).
+       NINDR, INDR1, INDR2 (See NINDR INDR1 INDR2).
+       NREP, IREP (See Simulation: NREP,IREP).
+       NPROB,  IPROB,  S1NUM, S2NUM, S1NIT, S2NIT, S1IT, S2IT (See Prob-
+       lem_Iteration_Counters).
+
+- RETURN and EXIT statements may be used.
+
+- DOWHILE loops are permitted.  The syntax is as follows.
+
+  #+begin_src f90
+       DO WHILE (condition)
+	.. statements ..
+       END DO
+  #+end_src
+  Here is an example of a transgeneration loop.
+  #+begin_src php
+    $PRED
+       IF (ICALL.EQ.0) THEN
+            MODE=0
+            CALL PASS (MODE)
+            MODE=2
+            CALL PASS (MODE)
+            DO WHILE (MODE.EQ.2)
+            ... transgeneration statements ...
+            CALL PASS (MODE)
+            ENDDO
+           RETURN
+       ENDIF
+   #+end_src
+   This type of usage of the PASS routine can be coded more  simply, as follows:
+   #+begin_src php
+       $PRED
+       IF (ICALL.EQ.0) THEN
+            DOWHILE (DATA)
+            ... transgeneration statements ...
+            ENDDO
+           RETURN
+       ENDIF
+   #+end_src
+   The  DOWHILE  (DATA)  causes the transgeneration statements to be
+  executed with each data record.  In effect, NM-TRAN supplies  the
+  statements  MODE=...  and  CALL  PASS(MODE) that are shown in the
+  above.
+
+- Variables that are first defined in an initialization block or
+  finalization  block  are  not  stored  globally  in NMPRD4, but
+  rather, are stored in module PRINFN.  (This makes  them  available
+  to  subroutine MIX.)
+
+- Variables  defined  in  an initialization or finalization block may
+  be used freely outside of such blocks, and vice versa: PRED-defined
+  variables defined outside such blocks may be used within them.
+
+- THETA variables may be used in initialization and finalization blocks.
+  They are obtained from the subroutine argument.
+    + At ICALL=0, THETA contains the initial estimates for the  first  problem.
+    + At ICALL=1, THETA contains the initial estimates for the current problem.
+    + At ICALL=3, THETA contains the final estimates for the  current  problem.
+  Here is an example of code that could be used during a simulation with multiple subproblems.
+  #+begin_src php
+     $PRED
+       IF (ICALL.EQ.1) THEN
+          SUM=0
+          N=0
+          RETURN
+       ENDIF
+       IF (ICALL.EQ.3) THEN
+         N=N+1
+         SUM=SUM+THETA(1)
+         RETURN
+       ENDIF
+       IF (ICALL.EQ.3.AND.N.EQ.NREP) THEN
+         MEAN=SUM/N
+         PRINT *,MEAN
+       ENDIF
+  #+end_src
+  The following variables may be referenced as right-hand quantities
+  in initialization and finalization blocks.  (Note also that
+  unsubscripted arrays may appear in a WRITE statement.)
+
+  #+begin_src php
+     OMEGA(n,m)
+     SIGMA(n,m)
+  #+end_src
+     (See Parameter Values: Initial and Final).
+     (See write print).
+- The following variables may be referenced as right-hand quantities  in
+  finalization blocks.
+  (Note also that unsubscripted arrays may appear in a WRITE statement.)
+
+  #+begin_src php
+      SETHET(n)
+       SETHETR(n)
+       SEOMEG(n,m)
+       SESIGM(n,m)
+       OBJECT
+  #+end_src
+       (See Standard Errors).
+       (See Objective Function Value).
+       (See write print).
+
+- The following statements are forbidden:
+  #+begin_src php
+       CALL SIMETA(ETA)
+       CALL SIMEPS(EPS)
+  #+end_src
+- When the PRED repetition feature is used, the variables RPTO and PRDFL
+  may appear as left-hand quantities in initialization blocks.
+  (See Repetition Variables).
+
+-  REFERENCES: Guide II, section D.2.2
+-  REFERENCES: Guide VI, section VI.A , Figure 37
+
+** Copying
+Usage:
+#+begin_src php
+  IF (COMACT.EQ.1) TVCL=CL
+#+end_src
+During specific “copying passes” data records are sent to PRED and
+become accessible. A copying pass is indicated by a positive value of
+COMACT. At least one copying pass occurs whenever variable values are displayed.
+
+During the first copying pass, COMACT = 1 and MIXNUM = 1. For a mixture model with k subpopulations, COMACT stays at 1 for k passes, while MIXNUM increments from 1 to k. If conditional estimation or the POSTHOC option is used, an additional set of copying passes occurs with COMACT = 2, again with MIXNUM increasing from 1 to k.
+If no mixture model is used, there are at most two copying passes: one
+with COMACT = 1 and one with COMACT = 2.
+
+If values of a variable from earlier  copying  passes  are  needed  in
+later passes, the values for the variable should be stored in the SAVE
+region of module NMPRD4. When the values are stored in
+the SAVE region, that value computed with a given data record during a
+copying pass will be found in NMPRD4 when the same  record  is  passed
+during  the  next  copying pass, i.e. it will have been saved from the
+previous copying pass.  This is in contrast  to  the  usual  behaviour
+(with a noncopying pass), where with a given data record, the value in
+NMPRD4 is the value computed with the previous data record.  The value
+is 0 when a record is passed during the first copying pass, and though
+PRED may set it or reset it during a  subsequent  copying  pass,  this
+need not be done (see discussion below about COMACT).
+
+The  values used in tables and scatterplots (whether or not these
+values are stored in the SAVE region) are those copied from  NMPRD4
+with the last copying pass.
+
+A  copying  block is a block of abbreviated code that is only executed
+during a copying pass, i.e. when COMACT has a positive value.  Special
+rules apply, which allow the user to be less concerned about using the
+COMSAV option of the $ABBREVIATED record (see example below):
+
+COM(i) variables that are defined in a copying block are  referred  to
+as  explicit  SAVE variables.  PRED-defined variables that are defined
+in a copying block, other than COM(i) variables, are  referred  to  as
+implicit  SAVE  variables.   Collectively, the two types of SAVE
+variables are referred to as SAVE variables.  NM-TRAN  stores  SAVE
+variables in the SAVE region of module NMPRD4.
+
+Implicit and explicit SAVE variables cannot both appear in abbreviated
+code.  The COMRES option of the $ABBREV record cannot be used when any
+implicit  SAVE  variables  are used, but it must be used when explicit
+SAVE variables appear (as whenever COM(i) variables appear).
+
+The size of the SAVE region of NMPRD4 depends on the COMSAV option  of
+the $ABBREV record.  This option may be used in three ways:
+
+- No COMSAV option.  The SAVE region of module NMPRD4 will nonethe-
+  less include all the SAVE variables.
+
+- COMSAV=n (n>=0).  NM-TRAN will, if necessary, extend the size  of
+  the  SAVE  region from n to a larger value so that all SAVE vari-
+  ables will be included in the region.
+
+- COMSAV=-1.  There is to be no SAVE region.  Variables defined  in a
+  copying block will not be SAVE variables.
+
+*** COMACT, COMSAV
+Usage (in user-defined function)
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: COMACT,COMSAV
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: COMACT,COMSAV
+#+end_src
+COMACT is set by NONMEM; COMSAV by PRED.
+
+- COMACT
+      + COMACT=0:  NONMEM is not making a copying pass, i.e., values
+        from NMPRD4 will not be copied for tables and  scatterplots.
+        (NONMEM only  makes  a copying pass when PRED-defined items
+        are listed in $TABLE or $SCATTER records.)
+
+      + COMACT=1: This is a copying pass  with  final  thetas;  etas  are zero.
+      + COMACT=2: This  is  a  copying pass with final thetas and conditional ETA estimates.
+      + COMACT=3: This is a copying pass with conditional
+        (nonparametric) estimates  of  ETAS.   Such  a  pass takes
+        place when the control stream includes this record:
+        #+begin_src php
+	  $NONPARAMETRIC ETAS
+	#+end_src
+
+
+- COMSAV: set by PRED at ICALL<=1 or at COMACT=1 with the very  first
+  data record.  The Save Region is an initial part of NMPRD4.  If with
+  a given data record, the value of a PRED-defined variable is stored
+  in  this  region,  then  during  a copy pass with COMACT = 2, the
+  value of the variable is initialized to the value obtained during
+  the  copy  pass with the same data record and COMACT=1. COMSAV is
+  the size of this region, i.e., the number of variables whose values
+  are stored in this region.
+
+  When NM-TRAN is used, COMACT may be tested in abbreviated code.
+  COMSAV may not be referenced in abbreviated code.  Instead, the
+  COMSAV option of  the $ABBREVIATED record is coded, and NM-TRAN
+  causes the specified value to be stored in COMSAV.
+
+- REFERENCES: Guide IV, section III.B.7 , IV.E.2
+- REFERENCES: Guide VI, section III.J , IV.E
+
+
+*** Examples
+#+begin_src php
+ $ERROR
+ Y=F+F*EPS(1)
+ IPRED=F
+ IF (COMACT.EQ.1) FT=F
+ WR=(DV-IPRED)/FT
+
+ $EST ... POSTHOC
+ $TABLE FT IPRED WR
+#+end_src
+With  the  first  copying pass the value of COMACT is 1, which signals
+that during this copying pass, all ETA variables are set to 0.   Since
+the  option  POSTHOC appears, with a subsequent copying pass the value
+of COMACT is 2, which signals that during this copying pass,  all  ETA
+variables are set to their conditional estimates.
+
+In the example, WR is set to the weighted intra-individual residual.
+When COMACT=1, the prediction for the typical  individual  (ETA=0)  is
+computed  and stored in FT.  FT is a SAVE variable, so this value will
+have been saved, and when COMACT=2, this same value will be  found  in
+FT.   With  COMACT=2, the weight used with the residual is computed to
+be the reciprocal of this FT value, while IPRED is computed from
+conditional  estimates of the ETA variables and thus its value applies
+to to the individual with these estimates, rather  than  to  the
+typical individual.   The  values  of  IPRED and WR appearing in the
+table are those obtained during the last copying pass.    The  tabled
+value  of IPRED is based on the conditional estimate of ETA.  The
+value of FT is also the value obtained during the last copying pass,
+but it  in  turn is  also  the value obtained from the first copying
+pass, as the value of FT has not changed during any subsequent copying
+pass,  and  this value is based on ETA=0.
+
+Since  FT  is  a SAVE variable, a SAVE region will have been allocated
+where this variable will be stored, and (unless there is  some  reason
+to  use  the  COMSAV option other than to insure this) the user not be
+concerned about this option.
+
+ (See PRED-Defined Variables).
+
+** Simulation
+Usage:
+#+begin_src php
+ $PK
+  IF (ICALL.EQ.4) CL=THETA(1)+ETA(1)
+#+end_src
+A  "simulation block" is a block of abbreviated code that is only
+executed when ICALL=4 (during simulation).  Such blocks may be present
+in $PK,  $ERROR,  and $PRED, and may be implemented by means of
+generated FORTRAN subroutines.  E.g.,
+
+#+begin_src php
+ IF (ICALL.EQ.4) THEN
+  ... simulation block ...
+ ENDIF
+#+end_src
+
+Special rules.
+
+ 1. No eta derivatives are computed in a simulation block.
+
+ 2. Transgeneration is permitted.  NM-TRAN allows a data  item  label
+    to appear on the left of an assignment statement.  NM-TRAN
+    generates assignment statements changing first the data  item  in
+    the event  or  data  record,  and then the local variable having
+    that label.  E.g.,  suppose WT is listed in $INPUT:
+
+    #+begin_src php
+    IF (ICALL.EQ.4) WT=70+70*ETA(3)
+    #+end_src
+    The generated code is:
+    #+begin_src f90
+    IF(ICALL.EQ.4.D0)THEN
+    EVTREC(NVNT,8 )=70.D0+70.D0*ETA(03)
+    WT=EVTREC(NVNT,08)
+    ENDIF
+    #+end_src
+
+    NONMEM and PREDPP reserved data items should not be modified
+    during  simulation.   Transgeneration  is  permitted with
+    simulation with subproblems.  With all versions of NONMEM, the
+    data set  for each  subproblem after the first is the same data
+    set used by the previous subproblem, and includes any  changes
+    (transgeneration) made by the previous subproblem.
+
+ 3. Calls to certain NONMEM routines are permitted:
+    #+begin_src f90
+    CALL SIMETA(ETA)
+    CALL SIMEPS(EPS)
+    CALL RANDOM(n,R)
+    #+end_src
+    where  n  is  an  integer  1-10.   If  CALL RANDOM is present, R
+    becomes a reserved variable used for the random number. Note that
+    NM-TRAN provides the  necessary  calls  to  SIMETA  and SIMEPS  in
+    generated routines.  Explicit calls are used in abbreviated code
+    only to obtain different values of ETA and EPS.
+
+ 4. A RETURN statement may be used.  If in $ERROR or $PRED,  and  the
+    RETURN  occurs  in  a  simulation block, then Y may be assigned a
+    value prior to the return.  If so, then F is set (F=Y); otherwise
+    F is not set.
+
+ 5. Loops are permitted.  The syntax is as follows.
+    #+begin_src php
+    DO WHILE (condition)
+     .. statements ..
+    END DO
+    #+end_src
+    For example, for a truncated normal distribution that
+    only requires testing the eta value directly, this  code  can  be
+    used:
+    #+begin_src php
+    $PK
+     ...
+    DO WHILE (ETA(1).GT.5)
+    CALL SIMETA(ETA)
+    ENDDO
+    #+end_src
+    Another example:
+    #+begin_src php
+    IF (ICALL.EQ.4.AND.NEWIND.NE.2) THEN
+      DO WHILE (ETA(1).GT..5.OR.ETA(1).LT.-.5)
+        CALL SIMETA(ETA)
+      ENDDO
+    ENDIF
+    IF (ICALL.EQ.4) WT=70+70*ETA(1)
+    #+end_src
+    In the examples, the first random seed of the $SIMULATION record
+    must have the NEW option.  Note also that, because of the
+    previous  automatic  call to SIMETA, ETA(1) requires no
+    initialization, but that R in the next example does.
+
+    #+begin_src php
+    IF (ICALL.EQ.4.AND.NEWIND.NE.2) THEN
+      R=1
+      DO WHILE (R.GT..5.OR.R.LT.-.5)
+        CALL RANDOM(2,R)
+      ENDDO
+    ENDIF
+    IF (ICALL.EQ.4) WT=70+70*R
+    #+end_src
+    This example illustrates how a categorical variable  with
+    equal-likely  probabilities  can  be  generated from a random
+    number R, uniformly distributed between 0 and 1.  In this example,
+    the categorical variable BIN takes values 1 through 5.
+    #+begin_src php
+    IF (ICALL.EQ.4) THEN
+      CALL RANDOM(2,R)
+      BIN=INT(R*5)+1
+    ENDIF
+    #+end_src
+
+    The number 5 can be replaced with any other positive integer n to
+    obtain an n-valued categorical variable.  Here INT is  the
+    function  that  transforms  a  nonnegative number x into the
+    greatest integer not exceeding x.  The effect of this simulation
+    code  is to perform the transformation:
+
+    #+begin_src php
+    BIN=1 if R < .2
+    BIN=2 if R < .4 and R >= .2
+    BIN=3 if R < .6 and R >= .4
+    BIN=4 if R < .8 and R >= .6
+    BIN=5 if R <  1 and R >= .8
+    #+end_src
+
+ 6. The "EXIT n k" statement may be used.  The value of n may be 0, 1
+    or 2.  The value of k is referred to as the PRED EXIT CODE. If it
+    is desired that the simulation be  immediately  terminated, then
+    use an EXIT 2 code:
+
+    #+begin_src php
+    IF(ICALL==4.and.IPRED<0.1 .and. TIME>20.0) EXIT 2
+    #+end_src
+
+    With  versions  of NONMEM prior to 7.2, the "EXIT 1" statement in
+    the Simulation step also caused NONMEM to abort.   As  of  NONMEM
+    7.2, if an error occurs in PREDPP during simulation such as
+    PK PARAMETER FOR KA IS NON-POSITIVE
+    or  a  user-implemented  EXIT 1 is issued during simulation, then
+    PRED will be called with a new ETA  and  EPS.   This  feature  is
+    referred  to  as  Simulation Error Forgiveness.  NONMEM describes
+    this as PRED SIMULATION REDO  in  the  NONMEM  report  file.   It
+    writes to the NONMEM report file a description of the data record
+    and THETA and ETA values, for example
+    #+begin_src txt
+     PRED SIMULATION REDO PRED EXIT CODE = 1 INDIVIDUAL NO.       1
+     ID= 1.00000000000000E+00   (WITHIN-INDIVIDUAL) DATA REC NO.   1
+     THETA=
+      3.00E+00   8.00E-02   4.00E-02
+     ETA=
+      4.66E-01   2.91E-03   9.95E-01
+     MESSAGE ISSUED FROM SIMULATION STEP
+    #+end_src
+    If ten such errors occur in the same subject, then it is supposed
+    that  the  cause  of  the simulation error is not due to an occa-
+    sional bad random sample, but is caused by a systematic error  in
+    the  control  stream file. The simulation step is terminated with
+    the message
+    #+begin_src txt
+    PRED ERROR OCCURRED TOO OFTEN ON SIMULATION
+    instead of a message
+    SIMULATION STEP PERFORMED
+    #+end_src
+    With NONMEM 7.5, the PRED  EXIT  CODE  k  may  be  in  the  range
+    1000-9999. For example,
+    #+begin_src txt
+    IF(ICALL==4.and.IPRED<0.01 .and. TIME>20.0) EXIT 1 2300
+    #+end_src
+    This can only occur with user's EXIT code; PREDPP will not gener-
+    ate this kind of EXIT.  NONMEM will try PRED SIMULATION  REDO  up
+    to  10000  times.   The  message "PRED SIMULATION REDO" itself is
+    written to PRDERR  up to 30 times.   After  that,  the  following
+    message is written to PRDERR:
+    #+begin_src txt
+    SUBSEQUENT PRED SIMULATION REDO ERROR MESSSAGES SUPPRESSED
+    #+end_src
+    NONMEM continues trying new ETA and EPS. Be careful that the con-
+    dition does not occur too often (causing  wasteful  computation).
+    After  10000  tries, the simulation is terminated as a protection
+    against an infinite loop. The following  message  is  written  to
+    PRDERR:
+    #+begin_src txt
+    TOO MANY CONSECUTIVE PRED ERRORS (>10000) OCCURRED ON SIMULATION
+    #+end_src
+
+ (See PRED Exit Code).
+ (See INTRODUCTION TO NONMEM 7, Simulation Error Forgiveness (NM72)).
+ (See INTRODUCTION TO NONMEM 7, Extensions to Simulation Error Forgive-
+ ness (NM75)).
+
+ REFERENCES: Guide IV, section III.B.13 , IV.I
+ REFERENCES: Guide V, section 12.4.8
+ REFERENCES: Guide VI, section III.E.2 , IV.B.2
+
+** Expectation
+Usage:
+#+begin_src php
+ $ERROR
+ IF (ICALL.EQ.5) THEN
+  ... expectation block ...
+ ENDIF
+#+end_src
+An  expectation block is a block of abbreviated code that is only
+executed when ICALL=5.  This value of  ICALL  occurs  when  the
+marginal (MRG_)  data  item is defined in the data set and has a
+non-zero value for some records.  Expectation blocks are not required
+when  the  marginal  data  item is present, but they allow the user
+additional functionality.  Such blocks may be present in $PRED, $PK,
+$ERROR.
+
+If the MRG_ data item has the value 1 in a data record, PRED- (PK- and
+ERROR-)  defined  items displayed for the record (e.g. in the row of a
+table corresponding to the record) are  expectations.   When  ICALL=5,
+the  expectations are being computed.  With each call to PRED with the
+data record, the value being set in Y is contributing to the
+expectation  being  computed for the PRED item, and the value being
+set for a PRED-defined item that will be displayed in  a  table  or
+scatterplot (except  for an item stored in the SAVE region) is
+contributing to the expectation being computed for that item.
+
+In this example, the displayed value of  PRED  with  a  record  having
+MRG_=1  is  the  expectation of the 0-1 variable taking the value 1 if
+and only if F > 10.
+
+#+begin_src php
+  IF (ICALL.EQ.5) THEN
+   Y=0
+   IF (F.GT.10) Y=1
+   RETURN
+  ENDIF
+#+end_src
+
+Special rules:
+
+1. No eta derivatives are computed in an expectation block.
+
+2. Calls  to  certain  NONMEM  utility  routines are permitted in an expectation block:
+   #+begin_src php
+   CALL RANDOM(n,R)
+   #+end_src
+   where  n is an integer  1-10.   If  CALL  RANDOM  is  present,  R
+   becomes  a  reserved  variable,  and  may not be used outside the
+   expectation block.  Multiple calls to RANDOM may be present.
+
+3. A RETURN statement may be used in an expectation  block.   If  Y=
+   appears  (i.e.  Y  is  assigned  a value) in an expectation block
+   before the RETURN (not necessarily the in same  block  containing
+   the RETURN), then F is set to Y (F=Y); otherwise F is set to to 0
+   (F=0).  If there is no RETURN statement in the expectation block,
+   then  as  usual,  F is set to the value of Y assigned by the time
+   PRED (PK, ERROR) exits.
+
+4. Loops are permitted in an expectation block.  The  syntax  is  as follows.
+   #+begin_src php
+      DO WHILE (condition)
+       .. statements ..
+      END DO
+   #+end_src
+
+
+5. If a mixture model is used, then during calls with ICALL=5, both
+   MIXNUM and MIXEST are the index of the subpopulation  into  which
+   the individual (whose data record is being passed) has been
+   classified.
