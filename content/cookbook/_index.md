@@ -1,10 +1,8 @@
 +++
-title = "Reference manual"
+title = "Cookbook"
 author = ["Yi Zhang"]
 draft = false
 bookCollapseSection = true
 +++
 
-## Reference manual
-
-fdaf
+## NONMEM cookbook: coding and modeling techniques

@@ -1,5 +1,420 @@
-#+title: PREDPP variales
-* PREDPP global variales
+#+title: Reserved variables
+* Reserved variables
+** NONMEM read-only global variables
+*** COM, COMACT, COMSAV, COMRES
+Reserved labels starting COM regards module NMPRD4.
+
+- COM(n) (in $TABLE and $SCATTER records)
+      Certain positions of MODULE NMPRD4 may be reserved, and the vari-
+      ables  stored in these positions may be displayed by listing them
+      as COM(1), COM(2), etc.  on $TABLE and $SCATTER records, e.g.,
+       $TABLE COM(1) COM(2)
+
+- COM(n) (in abbreviated and verbatim code)
+      Certain positions of MODULE NMPRD4 may be reserved, and the vari-
+      ables stored in these positions are referenced in abbreviated and
+      verbatim code as COM(1), COM(2), etc.
+
+- COMACT (in any user code)
+      Reserved variable COMACT is set by NONMEM. It may  be  tested  in
+      PRED  (e.g., in abbreviated code, verbatim code, or in user-writ-
+      ten routines) to determine when NONMEM is making a copying  pass,
+      i.e., when the data records are being passed to PRED for the pur-
+      pose of computing values of  variables  which  will  be  obtained
+      (i.e.  copied)  from  NMPRD4 for tables and scatterplots.  NONMEM
+      only makes a copying pass when PRED-defined items are  listed  in
+      $TABLE  or  $SCATTER records.  There may be a few copying passes.
+      With the first copying pass, the value of COMACT is 1.  As  copy-
+      ing  passes  proceed,  the value of COMACT may remain the same or
+      increase.  The values used in tables and scatterplots  are  those
+      copied from NMPRD4 with the last copying pass.
+      COMACT=0: This is not a copying pass.
+      COMACT=1:  This is a copying pass with final thetas and zero-val-
+      ued etas.
+      COMACT=2: This is a copying pass with  final  thetas  and  condi-
+      tional estimates of etas.
+      COMACT=3: This is a copying pass with conditional (nonparametric)
+      estimates of etas.
+      Such a pass takes place when the  control  stream  includes  this
+      record:
+       $NONPARAMETRIC ETAS
+
+- COMRES=n1 (option of $ABBREVIATED record)
+      COMRES  ("common  reserve")  is  an  option  of  the $ABBREVIATED
+      record.  It gives instructions to NM-TRAN about NMPRD4.
+      COMRES=-1:  Do not store any variables in module NMPRD4.
+      COMRES=0:  Store variables in NMPRD4,  but  do  not  reserve  any
+      positions (the default).
+      COMRES=n1:   Store  variables in NMPRD4, and reserve the first n1
+      positions.
+
+- COMRES=-1 (in abbreviated code)
+      The pseudo-assignment statement COMRES=-1  may  be  used  in  any
+      block  of abbreviated code to prevent any variable defined in the
+      block from being stored into NMPRD4.
+
+- COMSAV=n2 (option of $ABBREVIATED record)
+      Values of variables displayed  in  tables  and  scatterplots  are
+      obtained  from  module  NMPRD4.   There are particular times when
+      data records are passed to PRED  for  the  purpose  of  obtaining
+      these  values;  these are called copying passes.  The SAVE region
+      of module NMPRD4 is the initial part of NMPRD4.  If a variable is
+      stored  in  the  SAVE region, then the value of the variable com-
+      puted with a given data record during  a  copying  pass  will  be
+      found  in  NMPRD4  when the same record is passed during the next
+      copying pass, i.e. it will have  been  saved  from  the  previous
+      copying  pass.  This is in contrast to the usual behaviour, where
+      with a given data record, the value in NMPRD4 is the  value  com-
+      puted with the previous data record.
+      n2  is  the  initial  size of the SAVE region, i.e. the number of
+      positions in this region.  n2 =0 is the default  value.   n2  may
+      not exceed n1.
+      The  SAVE region has size n2 initially, but NM-TRAN may extend it
+      if SAVE variables are used.  However, if n2 =-1, the SAVE  region
+      is  not  to  be extended, and there is to be no SAVE region alto-
+      gether.
+      (See copying_block).
+
+      NM-TRAN causes the generated routines to store the value of  COM-
+      SAV at ICALL=1.
+
+- COMSAV=n2 (in user written code)
+      In  the absence of abbreviated code, COMSAV may be set by a user-
+      written PRED routine at ICALL<=1, or at COMACT=1  with  the  very
+      first data record.  n2 is as described above.
+
+ (See COMACT,COMSAV)
+ (See PRED-Defined Variables)
+ (See abbreviated, abbreviated_code, displayed_values).
+
+ REFERENCES: Guide IV, section III.B.7 , IV.E.2
+ REFERENCES: Guide VI, section III.J
+
+
+*** MIXNUM, MIXEST, MIXP
+Variables used with mixture models.
+
+USAGE:
+#+begin_src php
+      IF (MIXNUM.EQ.1) THEN
+        ...
+      ENDIF
+      IF (MIXNUM.EQ.2) THEN
+        ...
+      ENDIF
+      IF (MIXNUM.EQ.3) THEN
+        ...
+      ENDIF
+#+end_src
+With mixture models, MIXNUM, MIXEST and MIXP are global variables that
+may be used as right-hand quantities (or  in  logical  conditions)  in
+abbreviated code or user-supplied routines. In general: MIXNUM is an
+input to PRED (or PREDPP) set by NONMEM. MIXEST is an output (result)
+or consequence from the estimation set by NONMEM.
+
+- MIXNUM: the index of the subpopulation for which variables are  to
+  be computed.
+
+  During  ICALL=4,  MIXNUM  is  the index of the sub-population that
+  was randomly selected to simulate the subject's data.   When
+  ICALL=3  and the PASS subroutine used, or when ICALL=5 or 6, MIXNUM
+  is the index of the subpopulation estimated to be that  from  which
+  the  individual's data most probably arises, and is equal to MIXEST
+  (see below).
+
+- MIXEST
+  When  ICALL=3,5,6,  and at ICALL=2 when COMACT is not 0, MIXEST is the
+  index of the subpopulation estimated to be that from which  the  indi-
+  vidual's data most probably arises.  Before nm7.3, at all other condi-
+  tions, the value of MIXEST is not meaningful, such as when ICALL=4  or
+  ICALL=2  and  COMACT=0.   As  of NONMEM 7.3, when ICALL=4, MIXEST will
+  equal MIXNUM, and when ICALL=2 and COMACT=0, MIXEST will be 0 to indi-
+  cate it has not been assigned a meaningful value.
+
+- MIXP
+  These are the mixture probabilities P(i) computed by subroutine MIX or
+  by the $MIX block of abbreviated code.
+
+  In abbreviated code, MIXP may be coded in either of three ways:
+
+  #+begin_src php
+  MIXP(MIXNUM)
+  MIXP
+  MIXP(i)
+  #+end_src
+
+  The first two ways are identical; i.e., when no  subscript  is  coded,
+  NM-TRAN supplies the subscript MIXNUM.
+
+  With  the third, the index i must not exceed the value of MMX in SIZES
+  (or as set by $SIZES record).
+
+ (See Mixture_model:_MIXNUM,MIXEST)
+ (See Mixture_model:_MIXP)
+ (See mix, mixture model example).
+
+ REFERENCES: Guide IV, section III.B.4 , III.B.6
+ REFERENCES: Guide IV, section IV.E.1 , 4.E.2
+ REFERENCES: Guide VI, section III.L.2 , Figure 6
+
+
+*** Objective function value
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY: OBJECT
+
+ GLOBAL DECLARATION
+      USE SIZES, ONLY: DPSIZE
+      REAL(KIND=DPSIZE) :: OBJECT
+#+end_src
+- OBJECT: the final value of the objective function. This value should
+  only be used at ICALL = 3 (finalization block). May be used as a
+  right-hand quantity in abbreviated code.
+
+*** ESTIM COVAR ERROR CODES
+#+begin_src f90
+ USAGE:
+      USE ROCM_INT, ONLY: IERE=>IEST_ERR,IERC=>ICOV_ERR
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: IEST_ERR,ICOV_ERR
+#+end_src
+
+- IERE: the return code from the Estimation Step.
+
+- IERC: the return code from the Covariance Step.
+
+Values of 0 indicate normal termination. These  variables  may  be
+used as right-hand quantities in abbreviated code for
+initialization/finalization blocks.
+
+*** NINDR INDR1 INDR2
+#+begin_src f90
+ USAGE:
+      USE ROCM_INT,  ONLY: NINDR=>NINDOBS,INDR1=>IDXOBSF,INDR2=>IDXOBSL
+
+ GLOBAL DECLARATION:
+      REAL(KIND=ISIZE):: NINDOBS,IDXOBSF,IDXOBSL
+#+end_src
+- NINDR: The  number  of  individual records in the data set containing an
+      observation record.
+
+- INDR1:
+      The index of the first individual record in the data set contain-
+      ing an observation record.
+
+- INDR2:
+      The  index of the last individual record in the data set contain-
+      ing an observation record.
+
+These variables may be used as right-hand quantities  in  $PRED,  $PK, $ERROR, $INFN and $MIX abbreviated code.
+*** Mixture model: MIXPT
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY: MIXPT=>MIXP_RAW
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: MMX,DPSIZE
+      REAL(KIND=DPSIZE) :: MIXP_RAW(MMX)
+#+end_src
+At  ICALL=6,  (the  final  estimate of) the mixture probabilities
+associated with the individual  record  containing  the  template data
+record are stored in MIXPT.
+*** Size of individual record
+#+begin_src f90
+ USAGE:
+      USE ROCM_INT, ONLY: LIREC=>NDATPASS
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: NDATPASS
+
+#+end_src
+LIREC is The number of data records contained in the individual record
+at the current call to PRED. It changes value accordingly  with calls
+to PASS. It  may  be used as a right-hand quantity in $PRED, $PK, and
+$ERROR blocks, and in a $INFN block in conjunction with PASS.
+
+*** PRED,RES,WRES
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY:                                             &
+         PRED_=>APPND(001),RES_=>APPND(002),WRES_=>APPND(003)          &
+         IWRS_=>APPND(004),IPRD_=>APPND(005),IRS_=>APPND(006)          &
+         NPRED_=>APPND(007),NRES_=>APPND(008),NWRES_=>APPND(009)       &
+         NIWRES_=>APPND(010),NIPRED_=>APPND(011),NIRES_=>APPND(012)    &
+         CPRED_=>APPND(013),CRES_=>APPND(014),CWRES_=>APPND(015)       &
+         CIWRES_=>APPND(016),CIPRED_=>APPND(017),CIRES_=>APPND(018)    &
+         PREDI_=>APPND(019),RESI_=>APPND(020),WRESI_=>APPND(021)       &
+         IWRESI_=>APPND(022),IPREDI_=>APPND(023),IRESI_=>APPND(024)    &
+         CPREDI_=>APPND(025),CRESI_=>APPND(026),CWRESI_=>APPND(027)    &
+         CIWRESI_=>APPND(028),CIPREDI_=>APPND(029),CIRESI_=>APPND(030) &
+         EPRED_=>APPND(031),ERES_=>APPND(032),EWRES_=>APPND(033)       &
+         EIWRES_=>APPND(034),EIPRED_=>APPND(035),EIRES_=>APPND(036)    &
+         NPDE_=>APPND(037),ECWRES_=>APPND(038),NPD_=>APPND(039)        &
+         OBJI_=>APPND(040)
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: DPSIZE
+      REAL(KIND=DPSIZE) :: APPND(MAXXNAME)
+#+end_src
+- The PRED_,RES_,WRES_ items are the same as PRED, RES and WRES items.
+
+- The  CPRED_,CRES_,CWRES_  are calculated as if the estimation was per-
+ formed using a CONDITIONAL method without INTERACTION.   (conditional,
+ non-interactive in the manner of Hooker et al.)
+
+- The  PREDI_,RESI_,WRESI_  are calculated as if the estimation was per-
+ formed using the FO method with INTERACTION (non-conditional, interac-
+ tive).
+
+- The  CPREDI_,CRESI_,CWRESI_  are  calculated  as if the estimation was
+ performed using a CONDITIONAL method  with  INTERACTION  (conditional,
+ interactive)
+
+- EPRED_,ERES_,EWRES_ are Monte-Carlo generated pred, res, and wres val-
+ ues, and are not linearized approximations  like  the  other  weighted
+ residual types.
+
+- NPDE_  is  the  normalized  prediction  distribution error (takes into
+ account within-subject correlations)
+
+- NPD_ is the correlated normalized prediction distribution error  (does
+ not take into account within-subject correlations)
+
+- EWRES_  and NPDE_  and NPD_ are evaluated using predicted function and
+ residual variances evaluated over a Monte Carlo sampled range of  etas
+ with population variance Omega.
+
+- ECWRES_ is evaluated with only the predicted function evaluated over a
+ Monte Carlo sampled range of  etas  with  population  variance  Omega,
+ while  residual  variance  is  always evaluated at conditional mode or
+ mean.  Thus, ECWRES is the Monte Carlo version of CWRES,  while  EWRES
+ is the Monte Carlo version of CWRESI.
+
+- The  EPRED_,  ERES_, EWRES_, NPD_, NPDE_, ECWRES_ items are calculated
+ by the Table Step.  When EPRED_, ERES_, EWRES_, NPD_,  NPDE_,  ECWRES_
+ items are displayed, the options ESAMPLE and SEED of the $TABLE record
+ are of interest.  (See $table).
+
+- The PRED_,RES_,WRES_ (PRED,RES,WRES) items behave  as  they  did  with
+ NONMEM  VI. Consequently, if FO or a CONDITIONAL method without INTER-
+ ACTION is used, NPRED_,NRES_,NWRES_ and PRED_,RES_,WRES_  are  equiva-
+ lent.   If  FO  or  a  CONDITIONAL  method  with  INTERACTION is used,
+ IPRED_,IRES_,IWRES and PRED_,RES_,WRES_ are equivalent.
+
+These items are available with passes  through  the  data  set  during
+problem finalization (i.e. ICALL=3), in a data record specific way.
+
+
+These  items  may  be used as right-hand quantities in $PRED and $INFN
+during problem finalization.  They can also be output in  table  files
+by  specifying their names (without the underscore) on a $TABLE state-
+ment.
+
+ (See pred res, wres).
+
+ For other variables, see the INTRODUCTION TO NONMEM 7.
+
+ REFERENCES: Guide I, section C.3.5.3 , C.3.5.4
+ REFERENCES: Guide IV, section III.B.16 , III.B.17
+ REFERENCES: Guide V, section 9.5 , 10.7 , 11.4.4.2
+ REFERENCES: Guide Introduction_7
+
+*** CTLO CTUP probability: PR_CT
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY PR_CT
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: DPSIZE
+      REAL(KIND=DPSIZE) :: PR_CT
+#+end_src
+When  with  a given data record, either of the limits CTLO or CTUP are
+ set, thus defining an interval of values  comprising  one  of  several
+ categories  equated  with  the possible values of a potential observa-
+ tion, then during a copying pass (and during ICALL=5 and 6), PR_CT  is
+ the  estimated probability that an observation will be of the category
+ in question.
+ (See CTLO, CTUP)
+ (See copying_block, expectation, data_average)
+
+ If the mean and variance of the intra-individual model for a potential
+ observation  are  specified, and if the limits CTLO or CTUP are set, a
+ value of PR_CT will be computed,  whether  the  record  has  MDV=0  or
+ MDV=1.  If neither CTLO nor CTUP are set, the value PR_CT will be 1.
+
+ PR_CT  may  be  used  as a right-hand quantity in abbreviated code for
+ $PRED, $PK, $ERROR, and $INFN blocks.
+
+ Location prior to NONMEM 7: rocm45
+
+ REFERENCES: None.
+
+*** Objective function value from individual
+#+begin_src f90
+ USAGE:
+      USE ROCM_INT, ONLY: IIDX=>IDVALX
+      USE ROCM_REAL, ONLY: CNTID=>OFV_IND
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: MAXIDS,DPSIZE
+      INTEGER(KIND=ISIZE) :: IDVALX(MAXIDS)
+      REAL(KIND=DPSIZE) :: OFV_IND(MAXIDS)
+#+end_src
+These variables contain values of the ID data item and individual
+contributions  to  the  objective  function.   The values are in
+data-set order.
+
+- IIDX: values of the ID data item.
+
+- CNTID:
+      Values of the individual contribution to the  objective  function
+      for the corresponding values of IIDX.
+
+Namely, IIDX(n) is the ID data item for the nth. individual
+record, and CNTID(n) is the contribution to the objective function
+for  the  nth. individual record.
+
+These  values  should  only  be  accessed  with ICALL = 3 (finalization block).
+
+With NONMEM VI 1.0, they can only be displayed using verbatim code.
+
+With NONMEM VI 2.0 and later releases, they can be used on  the  right
+and  displayed  using abbreviated code in $PRED, $PK, $ERROR and $INFN
+blocks (See Individual objective function example).
+
+They may also be displayed in a table, using
+
+#+begin_src php
+ $ABBR COMRES=2
+#+end_src
+
+in the $ERROR or $PK block:
+
+#+begin_src php
+ IF (COMACT.EQ.1) THEN
+  COM(1)=IIDX(NIREC)
+  COM(2)=CNTID(NIREC)
+ ENDIF
+#+end_src
+The following, for example,  will produced a separate  table  for  the values:
+
+#+begin_src php
+ $TABLE IID=COM(1) CNT=COM(2) FILE=comvals NOAPPEND NOPRINT FIRSTONLY
+#+end_src
+
+Note: With earlier versions than NONMEM 7.3, verbatim code is needed:
+#+begin_src php
+ "  COM(1)=IIDX(NIREC)
+ "  COM(2)=CNTID(NIREC)
+#+end_src
+
+With NONMEM 7, the additional output file root.phi contains the same information. (See additional_output_file).
+
+
+
+
+
 ** PRED global variables
 *** Prior simulation: ICMAX
 #+begin_src f90
@@ -1034,6 +1449,7 @@ MDVRES=0 by default.
 
 REFERENCES: Guide Introduction_7
 
+
 ** PREDPP read-only global variables
 *** Active ETA list for PREDPP
 #+begin_src f90
@@ -1278,7 +1694,7 @@ The THETA  vector  passed  as an argument by NONMEM to PRED, PK, ERROR.
 IDEFD(1) and IDEFA(1) affect how many elements are copied.
 (See DES_AES:_ICALL,IDEFD,IDEFA)
 
-** PK global variables
+** PK variables
 Internal variables used by PREDPP can also be accessed by "using" specific
 Fortran modules within the user-defined PK routine.
 *** Initial steady state: I_SS,ISSMOD

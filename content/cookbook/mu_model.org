@@ -1,0 +1,254 @@
+#+title: MU model
+{{< katex >}}{{< /katex >}}
+
+* MU model
+** THETA-ETA association
+The new methods as EM are more efficient if the user
+supplies information on how the \(\theta\) (THETA) parameters are associated
+arithmetically  with  the  \(\eta\) (ETAs)  and individual parameters
+\(\phi\) (PHIs), wherever such a relationship holds:
+$$
+\phi_i=\mu_i(\theta)+\eta_i
+$$
+for each parameter, denoted by \(i\), with an \(\eta\) associated, and \(\mu_i(\cdot)\) indicates a
+function of \(\theta\).
+
+** MU referencing
+In NONMEM, each such a function \(\mu(\cdot)\)
+can be coded as a reserved variable =MU_i=, with =i= corresponding to
+the index for \(\eta\). In other words, we can code =MU_1= for a
+mapping of a set THETA's that is associated with with =ETA(1)=,
+=MU_2= for =ETA(2)=,  etc.   This is called "MU Referencing", or "MU Modelling".
+
+For example, code
+#+begin_src php
+ CL=THETA(4)+ETA(2)
+#+end_src
+can be rephrased as
+#+begin_src f90
+ MU_2=THETA(4)
+ CL=MU_2+ETA(2)
+#+end_src
+and
+#+begin_src f90
+ CL=(THETA(1)*AGE**THETA(2))*EXP(ETA(5))
+ V=THETA(3)*EXP(ETA(3))
+#+end_src
+as
+#+begin_src f90
+ MU_5= LOG(THETA(1))+THETA(2)*LOG(AGE)
+ MU_3=LOG(THETA(3))
+ CL=EXP(MU_5+ETA(5))
+ V=EXP(MU_3+ETA(3))
+#+end_src
+
+Traditionally, individual parameters are expressed using typical value
+ =TV= and =ETA=. In such a case, it is easy to rephrase using =MU_=:
+
+#+begin_src f90
+    ! with
+    TVCL= THETA(1)*AGE**THETA(2)
+    ! convert
+    CL=TVCL*EXP(ETA(5))
+    ! to
+    MU_5=LOG(TVCL)
+    CL=EXP(MU_5+ETA(5))
+#+end_src
+
+The association of  =MU_i+ETA(i)=  should be adhered to. An incorrect usage of MU modeling would be:
+#+begin_src f90
+ MU_1=LOG(THETA(1))
+ MU_2=LOG(THETA(2))
+ MU_3=LOG(THETA(3))
+ CL=EXP(MU_1+ETA(2))
+ V=EXP(MU_2+MU_3+ETA(1))
+#+end_src
+as =MU_1= is used as an arithmetic  mean  to  =ETA(2)= (unmatched subscript),
+ and  a  composite  =MU_2=  and  =MU_3= are the arithmetic means to
+ =ETA(1)= (incompatible association pattern).
+
+After a THETA expressed in a MU referencing, it should no longer be used. For example, after
+coding
+#+begin_src f90
+ CL=THETA(5)*EXP(ETA(2))
+#+end_src
+as
+#+begin_src f90
+ MU_2=LOG(THETA(5))
+ CL=EXP(MU_2+ETA(2))
+#+end_src
+if =THETA(5)=  is  used  without its association with =ETA(2)=:
+#+begin_src f90
+ !...
+ CLZ=THETA(5)*2
+#+end_src
+Then THETA(5) is not MU modeled, as it is a fixed effect without
+association to random effects.
+
+On the other hand, using =MU_= expressed variables is allowed:
+#+begin_src f90
+ MU_2=LOG(THETA(5))
+ CL=EXP(MU_2+ETA(2))
+ CLZ=CL*2
+#+end_src
+since it maintains the relationship between THETA and ETA.
+
+If we express
+#+begin_src f90
+ CL=THETA(5)+THETA(5)*ETA(2)
+#+end_src
+#+begin_src f90
+ MU_2=1.0
+ CL=THETA(5)*(MU_2+ETA(2))
+#+end_src
+then =THETA(5)= actually is not MU modeled, since MU_2 does not depend on THETA(5). The alternatively
+#+begin_src f90
+ MU_2=THETA(5)
+ CL=MU_2+MU_2*ETA(2)
+#+end_src
+is incorrect, as  =MU_2=  and  =ETA(2)= do not follow the association pattern =MU_2+ETA(2)=.
+Instead, one can remodel by reparametersize =ETA(2)=:
+
+#+begin_src f90
+ CL=THETA(5)*EXP(ETA(2))
+ MU_2=LOG(THETA(5))
+ CL=EXP(MU_2+ETA(2))
+#+end_src
+
+** Parameters with only fixed effect
+For example, in
+#+begin_src f90
+ Km=THETA(6)
+#+end_src
+such that =Km= is a same unknown across all  subjects, =THETA(6)= and
+=Km= cannot be MU referenced directly. However, we could associate
+=THETA(5)= with an =ETA=, and fix the corresponding =OMEGA= entry to a
+small value (say,  \(0.0225 =0.15^2\), to represent 15% CV, if =OMEGA=
+represents  proportional  error).   This  often will allow the EM
+algorithms to efficiently move this parameter, while retaining the
+original  intent  that  all  subjects have similar, although not
+identical, =Km= 's.  Very often, inter-subject variances to parameters
+were  removed because  the  FOCE had difficulty estimating a large
+parametered problem, and so it was an artificial constraint to begin
+with.  EM methods are  much  more  robust,  and  are adept at handling
+large, full block OMEGA's, so you may want to incorporate as many etas
+as possible  when using the EM methods.
+
+We recommend use  MU reference for all =THETAs= except those for
+residual variance (which should be modeled through =SIGMA= whenever
+possible). This often only require a slightly change in
+parameterization.
+
+When the arithmetic mean of an ETA is  associated  with  one  or  more
+=THETA='s in this way, EM methods can more efficiently analyze the
+problem, by requiring in certain calculations only the evaluation  of
+the MU's  to  determine  new  estimates  of THETAs for the next
+iteration, without having to re-evaluate the predicted value  for
+each  observation,  which  can be computationally expensive,
+particularly when differential equations are used in the model.  For
+those =THETA='s that  do not  have  a  relationship  with any =ETA='s, and
+therefore cannot be MU referenced (including THETA's associated with
+=ETA='s whose =OMEGA=  value is fixed to 0), computationally expensive
+gradient evaluations must be made to provide new estimates of them for
+the next iteration.
+
+** Linear \(\mu(\cdot)\) function
+There is additional increased efficiency when the MU models are linear functions of =THETA='s.
+Recalling one of the previous examples above, we could re-parameterize
+=THETA= such that
+
+#+begin_src f90
+ MU_5=THETA(1)+THETA(2)*LOG(AGE)
+ CL=EXP(MU_5+ETA(5))
+ MU_3=THETA(3)
+ V=EXP(MU_3+ETA(3))
+#+end_src
+This way both =MU_='s are linear with respect to =THETA='s. The added efficiency is greatest in =SAEM= method and the =MCMC= methods.  In the Bayesian method,  =THETA='s  that are  linearly  modeled with the MU variables have linear relationships with respect to the inter-subject variability.  This  allows  the Gibbs  sampling  method  to be used, more efficient than the Metropolis-Hastings (M-H) method.  By default,  NONMEM  tests  MU- THETA  linearity  by determining  if the second derivative of MU with respect to THETA is nearly or equal to 0.  Those THETA parameters with 0  valued second derivatives are Gibbs sampled, while all other THETAS are M-H sampled.  In the Gibbs sampling method, THETA values are  sampled  from a multi-variate normal conditional density given the latest PHI=MU+ETA values  for  each  subject,  and  the  samples  are  always accepted.
+
+** Additional notes
+- Define the MU's in the first few lines of $PK or $PRED.  Do not use
+  MU_ values in $ERROR.  Have all  the MU's  particularly  defined
+  before any additional verbatim code, such as write statements.
+  NMTRAN produces a MUMODEL2  subroutine based  on  the  PRED  or  PK
+  subroutine  in  FSUBS.F90, and this MUMODEL2 subroutine is
+  frequently called with  the  ICALL=2  settings,  more  often  than
+  PRED or PK.  The fewer code lines that MUMODEL2 has to go through to
+  evaluate all  the  MU_s'  the  more efficient.
+- Whenever possible, have the MU variables defined unconditionally, outside IF...THEN blocks.
+
+- Time dependent covariates cannot be part  of  the  MU_  equation. For example
+  #+begin_src f90
+    MU_3=THETA(1)*TIME+THETA(2)
+  #+end_src
+  should not be used. Same for
+  #+begin_src f90
+    MU_3=THETA(2)/WT
+  #+end_src
+  when  WT  varies  with  time.
+  However, we could phrase as
+  #+begin_src f90
+      MU_3=THETA(2)
+      CL=WT*(MU_3+ETA(3))
+  #+end_src
+  where =MU_3= represents a population  mean  clearance  per unit
+  weight,  which  is  constant  with time, and more universal among
+  subjects, whereas CL is the  non-wieght  normalized  clearance,
+  than  depends  on a person's weight, which could vary with time as
+  well.  The MU variables may vary with inter-occasion, but not with
+  time.
+
+- With NONMEM 7.2+, NMTRAN's CHECKMU subroutine attempts to look for
+  errors in MU modeling.  If it appears that there may  be errors,
+  then there are messages such as
+  #+begin_src txt
+      (MU_WARNING 13) MU_001: DOES NOT HAVE ADDITIVE ASSOCIATION WITH ETA(001)
+  #+end_src
+  Such  warnings  do  not  affect the outputs from NMTRAN. FSUBS is
+  generated as usual.  Sometimes the warnings may be  ignored  (see
+  "Model parameters as log t-Distributed", below.)  Sometimes warn-
+  ings may not be generated when they should be.   Thus,  the  user
+  must pay close attention to following the rules.
+
+- Option NOCHECKMU of $ABBR may be used to prevent NM-TRAN from
+  attempting to check the MU model statements.
+
+- MU referencing only needs to be done if you are
+  using one of the new EM or Gibbs sampling methods to improve  their
+  efficiency. The  EM methods may be performed without MU references,
+  but it will be several fold slower than the FOCE method, and the
+  problem may not even optimize  successfully.  For simple two
+  compartment models, the new EM methods are slower than FOCE even
+  with the MU references.  But, for  3 compartment models, or
+  numerical integration problems, the improvement in speed by the EM
+  methods, properly MU  modeled,  can  be  5-10  fold faster than with
+  FOCE.
+
+- Example  6  described  at  the  end of the SIGL section is one
+  example where importance sampling solves this problem in 30
+  minutes,  with  R matrix  standard  error, versus FOCE which takes
+  2-10 hours or longer, and without even requesting the $COV  step.
+  So,  for  complex  PK/PD problems  that take a very long time in
+  FOCE, it is well worth putting in MU references and using one of the
+  EM methods, even if you may need to  rephrase  some  of  the
+  fixed/random (theta/eta) effects relationships.  In addition, FOCE
+  is a linearized optimization method, and  is less accurate than the
+  EM and Bayesian methods when data are sparse or when the posterior
+  density for each individual is highly non-normal. Sometimes one
+  consider model PK/PD parameters as log t-distributed among  the
+  population,  with  degrees  of  freedom NU,
+
+See INTRODUCTION TO NONMEM 7, MU Referencing
+
+An example of simulation and analysis of such data is given as
+
+  ..\examples\tdist6_sim.ctl
+  ..\examples\tdist6.ctl:
+  ..\examples\tdist7.ctl
+
+Note that constructions such as
+ CL=EXP(MU_1+ETA(1)*SQRT((EXP(CLR)-1.0)/CLR))
+ violate the strict  MU_x+ETA(x)  rule  recommended  for  EM  analysis,
+ because  the  term  SQRT((EXP(CLR)-1.0)/CLR)  is multiplied by ETA(1).
+ NM-TRAN will generate a number of  MU_WARNING  messages.   Nonetheless
+ for  this  example,  the importance sampling works quite well, and the
+ MU_WARNING messages may be ignored.
