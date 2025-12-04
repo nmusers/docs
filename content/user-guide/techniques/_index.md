@@ -1,8 +1,8 @@
 +++
-title = "Cookbook"
+title = "Techniques"
 author = ["Yi Zhang"]
 draft = false
 bookCollapseSection = true
 +++
 
-## NONMEM cookbook: coding and modeling techniques
+## Coding and modeling techniques

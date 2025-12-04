@@ -1,6 +1,480 @@
 #+title: Reserved variables
 * Reserved variables
+FORTRAN  modules are used to communicate values between various
+components of the NONMEM system.  They supplement the subroutine
+arguments.
+
+** NONMEM-PRED modules
+
+These modules contain values that are (for the most part) communicated
+from  PRED  to  NONMEM.   Prior  to  NONMEM 7 these values were COMMON
+blocks.  Following is a list of the MODULE, the (old)  COMMON,  and  a
+description of the variables.
+
+- NMPRD_INT (NMPRD1)
+      PRED return code and user message count (IERPRD,NETEXT)
+
+- NMPRD_CHAR (NMPRD2)
+      PRED user message (ETEXT)
+
+- NMPRD_INT (NMPRD3)
+      "Copying  pass" flag and SAVE region size for NMPRD4 (COMACT,COM-
+      SAV)
+
+- NMPRD4P (NMPRD4)
+      PRED-defined items for tables and scatterplots
+
+- NMPRD_REAL (NMPRD5)
+      Correlation matrix for epsilon's.
+
+- NMPRD_INT (NMPRD6)
+      Return code from routine SIMEPS.
+
+- NMPRD_REAL (NMPRD7)
+      Simulated etas for tables and scatterplots.
+
+- NMPRD_REAL (NMPRD8)
+      PRED's "recursive" flag
+
+- NMPRD_REAL (NMPRD9)
+      Data record at ICALL 0, 1 and 3
+
+- NMPR_INT (NMPR10)
+      Control information for PRED repetition feature.
+
+- NMPR_INT (NMPR11)
+      Flags to override effect of NEW option on $SIMULATION record.
+
+- NMPR_REAL (NMPR12)
+      Conditional limits on observation.
+
+- NMPR_REAL (NMPR13)
+      Lower limits defining interval datum, and their derivatives.
+
+- NMPR_REAL (NMPR14)
+      Upper limits defining interval datum, and their derivatives.
+
+- NMPR_INT (NMPR15)
+      Skip control variable.
+
+- NMPR_REAL (NMPR16)
+      Parameter values produced during Simulation Step.
+
+- NMPR_INT (NMPR17)
+      Flag indicating character of PRED variable F.
+
+** NONMEM read-only modules
+These modules contain read-only values that are communicated from NONMEM to PRED and other user-supplied routines.
+
+- ROCM_REAL (ROCM0)
+      Current theta (THETA)
+
+- ROCM_REAL (ROCM1)
+      DV, data items in current L1 record
+
+- ROCM_INT (ROCM1C)
+      Size  of  current L1 record (prior to NONMEN 7, this was combined
+      with ROCM1).
+
+- ROCM_INT (ROCM2)
+      Number of L2 records and length of L2 record
+
+- ROCM_REAL (ROCM3)
+      Predictions and derivatives with current L1 record
+
+- ROCM_REAL (ROCM4)
+      Selected data from an individual record
+
+- ROCM_INT (ROCM4)
+      Selected data from an individual record
+
+- ROCM_REAL (ROCM5)
+      Predictions and derivatives with current L2 record
+
+- ROCM_REAL (ROCM6)
+      Initial/final theta, omega, sigma
+
+- ROCM_REAL (ROCM7)
+      Standard errors of estimates of theta, omega, sigma
+
+- ROCM_REAL (ROCM8)
+      Final value of the objective function
+
+- ROCM_INT (ROCM9)
+      Return codes from Estimation and Covariance Steps
+
+- ROCM_INT (ROCM10)
+      Simulation: no. of replications (total and current)
+
+- ROCM_INT (ROCM11)
+      Mixture: index of subpopulation (current and most probable)
+
+- ROCM_INT (ROCM12)
+      Second and first derivative flags for PRED
+
+- ROCM_INT (ROCM13)
+      Simulation: Final pass flag for PRED and CONTR
+
+- NMPRD_INT (ROCM14)
+      Problem and subproblem counters.
+
+- NMPRD_INT (ROCM15)
+      List of inactive etas.
+
+- ROCM_REAL (ROCM16)
+      The number of significant digits in the the vector of final esti-
+      mates.
+
+- ROCM_INT (ROCM17)
+      New level 2 record flag
+
+- ROCM_REAL (ROCM18)
+      Nonparametric   estimates:   height  and  heights  of  cumulative
+      marginals
+
+- ROCM_REAL (ROCM22)
+      Current value of omega.
+
+- ROCM_REAL (ROCM25)
+      Mixing probabilities
+
+- ROCM_REAL (ROCM28)
+      Superproblem printing indicator
+
+- NMPRD_INT (ROCM29)
+      Population vs. single-subject data flag.
+
+- ROCM_REAL (ROCM31)
+      Template record at ICALL=6.
+
+- ROCM_INT (ROCM32)
+      Number of the individual record and of the data record.
+
+- ROCM_INT (ROCM34)
+      NEWIND at ICALL 0, 1 and 3.
+
+- ROCM_INT (ROCM35)
+      Numbers of thetas, etas and epsilons in the problem.
+
+- ROCM_REAL (ROCM36)
+      Individual's  posterior  variance-covariance  matrix.   No   help
+      entry.
+
+- ROCM_INT (ROCM37)
+      Indicator that Estimation Step is omitted and obj. func. is being
+      evaluated  for first time.  No help entry.
+
+- ROCM_REAL (ROCM38)
+      Conditional limits for observations  in  individual  record.   No
+      help entry.
+
+- ROCM_REAL (ROCM39)
+      Conditional limits for observation.  No help entry.
+
+- ROCM_REAL (ROCM40)
+      Lower  Limits  defining  interval datum, and their derivatives in
+      individual record. No help entry.
+
+- ROCM_REAL (ROCM41)
+      Upper Limits defining interval datum, and  their  derivatives  in
+      individual record. No help entry.
+
+- ROCM_REAL (ROCM42)
+      Lower  Limits defining interval datum, and their derivatives.  No
+      help entry.
+
+- ROCM_REAL (ROCM43)
+      Upper Limits defining interval datum, and their derivatives.   No
+      help entry.
+
+- ROCM_REAL (ROCM44)
+      Probability that observation is within (outside) limits.
+
+- ROCM_REAL (ROCM45)
+      Probability that category occurs.
+
+- ROCM_INT (ROCM46)
+      Number  of  individual  records with observations, and indices of
+      first and last such record.
+
+- ROCM_REAL (ROCM47)
+      Mixture probabilities with individual record containing  template
+      record.
+
+- ROCM_INT (ROCM48)
+      Length of individual record.
+
+- ROCM_REAL (ROCM49)
+      Prediction,  residual, and weighted residual values for all meth-
+      ods, as well as normalized probability distribution error.
+
+- ROCM_INT (ROCM50)
+      ID data item for the individual contributions  to  the  objective
+      function.
+
+- ROCM_REAL (ROCM50)
+      Individual contributions to the objective function.
+
+Except  as  noted,  each has its own entry in the Help document.  Some
+modules are not fully documented.  The interested user may be able  to
+obtain more information by studying the appropriate sections of NONMEM
+code and previous examples that may be available from advanced users.
+
+ REFERENCES: Guide IV, section IV.E
+
+ REFERENCES: Guide VI, section III.E.4 , III.I ,  Figures 5, 6
+
 ** NONMEM read-only global variables
+
+*** INFN-defined variables
+#+begin_src f90
+ USAGE:
+      MODULE INFNP
+      USE PRINFN, ONLY: TLCOM=>ITV
+      END MODULE INFNP
+
+ GLOBAL DECLARATION:
+      MODULE PRINFN
+      USE SIZES, ONLY : DPSIZE,DIMTMP
+      IMPLICIT NONE
+      SAVE
+      REAL(KIND=DPSIZE), TARGET, DIMENSION (DIMTMP):: ITV
+      END MODULE PRINFN
+#+end_src
+PRINFN  is  a module for INFN-defined variables.  It contains an array
+ ITV.  (TLCOM is suggested above as an alternate to the name ITV to  be
+ consistent   with  generated   code, but this is optional.)  Variables
+ are stored in PRINFN for communication  with  other  other  blocks  of
+ abbreviated  code  or  with  user-written  codes.  These are variables
+ defined first in $INFN or in $PK-INFN or $ERROR-INFN  blocks.   Module
+ PRINFN  is declared in all generated routines PK, ERROR, etc., and the
+ variables can be used as  right-hand  quantities  in  these  routines.
+ INFN-defined  variables  are  not initialized or modified by NONMEM or
+ PREDPP.  Hence the variables in the module may be initialized or modi-
+ fied at ICALL values 0 or 1 or 3, and will retain whatever values they
+ are given.  These variables cannot be displayed in tables or  scatter-
+ plots.   If they are to be displayed, WRITE statements can be used, or
+ their values can be assigned to variables that are  listed  in  module
+ NMPRD4.  (See PRED-defined_variables).
+
+ Variables from PRINFN can be used in a user-written code. MODULE INFNP
+ must be defined as above prior to the SUBROUTINE statement.  The vari-
+ ables have names TLCOM(1), TLCOM(2), etc.
+ E.g.,  X=TLCOM(1)/TLCOM(2).   It is possible to give the variables the
+ same (non-subscripted) names that they had in $INFN. Suppose variables
+ X1  and X2 are used in $INFN, and the following is present in the gen-
+ erated INFN routine:
+      X1=>TLCOM(00001); X2=>TLCOM(00002)
+
+ In the user-written code, after the last declaraction, include:
+      POINTER :: X1,X2
+
+ Prior to the first executable statement, include:
+      X1=>TLCOM(1); X2=>TLCOM(2)
+
+ Now the code is X=X1/X2.
+
+ Code generated by NM-TRAN is somewhat more complex, but  achieves  the
+ same result.
+
+ REFERENCES: None.
+
+
+*** Additional record counters
+#+begin_src f90
+ USAGE:
+      include nonmem_reserved_general
+#+end_src
+In  addition  to  the record counters NDREC and NIREC, NONMEM 7.4
+provides additional record counters.  All except  IRECIDX   refers  to
+a record number within the current individual record.
+
+- FIRSTREC
+      First record of the individual.
+
+- LASTREC
+      Last record of the individual.
+
+- FIRSTOBS
+      First  observation  record  of the individual (for which MDV=0 or 100)
+
+- LASTOBS
+      Last observation record of the individual  (for  which  MDV=0  or 100)
+
+- FIRSTDOS: with  PREDPP,  first  dose  record  of  the individual
+  (for which EVID=1 or 4, and MDV=1 or MDV=101). Without PREDPP, -1.
+
+
+- LASTDOS With PREDPP, last dose record of the individual (for which
+  EVID-1 or 4, and MDV=1 or MDV=101). Without PREDPP, -1.
+
+
+- EFIRSTREC
+      First  record  of  the individual during Estimation or Covariance
+      Steps (for which MDV=0 or MDV=1)
+
+- ELASTREC
+      Last record of the individual  during  Estimation  or  Covariance
+      Steps (for which MDV=0 or MDV=1)
+
+- EFIRSTOBS
+      First  observation  record of the individual during Estimation or
+      Covariance Steps (for which MDV=0)
+
+- ELASTOBS
+      Last observation record of the individual  during  Estimation  or
+      Covariance Steps (for which MDV=0)
+
+- EFIRSTDOS
+      With  PREDPP,  first dose record of the individual during Estima-
+      tion or Covariance Steps (for which EVID=1 or 4, and MDV=1).
+      Without PREDPP, -1.
+
+- ELASTDOS
+      With PREDPP, last dose record of the individual during Estimation
+      or Covariance Steps (for which EVID=1 or 4, and MDV=1).
+      Without PREDPP, -1.
+
+- IRECIDX
+      IRECIDX+1  is  the  starting record number in the NONMEM data set
+      for the current individual record.  NDREC starts  at  1  for  the
+      first  record of each individual record, so that NDREC+IRECIDX is
+      the number of the current data record within the NONMEM data set.
+
+ Like NIREC and NDREC, the additional record counters also change value
+ in conjunction with calls to PASS, a NONMEM utility routine.  They may
+ all be used as right-hand quantities in $PRED, $PK, and $ERROR blocks,
+ and in a $INFN block in conjunction with PASS.
+
+ REFERENCES: Guide Introduction_7
+
+
+*** Record counters: NIREC,NDREC
+
+#+begin_src f90
+ USAGE:
+      USE ROCM_INT, ONLY: NIREC=>NINDREC,NDREC=>NDATINDR
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: NINDREC,NDATINDR
+
+#+end_src
+-  NIREC
+      The number of the individual record at the current call.
+
+-  NDREC
+      The number of the data record within the individual record at the
+      current call.
+
+NIREC and NDREC also change value in conjunction with calls to PASS, a NONMEM utility routine.
+
+NIREC  and  NDREC  may be used as right-hand quantities in $PRED, $PK, and $ERROR blocks, and in a $INFN block in conjunction with PASS.
+
+NM-TRAN automatically provides the necessary USE statement in the gen- erated subroutines.
+
+See  also  additional_record_counters  for other variables of interest
+ such as FIRSTREC.
+
+*** PASS NEWIND: NWIND
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: NWIND
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: NWIND
+#+end_src
+- NWIND
+      The  NEWIND  value  at  ICALL 0, 1 and 3.  NWIND changes value in
+      conjunction with calls to PASS.  (See pred, newind).
+
+ REFERENCES: Guide I, section C.3.5.2
+
+*** Parameter dimensions
+#+begin_src f90
+
+ USAGE:
+      USE NMPRD_INT, ONLY: NTHES_=>NWTHT,NETAS_=>NWETA, NEPSS_=>NWEPS
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: NWTHT,NWETA,NWEPS
+
+#+end_src
+-  NTHES_
+      The dimension of theta. If the dimension is 0, NTHES_=1.
+
+-  NETAS_
+      The dimension of omega. If the dimension is 0, NETAS_=1.
+
+-  NEPSS_
+      The dimension of sigma. If the dimension is 0, NEPSS_=1.
+
+*** YLO YUP probability: PR_Y
+
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY: PR_Y
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: DPSIZE
+      REAL(KIND=DPSIZE) :: PR_Y
+
+#+end_src
+When with a given data record, either of the limits YLO or YUP are set
+ so that during the analysis an interval is defined in which  (or  out-
+ side  of  which) an observation is conditioned to exist, then during a
+ copying pass (and during ICALL=5 and 6), PR_Y is the estimated  proba-
+ bility that an observation will fall within (or outside) the interval.
+ (See YLO YUP)
+ (See copying_block, expectation)
+ (See data average)
+
+ For  the  purpose of computing this probability, an actual observation
+ need not exist in the record.  If the mean and variance of the  intra-
+ individual model for a potential observation are specified, and if the
+ limits YLO or YUP are set, a value of PR_Y will be  computed,  whether
+ the  record  has  MDV=0 or MDV=1.  If neither YLO nor YUP are set, the
+ value PR_Y will be 1.
+
+ PR_Y may be used as a right-hand  quantity  in  abbreviated  code  for
+ $PRED, $PK, $ERROR, and $INFN blocks.
+
+
+
+
+*** Super problem print control
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY IPRNV
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: IPRNV(2)
+#+end_src
+-IPRNV(i)
+   +  0  indicates  no printing of NONMEM input information with
+     iterations 2, 3, etc. of active ith level superproblem.
+   +  1 indicates printing of NONMEM input information with  iterations
+   +  2, 3, etc. of active ith level superproblem.
+
+Status with 2nd level superproblem takes precedence.
+
+(See $super).
+*** Population single-subject indicator
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: IPS
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: IPS
+#+end_src
+- IPS = 1 when the data are population data.
+- IPS = 2 when the data are single-subject data.
+
+ REFERENCES: Guide I, section B.1
+
+ REFERENCES: Guide IV, section II.C.4
+
+
+
 *** Simulation: NREP,IREP
 #+begin_src f90
  USAGE:
@@ -14,6 +488,88 @@
 - IREP The number of the current replication.
 
 These variables may be used as right-hand  quantities  in  abbreviated code for initialization/finalization blocks.
+
+
+*** Pass new L2 record: NEWL2
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: NEWL2
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: NEWL2
+#+end_src
+- NEWL2
+    + NEWL2 = 1 if the data record is the first of an L2 record.
+    + NEWL2 = 2 otherwise.
+
+If  there  is  no  L2  data  item,  each data record is a different L2 record.
+
+NEWL2 also changes value in conjunction with calls to PASS.
+
+NEWL2 may be used as a right-hand quantity in $PRED and $ERROR blocks,
+and in an $INFN block in conjunction with PASS.
+
+*** Nonparametric density: DEN_,CDEN_
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY: DEN_=>DEN_NP(1),CDEN_=>DEN_NP(2:LVR+1)
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LVR,DPSIZE
+      REAL(KIND=DPSIZE) :: DEN_NP(LVR+1)
+#+end_src
+
+-  DEN_
+      The nonparametric density.
+
+-  CDEN_(1)
+      The marginal cumulative value for the first eta.
+
+-  CDEN_(2)
+      The marginal cumulative value for the second eta. etc.
+
+Values are computed by NONMEM when the Nonparametric step is performed
+and marginal cumulatives are requested (with  NM-TRAN:  $NONPARAMETRIC
+MARGINALS).
+
+
+Values  are  available  during  the pass with COMACT=2 and (if PASS is
+called) at ICALL=3.
+
+
+These variables may be used as right-hand  quantities  in  abbreviated
+code blocks $PK, $ERROR, $INFN and $PRED.
+
+*** CONTR: Y DATA NOBSe
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY: Y=>DV_ITM,DATA=>RDATA
+      USE ROCM_INT,  ONLY: NOBS=>NOBSIND2
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: NO,DPSIZE
+      REAL(KIND=DPSIZE) :: DV_ITM(NO),RDATA(NO,3)
+      INTEGER(KIND=ISIZE) :: NOBSIND2
+#+end_src
+
+These  variables  change values with each individual record.  They may
+be used by a user-written CONTR subroutine.
+
+-  Y(k)
+      DV data item on the kth data record  of  the  individual  record,
+      ignoring data records with MDV=1.
+
+-  DATA(k,i)
+      The  value  of  the  ith type of data item specified in NM-TRAN's
+      $CONTR record, appearing on the kth  observation  record  of  the
+      individual record.
+
+-  NOBS
+      Number of observations in the individual record.
+
+DATA is used also in MIX (See data_for_mix).
+
+REFERENCES: Guide IV, section III.B.4
 
 
 
@@ -106,8 +662,46 @@ Reserved labels starting COM regards module NMPRD4.
  REFERENCES: Guide IV, section III.B.7 , IV.E.2
  REFERENCES: Guide VI, section III.J
 
+*** Problem iteration count
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: NPROB,IPROB,S1NUM=>IDXSUP(1),S2NUM=>IDXSUP(2), &
+                           S1NIT=>NITR_SUP(1),S2NIT=>NITR_SUP(2), &
+                           S1IT=>NITSUP(1),S2IT=>NITSUP(2)
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: NPROB,IPROB,IDXSUP(2),NITR_SUP(2),NITSUP(2)
+#+end_src
+-  NPROB: The number of problems in the run.
+
+-  IPROB: The number of the current problem. IPROB  is  1  unless  there are multiple problems (e.g., multiple $PROBLEM records in the NM-TRAN control stream).
+
+- S1NUM: The number of the active first-level superproblem. S1NUM is 0
+  if there is no active first-level superproblem.
 
 
+- S2NUM The number of the active second-level superproblem. S2NUM is 0 if there is no active second-level superproblem.
+
+- S1NIT The number of iterations for the active first-level
+  superproblem. S1NIT is 0 if there is no active first-level
+  superproblem.
+
+
+- S2NIT The number of iterations for the active  second-level  superprob- lem. S2NIT is 0 if there is no active second-level superproblem.
+
+- S1IT The  number  of  the  current iteration of the active
+  first-level superproblem. S1IT is 0 if there is no active
+  first-level superproblem.
+
+- S2IT The number of the current iteration of  the  active
+  second-level superproblem. S2IT is 0 if there is no active
+  second-level superproblem.
+
+
+These  variables  may  be used as right-hand quantities in abbreviated
+code for initialization/finalization blocks.
+
+ (See $super).
 
 *** Objective function value
 #+begin_src f90
@@ -404,6 +998,110 @@ With NONMEM 7, the additional output file root.phi contains the same information
 
 
 ** PRED global variables
+*** MIX CONTR: TEMPLT
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY: TEMPLT=>VRAW
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: VSIZE,DPSIZE
+      REAL(KIND=DPSIZE) :: VRAW(VSIZE)
+#+end_src
+- TEMPLT: this variable serves two different purposes. At ICALL=6, the
+  template data record is stored in TEMPLT. When  MIX  is  called,
+  the  first  data record of the individual record is stored in
+  TEMPLT.
+
+TEMPLT(n) may be used as a right-hand quantity in blocks  of
+abbreviated  code  that  test for ICALL=6 and in $MIX blocks.  The "n"
+may be either a position in the data record or the label of  the  data
+item, e.g. TEMPLT(1) or TEMPLT(ID).
+
+
+
+*** Parameters OMEGA SIGMA: CURRENT
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY: OMEGA=>VARNF
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LVR,DPSIZE
+      REAL(KIND=DPSIZE) :: VARNF(LVR,LVR)
+
+#+end_src
+-  OMEGA
+      The current value of OMEGA being used.
+
+The current value of SIGMA is also located in this array as follows:
+#+begin_src f90
+      SIGMA(I,J)=OMEGA(NETAS_+I,NETAS_+J)
+#+end_src
+NETAS_ is described in Parameter dimensions.
+
+ (See Parameter dimensions).
+
+At  run and problem initialization and at problem finalization use the variables OMEGAF and SIGMAF.
+ (See Parameter values: Initial and Final).
+
+Should not be used if an initial estimate is being computed.
+
+When an initial estimate is being computed, the  value  is  just  that
+found at problem initialization (when ICALL=1).
+
+EXAMPLE: Compute individual weighted residuals using a slope-intercept residual error model:
+
+#+begin_src f90
+ $ERROR
+ Y=F+EPS(1)+F*EPS(2)
+ IF (COMACT.GE.1) THEN
+    STD=SQRT(SIGMA(1)+F**2*SIGMA(2))
+    IWRES=(DV-F)/STD
+ ENDIF
+#+end_src
+
+
+
+*** Non-active ETA list for PRED
+
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY NAETA,LVOUT
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LVR
+      INTEGER(KIND=ISIZE) :: NAETA,LVOUT(LVR)
+#+end_src
+- NAETA
+      The number of positions in LVOUT that are set to 1.
+
+- LVOUT
+      When  LVOUT(i)=1,  NONMEM  is  ignoring  partial derivatives with
+      respect to eta(i) with the current call to PRED.
+
+*** Significant digits from Estmation Step
+
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY NSIG=>SIGD,SIG=>DIFA
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LPAR,DPSIZE
+      REAL(KIND=DPSIZE) :: SIGD,DIFA(LPAR)
+#+end_src
+- SIG(i): when  the minimization in the Estimation Step terminates due
+  to round- ing errors, but the number of significant digits that is
+  achieved  is reported,  the ith value in SIG gives the number of
+  significant digits for the ith UCP element.
+
+
+-  NSIG gives the minimum of the values found in the vector SIG
+
+The NSIG and SIG values should only be used with ICALL = 3.
+
+
+
+
+
 *** Partial derivative indicators
 #+begin_src f90
  USAGE:
@@ -1639,6 +2337,93 @@ REFERENCES: Guide Introduction_7
 
 
 ** PREDPP read-only global variables
+PREDPP modules contain values that are (for the most part)
+communicated from PRED to its subroutines.  Listed below are MODULE
+(previous COMMON block name), and a description of the variables.
+(See NONMEM_modules).
+
+PREDPP read-only modules contain values  that  are  communicated  from
+PREDPP to various user-subroutines PK, ERROR, DES and AES.
+
+- PROCM_INT (PROCM1)
+      NEWIND, for PK and ERROR
+
+- PROCM_REAL (PROCM2)
+      Non-event dose time and derivatives, for PK
+
+- PROCM_REAL (PROCM3)
+      Initiating dose record (at non-event dose time), for PK
+
+- PROCM_REAL (PROCM4)
+      Compartment amounts and derivatives, for PK and ERROR
+
+- PROCM_INT (PROCM5)
+      Number and map of active etas, for PK and ERROR (and TRANS)
+
+- PROCM_REAL (PROCM6)
+      Theta vector from NONMEM, for DES and AES
+
+- PROCM_REAL (PROCM7)
+      EVTREC from NONMEM, for DES and AES
+
+- PROCM_CHAR (PROCM8)
+      Format statements, for all routines
+
+- PROCM_REAL (PROCM9)
+      Time at which the state-vector (in PROCM4) was last computed, for
+      PK
+
+- PROCM_INT (PROCMA)
+      Indicator variables associated with model event  times,  for  all
+      routines
+
+- PROCM_INT (PROCMB)
+      Flag  indicating  final call to DES or AES after advance to event
+      or non-event time, for DES and AES
+
+- PROCM_INT (PROCMC)
+      Flag indicating compartment initialization call to PK, for PK
+
+The following are special modules containing values that are  communicated from user routines to PREDPP.
+
+- PRCOM_INT (PRCOMG)
+      Override  default settings in ADVAN6, ADVAN8, ADVAN9, ADVAN13,and
+      SS6
+
+- PRCOM_LOG (PRCOMU)
+      Restore pre-1990 behavior of bio-availability fraction
+
+- PRCM2_REAL (PRCOMW)
+      Fudge factor for error tests in ADVAN7/SS7
+
+These modules contain values that are communicated from subroutines to PREDPP.
+
+- PKERR_REAL (PRDPK1)
+      Communicate  model  event  time  parameters computed by PK to the
+      ERROR routine
+
+- PRMOD_INT (PRDPK2)
+      Flag indicating possible change in model event time parameters
+
+- PRMOD_REAL (PRDPK3)
+      Compartment initialization values from PK
+
+- PRMOD_INT (PRDPK4)
+      Values of ISSMOD and I_SS ("Initial Steady-State") flags.
+
+- PROCM_INT (PRDDE1)
+      Initialization values that are communicated from  subroutine  DES
+      and AES to PREDPP.
+
+- PRINFN (PRINFN)
+      Contains  values of INFN-defined variables which are communicated
+      to other PREDPP user-routines.
+
+Each has its own entry in the Help document.
+
+REFERENCES: Guide VI, section III.I , IV.D , Figure 14
+
+
 *** Active ETA list for PREDPP
 #+begin_src f90
  USAGE:
