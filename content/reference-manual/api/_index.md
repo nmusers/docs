@@ -7,4 +7,6 @@ bookCollapseSection = true
 
 ## Internals, customization, and API {#user-guide}
 
-fdaf
+For advanced users, NONMEM provides a large set of variables and
+functions for customization. NONMEM API consists reserved variables
+,user-defined functions, and special directives.

@@ -1,0 +1,313 @@
+#+title: PREDPP variales
+* PREDPP global variales
+** PREDPP read-only global variables
+*** Write formats
+#+begin_src f90
+ USAGE:
+      USE PROCM_CHAR, ONLY: FMT
+
+ GLOBAL DECLARATION:
+      CHARACTER*80 FMT(3)
+#+end_src
+- FMT(1)
+      A  suitable  format  statement for WRITE statements when the full
+      omega array is written.
+
+- FMT(2)
+      A suitable format statement for WRITE statements  when  the  full
+      sigma array is written.
+
+- FMT(3)
+      A  suitable  format  statement for WRITE statements when the full
+      theta array is written.
+*** State Vector time: TSTATE
+#+begin_src f90
+ USAGE:
+      USE PROCM_REAL, ONLY: TSTATE
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: DPSIZE
+      REAL(KIND=DPSIZE) :: TSTATE
+#+end_src
+TSTATE = the time at which the state-vector (See State Vector: A) was
+last computed.  It is the previous event time (i.e. the  time on  the
+previous  event  record  passed to PK), or if at a later time, but
+before the time for which PK is being called, a  lagged or  additional
+dose  was given, or a regular infusion was terminated, or a modeled
+event occurred, then  TSTATE  is  the  latest such time.
+
+NM-TRAN  includes  this  global  variable in the PK and ERROR routines
+when $PK or $ERROR abbreviated code includes references  to  variables
+A(n) or when verbatim code is present.
+
+*** State Vector: A
+#+begin_src f90
+ USAGE:
+      USE PROCM_REAL, ONLY A=>AMNT,DAETA,D2AETA
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: PC,LVR,DPSIZE
+      REAL(KIND=DPSIZE) :: AMNT(PC),DAETA(PC,LVR),D2AETA(PC,LVR,LVR)
+#+end_src
+- A: the state vector of compartment amounts. A(n) = the amount in compartment n.
+
+- DAETA: DAETA(n,i) = the derivative of A(n) wrt ETA(i).
+
+- D2AETA: D2AETA(n,i,j)  = the second derivative of A(n) wrt ETA(i),
+  ETA(j) (lower-triangular; j=1, ..., i).
+
+The A(n) can be used as right-hand quantities in $ERROR and $PK
+abbreviated  code.    These  amounts  are  the  latest ones computed.
+With $ERROR, the A(n) are computed at the event time on  the  event
+record passed to ERROR.  With $PK, the A(n) are computed at the event
+time on the previous event record, or possibly at a later time.  This
+time  - the  latest  time  at which the amounts are computed - is
+given in the variable TSTATE, which may also be used in $PK
+abbreviated code.
+
+ REFERENCES: Guide VI, section IV.D , Figure 14
+
+** PK global variables
+Internal variables used by PREDPP can also be accessed by "using" specific
+Fortran modules within the user-defined PK routine.
+*** Initial steady state: I_SS,ISSMOD
+#+begin_src f90
+ USAGE:
+      USE PRMOD_INT, ONLY: I_SS,ISSMOD
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: I_SS,ISSMOD
+#+end_src
+Used  for the Initial Steady State feature of PREDPP, with the general
+non-linear models (ADVAN6, ADVAN8, ADVAN9, ADVAN13, ADVAN14,  ADVAN15,
+ADVAN16, ADVAN17, ADVAN18).
+
+By  default,  the  initial  conditions (i.e., compartment amounts) are
+zero at the start of each individual record.  Different initial
+conditions may be computed using the I_SS (Initial Steady State)
+feature of MODEL and/or PK.
+
+- ISSMOD may be set by MODEL. (Note that the option of the $MODEL
+  record is I_SS, not ISSMOD.) Default: -1 (MODEL does not request the
+  I_SS feature) Values 0, 1, 2 and 3 are permitted.  Value 0 requests
+  that  no  steady state be computed.  ISSMOD values 1, 2, or 3
+  requests that PREDPP compute an initial steady state for the  model
+  before  the  first  event record  of  an individual record, or after
+  a reset event.  The results are identical to those that would be
+  computed by a  steady-state  dose event  record with SS=ISSMOD and
+  AMT=0 and RATE=0.  If endogenous drug is specified in the
+  differential equations,  non-zero  initial  conditions will be
+  computed.
+
+- I_SS may be set by PK. Default: -1 (PK does not request the I_SS
+  feature) Values are the same as ISSMOD, with the same effect.  This
+  allows I_SS to be set conditionally, e.g., if some subjects  are  at
+  steady-state and  others  are not.  If both ISSMOD and I_SS are set,
+  then the value of I_SS overrides that of ISSMOD.
+
+  There is no difference between values 1, 2 and 3 of I_SS unless the
+  PK routine  also  uses  the  compartment initialization feature A_0.
+  The I_SS feature behaves exactly like a steady state dose record  in
+  this regard.  Specifically,
+   + With I_SS=1 ("reset"), values of A_0 are ignored.
+   + With I_SS=2 ("sum"), values of A_0 are added to the SS values.
+   + With I_SS=3  ("initial ests"), values of A_0 are used as initial estimates when computing the SS values.
+  Similar for ISSMOD.
+
+- If ISSMOD is set, or I_SS is set at ICALL=1,  PREDPP  will  acknowlege the fact in the NONMEM output.
+
+- When I_SS or ISSMOD is set, even if only to 0, then SSS and the
+  appropriate SS routine are included in the NONMEM executable.
+
+- When I_SS or ISSMOD is set, even if only to 0,  or  verbatim  code
+  is present  in  the $PK or $INFN block, then NM-TRAN includes
+  I_SS,ISSMOD in the PK and/or INFN routine.
+
+  Example: $PK may include code such as
+  #+begin_src f90
+   IF (TYPE.EQ.1) THEN
+   I_SS=1
+   ELSE
+   I_SS=0
+   ENDIF
+  #+end_src
+ (See $model, model).
+
+*** PASTZERO (NM75)
+#+begin_src f90
+  USAGE:
+       USE PRDDESLVU, ONLY: PASTZERO ! for ADVAN18
+       USE PRRADAR5U, ONLY: PASTZERO ! For ADVAN16/17
+  GLOBAL DECLARATION:
+       USE SIZES, ONLY: DPSIZE
+       REAL (KIND=DPSIZE) PASTZERO
+#+end_src
+This  variable  is reserved with ADVAN18, for use with Delay
+Differential Equations.  Sometimes you may wish to have the equations
+transition  from  the  past  to  the present other than at time T=0.
+In this case, set PASTZERO to a  non-zero  (including  negative)
+value.   For example,
+#+begin_src php
+ $DES PASTZERO=-10.0
+#+end_src
+
+*** MXSTEP
+#+begin_src f90
+  USAGE:
+    USE PRDATA, ONLY: MXSTEP=>MXSTP0  ! (ADVAN9)
+    USE PRDATA, ONLY: MXSTEP=>MXSTP01 ! (ADVAN13,ADVAN14,ADVAN15,ADVAN16,ADVAN17,ADVAN18)
+
+  GLOBAL DECLARATION:
+    INTEGER(KIND=ISIZE) MXSTP0
+    INTEGER(KIND=ISIZE) MXSTP01
+#+end_src
+The  maximum  number  of integration steps for ADVAN9 and ADVAN13 and ADVAN14 and ADVAN15 and ADVAN16 and ADVAN17 and ADVAN18.
+
+- For ADVAN13, ADVAN14, ADVAN15, ADVAN16, ADVAN17, and ADVAN18, the
+  default value of MXSTP01 is set to 10000 in resource\PRDATA.f90
+- For  ADVAN9,  the  default  value of MXSTP0 is set to the largest
+  possible integer  value  2147483647  in  resource\PRDATA.f90,  so
+  MXSTEP can only be used to set a smaller value.
+- This  variable is only a reserved variable for ADVAN9 and ADVAN13
+  and ADVAN14 and ADVAN15 and ADVAN16 and ADVAN17 and ADVAN18.
+
+** STOP_TIME,ITASK_ (NM75)
+#+begin_src f90
+   USAGE:
+        USE PRLS01_REAL, ONLY: STOP_TIME
+        USE PRLS01_INT, ONLY: ITASK_=>ITASK
+
+   GLOBAL DECLARATION:
+        USE SIZES, ONLY: DPSIZE
+        REAL (KIND=DPSIZE) STOP_TIME
+        USE SIZES, ONLY: ISIZE
+        INTEGER(KIND=ISIZE) ITASK_
+#+end_src
+These  reserved  variables  are  used  to  avoid  overshoot in ADVAN9,
+ADVAN13, ADVAN14, and ADVAN15.  These  LSODA  based  routines  use  an
+algorithm  for  integration  that  overshoots the integration interval
+during calls to DES, but still accurately evaluates at the end of  the
+integration interval when all calculations are completed. However, you
+may wish to capture a maximal or minimal value during  $DES,  and  the
+overshoot  should be turned off for this purpose. This is readily done
+by setting ITASK_=4 in $PK or $ERROR. E.g.,
+
+#+begin_src php
+ $PK ITASK_=4
+#+end_src
+
+- ITASK_ may take values between 1 and 5. For other values of ITASK_ and a discussion of these variables,
+ See INTRODUCTION TO NONMEM 7, "ITASK_ and  STOP_TIME:  Avoiding
+  overshoot in ADVAN9, ADVAN13, ADVAN14, and ADVAN15"
+
+- You  may  also  specify  a  STOP_TIME (Tcrit) past which it should
+  not integrate, if it is different from the end of the  normal
+  integration interval:
+
+  #+begin_src f90
+  IF(TIME==4.0) STOP_TIME=5.0
+  #+end_src
+
+- To set back to default (end of normal integration interval)
+  #+begin_src f90
+  STOP_TIME=-1.0d+300
+  #+end_src
+*** HINIT_,HMIN_,HMAX_ (NM760)
+ |
+ |                                                                    |
+ +--------------------------------------------------------------------+
+
+ MEANING: PREDPP-PK global variables                                    |
+ CONTEXT: User-supplied routines                                        |
+
+ USAGE:                                                                 |
+      USE PRLS01_REAL, ONLY: HINIT_,HMIN_,HMAX_                         |
+
+ GLOBAL DECLARATION:                                                    |
+      USE SIZES, ONLY: DPSIZE                                           |
+      REAL (KIND=DPSIZE) HINIT_,HMIN_,HMAX_                             |
+
+ DISCUSSION:                                                            |
+
+ These  reserved variables are used to modify the integration step size |
+ behavior in ADVAN9, ADVAN13, ADVAN14, and  ADVAN15.   When  a  modeled |
+ short,  large  rate  input  occurs at some time during the simulation, |
+ that is not a scheduled bolus event or is not  easily  specified  with |
+ MTIME(), the LSODA type ODE solvers can miss this event.  For example, |
+ a gamma function shaped input with a large N>20 parameter, can  create |
+ a stiff, pseudo-bolus input that may be missed by one of these ADVANs. |
+ One way to avoid missing this input is to  set  the  integration  step |
+ size to an upper limit:                                                |
+
+ $PK HMAX_=0.01                                                         |
+
+ One  may also set the initial step size (HINIT_), or minimal step size |
+ (HMIN_) within the $PK block in a similar manner.                      |
+
+ The usual technique for handling short-term rate inputs is to set  the |
+ RTOL and ATOL to very high levels, such as between 13 and 15, but this |
+ may not work for every problem, and one may need to resort to  explic- |
+ itly limiting the HMAX_ or HINIT_ in the manner shown above.           |
+
+ For a discussion of these variables,                                   |
+ See INTRODUCTION  TO  NONMEM  7, "HMIN_, HINIT_,HMAX_: Avoiding missed |
+ short events in ADVAN9, ADVAN13, ADVAN14, and ADVAN15 (nm760)"         |
+
+ REFERENCES: Guide Introduction_7
+*** MODEL EVENT TIME: MTIME
+USAGE:
+      USE PKERR_REAL, ONLY :: MTIME
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: PCT,DPSIZE
+      REAL(KIND=DPSIZE) :: MTIME(PCT)
+
+ DISCUSSION:
+
+ Model time parameters MTIME are stored in MTIME if they are defined in
+ $PK abbreviated code or if verbatim code  is  present  in  $PK.   This
+ makes  them  also  available to the ERROR routine.  However, their eta
+ derivatives (if any) are not included.  Hence the ERROR routine should
+ not  use model time parameters in such a way as to influence the value
+ of Y if those parameters have eta derivatives.
+
+ A user-written PK routine need not define these variables unless  per-
+ haps the model time parameter values are used in the ERROR routine.
+
+ (See mtime, model time examples).
+
+*** MODEL EVENT TIME: MTDIFF
+
+ MEANING: PREDPP-PK global variables
+ CONTEXT: PK routine
+
+ USAGE:
+      USE PRMOD_INT, ONLY: MTDIFF
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: MTDIFF
+
+ DISCUSSION:
+
+ MTDIFF is of interest when model time parameters MTIME are used.
+
+ The  value  of  MTDIFF is 0 when PK is called.  If PK sets MTDIFF to a
+ value other than 0, e.g., MTDIFF=1, then PREDPP will  understand  that
+ with  that  call to PK, the values of one or more of the MTIME(i) have
+ possibly been reset.
+
+ It is not necessary to set MTDIFF at a  call  to  PK  with  the  first
+ record  of an individual or with a reset record.  At such calls, it is
+ assumed that all MTIME(i) are being set  (if  only  to  their  default
+ value of 0).
+
+ Suppose PK has defined a value MTIME(i).  PREDPP calls PK prior to the
+ advance to MTIME(i).  PK may change MTIME(i) at this  call.   However,
+ the  new  value  of  MTIME(i) is ignored till after the advance.  Only
+ then is the new value of MTIME(i) effective.
+
+ MTDIFF=0 (the default) can save considerable run time when  there  are
+ many  model  time parameters.  Note that the results are unpredictable
+ if the times are in fact changed when MTDIFF=0.
+
+ (See mtime, model time examples).
