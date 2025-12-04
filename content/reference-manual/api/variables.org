@@ -1,6 +1,22 @@
 #+title: Reserved variables
 * Reserved variables
 ** NONMEM read-only global variables
+*** Simulation: NREP,IREP
+#+begin_src f90
+ USAGE:
+      USE ROCM_INT, ONLY: NREP,IREP=>NCREP
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: NREP,NCREP
+#+end_src
+- NREP The  number  of replications in the Simulation Step, given by the NSUBS option of the $SIMULATION record.
+
+- IREP The number of the current replication.
+
+These variables may be used as right-hand  quantities  in  abbreviated code for initialization/finalization blocks.
+
+
+
 *** COM, COMACT, COMSAV, COMRES
 Reserved labels starting COM regards module NMPRD4.
 
@@ -91,71 +107,6 @@ Reserved labels starting COM regards module NMPRD4.
  REFERENCES: Guide VI, section III.J
 
 
-*** MIXNUM, MIXEST, MIXP
-Variables used with mixture models.
-
-USAGE:
-#+begin_src php
-      IF (MIXNUM.EQ.1) THEN
-        ...
-      ENDIF
-      IF (MIXNUM.EQ.2) THEN
-        ...
-      ENDIF
-      IF (MIXNUM.EQ.3) THEN
-        ...
-      ENDIF
-#+end_src
-With mixture models, MIXNUM, MIXEST and MIXP are global variables that
-may be used as right-hand quantities (or  in  logical  conditions)  in
-abbreviated code or user-supplied routines. In general: MIXNUM is an
-input to PRED (or PREDPP) set by NONMEM. MIXEST is an output (result)
-or consequence from the estimation set by NONMEM.
-
-- MIXNUM: the index of the subpopulation for which variables are  to
-  be computed.
-
-  During  ICALL=4,  MIXNUM  is  the index of the sub-population that
-  was randomly selected to simulate the subject's data.   When
-  ICALL=3  and the PASS subroutine used, or when ICALL=5 or 6, MIXNUM
-  is the index of the subpopulation estimated to be that  from  which
-  the  individual's data most probably arises, and is equal to MIXEST
-  (see below).
-
-- MIXEST
-  When  ICALL=3,5,6,  and at ICALL=2 when COMACT is not 0, MIXEST is the
-  index of the subpopulation estimated to be that from which  the  indi-
-  vidual's data most probably arises.  Before nm7.3, at all other condi-
-  tions, the value of MIXEST is not meaningful, such as when ICALL=4  or
-  ICALL=2  and  COMACT=0.   As  of NONMEM 7.3, when ICALL=4, MIXEST will
-  equal MIXNUM, and when ICALL=2 and COMACT=0, MIXEST will be 0 to indi-
-  cate it has not been assigned a meaningful value.
-
-- MIXP
-  These are the mixture probabilities P(i) computed by subroutine MIX or
-  by the $MIX block of abbreviated code.
-
-  In abbreviated code, MIXP may be coded in either of three ways:
-
-  #+begin_src php
-  MIXP(MIXNUM)
-  MIXP
-  MIXP(i)
-  #+end_src
-
-  The first two ways are identical; i.e., when no  subscript  is  coded,
-  NM-TRAN supplies the subscript MIXNUM.
-
-  With  the third, the index i must not exceed the value of MMX in SIZES
-  (or as set by $SIZES record).
-
- (See Mixture_model:_MIXNUM,MIXEST)
- (See Mixture_model:_MIXP)
- (See mix, mixture model example).
-
- REFERENCES: Guide IV, section III.B.4 , III.B.6
- REFERENCES: Guide IV, section IV.E.1 , 4.E.2
- REFERENCES: Guide VI, section III.L.2 , Figure 6
 
 
 *** Objective function value
@@ -220,6 +171,43 @@ These variables may be used as right-hand quantities  in  $PRED,  $PK, $ERROR, $
 At  ICALL=6,  (the  final  estimate of) the mixture probabilities
 associated with the individual  record  containing  the  template data
 record are stored in MIXPT.
+*** MIX CONTR: THETA
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY: THETA=>THETAC
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LTH,DPSIZE
+      REAL(KIND=DPSIZE) :: THETAC(LTH)
+#+end_src
+- THETA:
+      The current value of theta, made available by NONMEM for the MIX,
+      CONTR and CCONTR routines.  THETA is a reserved varible  in  $MIX
+      abbreviated code.
+
+ REFERENCES: Guide VI, section III.L.2 , Figure 6
+*** MIX: DATA
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY: DATA=>RDATA
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: NO,DPSIZE
+      REAL(KIND=DPSIZE) :: RDATA(NO,3)
+#+end_src
+- DATA(k,i):
+      The  value  of  the  ith type of data item specified in NM-TRAN's
+      $CONTR record, appearing on the kth  observation  record  of  the
+      individual  record.   It  changes  values  with  each  individual
+      record.  DATA is a reserved variable in $MIX abbreviated code.
+
+
+DATA is also used in CONTR
+ (See CCONTR:_Y,DATA,N1,N2,DIM)
+
+REFERENCES: Guide IV, section III.B.4
+
+
 *** Size of individual record
 #+begin_src f90
  USAGE:
@@ -416,6 +404,206 @@ With NONMEM 7, the additional output file root.phi contains the same information
 
 
 ** PRED global variables
+*** Partial derivative indicators
+#+begin_src f90
+ USAGE:
+      USE NMPRD_INT, ONLY: MFIRST=>IFRSTDER,MSEC=>ISECDER,IFIRSTEM
+
+ GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: IFRSTDER,ISECDER,IFIRSTEM
+#+end_src
+-  MSEC
+   + MSEC=1  when  NONMEM  is expecting second-partial eta-derivatives with the current call to PRED.
+   + MSEC=0 when NONMEM  is  ignoring  second-partial
+     eta-derivatives with the current call to PRED. Second-partial
+     eta-derivatives  are  never  expected  unless the Laplacian
+     method is used.
+
+
+-  MFIRST
+   + MFIRST=1 when NONMEM is expecting  first-partial  eta-derivatives with the current call to PRED.
+   + MFIRST=0  when  NONMEM  is ignoring first-partial eta-derivatives
+     with the current call to PRED.  This variable  is  used  only  by
+     PREDPP, not by generated FSUBS.
+
+- IFIRSTEM: with  NONMEM  7.2  and  higher, first-partial
+  eta-derivatives are computed by generated code in FSUBS for
+  classical NONMEM methods, but  not  for  IMP,  SAEM,  and BAYES
+  methods.  This improves the speed at which the problem is evaluated.
+  However,  on  occasion such  derivatives are needed, for example,
+  when steady state values are to be calculated, or when stochastic
+  differential  equations  are  to  be evaluated.  In such cases,
+  insert as the first line in a each block of  abbreviated  code
+  ($PK,  $ERROR,  $DES, $AES, $PRED) the following line of code:
+  FIRSTEM=1 First derivatives will be evaluated for the new methods as
+  well.
+
+  Note  that  FIRSTEM  is  a  local  variable. In FSUBS, FIRSTEM is
+  copied from IFIRSTEM in MODULE NMPRD_INT prior to being used:
+  #+begin_src f90
+      FIRSTEM=IFIRSTEM
+       ...
+        IF (FIRSTEM == 1) THEN
+         block of first derivative code
+        ENDIF
+  #+end_src
+  The statement FIRSTEM=1 is inserted in generated  code  prior  to
+  the  first  test of FIRSTEM.  Thus, the local variable FIRSTEM is
+  changed by the user, not the global variable IFIRSTEM.
+
+  In order to implement this feature, NM-TRAN rearranges the  order of
+  statements  in  FSUBS.  Statements that compute first-partial
+  eta-derivatives are collected together into blocks of  first  de-
+  rivative  code  to  be  executed  only with FIRSTEM is 1.  Option
+  NOFASTDER of the $ABBREVIATED record prevents NM-TRAN from  doing
+  this and restores the order of statements in FSUBS to what it was in
+  previous versions.
+
+ REFERENCES: Guide VI, section III.E.4 , IV.B.2
+
+*** MIXNUM, MIXEST, MIXP
+Variables used with mixture models.
+
+USAGE:
+#+begin_src php
+      IF (MIXNUM.EQ.1) THEN
+        ...
+      ENDIF
+      IF (MIXNUM.EQ.2) THEN
+        ...
+      ENDIF
+      IF (MIXNUM.EQ.3) THEN
+        ...
+      ENDIF
+#+end_src
+With mixture models, MIXNUM, MIXEST and MIXP are global variables that
+may be used as right-hand quantities (or  in  logical  conditions)  in
+abbreviated code or user-supplied routines. In general: MIXNUM is an
+input to PRED (or PREDPP) set by NONMEM. MIXEST is an output (result)
+or consequence from the estimation set by NONMEM.
+
+- MIXNUM: the index of the subpopulation for which variables are  to
+  be computed.
+
+  During  ICALL=4,  MIXNUM  is  the index of the sub-population that
+  was randomly selected to simulate the subject's data.   When
+  ICALL=3  and the PASS subroutine used, or when ICALL=5 or 6, MIXNUM
+  is the index of the subpopulation estimated to be that  from  which
+  the  individual's data most probably arises, and is equal to MIXEST
+  (see below).
+
+- MIXEST
+  When  ICALL=3,5,6,  and at ICALL=2 when COMACT is not 0, MIXEST is the
+  index of the subpopulation estimated to be that from which  the  indi-
+  vidual's data most probably arises.  Before nm7.3, at all other condi-
+  tions, the value of MIXEST is not meaningful, such as when ICALL=4  or
+  ICALL=2  and  COMACT=0.   As  of NONMEM 7.3, when ICALL=4, MIXEST will
+  equal MIXNUM, and when ICALL=2 and COMACT=0, MIXEST will be 0 to indi-
+  cate it has not been assigned a meaningful value.
+
+- MIXP
+  These are the mixture probabilities P(i) computed by subroutine MIX or
+  by the $MIX block of abbreviated code.
+
+  In abbreviated code, MIXP may be coded in either of three ways:
+
+  #+begin_src php
+  MIXP(MIXNUM)
+  MIXP
+  MIXP(i)
+  #+end_src
+
+  The first two ways are identical; i.e., when no  subscript  is  coded,
+  NM-TRAN supplies the subscript MIXNUM.
+
+  With  the third, the index i must not exceed the value of MMX in SIZES
+  (or as set by $SIZES record).
+
+ (See Mixture_model:_MIXNUM,MIXEST)
+ (See Mixture_model:_MIXP)
+ (See mix, mixture model example).
+
+ REFERENCES: Guide IV, section III.B.4 , III.B.6
+ REFERENCES: Guide IV, section IV.E.1 , 4.E.2
+ REFERENCES: Guide VI, section III.L.2 , Figure 6
+
+
+*** Parameter values: initial and final
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY: THETAF,OMEGAF,SIGMA,THETAFR
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LTH,LVR ,DPSIZE
+      REAL(KIND=DPSIZE) :: THETAF(LTH),OMEGAF(LVR,LVR), &
+                           SIGMAF(LVR,LVR),THETAFR(LTH)
+#+end_src
+- THETAF
+      THETAF(i)  = zero, initial, or final value of theta(i), according
+      to the current value of ICALL.
+
+- THETAFR
+      THETAFR(i) = zero, initial, or final value of reported thetar(i),
+      according  to  the  current value of ICALL.  If record $THETAR is
+      not used, THETAF and THETAFR are equal.   If  record  $THETAR  is
+      used, then THETAF is the internal theta as used in $PK/$PRED, and
+      THETAFR is the theta reported in the report file.
+
+- OMEGAF
+      OMEGAF(i,j) =  zero,  initial,  or  final  value  of  omega(i,j),
+      according to the current value of ICALL.
+
+- SIGMAF
+      SIGMAF(i,j)  =  zero,  initial,  or  final  value of sigmaf(i,j),
+      according to the current value of ICALL.
+
+- At ICALL = 0, these are zero values.
+
+- At ICALL = 1, these are initial values. If NONMEM will be computing
+  the initial value of theta(i), at  ICALL=1 the initial value
+  THETAF(i) is set to some point between the lower and upper bounds.
+  If NONMEM will be computing the initial value of a diagonal  block
+  of OMEGA (SIGMA), at ICALL=1 the initial value of the block is set
+  to the identity matrix.
+
+- At ICALL = 3, these are final values.
+
+- At ICALL = 2, the values of these variables  should not be used
+  unless the value of COMACT is 1 or 2, in which case these are final
+  values. (See COMACT,COMSAV)
+
+*** Standard errors
+#+begin_src f90
+ USAGE:
+      USE ROCM_REAL, ONLY: SETHET=>SETH,SEOMEG=>SEOM,SESIGM=>SESIG,
+          SETHETR=>SETHR
+
+ GLOBAL DECLARATION:
+      USE SIZES, ONLY: LTH,LVR,DPSIZE
+      REAL(KIND=DPSIZES) :: SETH(LTH),SEOM(LVR,LVR),SESIG(LVR,LVR)
+#+end_src
+- SETHET
+      SETHET(i) = the standard error of the estimate of theta(i).
+
+- SETHETR
+      SETHETR(i)  =  the  standard  error  of  the estimate of reported
+      theta(i).  If record $THETAR is not used, SETHET and SETHETR  are
+      equal.   If  record  $THETAR is used, then SETHET is the standard
+      error of the internal theta as used in $PK/$PRED, and SETHETR  is
+      the standard error of the theta reported in the report file.
+
+- SEOMEG
+      SEOMEG(i,j) = the standard error of the estimate of omega(i,j).
+
+- SESIGM
+      SESIGM(i,j) = the standard error of the estimate of sigma(i,j).
+
+These values should only be used with ICALL = 3.
+
+ REFERENCES: Guide I, section C.3.5.2
+
+ REFERENCES: Guide V, section 5.4.2.1
+
 *** Prior simulation: ICMAX
 #+begin_src f90
  USAGE:
