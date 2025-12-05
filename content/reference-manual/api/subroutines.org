@@ -1,6 +1,233 @@
 #+title: Subroutines
 
 * User-defined subroutines
+"Stubs,"  or  "dummy" routines, are subroutines or functions called by
+NONMEM, PREDPP or user code.  NONMEM  releases contain dummy
+implementations of these routines, to be replaced by user-written code in advanced applications.
+
+- Stubs for NONMEM
+ | CRIT   | Modifies the computation of the default objective function.                         |
+ | CONTR  | Specifies the contribution to the objective  function  of  a level 1 ("L1") record. |
+ | CCONTR | Specifies  the  contribution  to the objective function of a level 2 ("L2") record. |
+ | MIX    | Describes the mixing parameter of a mixture model.                                  |
+ | PRIOR  | Allows a Bayesian penalty to be included  in  the  objective function.              |
+ | SPTWO  | SPTWO  can  be  used  to redefine the RES and WRES items for observation records.   |
+ | THETAI | THETAI is used to transform initial thetas.                                         |
+ | THETAR | THETAR is used to transform final thetas for reporting.                             |
+
+- stubs for PREDPP
+
+ | INFN | Initialization/Finalization routine. |
+
+- Stubs for User functions: =FUNCA=, =FUNCB=, =FUNCC=, ... define functions in abbreviated code.
+
+Code to replace a function stub should be placed in a file and provided to $SUBROUTINES:
+#+begin_src php
+$SUBROUTINES ... OTHER=funcacode
+#+end_src
+
+REFERENCES: (CRIT) Guide II, section C.6
+
+REFERENCES: (INFN) Guide VI, section VI.A , Figure 37
+
+** CONTR
+USAGE:
+#+begin_src f90
+      SUBROUTINE CONTR (I,CNT,IER1,IER2)
+      USE SIZES, ONLY: ISIZE,DPSIZE
+      INTEGER(KIND=ISIZE), INTENT(IN OUT) :: I,IER1,IER2
+      REAL(KIND=DPSIZE),   INTENT(IN OUT) :: CNT
+#+end_src
+CONTR is a user-supplied routine for computing the  contribution  made
+to  the  objective function from an L1 record.  It is used to override
+the NONMEM default objective function.
+
+A user-supplied CONTR routine may be used when the dimension of  OMEGA
+is  zero,  i.e.,  when  there are no etas in the problem, and in other
+situations, e.g., with categorical data.
+
+
+When NM-TRAN is used, the $CONTR record may be used  to  request  that
+information from the data records be made available to CONTR.
+
+
+Input argument:
+
+- I   Similar to ICALL for PRED subroutine. Possible values: 0, 1, 2
+
+Output argument:
+
+- CNT Contribution  to  -2log  likelihood  for data from the individual
+      record.
+
+- IER1 0 - Normal return; non-zero - error return.
+
+- IER2 0 - error-recovery is to be implemented when IER1 is nonzero; 1 - NONMEM is to stop when IER1 is nonzero.
+
+Other Inputs: other inputs are available to CONTR in NONMEM read-only
+global  vari- ables. In particular:
+
+- THETA (current theta) (See CONTR_MIX:_THETA)
+- DV and data values for this L1 record.
+
+      (See CONTR:_Y_DATA_NOBS, CONTR:_III_DIM)
+      (See $CONTR)
+
+      Predictions and derivatives.  (See CONTR:_F_G_H)
+
+NONMEM Utility routines may be called by CONTR, depending on the type
+ of data:
+
+|             | POPULATION          | SINGLE-SUBJECT |
+|-------------+---------------------+----------------|
+| CONTINUOUS  | ELS, NCONTR         | ELS            |
+|             | (note: same result) |                |
+|-------------+---------------------+----------------|
+| CATEGORICAL | NCONTR              | none           |
+
+If the scatterplot step is implemented, and zero lines are appropriate  for  values of RES and/or WRES, CONTR should request that NONMEM generate such lines.  (NONMEM does this by default when  a user  supplied CONTR is not supplied.)  To request zero lines for RES and WRES, CONTR should set OPSCRS(2) and  OPSCRS(3)  (respectively) to 1. e.g.,
+#+begin_src f90
+      USE CMNM6_INT, ONLY: OPSCRS=>ICONTRSC
+       ...
+      IF (ICALL.LE.1) THEN
+      OPSCRS(2)=1
+      OPSCRS(3)=1
+      ENDIF
+#+end_src
+
+ REFERENCES: Guide I, section G.3
+ REFERENCES: Guide IV, section III.B.4
+ REFERENCES: Guide V, section 12.4.16
+
+
+** CCONTR
+#+begin_src f90
+ USAGE:
+      SUBROUTINE CCONTR (I,CNT,P1,P2,IER1,IER2)
+      USE SIZES, ONLY: ISIZE,DPSIZE
+      INTEGER(KIND=ISIZE), INTENT(IN OUT)    :: I,IER1,IER2
+      REAL(KIND=DPSIZE),   INTENT(IN OUT)    :: CNT,P1(:),P2(:,:)
+#+end_src
+CCONTR is a user-supplied routine for computing the contribution  made
+to  the  objective function from an L2 record.  It is used to override
+the NONMEM default objective function.
+
+CCONTR may be used when there are no EPS or  ETA  and  in  other
+situations, e.g., with categorical population data.
+
+NONMEM could output error message:
+#+begin_src txt
+ USER CCONTR ROUTINE NOT USED, BUT THERE ARE NO EPSILONS,
+ AND ETAS ARE TO BE ESTIMATED
+#+end_src
+This can happen when POSTHOC etas are requested, but the data are single-subject data.  The user may have included the  POSTHOC  option  in error.
+
+The CCONTR routine may contain the following code:
+#+begin_src f90
+ CALL CELS (CNT,P1,P2,IER1,IER2)
+#+end_src
+
+If  the  data  is  correlated across L2 records (e.g., auto-regressive
+data), CCONTR computes the contribution to the objective function  for
+data from an entire individual record.
+
+Input argument:
+
+- I   Similar to Ifor PRED subroutine Possible values: 0, 1, 2
+
+Output argument:
+
+- CNT The  conditional  contribution to the objective function for this L2 record.
+
+- P1  P1(i) is the partial derivative of CNT with respect to eta(i).
+
+- P2  P2(i,j) is the second partial derivative of CNT with  respect
+  to eta(i) and eta(j) (for i <= j). At  ICALL=1,  CCONTR  sets
+  P2(1,1)=-1 if second derivative values are to be used.  Otherwise,
+  if cross-gradient values  are  to  be used.
+
+
+- IER1 0(Normal return); >0(error return).
+
+
+- IER2 0 if error-recovery is to be implemented when IER1 is nonzero;
+  1 if NONMEM is to stop when IER1 is nonzero.
+
+- Other inputs
+      Other  inputs  are available to CCONTR in NONMEM read-only global variables.
+      (See MIX_CONTR:_THETA)
+      E.g., USE ROCM_REAL,   ONLY: THETA=>THETAC
+      (See CCONTR:_Y,DATA,N1,N2,DIM)
+      (See CCONTR:_F,G,H)
+
+CCONTR is called by NONMEM's NCONTR routine with one  level  2  ("L2")
+record  after  another.  If no CCONTR routine is supplied by the user,
+NCONTR calls NONMEM utility CELS ("Conditional ELS"; ELS  contribution
+conditional  on  knowing  eta).   If  no L2 data item is present, each
+level 2 record is a single observation event record.  Otherwise, it is
+a  group  of observation records grouped together by a common value of
+L2.
+
+
+REFERENCES: Guide IV, section III.B.4
+
+
+** CRIT
+USAGE:
+#+begin_src f90
+      SUBROUTINE CRIT (ICALL,J,N,WRES,V)
+      USE SIZES, ONLY: ISIZE,DPSIZE
+      INTEGER(KIND=ISIZE), INTENT(IN)     :: J,N
+      INTEGER(KIND=ISIZE), INTENT(IN)     :: ICALL
+      REAL(KIND=DPSIZE),   INTENT(OUT)    :: V
+      REAL(KIND=DPSIZE),   INTENT(IN)     :: WRES(*)
+      END SUBROUTINE CRIT
+#+end_src
+The CRIT  subroutine  is used to modify the NONMEM objective function
+used with the First-Order (or the Extended Least  Squares)  Estimation
+method.   This  objective function may be regarded as being the sum of
+contributions computed from each individual record.  The first term in
+the contribution from an individual record is independent of data, but
+the second term in the contribution is the sum of the squared weighted
+residuals  for  the  data in the record.  The weights are functions of
+the model parameters and are obtained so that  with  a  given  set  of
+parameter  values,  assumed  to  be  the  true  parameter values, each
+weighted residual has unit variance and all the weighted residuals are
+mutually  uncorrelated.   With  the  CRIT  routine,  a function of the
+weighted residuals other than the sum of their squares may be
+substituted  for  the second term.  The function may vary between
+individual records.  The CRIT routine is called by  NONMEM  with  one
+individual record  after  another  (individual  records  without
+observations are skipped).
+
+
+Input argument:
+
+- ICALL Similar to ICALL for PRED subroutine.
+  + 0 - First call to CRIT in the run
+  + 1 - First call to CRIT in the current problem
+  + 2 - Computation of function value required
+
+- J    Number of individual record
+
+- N    Number of observations in the individual record
+
+- WRES Vector of weighted residuals (as  many  residuals  as  there  are
+      observations)
+
+Output argument:
+
+- V    Value of function
+
+Note:  When a user CRIT is supplied, NONMEM subroutine CELS may not be called.
+
+REFERENCES: Guide II, section C.6 , Figure 8
+
+REFERENCES: Guide III, section V.5.0
+
+REFERENCES: Guide IV, section III.B.6
+
+
 ** AES
 For use with PREDPP's ADVAN9 and ADVAN15 and ADVAN17.
 
@@ -411,6 +638,69 @@ EXAMPLES OF USAGE:
   (See Infn interpolation example).
 
   REFERENCES: Guide VI, section VI.A , Figure 37
+** MIX
+USAGE:
+#+begin_src f90
+      SUBROUTINE MIX (ICALL,NSPOP,P)
+      USE SIZES, ONLY: ISIZE,DPSIZE,LTH
+      USE ROCM_REAL, ONLY: THETA=>THETAC
+      INTEGER(KIND=ISIZE), INTENT(IN) :: ICALL
+      INTEGER(KIND=ISIZE), INTENT(OUT) :: NSPOP
+      REAL(KIND=DPSIZE),   INTENT(OUT) :: P(*)
+
+GLOBAL DECLARATION:
+      REAL(KIND=DPSIZE) :: THETAC(LTH)
+#+end_src
+MIX  is  a  NONMEM routine that is replaced by a user-supplied routine
+when a mixture model is used.  The MIX subroutine is used to  describe
+the  mixture  parameters  of  a mixture model.  It is called by NONMEM
+with one individual record after another.
+
+
+Input argument:
+
+- ICALL
+      Similar to ICALL for PRED subroutine.
+
+Output argument:
+
+-  NSPOP An integer variable or integer constant.  The maximum  number
+  of sub-populations  that  are  possible.  Must be given a value when
+  ICALL=1.
+
+
+- P   An array. For each i (i=1, ... , NSPOP), P(i) gives  the
+  modeled fraction  of the population in the ith subpopulation.  The
+  sum of the P(i) should equal 1.  In principle, the P(i) can change
+  from individual  to individual.  If for a given individual, the
+  second (for example) subpopulation doesn't apply, then  set  P(2)=0
+  for that individual.
+
+Other  inputs  are  available  to MIX in NONMEM read-only global
+variables.  In particular, data items that are requested using the
+$CONTR record, and the current value of THETA, as shown above. (See
+MIX:_DATA, MIX CONTR:_THETA).
+
+The  TEMPLT  data  record  in  a NONMEM read-only global variable also
+serves to provide an additional way for  individual-specific  informa-
+tion to be made available (See  MIX_CONTR:_TEMPLT)
+
+
+See also MIXNUM, MIXEST and MIXP
+
+ (See MIXNUM_MIXEST_MIXP)
+
+ (See mixnum_mixest_for_mixture_model)
+
+ (See Mixture_model:_MIXP)
+
+ (See mixture_model_example, mixnum_mixest).
+
+ REFERENCES: Guide III, section V.5.0
+ REFERENCES: Guide IV, section III.B.4 , III.B.6
+ REFERENCES: Guide IV, section IV.E.1 , 4.E.2
+ REFERENCES: Guide VI, section III.L.2 , Figure 6
+
 ** MODEL
 #+begin_src f90
  USAGE:
@@ -791,6 +1081,135 @@ Output argument:
  REFERENCES: Guide IV, section III.B.8 , IV
 
  REFERENCES: Guide V, section 12.3
+
+** PRIOR
+USAGE:
+#+begin_src f90
+      SUBROUTINE PRIOR (ICALL,CNT)
+      USE SIZES, ONLY: ISIZE,DPSIZE
+      INTEGER(KIND=ISIZE), INTENT(IN) :: ICALL
+      REAL(KIND=DPSIZE),   INTENT(IN OUT) :: CNT
+#+end_src
+A user-written PRIOR subroutine allows a penalty function based on a
+prior to be specified and  added  to  the  -2log  likelihood  function
+(Gisleskog et al, JPP, 2002, p. 473-505).  This serves as a constraint
+on the estimates of THETA, OMEGA, and SIGMA and thus as a way for
+stable estimates to be obtained with insufficient data.
+
+When  the  Simulation  Step is implemented, THETA and OMEGA, and SIGMA
+may also be simulated (along with etas and epsilons, should  any  such
+appear  in  the model and have nonzero-variances) in the PRIOR
+subroutine (See PRIOR_Simulation:_Parameters).  However, this  need
+not  be done  (simply execute a return in PRIOR at ICALL=4), in which
+case the values for THETA, OMEGA, and SIGMA used in the simulation are
+the values  given  in  the NONMEM control stream or input Model
+Specification File.
+
+Input argument:
+
+- ICALL Similar to ICALL for PRED subroutine. Possible values: 0, 1,
+  2, and 4. In a multiple problem run, PRIOR is called with ICALL=1
+  only with the first problem.
+
+
+Output argument:
+
+- CNT: the penalty term.
+
+Other Inputs are  available  to  PRIOR  in NONMEM read-only modules.
+ (See NONMEM_modules).
+
+PRIOR  may  call   NONMEM   utility   routines  NWPRI   and   TNPRI:
+
+#+begin_src f90
+      SUBROUTINE PRIOR (ICALL,CNT)
+      USE SIZES, ONLY: DPSIZE,ISIZE
+      REAL (KIND=DPSIZE) :: CNT
+      REAL (KIND=DPSIZE) :: PLEV
+      INTEGER (KIND=ISIZE) :: ICALL
+      NTHETA=3
+      NETA=3
+      NEPS=1
+      NTHP=2
+      NETP=2
+      NEPP=1
+      PLEV=0
+      CALL NWPRI (NTHETA,NETA,NEPS,NTHP,NETP,NEPP,NPEXP,ITYP,PLEV, &
+                  NSAM,ISS,CNT)
+      RETURN
+      END
+#+end_src
+NWPRI  and TNPRI compute particular types of penalty functions.  NWPRI
+computes a function based on a prior that has  a  multivariate  normal
+form  for  THETA, and also, in the case of population data, an inverse
+Wishart form for OMEGA (independent from the normal for THETA).   When
+used during a Simulation Step, it produces a random value of THETA and
+a random value of OMEGA from the  prior.   The  prior  information  is
+entered  manually  into  the control stream.  This prior is especially
+useful  for  a  subjective  specification  of  a   penalty   function.
+(See nwpri, tnpri).
+
+Model parameters may be constrained in various ways.  Those parameters
+whose values are not fixed are transformed  to  new  parameters  whose
+values are not at all constrained a priori (the "unconstrained
+parameters", or UCP).  TNPRI computes a penalty function based  on  a
+prior that  has  a multivariate normal form for all UCP.  When used
+during a Simulation Step, it produces a random value of the vector of
+all model parameters  (whose  values  are  not fixed).  The prior
+information is found in an input model specification file, and it has
+been  automatically  stored  there as part of a NONMEM analysis of a
+prior data set. (See $msfi, model_specification_file).  This prior is
+especially  useful   for   an   empirical   specification   of  a
+penalty  function. (See TNPRI).
+
+The $PRIOR statement can be used instead of a PRIOR subroutine.
+(See $prior.ctl).
+
+REFERENCES: Guide V, section 12.4.16
+
+** SPTWO
+USAGE:
+#+begin_src f90
+      SUBROUTINE SPTWO (ICALL,I1,I2,NROB,D,IER)
+      USE SIZES, ONLY: ISIZE,DPSIZE,NO
+      INTEGER(KIND=ISIZE), INTENT(IN)     :: NROB,ICALL
+      INTEGER(KIND=ISIZE), INTENT(IN OUT) :: I1,I2,IER
+      REAL(KIND=DPSIZE),   INTENT(IN OUT) :: D(NO,2)
+#+end_src
+SPTWO is used to redefine the meaning of the RES and  WRES  items  for
+observation  records  within  an individual record.  It is called with
+each individual record.  The labels 'RES' and 'WRES' can  be  changed,
+as usual.
+
+Input argument:
+
+- ICALL Similar to ICALL for PRED subroutine. Possible values: 0, 1, 2
+
+- NROB Number of observation records in the individual record.
+
+Output argument:
+
+- I1,I2: when  SPTWO  is  used,  by default, I1 and I2 are 0, meaning
+  zero lines are not to be generated through RES or WRES values on
+  scatterplots.   If  zero lines through RES or WRES values on
+  scatterplots are desired, SPTWO should set I1 or I2, respectively,
+  to 1.
+
+- D(J,1): Value of RES for Jth observation record, J=1,...,NROB.
+
+- D(J,2): Value of WRES for Jth observation record, J=1,...,NROB
+
+- IER Error indicator. 0 - Normal return; non-zero - error stop.
+
+Other Inputs:
+
+ NONMEM read-only global variables.
+ (See MIX:_DATA)
+ (See CONTR:_III,DIM)
+ (See CONTR:_F,G,H)
+ (See Non-active_ETA_list_for_PRED)
+ (See Parameters_OMEGA_SIGMA:_Current)
+ (See Record_Counters:_NIREC,NDREC)
 
 ** TRANS
 #+begin_src f90
