@@ -5,6 +5,6 @@ draft = false
 bookCollapseSection = true
 +++
 
-## Reference manual {#user-guide}
+## Reference manual
 
 fdaf

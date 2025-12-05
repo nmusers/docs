@@ -1,89 +1,73 @@
-
-
-
 * $AESINIT
  Marks the beginning of abbreviated code for the AES routine.
-
-
-
-
 ** USAGE
-
 #+begin_src php
  $AESINITIAL
  abbreviated code
 #+end_src
 
 ** DISCUSSION
- The  $AESINITIAL record is used to compute the amounts in the equilibrium compartments at the beginning of an integration interval.  It  is
- used  with  PREDPP's  ADVAN9, ADVAN15, and ADVAN17.  May also be coded
- $AES0.
- (See $AES).
- General rules for abbreviated code are documented elsewhere
- (See abbreviated code).
- Specific rules follow.
+The  $AESINITIAL record is used to compute the amounts in the
+equilibrium compartments at the beginning of an integration interval.
+It  is used  with  PREDPP's  ADVAN9, ADVAN15, and ADVAN17.  May also
+be coded $AES0. (See $AES). See @@html:<a href="http://localhost:1313/reference-manual/abbr/">abbreviated code</a>@@ for general rules. Specific rules follow.
 
 *** ASSIGNMENT AND CONDITIONAL STATEMENTS
+Left-hand quantities in assignment statements:
 
-**** Left-hand quantities in assignment statements:
+- A(ncm1+1), A(ncm1+2), ...  (Required. The amounts in  the
+  equilibrium compartments at the beginning of the integration
+  interval. ncm1 is the number of nonequilibrium compartments.)
+- INIT (Initialization flag.)
+  + INIT=0: The A(n) are approximate.
+  + INIT=1: The A(n) are exact (the default).
 
- A(ncm1+1), A(ncm1+2), ...  (Required. The amounts in  the  equilibrium
- compartments at the beginning of the integration interval. ncm1 is the
- number of nonequilibrium compartments.)
+- AESINITIAL-defined (i.e., PRED-defined) items.
 
- INIT  (Initialization flag.)
-  INIT=0: The A(n) are approximate.
-  INIT=1: The A(n) are exact (the default).
+Right-hand quantities in assignment statement and in conditions:
 
- AESINITIAL-defined (i.e., PRED-defined) items.
+- A(1), A(2), ...   (Current compartment amounts; may be  random  variables.)
 
-**** Right-hand quantities in assignment statement and in conditions:
+- P(1),  P(2), ...   (Post-translation basic PK parameters; may be random variables.)
 
-  A(1), A(2), ...   (Current compartment amounts; may be  random  variables.)
+- PK-defined items (Implicit basic PK parameters; may be  random  variables.)
 
-  P(1),  P(2), ...   (Post-translation basic PK parameters; may be random variables.)
+- T  (Time  at the beginning of the integration interval; may be random variables.)
 
-  PK-defined items (Implicit basic PK parameters; may be  random  variables.)
+- AESINITIAL-defined items that appeared earlier as  left-hand  quantities.
 
-  T  (Time  at the beginning of the integration interval; may be random
-  variables.)
+- Data item labels specified on the $INPUT statement.
 
-  AESINITIAL-defined items that appeared earlier as  left-hand  quantities.
+- THETA(n).
 
-****  Data item labels specified on the $INPUT statement.
+- Global Variables in Modules.
 
-  THETA(n).
-
-****  Global Variables in Modules
-   Certain variables in FORTRAN Modules can be used.
-   (See Variables_in_modules)
-
-**** Forbidden Variable Names:
-
-  IR DA DP DT E(n) ETA(n) EPS(n) ERR(n)
+- Forbidden Variable Names: IR DA DP DT E(n) ETA(n) EPS(n) ERR(n)
 
 *** PSEUDO ASSIGNMENT STATEMENTS
 
- COMRES=-1
+- COMRES=-1
 
- CALLFL=-1: Call ADVAN and AES with every event record (default).
- CALLFL=1: Call ADVAN and AES once per individual record.
-
- (CALLFL may be used only when the TIME data item is not defined.)  The
- pseudo assignments statements may be enclosed in parentheses.  If both
- are  present  within the same set of parentheses, separate them with a
- semicolon.  Within parentheses, a calling protocol phrase may be  used
- instead of CALLFL, and either upper or lower case may be used. E.g.,
- $AESINIT (ONCE PER IR)     ; same as CALLFL=1
- $AESINIT (EVERY EVENT)     ; same as CALLFL=-1 (default)
+- CALLFL=-1: Call ADVAN and AES with every event record (default).
+- CALLFL=1: Call ADVAN and AES once per individual record. (CALLFL may
+  be used only when the TIME data item is not defined.)  The pseudo
+  assignments statements may be enclosed in parentheses.  If both are
+  present  within the same set of parentheses, separate them with a
+  semicolon.  Within parentheses, a calling protocol phrase may be
+  used instead of CALLFL, and either upper or lower case may be used.
+  E.g.,
+  #+begin_src php
+  $AESINIT (ONCE PER IR)     ; same as CALLFL=1
+  $AESINIT (EVERY EVENT)     ; same as CALLFL=-1 (default)
+  #+end_src
 
  (See calling protocol).
 
 *** RECORD ORDER:
 
- Follows $SUBROUTINES $INPUT $MODEL $PK
+ - Follows $SUBROUTINES $INPUT $MODEL $PK
 
- Precedes $AES
+ - Precedes $AES
 
 ** REFERENCES
 Guide IV, section V.C.8

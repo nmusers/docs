@@ -1,0 +1,84 @@
+#+title: Stochastic structure
+
+* Stochastic structure
+
+The  following are examples of commonly used models using stochastic
+structures, aka "random models".
+
+Models for CL in terms of TVCL ("typical value of clearance") and  ETA
+are  examples  of  models expressing population inter-individual
+variability.
+
+Models for Y involving F ("prediction  based  on  the  pharmacokinetic
+parameters")  and  ERR  are  examples  of  models for intra-individual
+("residual") variability. They are used with both population  or
+single-subject  data,  in  which  case ERR stands for EPS or ETA,
+respectively.
+
+
+** Additive models
+
+#+begin_src f90
+      CL=TVCL+ETA(1)
+      Y=F+ERR(1)
+#+end_src
+
+** Proportional
+Also known as CCV; Constant Coefficient of Variation models
+#+begin_src f90
+      CL=TVCL*(1+ETA(1))
+      Y=F*(1+ERR(1))
+#+end_src
+An equivalent way of coding the proportional model is:
+#+begin_src f90
+      CL=TVCL+TVCL*ETA(1)
+      Y=F+F*ERR(1)
+#+end_src
+
+** Exponential
+
+#+begin_src f90
+      CL=TVCL*EXP(ETA(1))
+      Y=F*EXP(ERR(1))
+#+end_src
+During estimation by  the  first-order  method,  the  exponential
+model  and proportional models give identical results, i.e., NONMEM
+cannot distinguish between them.
+
+During estimation by a conditional estimation method,  the
+exponential  and proportional models for inter-individual variability
+give different results.  During simulation, the two  models  give
+different results, in both the inter- and intra-individual cases.
+
+
+** Power Function model
+
+#+begin_src f90
+      Y=F+F**P*ERR(1)
+#+end_src
+
+The  Power Function model has both the additive and the CCV error
+models as special cases, and smoothly interpolates  between  them in
+other cases.
+
+** Combined Additive and Proportional model
+Also known as slope-intercept model.
+
+#+begin_src f90
+      Y =F*(1+ERR(1))+ERR(2)
+#+end_src
+
+Here  is  an alternative parameterization for the same model when
+there is no covariance between ERR(1) and ERR(2).  Any THETA  may be
+used.
+
+#+begin_src f90
+      W=(1+THETA(5)*THETA(5)*F*F)**.5
+      Y=F+W*ERR(1)
+#+end_src
+
+ REFERENCES:  Guide V, section 3 , 4.1 , 7.5 , 8.3
+
+ REFERENCES: Guide V, section 8
+
+ REFERENCES: Guide VII, section I , III

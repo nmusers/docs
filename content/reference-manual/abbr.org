@@ -345,14 +345,6 @@ spaces, and may contain at most 71 characters.
     + 1 or 991 requests the built-in format specification: 991  FORMAT (35F14.4)
     + 2 or 992 requests the built-in format specification: 992  FORMAT (35E15.7)
 
-[fn:1] Format specification numbers 991 and 992 are used in generated
-code  to  avoid conflict with statement numbers arising from DO WHILE
-statements.  The one digit versions are perhaps easier to remember.
-
-[fn:2] No  integer format specification is provided because constants
-are stored as floating point variables in generated and library
-routines.
-
   - list. A  list  of one or more right-hand quantities, i.e.,
     variables or constants that may appear on the right in abbreviated
     code.   May not  include expressions or names of abbreviated
@@ -574,26 +566,6 @@ the function has three arguments.
  $SUBROUTINES ... OTHER=funcfile
  #+end_src
 
-[fn:3] With NONMEM VI 2.0, reserved function names are FUNCA  through
-FUNCC. reserved names for vectors are VECTRA through VECTRC.
-
-[fn:4] With NONMEM 7.3, reserved function names are FUNCA through FUNCI.
-
-[fn:5] With  NONMEM  7.4,  reserved  function  names are FUNCA through
-FUNCZ. Reserved names for vectors are VECTRA through VECTRZ. Extended
-reserved names are also recognized. These are FUNCxy and FUNCxyz,
-where each of x, y, z  stands  for  an  alphabetic character  A-Z,
-e.g.,  FUNCAB  or FUNCABC.  Similar extended reserved names for
-vectors are also recognized: e.g, VECTRAB or VECTRABC. If the
-abbreviated code uses one of these extended  reserved  function names,
-but the user does not supply the code via $SUBR OTHER, the NONMEM
-executable cannot be created, and there will be an  error  message
-from the Fortran compiler such as:
- #+begin_src txt
- Undefined Symbols
- _funcaaa_
- #+end_src
-
 If the abbreviated code uses one of these reserved function names, but the  user  does  not  supply the code via $SUBR OTHER, the NONMEM executable will be created, but there will be an  error  message  in  the
  NONMEM report file such as:
  #+begin_src txt
@@ -669,325 +641,17 @@ function).
    assignment statements special to those records.
 
 ** Reserved variables
-Reserved variable names include names of those variables  that  have
-   special meaning for the user, as well as names of variables that are
-   used internally by NM-TRAN.  Entries for $PRED, $PK,  $ERROR,  $DES,
-   $AES, $AESINITIAL, and $TOL describe the reserved variable names for
-   these abbreviated codes.
+Entries for $PRED, $PK,  $ERROR,  $DES,
+$AES, $AESINITIAL, and $TOL describe the reserved variable names for
+these abbreviated codes.
 
 A variable name that is reserved in an abbreviated code may  not  be
-   used as the name of a variable defined in this code, or in any other
-   abbreviated code unless the pseudo-assignment statement COMRES=-1 is
-   used (in some code).  If a reserved variable name is inappropriately
-   used, NM-TRAN will generate an error message.
+used as the name of a variable defined in this code, or in any other
+abbreviated code unless the pseudo-assignment statement COMRES=-1 is
+used (in some code).  If a reserved variable name is inappropriately
+used, NM-TRAN will generate an error message.
 
-The following names are reserved in all abbreviated code:
-   #+begin_src f90
-     GETETA
-     SIMETA
-     SIMEPS
-     COMSAV
-     NWIND
-     ETEXT
-     IERPRD
-     IERPRDU
-     MSEC
-     MFIRST
-     NETEXT
-     ETA1, ETA2, ...ETA9
-     ETA10, ETA11, ...ETA99
-     Annnnn !! nnnnn is numeric 00000-99999, and nnnn is numeric 0000 -9999
-     ! Similarly
-     Bnnnnn,Cnnnnn,Dnnnnn,Ennnnn,Fnnnnn,Pnnnnn,Qnnnnn,MCnnnn,MEnnnn,MGnnnn,MTnnnn
-   #+end_src
-Names of modules and of variables in the modules are also reserved. [fn:6]
-Below  is  a list of blocks of abbreviated code and the modules and
-variables that may be used.  Second is a list of  modules,  the
-variables  in  the  modules,  and  the blocks of abbreviated code in
-which these variables may be used.
-
-#+begin_src f90
-  ! $AES
-  NMPRD_INT:  COMACT,COMSAV
-  NMPRD_INT:  NPROB,IPROB
-  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
-  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
-  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
-  PKERR_REAL: MTIME
-  PRMOD_INT:  ICALL,IDEFD,IDEFA
-  PRMOD_INT:  MTDIFF
-  PROCM_INT:  ISFINL
-  PROCM_INT:  MNOW,MPAST,MNEXT
-  PROCM_INT:  NVNT
-  PROCM_REAL: DOSREC
-  PROCM_REAL: DOSTIM
-  PROCM_REAL: EVTREC
-  PROCM_REAL: THETA
-  ROCM_INT:   MIXNUM,MIXEST
-  ROCM_INT:   NIREC,NDREC
-  ROCM_INT:   NREP,IREP
-  ROCM_REAL:  MIXP
-
-  ! $DES
-  NMPRD_INT:  COMACT,COMSAV
-  NMPRD_INT:  MSEC,MFIRST,IFIRSTEM
-  NMPRD_INT:  NPROB,IPROB
-  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
-  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
-  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
-  PKERR_REAL: MTIME
-  PRMOD_INT:  ICALL,IDEFD,IDEFA
-  PRMOD_INT:  MTDIFF
-  PROCM_INT:  ISFINL
-  PROCM_INT:  MNOW,MPAST,MNEXT
-  PROCM_INT:  NVNT
-  PROCM_REAL: DOSREC
-  PROCM_REAL: DOSTIM
-  PROCM_REAL: EVTREC
-  PROCM_REAL: THETA
-  ROCM_INT:   MIXNUM,MIXEST
-  ROCM_INT:   NIREC,NDREC
-  ROCM_INT:   NREP,IREP
-  ROCM_REAL:  MIXP
-
-  ! $ERROR
-  CMNM1_INT:  NIND_7
-  NMPRD_INT:  COMACT,COMSAV
-  NMPRD_INT:  MSEC,MFIRST,IFIRSTEM
-  NMPRD_INT:  NEWL2
-  NMPRD_INT:  NPROB,IPROB
-  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
-  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
-  NMPRD_INT:  MDVRES
-  NMPRD_INT:  NPDE_MODE
-  NMPRD_INT:  ETASXI
-  NMPRD_INT:  NOFIRSTDERCODE
-  NMPRD_REAL: CORRL2
-  NMPRD_REAL: ETA,EPS
-  NMPR_INT:   F_FLAG
-  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
-  NMPR_REAL:  CTLO
-  NMPR_REAL:  CTUP
-  NMPR_REAL:  YLO,YUP
-  NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR
-  PKERR_REAL: MTIME
-  PRMOD_INT:  MTDIFF
-  PROCM_INT:  MNOW,MPAST,MNEXT
-  PROCM_INT:  NEWIND
-  PROCM_REAL: A
-  ROCM_INT:   LIREC
-  ROCM_INT:   MIXNUM,MIXEST
-  ROCM_INT:   NINDR,INDR1,INDR2
-  ROCM_INT:   NIREC,NDREC
-  ROCM_INT:   NREP,IREP
-  ROCM_REAL:  CNTID
-  ROCM_REAL:  CDEN_,DEN_
-  ROCM_REAL:  IIDX
-  ROCM_REAL:  MIXP
-  ROCM_REAL:  OMEGA
-  ROCM_REAL:  PR_CT
-  ROCM_REAL:  PR_Y
-  ROCM_REAL:  TEMPLT
-
-  ! $INFN
-  CMNM1_INT:  NIND_7
-  NMPRD_INT:  NEWL2
-  NMPRD_INT:  NPROB,IPROB
-  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
-  NMPRD_INT:  NWIND
-  NMPRD_INT:  PRED_IGNORE_DATA,PRED_IGNORE_DATA_TEST
-  NMPRD_REAL: CORRL2
-  NMPRD_REAL: ETA,EPS
-  NMPRD_REAL: PASSRC
-  NMPR_INT:   F_FLAG
-  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
-  NMPR_INT:   SKIP_
-  NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR
-  PRMOD_INT:  I_SS,ISSMOD
-  ROCM_INT:   IERE,IERC
-  ROCM_INT:   LIREC
-  ROCM_INT:   MIXNUM,MIXEST
-  ROCM_INT:   NINDR,INDR1,INDR2
-  ROCM_INT:   NIREC,NDREC
-  ROCM_INT:   NREP,IREP
-  ROCM_REAL:  CDEN_,DEN_
-  ROCM_REAL:  CNTID
-  ROCM_REAL:  IIDX
-  ROCM_REAL:  MIXP
-  ROCM_REAL:  OBJECT
-  ROCM_REAL:  PR_CT
-  ROCM_REAL:  PR_Y
-  ROCM_REAL:  SETHET,SEOMEG,SESIGM,SETHETR
-  ROCM_REAL:  THETAF,OMEGAF,SIGMAF,THETAFR
-  ROCM_REAL:  PRED_,RES_,WRES_,NPRED_,NRES_,NWRES_
-  ROCM_REAL:  CPRED_,CRES_,CWRES_,PREDI_,RESI_,WRESI_,
-  ROCM_REAL:  CPREDI_,CRESI_,CWRESI_,EPRED_,ERES_,EWRES_
-  ROCM_REAL:  NPDE_,ECWRES_
-
-  ! $MIX
-  NMPRD_INT:  NPROB,IPROB
-  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
-  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
-  ROCM_INT:   NINDR,INDR1,INDR2
-  ROCM_INT:   NIREC,NDREC
-  ROCM_INT:   NREP,IREP
-  ROCM_REAL:  TEMPLT
-  ROCM_REAL:  THETA,DATA
-
-  ! $PK
-  CMNM1_INT:  NIND_7
-  NMPRD_INT:  COMACT,COMSAV
-  NMPRD_INT:  MSEC,MFIRST,IFIRSTEM
-  NMPRD_INT:  NPROB,IPROB
-  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
-  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
-  NMPRD_INT:  MDVRES
-  NMPRD_INT:  NPDE_MODE
-  NMPRD_INT:  ETASXI
-  NMPRD_INT:  NOFIRSTDERCODE
-  NMPRD_REAL: CORRL2
-  NMPRD_REAL: ETA,EPS
-  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
-  NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR
-  PKERR_REAL: MTIME
-  PRMOD_INT:  I_SS,ISSMOD
-  PRMOD_INT:  MTDIFF
-  PRMOD_REAL: A_0
-  PROCM_INT:  A_0FLG
-  PROCM_INT:  MNOW,MPAST,MNEXT
-  PROCM_INT:  NEWIND
-  PROCM_REAL: A
-  PROCM_REAL: DOSREC
-  PROCM_REAL: DOSTIM
-  PROCM_REAL: TSTATE
-  ROCM_INT:   LIREC
-  ROCM_INT:   MIXNUM,MIXEST
-  ROCM_INT:   NINDR,INDR1,INDR2
-  ROCM_INT:   NIREC,NDREC
-  ROCM_INT:   NREP,IREP
-  ROCM_REAL:  CNTID
-  ROCM_REAL:  CDEN_,DEN_
-  ROCM_REAL:  IIDX
-  ROCM_REAL:  MIXP
-  ROCM_REAL:  OMEGA
-  ROCM_REAL:  PR_CT
-  ROCM_REAL:  PR_Y
-
-  ! $PRED
-  CMNM1_INT:  NIND_7
-  NMPRD_INT:  COMACT,COMSAV
-  NMPRD_INT:  I_REC
-  NMPRD_INT:  MSEC,MFIRST,IFIRSTEM
-  NMPRD_INT:  NEWL2
-  NMPRD_INT:  NPROB,IPROB
-  NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM
-  NMPRD_INT:  NTHES_,NETAS_,NEPSS_
-  NMPRD_INT:  MDVRES
-  NMPRD_INT:  NPDE_MODE
-  NMPRD_INT:  ETASXI
-  NMPRD_INT:  NOFIRSTDERCODE
-  NMPRD_INT:  PRED_IGNORE_DATA,PRED_IGNORE_DATA_TEST
-  NMPRD_REAL: CORRL2
-  NMPRD_REAL: ETA,EPS
-  NMPR_INT:   F_FLAG
-  NMPR_INT:   RPTI,RPTO,RPTON,PRDFL
-  NMPR_INT:   SKIP_
-  NMPR_REAL:  CTLO
-  NMPR_REAL:  CTUP
-  NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR
-  NMPR_REAL:  YLO,YUP
-  ROCM_INT:   IERE,IERC
-  ROCM_INT:   LIREC
-  ROCM_INT:   MIXNUM,MIXEST
-  ROCM_INT:   NINDR,INDR1,INDR2
-  ROCM_INT:   NIREC,NDREC
-  ROCM_INT:   NREP,IREP
-  ROCM_REAL:  CNTID
-  ROCM_REAL:  CDEN_,DEN_
-  ROCM_REAL:  IIDX
-  ROCM_REAL:  MIXP
-  ROCM_REAL:  OBJECT
-  ROCM_REAL:  OMEGA
-  ROCM_REAL:  PR_CT
-  ROCM_REAL:  PR_Y
-  ROCM_REAL:  SETHET,SEOMEG,SESIGM,SETHETR
-  ROCM_REAL:  TEMPLT
-  ROCM_REAL:  THETAF,OMEGAF,SIGMAF,THETAFR
-  ROCM_REAL:  PRED_,RES_,WRES_,NPRED_,NRES_,NWRES_
-  ROCM_REAL:  CPRED_,CRES_,CWRES_,PREDI_,RESI_,WRESI_,
-  ROCM_REAL:  CPREDI_,CRESI_,CWRESI_,EPRED_,ERES_,EWRES_
-  ROCM_REAL:  NPDE_,ECWRES_
-#+end_src
-
-Another view of the above list is through the Fortran modules
-
-#+begin_src f90
-!MODULES:   !VARIABLES                                 ! NONMEM CONTROL RECORD BLOCKS
-CMNM1_INT:  NIND_7                                     ! $ERROR $PK $PRED $INFN
-NMPRD_INT:  COMACT,COMSAV                              ! $DES $AES $ERROR $PK $PRED
-NMPRD_INT:  I_REC                                      ! $PRED
-NMPRD_INT:  MSEC,MFIRST,IFIRSTEM                       ! $DES $ERROR $PK $PRED
-NMPRD_INT:  NEWL2                                      ! $ERROR $PRED $INFN
-NMPRD_INT:  NPROB,IPROB                                ! $DES $AES $ERROR $MIX $PK $PRED $INFN
-NMPRD_INT:  NTHES_,NETAS_,NEPSS_                       ! $DES $AES $ERROR $MIX $PK $PRED
-NMPRD_INT:  NWIND                                      ! $INFN
-NMPRD_INT:  S1IT,S1NIT,S1NUM,S2IT,S2NIT,S2NUM          ! $DES $AES $ERROR $MIX $PK $PRED $INFN
-NMPRD_REAL: CORRL2                                     ! $ERROR $PK $PRED $INFN
-NMPRD_REAL: ETA,EPS                                    ! $ERROR $PK $PRED $INFN
-NMPRD_REAL: PASSRC                                     ! $INFN
-NMPR_INT:   F_FLAG                                     ! $ERROR $PRED $INFN
-NMPR_INT:   RPTI,RPTO,RPTON,PRDFL                      ! $DES $AES $ERROR $PK $PRED $INFN
-NMPR_INT:   SKIP_                                      ! $PRED $INFN
-NMPR_REAL:  CTLO                                       ! $ERROR $PRED $ERROR $PRED
-NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR               ! $PK $PRED $INFN
-NMPR_REAL:  YLO,YUP                                    ! $ERROR $PRED
-NMPR_REAL:  THSIMP,OMSIMP,SGSIMP,THSIMPR               ! $ERROR
-PKERR_REAL: MTIME                                      ! $DES $AES $ERROR $PK
-PRMOD_INT:  ICALL,IDEFD,IDEFA                          ! $DES $AES
-PRMOD_INT:  I_SS,ISSMOD                                ! $PK $INFN
-PRMOD_INT:  MTDIFF                                     ! $DES $AES $ERROR $PK
-PRMOD_REAL: A_0                                        ! $PK
-PROCM_INT:  A_0FLG                                     ! $PK
-PROCM_INT:  ISFINL                                     ! $DES $AES
-PROCM_INT:  MNOW,MPAST,MNEXT                           ! $DES $AES $ERROR $PK
-PROCM_INT:  NEWIND                                     ! $ERROR $PK
-PROCM_INT:  NVNT                                       ! $DES $AES
-PROCM_REAL: A                                          ! $ERROR $PK
-PROCM_REAL: DOSREC                                     ! $DES $AES $PK
-PROCM_REAL: DOSTIM                                     ! $DES $AES $PK
-PROCM_REAL: EVTREC                                     ! $DES $AES
-PROCM_REAL: THETA                                      ! $DES $AES
-PROCM_REAL: TSTATE                                     ! $PK
-ROCM_INT:   IERE,IERC                                  ! $PRED $INFN
-ROCM_INT:   LIREC                                      ! $ERROR $PK $PRED $INFN
-ROCM_INT:   MIXNUM,MIXEST                              ! $DES $AES $ERROR $PK $PRED $INFN
-ROCM_INT:   NINDR,INDR1,INDR2                          ! $ERROR $MIX $PK $PRED $INFN
-ROCM_INT:   NIREC,NDREC                                ! $DES $AES $ERROR $MIX $PK $PRED $INFN
-ROCM_INT:   NREP,IREP                                  ! $DES $AES $ERROR $MIX $PK $PRED $INFN
-ROCM_REAL:  CDEN_,DEN_                                 ! $ERROR $PK $PRED $INFN
-ROCM_REAL:  CNTID                                      ! $ERROR $PK $PRED $INFN
-ROCM_REAL:  CPREDI_,CRESI_,CWRESI_,EPRED_,ERES_,EWRES_ ! $PRED $INFN
-ROCM_REAL:  CPRED_,CRES_,CWRES_,PREDI_,RESI_,WRESI_    ! $PRED $INFN
-ROCM_REAL:  IIDX                                       ! $ERROR $PK $PRED $INFN
-ROCM_REAL:  MIXP                                       ! $DES $AES $ERROR $PK $PRED $INFN
-ROCM_REAL:  NPDE_,ECWRES_                              ! $PRED $INFN
-ROCM_REAL:  OBJECT                                     ! $PRED $INFN
-ROCM_REAL:  OMEGA                                      ! $ERROR $PK $PRED
-ROCM_REAL:  PRED_,RES_,WRES_,NPRED_,NRES_,NWRES_       ! $PRED $INFN
-ROCM_REAL:  PR_CT                                      ! $ERROR $PK $PRED $INFN
-ROCM_REAL:  PR_Y                                       ! $ERROR $PK $PRED $INFN
-ROCM_REAL:  SETHET,SEOMEG,SESIGM,SETHETR               ! $PRED $INFN
-ROCM_REAL:  TEMPLT                                     ! $ERROR $MIX $PRED
-ROCM_REAL:  THETA,DATA                                 ! $MIX $PRED $INFN
-#+end_src
-
-[fn:6] With NONMEM 7.2 and higher, either upper or lower case may be
-used. Variables in modules whose names start ROCM or PROCM may be used
-only on the right. Variables  in  modules  whose  names start NMPR or
-PRDPK may always be used on the right and may sometimes be used on the
-left. Names of modules are reserved and may not be  used  in  any
-block  of abbreviated code.
-
+For a list of reserved variables, see Reserved Variales.
 ** Subscripts
 Subscripts may be used with user-defined variables that are declared
    to  be  arrays using the $ABBR DECLARE record, and also with certain
@@ -1030,70 +694,351 @@ Where a subscript is permitted or necessary, it may  be  an  integer
    character string that is replaced by an integer constant  using  the
    $ABBR REPLACE feature.
 
-** NONMEM reserved variables
-   There  are many variables that are generally internal to NONMEM, and
-   often are not needed by users except  occasionally,  which  are  not
-   explicitly  recognized  by NMTRAN, and so cannot be used in abbrevi-
-   ated code, but must be used with verbatim code ("  at  beginning  of
-   line).   A  convenient means of accessing such variables, as well as
-   letting NMTRAN allow you to use the variables in abbreviated code is
-   to  place the MODULE definitions in an include file that begins with
-   the name NONMEM_RESERVED (case insensitive).  Insert include  state-
-   ments for such files at the beginning of the block(s) of abbreviated
-   code in which you want to use them.  The user may use any  of  these
-   variables  without  using  verbatim  code.   NMTRAN "reads" the non-
-   mem_reserved file, and remembers the variables declared in there  as
-   acceptable to use.
-
-   A  list  of  useful  variables  and  their  meanings  are  listed in
-    ..\guides\useful_variables.pdf.  Be careful in their  use,  as  you
-   have  the  ability to change the values of these reserved variables,
-   and this could crash the system if you change the wrong thing.
-
-   NONMEM_RESERVED_GENERAL in the ..\util directory has a  few  of  the
-   quite useful variables listed.  It needs to be copied to the present
-   run directory so that NM-TRAN has access to it.  Note that there may
-   be  user-defined  variable names in the control stream that inadver-
-   tently have the same names as variables in  NONMEM_RESERVED_GENERAL,
-   which  may  cause compiler errors.  If so, make a smaller version of
-   NONMEM_RESERVED_GENERAL  with  a  name  also  starting  with   "NON-
-   MEM_RESERVED"  that contains only those reserved variables of inter-
-   est.
-
-   As an example,
-
-   NONMEM_RESERVED_GENERAL contains
-
-   " USE NMBAYES_INT, ONLY: ITER_REPORT,BAYES_EXTRA_REQUEST,BAYES_EXTRA
-
-   These variables can be used as shown in example 8:
-
-   $PK
-   include nonmem_reserved_general
-   BAYES_EXTRA_REQUEST=1
-    ....
-   IF(BAYES_EXTRA==1 .AND. ITER_REPORT>=0 .AND. TIME==0.0) THEN
-   WRITE(50,*) ITER_REPORT,ID,CL,V1,Q,V2
-   ENDIF
-
-   ITER_REPORT contains the present iteration number as reported to the
-   console  or NONMEM report file.  BAYES_EXTRA and BAYES_EXTRA_REQUEST
-   are described in example8.ctl.
-
-** RESERVED AND OTHER FUNCTIONS
-
+** Reserved and other functions
    The nonmem_reserved_general  file  contains  function  declarations,
-   such  as  TFI and TFD, which are convenient functions to easily con-
-   vert an integer to text ("text from integer" TFI) or  double  preci-
-   sion value to text ("text from double" TFD).
+   such  as  TFI and TFD, which are convenient functions to easily
+   convert an integer to text ("text from integer" TFI) or  double
+   precision value to text ("text from double" TFD).
 
-   If  you wish to define your own function for use in abbreviated code
-   and have the information about its proper use of arguments  be  con-
-   veyed  upon  its  execution, so the compiler may detect errors, then
-   one method is to package the definition of the  function  in  a  USE
-   module,  such  as is done in the example User-defined Reserved Func-
-   tion.
+   If  you wish to define your own function for use in abbreviated
+   code and have the information about its proper use of arguments  be
+   conveyed  upon  its  execution, so the compiler may detect errors,
+   then one method is to package the definition of the  function  in
+   a  USE module,  such  as is done in the example User-defined
+   Reserved Function.
 
  REFERENCES: Guide IV, section IV
+
  REFERENCES: Guide VI, section III.K
+
  REFERENCES: Guide Introduction_7
+
+** Probability density functions
+A  series of built in probability density functions are available with
+NONMEM 7.4.2.  For a given probability density there is also a
+cumulative  distribution function (densitycdf), and random number
+generating function (density_rng).
+
+They are described in INTRODUCTION TO NONMEM 7.4.2 Section I.26.
+
+The density and densityCDF functions have arguments that are
+compatible with the FUNC system, in which function provides
+derivatives (XD), and second derivatives (XDD) (see I.65.Expanded
+Syntax  and  Capacity for  User-Defined  Functions  (FUNCA)  (NM74)).
+Thus, even random (eta associated) variables may serve as arguments to
+the parameters of  the density   functions.  The  source  code  of
+these  densities  are  in ..\source\DISTRIB.f90, DISTRIBCDF.f90, and
+DISTRIBRNG.f90.  Note  that multi-variate densities do not have a
+corresponding CDF routine.
+
+Examples of their use are in the ..\examples\densities directory.
+
+#+begin_src f90
+ BERNOULLI
+ BERNOULLILOGIT
+ BINOMIAL
+ BINOMIALLOGIT
+ BETABINOMIAL
+ HYPERGEOMETRIC
+ CATEGORICAL
+ CATEGORICALLOGIT
+ ORDEREDLOGISTIC
+ NEGBINOMIAL
+ NEGBINOMIAL2
+ NEGBINOMIAL2LOG
+ POISSON
+ POISSONLOG
+ MULTINOMIAL
+ NORMAL
+ EXPMODNORMAL
+ SKEWNORMAL
+ STUDENTT
+ DOUBLEEXPONENTIAL
+ LOGISTIC
+ GUMBEL
+ LOGNORMAL
+ CHISQUARE
+ INVCHISQUARE
+ SCALEDINVCHISQUARE
+ EXPONENTIAL
+ GAMMA
+ INVGAMMA
+ WEIBULL
+ FRECHET
+ RAYLEIGH
+ PARETO
+ PARETO2
+ BETA
+ DIRICHLET
+ VON MISES
+#+end_src
+
+** CALLFL
+USAGE:
+#+begin_src php
+ CALLFL=n
+#+end_src
+- In $PK abbreviated code: control when PREDPP calls the PK routine.
+
+- In $ERROR abbreviated code: control when PREDPP calls the ERROR routine.
+
+- In $AESINITIAL abbreviated code: when the TIME data item is not
+  used, it controls when PREDPP calls the ADVAN9, ADVAN15,  or
+  ADVAN17  routine.
+
+The use of CALLFL in each of the three abbreviated codes is
+independent of its use in the others.  The pseudo-assignment statement
+may be enclosed in parentheses.  A calling protocol phrase may be used
+within parentheses instead of a pseudo-assignment statement CALLFL
+(See calling protocol).  The pseudo-assignment statement may take
+these forms:
+
+- CALLFL=-2: call  the  PK subroutine with every event record, with
+  additional and lagged doses, and at modeled event times.  It does  not
+  affect ERROR, ADVAN9, ADVAN15, or ADVAN17 routines.
+
+  The following messages will appear in the NONMEM output report:
+  #+begin_src txt
+  PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
+  PK SUBROUTINE CALLED AT NONEVENT (ADDITIONAL AND LAGGED) DOSE TIMES
+  or
+  PK SUBROUTINE CALLED AT NONEVENT (ADDITIONAL AND LAGGED) DOSE TIMES
+  AND AT MODEL TIMES
+  #+end_src
+
+- CALLFL=-1 (default): call the subroutine with every event record.
+
+  Correspondingly messages will appear in the NONMEM output:
+  #+begin_src txt
+  PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
+  PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES
+
+  ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
+
+  ADVAN9 CALLED WITH EVERY EVENT RECORD
+  ADVAN15 CALLED WITH EVERY EVENT RECORD
+  ADVAN17 CALLED WITH EVERY EVENT RECORD
+  #+end_src
+
+- CALLFL=0
+  + For the PK subroutine: If the data are population data, call the
+    subroutine with the first event record of each individual record;
+    if the data  are  single-subject  data,  call  the subroutine with
+    the first event record of the data set.  In addition, call the
+    subroutine  with with  every event record where the event time
+    differs from the previous event time.
+
+    The following messages will appear in the NONMEM output report:
+    #+begin_src txt
+    PK SUBROUTINE CALLED ONLY WITH NEW INDIVIDUAL OR NEW TIME
+    PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL DOSE OR LAGGED) DOSE TIMES.
+    #+end_src
+
+  + For the ERROR subroutine: When the Simulation Step  is  being
+    implemented, call the subroutine with every event record.
+    Otherwise, call the subroutine only with observation event
+    records.
+
+    The following messages will appear in the NONMEM output report:
+    #+begin_src txt
+    DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
+    OTHERWISE, ERROR SUBROUTINE CALLED ONLY WITH OBSERVATION EVENTS
+    #+end_src
+
+  + not applicable to the ADVAN9, ADVAN15, or ADVAN17 routine.
+
+  With CALLFL=0, The CALL data item may be used to request  calls  with additional event records.
+
+- CALLFL=1:
+  + For  the  PK and ADVAN9, ADVAN15, or ADVAN17 subroutines: If the
+    data are population data, call the subroutine with the first event
+    record of  each individual record; if the data are single-subject
+    data, call the subroutine with the first event record of the data
+    set.
+
+    The following messages appear in the NONMEM output report:
+    #+begin_src txt
+    PK SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
+    PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL DOSE OR LAGGED) DOSE TIMES
+
+    ADVAN9 CALLED ONCE PER INDIVIDUAL RECORD.
+    ADVAN15 CALLED ONCE PER INDIVIDUAL RECORD.
+    ADVAN17 CALLED ONCE PER INDIVIDUAL RECORD.
+    #+end_src
+
+  + For the ERROR subroutine: When the Simulation Step  is  being
+    implemented,  call  the subroutine with every event record.
+    Otherwise, if the data are population data, call  the  subroutine
+    with  the  first event  record  of each individual record; if the
+    data are single-subject data, call the subroutine with the first
+    event  record  of  the data set.
+
+    The following messages appear in the NONMEM output report:
+    #+begin_src txt
+    DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
+    OTHERWISE, ERROR SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
+    #+end_src
+  With  CALLFL=1,  The  CALL data item may be used to request calls with additional event records.
+
+In a block of abbreviated code, the CALLFL=n pseudo-assignment
+statement  must precede all the other abbreviated code (except for
+verbatim code or other pseudo-assignment  statements). The
+pseudo-assignment statement  may not be used conditionally.  CALLFL
+may not be used as a variable elsewhere in the abbreviated code.
+
+Note that if the $ERROR record consists  of  only one  of  these  four statements:
+#+begin_src f90
+   Y=F+ERR(1)
+   Y=F*(1+ERR(1))
+   Y=F+F*ERR(1)
+   Y=F*EXP(ERR(1))
+#+end_src
+NM-TRAN will automatically limit calls to ERROR  to  once-per-problem
+(unless  the Simulation  Step  is being implemented, in which case.
+calls are made with every event record).  In effect, this amounts to
+yet another  way to  control  when it is that calls may occur to the
+ERROR routine, but one which may not be explicitly specified in $ERROR
+via  the  use  of CALLFL.
+
+With  the  last  three  models above (proportional and exponential), NM-TRAN will also request PREDPP to output the message:
+#+begin_src txt
+  ERROR IN LOG Y IS MODELED
+#+end_src
+This does not mean that a model is fit to Log Y data.
+
+REFERENCES: Guide IV, section V.C.5
+
+** Calling protocol phrase
+USAGE:
+#+begin_src php
+ $PK (ONCE PER INDIVIDUAL RECORD)
+ $ERROR (ONCE PER INDIVIDUAL RECORD)
+ $AESINITIAL (ONCE PER INDIVIDUAL RECORD)
+#+end_src
+A calling protocol phrase can be used instead of  the  CALLFL
+pseudo-statement  in  $PK,  $ERROR,  and  $AESINITIAL abbreviated
+codes.  The phrase must be enclosed in parentheses.  Either upper  or
+lower  case may  be used.  In an abbreviated code, the line of code
+containing the phrase must precede all the other abbreviated code
+(except for  verbatim  code  or  other  pseudo-assignment statements),
+and it may be the same line that marks the beginning of the code, as
+in the above  usage examples.   Pseudo-statements  defining COMRES may
+be coded within the same parentheses, separated by a semicolon ";".
+No  abbreviated  code may follow ")" on the same line as the ")".
+
+- Phrases equivalent to CALLFL=-2 for the $PK record:
+
+  #+begin_src php
+  (NON-EVENT)
+  (ADDITIONAL OR LAGGED)
+  #+end_src
+
+  NONMEM will output the following messages:
+
+  #+begin_src txt
+  PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
+  PK SUBROUTINE CALLED AT NONEVENT (ADDITIONAL AND LAGGED) DOSE TIMES
+  or
+  PK SUBROUTINE CALLED AT NONEVENT (ADDITIONAL AND LAGGED) DOSE
+  TIMES AND AT MODEL TIMES
+  #+end_src
+
+- Phrases  equivalent to CALLFL=-1 for $PK, $ERROR and $AESINITIAL records (the default):
+
+  #+begin_src php
+  (EVERY EVENT)
+  (EVERY)
+  #+end_src
+
+  NONMEM will output the following messages:
+
+  #+begin_src txt
+  PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
+  PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES
+
+  ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
+
+  ADVAN9 CALLED WITH EVERY EVENT RECORD.
+  ADVAN15 CALLED WITH EVERY EVENT RECORD.
+  #+end_src
+
+- Phrases equivalent to CALLFL=0 for the $PK record:
+
+  #+begin_src php
+  (NEW TIME)
+  (NEW EVENT TIME)
+  #+end_src
+
+  NONMEM will output the following messages:
+
+  #+begin_src txt
+  PK SUBROUTINE CALLED ONLY WITH NEW INDIVIDUAL OR NEW TIME
+  PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
+  #+end_src
+
+- Phrases equivalent to CALLFL=0 for the $ERROR record:
+
+  #+begin_src php
+  (OBSERVATION EVENT)
+  (OBS)
+  (OBSERVATION ONLY)
+  (OBS ONLY)
+  #+end_src
+
+  NONMEM will output the following messages:
+
+  #+begin_src txt
+  DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
+  OTHERWISE, ERROR SUBROUTINE CALLED ONLY WITH OBSERVATION EVENTS
+  #+end_src
+
+- Phrases  equivalent  to  CALLFL=1 for the $PK, $ERROR and $AESINITIAL:
+
+  #+begin_src php
+  (ONCE PER INDIVIDUAL RECORD)
+  (ONCE/IND.REC.)
+  #+end_src
+
+  NONMEM will output the following messages:
+
+  #+begin_src txt
+  PK SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
+  PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES
+
+  DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
+  OTHERWISE, ERROR SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
+
+  ADVAN9 CALLED ONCE PER INDIVIDUAL RECORD.
+  ADVAN15 CALLED ONCE PER INDIVIDUAL RECORD.
+  #+end_src
+
+REFERENCES: Guide IV, section V.C.5
+
+
+[fn:1] Format specification numbers 991 and 992 are used in generated
+code  to  avoid conflict with statement numbers arising from DO WHILE
+statements.  The one digit versions are perhaps easier to remember.
+
+[fn:2] No  integer format specification is provided because constants
+are stored as floating point variables in generated and library
+routines.
+
+[fn:3] With NONMEM VI 2.0, reserved function names are FUNCA  through
+FUNCC. reserved names for vectors are VECTRA through VECTRC.
+
+[fn:4] With NONMEM 7.3, reserved function names are FUNCA through FUNCI.
+
+[fn:5] With  NONMEM  7.4,  reserved  function  names are FUNCA through
+FUNCZ. Reserved names for vectors are VECTRA through VECTRZ. Extended
+reserved names are also recognized. These are FUNCxy and FUNCxyz,
+where each of x, y, z  stands  for  an  alphabetic character  A-Z,
+e.g.,  FUNCAB  or FUNCABC.  Similar extended reserved names for
+vectors are also recognized: e.g, VECTRAB or VECTRABC. If the
+abbreviated code uses one of these extended  reserved  function names,
+but the user does not supply the code via $SUBR OTHER, the NONMEM
+executable cannot be created, and there will be an  error  message
+from the Fortran compiler such as:
+ #+begin_src txt
+ Undefined Symbols
+ _funcaaa_
+ #+end_src
