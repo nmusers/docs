@@ -1,4 +1,4 @@
-o#+title: Subroutines
+#+title: Subroutines
 
 * User-defined subroutines
 ** AES
@@ -948,33 +948,33 @@ initial  parameters  estimate,  nonparametric).  For example, create a
 toluser.f90 file,
 
 #+begin_src f90
- SUBROUTINE TOL(NRD,ANRD,NRDC,ANRDC)
- USE NMPRD_INT, ONLY: IPROB
- USE NM_BAYES_INT, ONLY: NM_STEP,BASE_STEP,EST_STEP,COV_STEP, &
-  TABLE_STEP,SIML_STEP,INE_STEP, NONP_STEP
- IMPLICIT NONE
- INTEGER :: NRD(0:*), ANRD(0:*), NRDC(0:*), ANRDC(0:*)
- IF(NM_STEP==EST_STEP) THEN
- NRD(1)=6
- ANRD(1)=10
- ELSE IF (NM_STEP==COV_STEP) THEN
- NRD(1)=7
- ANRD(1)=8
- ELSE IF (NM_STEP==TABLE_STEP) THEN
- NRD(1)=8
- ANRD(1)=7
- ELSE
- NRD(1)=9
- ANRD(1)=12
- ENDIF
- IF(IPROB>1) THEN
- NRD(1)=NRD(1)+1
- ANRD(1)=ANRD(1)+1
- ENDIF
- RETURN
- END
+  SUBROUTINE TOL(NRD,ANRD,NRDC,ANRDC)
+    USE NMPRD_INT, ONLY: IPROB
+    USE NM_BAYES_INT, ONLY: NM_STEP,BASE_STEP,EST_STEP,COV_STEP, &
+         TABLE_STEP,SIML_STEP,INE_STEP, NONP_STEP
+    IMPLICIT NONE
+    INTEGER :: NRD(0:*), ANRD(0:*), NRDC(0:*), ANRDC(0:*)
+    IF(NM_STEP==EST_STEP) THEN
+       NRD(1)=6
+       ANRD(1)=10
+    ELSE IF (NM_STEP==COV_STEP) THEN
+       NRD(1)=7
+       ANRD(1)=8
+    ELSE IF (NM_STEP==TABLE_STEP) THEN
+       NRD(1)=8
+       ANRD(1)=7
+    ELSE
+       NRD(1)=9
+       ANRD(1)=12
+    ENDIF
+    IF(IPROB>1) THEN
+       NRD(1)=NRD(1)+1
+       ANRD(1)=ANRD(1)+1
+    ENDIF
+    RETURN
+  END SUBROUTINE TOL
 #+end_src
-and incorporate using $SUBR
+and incorporate it using $SUBR
 #+begin_src php
  $SUBROUTINES ADVAN13 TRANS1 TOL=toluser.f90
 #+end_src
