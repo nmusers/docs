@@ -1,6 +1,7 @@
-#+title: Files
+#+title: Output
+{{< katex >}}{{< /katex >}}
 
-* Files
+* Output files and quantities
 ** NM-TRAN output files
 NM-TRAN  produces  several  output  files,  some of which are input
 files to NONMEM itself.
@@ -227,6 +228,919 @@ and Guide I, section B.2.
 
 
  REFERENCES: Guide Introduction_7
+** Output quantities
+*** PRED-defined items
+PRED-defined items, including PK-defined and ERROR-defined items can
+be displayed in tables and scatterplots. They  are computed many times
+during a NONMEM run, with various values of THETA and ETA.  It is
+important to know which values  are  used in the computation of the
+items as displayed.
+
+Consider this fragment of an NM-TRAN control stream:
+#+begin_src php
+   $PK
+   CL=THETA(1)*EXP(ETA(1))
+   $TABLE CL ETA(1)
+#+end_src
+ETA(1) and the PRED-defined item CL that are displayed depend on task specification records.
+
+ | Task specification records        | THETA   | Displayed values     |                      |
+ |-----------------------------------+---------+----------------------+----------------------|
+ |                                   |         | ETA(1)               | CL                   |
+ |-----------------------------------+---------+----------------------+----------------------|
+ | None                              | initial | 0                    | typical              |
+ |-----------------------------------+---------+----------------------+----------------------|
+ | $EST (or $MSFI) METH=0            | final   | 0                    | typical              |
+ |-----------------------------------+---------+----------------------+----------------------|
+ | $EST (or $MSFI) METH=1 or POSTHOC | final   | conditional  (CPE)   | conditional(CPE)     |
+ |-----------------------------------+---------+----------------------+----------------------|
+ | $SIMULATION                       | initial | 0                    | typical              |
+ |-----------------------------------+---------+----------------------+----------------------|
+ | $SIMULATION  ... ONLYSIM          | initial | simulated*           | simulated            |
+ |-----------------------------------+---------+----------------------+----------------------|
+ | $NONPARAMETRIC ETAS               | final   | nonparametric (CNPE) | nonparametric (CNPE) |
+ |-----------------------------------+---------+----------------------+----------------------|
+
+- Displayed etas are the simulated etas  if  the  simulated  etas  are
+  stored  in  common  NMPRD7. This is the case when NM-TRAN is used.
+  If they are not stored in NMPRD7, displayed etas are all 0.
+
+
+- Displayed values of PRED, RES, and WRES are always computed with
+  typical values of parameters, except as noted below.
+
+
+- Displayed  values  of  DV  are  simulated  values  when $SIMULATION
+  is present.
+
+- With NONMEM 7, Additional types of PRED, RES, and WRES values  may
+  be requested  than  the  usual  set  available in NONMEM VI.  They
+  may be specified at any $TABLE command or  $SCATTER  command,  as
+  one  would request  PRED, RES, or WRES items.  Such items are
+  supplied internally by NONMEM, and in the case of L2 data, more
+  accurately.  An example of their use is in Example #4a, below.
+
+- Every NONMEM output report contains the line:
+  #+begin_src txt
+  THE FOLLOWING LABELS ARE EQUIVALENT
+  Subsequent  lines  show the relationship of such items for the current
+  Estimation method.
+  (See $table, $scatter).
+  (See PRED,RES,WRES).
+  See INTRODUCTION TO NONMEM 7, $TABLE: Additional Statistical  Diagnostics, Associated Parameters, and Output Format
+  #+end_src
+
+- Suppose that marginal items appear.  If this item is 1 or 2 on a
+  given record, the values of PRED  and  any  PRED-defined  displayed
+  item  D (assuming  D  is  not  in the SAVE region (See comsav)
+  associated with this record) are determined as follows:
+
+  + If the Simulation Step is implemented, and ONLYSIMULATION is
+    specified,  the  PRED  item  is the simulation expectation of F,
+    over the simulated values of eta for all the  individuals  in  the
+    data  set (including those individuals with no observation
+    records), and the D item is the simulation expectation of the
+    variable D.
+
+  + If conditional estimates are obtained (e.g.  with  the  use  of
+    the POSTHOC  option),  the  PRED item is the posterior expectation
+    of F, over the conditional estimates of eta for  all  individuals
+    in  the data set (that have some observation records), and the D
+    item is the posterior expectation of the variable D.
+
+  + Otherwise, the PRED and D items are the same as with a marginal
+    item of 0 (see description above).
+
+- Suppose  that  the  raw-data  items  appear.   If this is 1 on a
+  given record, the values of the DV, RES, and any PRED-defined
+  displayed item D  (assuming D is in the SAVE region (See comsav)
+  associated with this record) are determined as follows: the data
+  record serves as a template record.  The DV item  appearing in  a
+  table or scatterplot is the raw-data-average of the values of DV in
+  observation records matching the  template  record.   The  RES item
+  is  the  difference between the PRED item and this average.  A
+  PRED-defined item D is the average of the values of D obtained  with
+  observation records matching the template.
+
+(See mrg, raw, template).
+
+- Example 1: output typical and conditional values using different variables.
+  #+begin_src php
+   $PK
+    ...
+   TVCL=THETA(1)
+   CL=TVCL*EXP(ETA(1))
+   $ESTIM  ... POSTHOC ...
+   $TABLE TVCL CL
+  #+end_src
+  TVCL is a typical value by definition. CL is a conditional value.
+
+- Example 2: output typical and conditional values of the same variables.
+  #+begin_src php
+   $PK
+    ...
+   CL=THETA(1)*EXP(ETA(1))
+   IF (COMACT.EQ.1) TVCL=CL
+   $ESTIM  ... POSTHOC ...
+   $TABLE TVCL CL
+  #+end_src
+  TVCL  is  a  SAVE  variable  because it is defined in a copying
+  block. During the copying pass with COMACT=1, it is set to the
+  typical  value of CL, because when COMACT=1, etas are 0.  Were the
+  values of TVCL not stored in the SAVE region, then during the
+  copying pass to obtain values for tables and with COMACT=2, TVCL
+  would retain its value set with the previous data record. The first
+  column of the table is labelled TVCL and contains the  typical value
+  of CL, and the second column contains the conditional value.
+
+- Example 3:  output  typical and conditional values of the
+  prediction, and the individual residual and weighted residual
+  values.
+  #+begin_src php
+   $ERROR
+   IPRED=F
+   IRES=DV-IPRED
+   IWRES=IRES/IPRED
+   Y=F+EPS(1)
+   $ESTIM  ... POSTHOC ...
+   $TABLE IPRED IRES IWRES
+  #+end_src
+  The IPRED column contains the conditional value of F ("individual
+  prediction").   (F is not a left-hand quantity and cannot be
+  specified in a $TABLE or $SCATTERPLOT record.)  The PRED column
+  contains the  typical  value.   The IRES column contains the
+  "individual residual".  The IWRES column contains a value which is
+  proportional to (but not  equal to) the "individual weighted
+  residual".
+
+  If  predicted  values  of  F may be zero, then division by zero can
+  be avoided by code such as the following.
+  #+begin_src php
+   $ERROR
+   IPRED=F
+   IRES=DV-IPRED
+   DEL=0
+   IF (IPRED.EQ.0) DEL=1
+   IWRES=(1-DEL)*IRES/(IPRED+DEL)
+   Y=F+EPS(1)
+  #+end_src
+
+- Example 4: output intra-individual weighted residual. Assume
+  constant CV intraindividual error model, to output weighted
+  intra-individual residual that is used during Estimation when the
+  FOCE method without interaction is used.
+  #+begin_src php
+   $ERROR
+   Y=F+F*EPS(1)
+   IPRED=F
+   IF (COMACT.EQ.1) FT=F
+   IF (FT.NE.0) WR=(DV-IPRED)/FT/SQRT(SIGMA(1,1))
+   IF (IPRED.NE.0) WR2=(DV-IPRED)/IPRED/SQRT(SIGMA(1,1))
+   $ESTIM METHOD=COND
+   $TABLE FT IPRED WR WR2
+  #+end_src
+  IPRED is the conditional estimate of F.
+  FT is a SAVE variable because it is defined in a copying block.
+  During  the copying pass with COMACT=1, it is set to the typical
+  value of F, because when COMACT=1, etas are 0.   Were  the  values
+  of  FT  not stored in the SAVE region, then during the copying pass
+  to obtain values for tables and with COMACT=2, FT would retain its
+  value  set  with the previous data record.
+
+  WR  is  the weighted intraindividual residual with no eta-eps
+  interaction.  It is defined in a conditional assignment since it is
+  possible that  the typical value of F is zero with some
+  non-observation record. (With previous versions of the help guide
+  the SIGMA term  was  omitted and the WR was proportional to the
+  weighted intraindividual residual.) It is a no-interaction residual
+  because  the  denominator  term,  the residual   standard
+  deviation  FT*SQRT(SIGMA(1,1)),  represents  the epsilon error, and
+  uses the predicted value (FT) evaluated with eta=0, that is, eta
+  does not interact with the epsilon error.  WR2 is the conditional
+  intra-individual  weighted residual with eta-eps interac- tion.  It
+  is an eta-eps interaction residual because  the  denominator term,
+  the  residual standard deviation IPRED*SQRT(SIGMA(1,1)), represents
+  the epsilon error, and uses the predicted value  (IPRED)  evaluated
+  with  a  non-zero  eta,  that is, eta interacts with the epsilon
+  error.
+
+  With NONMEM 7, alternatively one can use reserved  residual
+  variables CIWRES(=WR)  and CIWRESI(=WR2):
+  #+begin_src php
+   $ERROR
+   Y=F+F*EPS(1)
+   $ESTIM METHOD=COND
+   $TABLE IPRD CIPRED CIWRES CIWRESI
+  #+end_src
+- Example 5: output simulated values:
+  #+begin_src php
+   $PK
+    ...
+   CL=THETA(1)*EXP(ETA(1))
+    ...
+   $SIMULATION (seed) ONLYSIM
+   $TABLE ETA(1) CL
+  #+end_src
+  ETA(1) and CL are simulated values.
+
+- Example 6: output simulated and estimated values:
+  #+begin_src php
+   $INPUT  .... CLSM E1SM ...
+   $PK
+    ...
+   CL=THETA(1)*EXP(ETA(1))
+   IF (ICALL.EQ.4) THEN
+       CLSM=CL
+       E1SM=ETA(1)
+   ENDIF
+   $SIMULATION (seed)
+   $ESTIM
+   $TABLE CLSM E1SM CL ETA(1)
+  #+end_src
+  Modification of the data record during the simulation pass is the
+  only way to save the simulated values in the absence of ONLYSIM.
+  Column  1 and  2  of the table are the simulated values.  Column 3
+  and 4 are the typical values.
+
+- Example 7: output conditional values of a variable in  each  of  two  mixture subpopulations.
+  #+begin_src php
+   $PK
+      ...
+   IF (MIXNUM.EQ.1) CL=  ...
+   IF (MIXNUM.EQ.2) CL=  ...
+   IF (COMACT.EQ.2) THEN
+     IF (MIXNUM.EQ.1) CL1=CL
+     IF (MIXNUM.EQ.2) CL2=CL
+   ENDIF
+   $ESTIM  ... POSTHOC ...
+   $TABLE CL1 CL2
+  #+end_src
+  CL1  (and  CL2)  is a SAVE variable because it is defined in a
+  copying block.  Were the values for CL1 not stored in the SAVE
+  region,  during the  copying  pass  to obtain values for tables and
+  with MIXNUM=2, CL1 would retain its value set with the previous data
+  record.
+
+
+- Example 8: output conditional values of a variable in the
+  subpopulation into which the individual is classified.
+  #+begin_src php
+   $PK
+      ...
+   IF (MIXNUM.EQ.1) CL=  ...
+   IF (MIXNUM.EQ.2) CL=  ...
+   IF (COMACT.EQ.2.AND.MIXNUM.EQ.MIXEST) CLE=CL
+   $ESTIM  ... POSTHOC ...
+   $TABLE CLE
+  #+end_src
+  CLE is a SAVE variable because it is defined in a copying block.
+  Were the values for CLE not stored in the SAVE region, during  the
+  copying pass  to  obtain  values  for tables and with MIXNUM>MIXEST,
+  CLE would retain its value set with the previous data record.
+
+REFERENCES: Guide IV, section III.B.7 , IV.E.2
+
+REFERENCES: Guide VI, section III.J , IV.E
+
+REFERENCES: Guide Introduction_7
+
+*** Data set
+Summary of data used in the analysis is listed, e.g.
+
+#+begin_src txt
+ DATA SET LOCATED ON UNIT NO.:    2
+ THIS UNIT TO BE REWOUND:        NO
+ NO. OF DATA RECS IN DATA SET:  394
+ NO. OF DATA ITEMS IN DATA SET:   8
+ ID DATA ITEM IS DATA ITEM NO.:   1
+ DEP VARIABLE IS DATA ITEM NO.:   4
+#+end_src
+In FORTRAN terms, the summary shows file I/O unit,  the REWIND
+(necessary only with multiple runs using the data).
+
+(See data record, data item).
+
+REFERENCES: Guide IV, section III.B.2
+
+*** Monitoring of search
+NONMEM  output  includes  a report of the history of the search
+undertaken in the Estimation Step for parameter estimates.  This
+report  is called  the  intermediate  output from the Estimation Step,
+because it consists of summaries of the progress of the search, from
+iteration to iteration, and because it may be viewed as the search
+progresses, provided the NONMEM output file may be viewed as the
+search  progresses. This report can also be viewed in a special
+(unbuffered) file.
+
+The  search  is  for  parameter  values that minimize the value of the
+OBJECTIVE FUNCTION  (See minimum value of objective function).  It
+entails the following steps.
+1. The  search  is  carried out in a different parameter space.  The
+   parameters are transformed to unconstrained parameters (UCP).  In
+   the  transformation  process a scaling occurs so that the initial
+   estimate of each of the UCP is 0.1.  (NONMEM Users Guide  I
+   Sections  C.3.5.1 "ESTIMATION" and G.3 "Messages from the
+   Estimation Step" refer to the UCP as "scaled transformed
+   parameters" or STP. NONMEM  Users Guide II Section F "Rescaling"
+   refers to the UCP as "rescaled canonical parameters" or RCP.)
+
+2. At the  current parameter estimate the GRADIENT vector (the
+   vector  of  first  partial  derivatives of the objective function
+   with respect to the UCP) is  computed.   An  approximate  Hessian
+   matrix  (See hessian)  is  also  computed.  An ITERATION SUMMARY,
+   including the current parameter estimate and the gradient vector,
+   may placed into the intermediate output.
+
+   With  NONMEM  7,  the  parameter  estimates are also displayed in
+   their natural (unscaled) space. These  lines  are  identified  as
+   NPARAMETR  and precede the PARAMETER lines, which display the UCP
+   values.  Note that when OMEGA (or SIGMA)  have  block  structure,
+   the  values  in  NPARAMETR  are listed in upper triangular order,
+   whereas elsewhere in NONMEM output they are  displayed  in  lower
+   triangular  order.   For  example, suppose the NONMEM output displays a 3x3 OMEGA matrix as
+
+   #+begin_src txt
+      OMEGA(1,1)
+      OMEGA(2,1) OMEGA(2,2)
+      OMEGA(3,1) OMEGA(3,2) OMEGA(3,3)
+   #+end_src
+
+   It will be listed in NPARAMTR in row-major order:
+   #+begin_src txt
+      OMEGA(1,1) OMEGA(2,1) OMEGA(3,1) OMEGA(2,2) OMEGA(3,2) OMEGA(3,3)
+   #+end_src
+   Note that $ESTIMATION's ORDER option does not affect the order.
+
+3. Using  the  gradient  vector  and  Hessian matrix, a direction in
+   parameter space, emananting from the current parameter  estimate,
+   is  computed, and a search is undertaken along this direction for
+   an approximate minimum point.  When this point is  found,  NONMEM
+   returns  to step 2.  (An ITERATION consists of the computation of
+   the direction, the search along the direction, and  the
+   computation of the gradient vector and Hessian matrix at the
+   approximate minimum point.)
+
+4. Iteration stops when one of the following conditions holds:
+
+   - A successful (local) minimum point has been found.
+
+   - The maximum number of FUNCTION EVALUATIONS allowed  by  the  user (MAXEVALS option of $ESTIM) is exceeded.
+
+   - It was not possible to successfully locate a minimum point due to ROUNDING ERRORS.
+
+   Here is an example of intermediate output from the Estimation Step:
+
+   #+begin_src txt
+    MONITORING OF SEARCH:
+     ITERATION NO.:    0    OBJECTIVE VALUE:   110.244034784025  NO. OF FUNC. EVALS.:   6
+     CUMULATIVE NO. OF FUNC. EVALS.:        6
+     NPARAMETR:  3.0000E+00  8.0000E-02  4.0000E-02  6.0000E+00  5.0000E-03
+     3.0000E-01  2.0000E-04  6.0000E-03  4.0000E-01  4.0008E-01
+     PARAMETER:  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01
+     1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01
+     GRADIENT:   1.4640E+01 -1.6691E+01  5.6460E+01 -9.4129E+00 -1.1699E+01
+     1.0623E+01 -6.3485E-01 -4.7803E+01 -9.6457E+00  5.2414E+00
+
+     ITERATION NO.:    5    OBJECTIVE VALUE:   105.453694506861  NO. OF FUNC. EVALS.:   7
+    CUMULATIVE NO. OF FUNC. EVALS.:       45
+     NPARAMETR:  2.8166E+00  8.0433E-02  3.8563E-02  6.6123E+00  9.7862E-03
+    -3.9509E-02  2.3438E-04  8.1375E-03  4.9657E-01  4.0355E-01
+     PARAMETER: -5.3055E-02  1.0703E-01  5.7598E-02  1.4858E-01  1.8644E-01
+    -1.2545E-02  1.5794E-01  1.3452E-01  3.7714E-02  1.0431E-01
+     GRADIENT:   3.5103E-01 -1.3214E+01  2.8003E+01  1.1115E+00  1.9193E+00
+    -5.3252E+00  7.1533E-02 -2.2091E+01 -1.4424E+00  8.2329E+00
+
+     ITERATION NO.:   10    OBJECTIVE VALUE:   104.747695563098  NO. OF FUNC. EVALS.:   7
+     CUMULATIVE NO. OF FUNC. EVALS.:       80
+     NPARAMETR:  2.7362E+00  7.6935E-02  3.5982E-02  5.7362E+00  1.0840E-03
+    -2.9208E-01  2.3701E-04  9.4013E-03  5.1805E-01  3.8858E-01
+     PARAMETER: -1.1928E-01  4.9234E-02 -2.3022E-02  7.7517E-02  2.2174E-02
+    -9.9574E-02  1.9498E-01  1.4956E-01 -1.7173E-01  8.5414E-02
+     GRADIENT:  -1.3933E+00 -7.4632E+00  9.3144E+00  1.0280E+00  9.6395E-01
+    -3.1313E+00  1.0212E+00 -5.3784E+00 -2.0828E+00 -9.1477E-01
+
+     ITERATION NO.:   15    OBJECTIVE VALUE:   104.561086502423  NO. OF FUNC. EVALS.:   7
+     CUMULATIVE NO. OF FUNC. EVALS.:      116
+     NPARAMETR:  2.7735E+00  7.8097E-02  3.6292E-02  5.5466E+00  5.1735E-03
+    -1.2911E-01  2.3941E-04  9.0947E-03  5.1461E-01  3.8760E-01
+     PARAMETER: -8.8567E-02  6.8686E-02 -1.2994E-02  6.0711E-02  1.0762E-01
+    -4.4762E-02  1.9028E-01  1.4643E-01 -8.4016E-02  8.4157E-02
+     GRADIENT:   7.7937E-03  5.7189E-03  3.0426E-02 -5.1648E-03 -1.2939E-02
+     1.4490E-02  7.4602E-04 -2.5227E-02 -3.1443E-03  1.5799E-02
+
+    ITERATION NO.:   19    OBJECTIVE VALUE:   104.561067398632  NO. OF FUNC. EVALS.:   0
+     CUMULATIVE NO. OF FUNC. EVALS.:      149
+     NPARAMETR:  2.7739E+00  7.8129E-02  3.6307E-02  5.5498E+00  5.2393E-03
+    -1.2767E-01  2.3985E-04  9.1064E-03  5.1521E-01  3.8742E-01
+     PARAMETER: -8.8304E-02  6.9219E-02 -1.2510E-02  6.0998E-02  1.0895E-01
+    -4.4249E-02  1.9095E-01  1.4652E-01 -8.3269E-02  8.4127E-02
+     GRADIENT:   1.2144E-04 -1.4883E-04 -6.6257E-06 -7.5745E-05 -1.6157E-05
+     1.1307E-04  6.4128E-05  1.1193E-04 -1.7655E-05  4.2676E-05
+   #+end_src
+   Note that the values of the PARAMETERs are the values of the  UCP,
+   so that at the 0th iteration, all the PARAMETERs have the value
+   0.1.
+
+   The  first  parameter  (and gradient) elements correspond to the
+   THETA elements which are not fixed.  The remaining  elements
+   correspond  to the  OMEGA and SIGMA elements which are not fixed,
+   but not in a simple 1-1 manner unless OMEGA and SIGMA are
+   constrained to be diagonal.
+
+   $ESTIMATION's PRINT option determines how often iteration
+   summaries  are printed: not at all (with PRINT=0);  only for the
+   0th and last iterations (with PRINT=9999); for the 0th iteration,
+   for every  10th  iteration  thereafter,  and  for the last
+   iteration (with PRINT=10, as illustrated above).
+
+   If a model specification file is output, then the estimates  may
+   also be  seen  in  the original parameterization for those
+   iterations whose summaries appear in intermediate output.  These
+   estimates may be found in  file INTER in the same order and format
+   as elsewhere in the NONMEM output.  With NONMEM 7, INTER exists
+   after the run is finished.
+
+   When the Estimation Step terminates, it reports its outcome:
+   #+begin_src txt
+    MINIMIZATION SUCCESSFUL
+    NO. OF FUNCTION EVALUATIONS USED:      149
+    NO. OF SIG. DIGITS IN FINAL EST.:  4.7
+   #+end_src
+   Each  UCP  element of the mimimum point is determined to a number
+   of significant digits.  The number of significant digits reported
+   is  the number  of  significant  digits  in the
+   least-well-determined element. The report "MINIMIZATION SUCCESSFUL"
+   is issued when this number is  no less than the number of
+   significant digits requested using the SIGDIGITS option of the
+   $ESTIMATION record.  Note  that  this  report  alone does not
+   assure that a global (or even a local) minimum point has been
+   located; what appears to be a minimum point may  be  a  saddle
+   point. Nor, if a minimum point has been located, does the report
+   alone assure that the objective function is not "flat" in a region
+   of  the  point. For such assurances, one also needs to implement
+   the Covariance Step.
+
+REFERENCES: Guide I, section C.3.5.1
+
+REFERENCES: Guide V, section 10.4.1
+
+*** Initial estimate
+Initial  estimates  of  parameters  are  required by NONMEM.  They are
+used, for example, to compute the initial value of the objective
+function  (before NONMEM begins its search for final estimates).  The
+user may provide initial estimates.  Alternatively,  he  may  request
+that NONMEM provide initial estimates.
+
+NONMEM  may  also use the final estimates from a previous run as
+initial estimates, by means of a Model Specification File. The outputs
+will be different in that case (See model specification file).
+
+NONMEM output reflects initial estimates provided by the user on  its
+problem summary page, such as
+#+begin_src txt
+      INITIAL ESTIMATE OF THETA:
+      LOWER BOUND    INITIAL EST    UPPER BOUND
+      0.0000E+00     0.1500E+03     0.1000E+07
+      0.0000E+00     0.0000E+00     0.0000E+00
+      0.1000E+00     0.3000E+00     0.1000E+02
+      -0.1000E+07    -0.1000E-01    0.1000E+07
+      INITIAL ESTIMATE OF OMEGA:
+      0.2500E+00
+      0.0000E+00   0.2500E+00
+      INITIAL ESTIMATE OF SIGMA:
+      0.2500E+00
+#+end_src
+indicating:
+- The  initial  estimate of THETA(1) is 150, and the parameter is
+  constrained to be greater than zero (no upper bound).
+- THETA(1) is fixed at zero.
+- The initial estimate of THETA(3) is .3, and the parameter is
+  constrained to lie between .1 and 10.
+- The initial estimate of theta(4) is -.01, and the parameter is
+  unconstrained.
+- OMEGA is 2x2 and constrained to be  diagonal (signified  by the  0
+  value of the initial estimate of omega(2,1); the initial estimates
+  of omega(1,1) and omega(2,2) are .25.
+- SIGMA is 1x1 (a scalar), with initial estimate .25.
+
+Not specifying the initial estimate of an element of THETA prompts
+NONMEM to provide the initial estimate, as in this example:
+
+#+begin_src txt
+       INITIAL ESTIMATE OF THETA:
+       LOWER BOUND    INITIAL EST    UPPER BOUND
+       0.1000E+00                    0.1000E+02
+#+end_src
+Similar for OMEGA  and SIGMA  elements.
+
+In those cases, NONMEM search for initial estimates and output them
+along with user-specified ones under  the  heading  "INITIAL PARAMETER
+ESTIMATE". This output is omitted if all initial parameter estimates
+are provided by the user.
+
+#+begin_src txt
+	********************  INITIAL PARAMETER ESTIMATE   ***
+	THETA - VECTOR OF FIXED EFFECTS PARAMETERS  **********
+                   TH 1      TH 2      TH 3
+		1.50E+00  1.02E-01  2.90E+01
+	OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
+                   ETA1
+	ETA1    1.50E+00
+#+end_src
+
+(See final parameter estimate).
+
+REFERENCES:  Guide  IV,  section  III.B.9  , III.B.10 , III.B.11
+
+*** Hessian  matrix
+The second derivative matrix of the objective function with respect to
+the parameters of the model are utilized in NONMEM.
+
+- Estimation Step: a crude numerical approximation to the Hessian is
+  maintained during the minimization search.  The following message in
+  the intermediate output refers to this matrix:
+
+  #+begin_src txt
+      RESET HESSIAN
+  #+end_src
+  Internally, the search starts with the Hessian set to the identity
+  matrix. The Hessian is updated after each iteration, using a rank  1
+  update  procedure.  When  there  is no longer a sensible direction
+  to take, but convergence has not  been  achieved,  this may be due
+  to inadequacy of the updated Hessian. Then the Hessian is reset to a
+  certain positive semi-definite diagonal matrix, and a  new direction
+  computed from this matrix (and the gradient vector) is tried.
+
+  The message indicates why  an  unusually  large
+  number of function evaluations were used for the iteration (extra
+  ones were needed to compute the new Hessian and  perform  a  line
+  search  along  the  new  direction) and why an unusually long CPU
+  time was needed for the  iteration  (if  intermediate  output  is
+  being  monitored). It suggests difficulties in searching, and
+  possible modeling error.
+
+- Covariance Step: a good numerical approximation to the Hessian is
+  computed at  the final parameter estimates. It is referred to as the
+  R matrix.
+
+
+- Obtaining Conditional Estimates: in  this case, the Hessian matrix
+  is the second derivative matrix of the conditional objective
+  function.  The following error messages refer to this matrix:
+  #+begin_src txt
+      HESSIAN OF OBJ. FUNCT. FOR COMPUTING CONDITIONAL ESTIMATE IS
+      NON POSITIVE DEFINITE
+
+      NUMERICAL HESSIAN OF OBJ. FUNC. ...
+  #+end_src
+
+REFERENCES: Guide IV, section III.B.15
+
+REFERENCES: Guide V, section 12.4.6
+
+REFERENCES: Guide VII, section II.A
+
+*** Covariance matrix of estimate
+parameter estimators follow multivariate  normal distribution
+asymptotically,  with  variance-covariance  matrix that can be
+estimated from the data.  They are computed and reported by NONMEM in
+a Covariance Step. The matrix describes the variability under the
+assumed model  of  the  parameter  estimates.  It is /not/ SIGMA (the
+covariance matrix for the second level random effects) or OMEGA (the
+covariance matrix  for the first level random effects).
+
+
+An example  of  the  NONMEM  output  giving the estimate of the variance-covariance matrix.
+
+#+begin_src txt
+ **************** COVARIANCE MATRIX OF ESTIMATE  ********************
+             TH 1      TH 2      OM11      OM12      OM22      SG11
+  TH 1        1.02E+00
+  TH 2       -7.34E-03  6.50E-04
+  OM11        1.50E+01 -2.88E-01  2.78E+02
+  OM12       ......... ......... ......... .........
+  OM22        3.73E-04 -3.33E-05  1.47E-02 .........  1.72E-06
+  SG11       -7.79E-02  1.26E-03 -1.45E+00 ......... -5.59E-05  2.55E-02
+#+end_src
+The matrix is symmetric and is given in lower triangular form.  Here
+the 2x2 OMEGA matrix is constrained to be diagonal, therefore entries
+related to OM12 are not available omitted. (a compressed  form is used
+when the dimension exceeds 75x75. One can also requested this format
+manually. See $covariance).
+
+The estimated variance-covariance matrix is computed as
+\(R^{-1}SR^{-1}\). Here \(R\) is the Hessian matrix of the objective
+function, , and \(S\) the summation of  the  cross-product  gradient
+vectors of the individual-based objective functions. Both
+are evaluated at the parameter estimates.   The individual-based objective
+functions are the separate terms contributed by each individual's data
+to the  overall  objective  function,  and  the cross-product
+gradient  vectors  are summed across the individuals in the data set.
+
+The Inverse Covariance Matrix \(T=RS^{-1}R\),  is  also  output. A
+pseudo-inverse of \(S\) is  used when \(S\) is (near) singular. One
+can potentially use this Inverse Covariance Matrix to estimate a joint
+confidence region for the complete set of population parameters.
+
+- An error message stating that the R matrix is not positive
+  semidefinite suggests that the  parameter  estimation did not  reach
+  a  local minimum and warrants further investigation. In this case,
+  no covarance matrix (or its inverse) will be output.
+
+- An error message stating that \(R\) is positive semidefinite  but
+  singular suggests that the objective function minimum reached is not
+  unique, probably due to overparametrization. In this case, no
+  covarance matrix (or its inverse) will be output.
+
+- An error message stating that \(S\) is singular suggests
+  overparameterization. This still allows estimating and ouptut of the
+  covariance matrix when \(R\) is positive semidefnite and
+  nonsingular.
+
+- When \(R\) is singular but positive semidefinite, matrix \(T\) is
+  output. In this case \(T\) is not the inverse  covariance  matrix,
+  but still can be used to  develop  a joint confidence region for the
+  complete set of population parameters.
+
+- Alternatively, $COVAR's MATRIX option allows the variance-covariance matrix to be calculated as
+  \(2R^{-1}\) or \(4S^{-1}\). They are asymptotically equivalent to
+  \(R^{-1}SR^{-1}\) under the assumption that the objective function is additively proportional to
+  \(LL\), the log likelihood of the data.
+
+- The  Covariance   Step   will   not   be executed when the requested
+  number of significant digits is greater than the reported number of
+  significant digits in the final  parameter  estimate (See sig
+  digits). When the model specification file is used as input the
+  Covariance  Step  can be run without the  Estimation step
+  (MAXEVAL=0). In that case one should ensure the requested number of
+  significant digits is less than the reported number  of significant
+  digits from the previous run.
+
+ (See standard error, correlation matrix of estimate).
+
+ REFERENCES: Guide I, section C.3.5.2
+
+ REFERENCES: Guide II, section D.2.5
+
+ REFERENCES: Guide V, section 5.4 , 13.3
+
+*** Correlation matrix of estimate
+The  correlation  matrix is the variance-covariance matrix in
+correlation form.  If  the  correlation between  two  parameters  is
+large (e.g., >.95), then one may conclude that a considerable portion
+of the uncertainty in  each  parameter  is due  to unidentifiability.
+The problem can be alleviated with additional data or using  a
+simpler model with fewer parameters.
+
+
+Ouutput example:
+#+begin_src txt
+ **************** CORRELATION MATRIX OF ESTIMATE ********************
+             TH 1      TH 2      OM11      OM12      OM22      SG11
+  TH 1        1.01E+00
+  TH 2       -2.85E-01  2.55E-02
+  OM11        8.87E-01 -6.77E-01  1.67E+01
+  OM12       ......... ......... ......... .........
+  OM22        2.81E-01 -9.96E-01  6.72E-01 .........  1.31E-03
+  SG11       -4.83E-01  3.10E-01 -5.44E-01 ......... -2.67E-01  1.60E-01
+#+end_src
+The matrix is symmetric and is given in lower triangular form.  Here
+the 2x2 OMEGA matrix is constrained to be diagonal, therefore entries
+related to OM12 are not available omitted. (a compressed  form is used
+when the dimension exceeds 75x75. One can also requested this format
+manually. See $covariance).
+
+With  NONMEM  7.2  and  higher, the diagonal elements are the standard
+error (the square root of the diagonal elements of the covariance
+matrix. Earlier versions they were 1.0.
+
+REFERENCES: Guide I, section C.3.5.2
+
+REFERENCES: Guide V, section 5.4
+
+
+*** ETABAR
+ETABAR (\(\bar{\eta}\)) is output when a conditional population estimation  method  is used.
+#+begin_src txt
+  ETABAR IS THE ARITHMETIC MEAN OF THE ETA-ESTIMATES,
+  AND THE P-VALUE IS GIVEN FOR THE NULL HYPOTHESIS THAT THE TRUE MEAN IS 0.
+
+  ETABAR:        -3.5224E-02 -7.1437E-05  2.5095E-03
+  SE:             3.4060E-01  3.1223E-03  1.9001E-01
+  N:                      12          12          12
+
+  P VAL.:         9.1763E-01  9.8175E-01  9.8946E-01
+#+end_src
+The  ith  number  listed  after "ETABAR" is the sample average (across
+individuals) of the conditional estimates of the ith ETA, and the  ith
+number  listed  after  "SE"  is  the  standard error for this average.
+The population average of the the conditional estimates  is
+approximately zero, thus ETABARs from a well-specified model are
+approximately 0. This can be assessed by the provided P-value.
+
+ REFERENCES: Guide VII, section II.A , III.D
+*** Final estimate
+NONMEM output always include FINAL PARAMETER ESTIMATE. When the
+Estimation Step was not run, then output  are  the initial parameter
+estimates specified for the problem.
+
+These estimates of parameters are used by NONMEM to compute the objective  function  value printed on the page with under "MINIMUM VALUE OF OBJECTIVE FUNCTION" and predicted  values  for  Tables  and Scatterplots.
+
+#+begin_src txt
+  ********************  FINAL PARAMETER ESTIMATE   ***************
+  THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
+
+          TH 1      TH 2      TH 3
+          1.94E+00  1.02E-01  3.20E+01
+
+  OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
+
+             ETA1
+  ETA1     8.99E-01
+
+  OMEGA - CORR MATRIX FOR RANDOM EFFECTS - ETAS  *******
+
+             ETA1
+  ETA1     9.48E-01
+#+end_src
+The  example above is from a run involving single-subject data, so there is no SIGMA matrix.
+
+With NONMEM 7.2 and higher, the correlation matrix is included.  It is
+computed  from  the  covariance  matrix, whether or not the Estimation
+step is not run.
+
+(See initial parameter estimate).
+
+With NONMEM 7.3 and higher, the $THETAR record may be used  to  trans-
+form  final  estimates of THETA before they are reported in the NONMEM
+output.
+
+(See $thetar).
+
+REFERENCES: Guide V, section 10.5
+
+
+*** Value of the objective function
+The  NONMEM  OBJECTIVE  FUNCTION  is  a goodness of fit statistic; the
+lower the value, the better the fit.  Negative values are possible and
+have   no   special  significance.   Under  certain  assumptions,  the
+(default) objective function value is minus twice the log likelihood.
+
+A page with the title MINIMUM VALUE OF OBJECTIVE FUNCTION is  printed
+as part of every NONMEM output, as in this example.
+
+#+begin_src txt
+ ******       MINIMUM VALUE OF OBJECTIVE FUNCTION        ***********
+ *****************         11.570     ******************************
+#+end_src
+
+If the Estimation Step was run, then the value printed is the value of
+the objective function with the final parameter estimates. Otherwise,
+the value printed is the value of the objective function using the
+initial parameter  estimates specified for the problem.
+
+
+Differences in the objective function of fits  of  the  same  data  to
+hierarchical  models can often be used to test approximately the
+plausibility of the smaller (fewer free parameters) model  by
+referencing the  difference  to  a chi-square distribution with
+degrees of freedom equal to the difference in the number of free model
+parameters between models (hypothesis tests).
+
+NM-TRAN may generate the following warning message:
+
+#+begin_src txt
+ (WARNING   68) THE INTEGER FUNCTION IS BEING USED OUTSIDE OF A SIMULATION
+  BLOCK. IF THE INTEGER VALUE AFFECTS THE VALUE OF THE OBJECTIVE  FUNCTION,
+  THEN AN ERROR WILL PROBABLY OCCUR.
+#+end_src
+In  general, any code that affects the value of the prediction F (with
+$PRED) or Y (with $ERROR), or their eta and eps partials, affects  the
+value  of the objective function.  Such code must be continuous, e.g.,
+must not use functions such as INT or MOD, and must not involve
+conditional statements that introduce discontinuities.  The following
+examples use Model Event Time parameters (MTIME) to avoid
+discontinuities in differential equations:
+
+Model Time examples
+ Examples Using MTIME to Model Periodic Discontinuities in $DES
+ Enterhepatic circulation examples
+
+(See mtime, model time examples).
+
+ (See Circadian Example: Examples Using MTIME to Model Periodic Discontinuities in $DES)
+ (See Enterhepatic circulation examples).
+
+REFERENCES: Guide I, section C.3.5.1
+
+REFERENCES: Guide V, section 5.5
+
+
+*** Inferential statistics
+Confidence intervals for parameters, testing hypotheses about
+parameters, and building models all need reasonable ranges for
+parameter values. These ranges can be found if we can estimate the
+distribution of the parameter estimates based on asymptotic theory,
+used in NONMEM's extended least-squares method. The parameter
+estimates follow a multivariate normal distribution, and their
+variance and covariance can be estimated from the data.
+
+NONMEM provides this variance-covariance matrix for the estimates. The
+square roots of the diagonal elements of this matrix are the estimated
+standard errors for each parameter. The off-diagonal elements can be
+converted into correlation coefficients, which are shown in the
+correlation matrix of the parameter estimates. Additionally, the
+inverse of the covariance matrix and the eigenvalues of the
+correlation matrix are also available for use.
+
+*** PRED, RES, WRES
+NONMEM output usually include special items: prediction, residual, and
+weighted residual, which are generated by NONMEM.  The default  labels
+for these items are PRED, RES, and WRES, respectively. Synonyms may be
+specified on the $TABLE record for one or more of these labels.   With
+the  NOAPPEND  option on this record, the three items are not included
+in a table unless explicity listed on the $TABLE record.  With the use
+of the user-routine SPTWO, the values of the RES and WRES items can be
+defined differently from the values described below. (See sptwo).
+
+These items may also be displayed in scatterplots. See $SCATTERPLOT.
+
+- PRED Prediction items are the predictions computed by the PRED
+  subroutine.  For population data, prediction items are  always
+  population  predictions,  i.e.,  they are computed at the mean value
+  of eta (0).
+
+- RES  The residual is defined as DV - PRED; that is, the observed value minus the prediction item.
+
+- WRES The weighted residuals for an individual are formed by
+  transforming the individual's residuals so that under the model,
+  assuming the  true  values of the parameters are given by the
+  estimates of those parameters, all weighted residuals have mean 0,
+  unit  variance  and  are  uncorrelated.  For population data, the
+  "weights" are computed at eta = 0.
+
+For odd-type data, the prediction items are likelihoods  (for
+population  data, using the estimated values of the parameters, and
+computed at ETA = 0).  These may not be of much interest.   The  RES
+and  WRES items are 0.
+
+
+With  a  mixture  model, each individual is classified into one of the
+subpopulations of the mixture according to a computation based on  the
+individual's  data  and  on the final parameter estimates.  For a data
+record from the  individual  record,  the  prediction,  residual,  and
+weighted  residual items in the corresponding row of a table (or point
+on a scatterplot) are based on the submodel defining the subpopulation
+into which the individual is classified.
+
+
+If  the  Marginal  data item (MRG_) is 1 or 2 for a given data record,
+then PRED is an expected prediction, rather than the prediction at the
+mean  value  of eta.  When the Raw-data data item (RAW_) is 1, then DV
+is a raw-data average and RES is the difference between the PRED  item
+and this average.
+
+(See displayed PRED-defined items).
+
+
+REFERENCES: Guide I, section C.3.5.3 , C.3.5.4
+
+REFERENCES: Guide IV, section III.B.16 , III.B.17
+
+REFERENCES:  Guide V, section 9.5 , 10.7 , 11.4.4.2
+
+*** Shrinkage
+Shrinkage are output between #TERM and #TERE entries.
+
+- With NONMEM 7.3, these are
+  #+begin_src txt
+      ETAshrink
+      EBVshrink
+      EPSshrink
+  #+end_src
+  For details, see the NONMEM 7 guide.
+- With NONMEM 7.4, these are
+  #+begin_src txt
+      ETAshrinkSD (ETAshrink in NM73)
+      ETAshrinkVR
+      EBVshrinkSD (EBVshrink in NM73)
+      EBVshrinkVR
+      EPSshrinkSD (EPSshrink in NM73)
+      EPSshrinkVR
+  #+end_src
+  For details, see the NONMEM 7.4 guide
+
+- NONMEM v7.3+ provides option ETASTYPE=1 in $EST to average shrinkage
+  information only among individuals with non-zero derivative of their
+  data likelihood with respect to ETA, and will not include subjects
+  with a non-influential ETAs that have zero derivative.
+
+- One may  request include/exclude ETA output using ETASXI(i). (See
+  ETASXI). Shrinkage map for included/exlucded ETAs is documented in root.shm.
+
+- Shrinkage  data  are  reported in file root.shk.
+
+REFERENCES: Guide Introduction_7
 
 ** Raw output file
  With  NONMEM 7, a NONMEM run produces several additional output

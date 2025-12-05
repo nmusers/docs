@@ -1,0 +1,72 @@
+#+title: Mixture model: ETABAR
+
+* ETABAR in a mixture model
+In  a  mixture  model the ith ETA has a different
+distribution for each subpopulation.  Accordingly, different
+instances of the above output will appear, one for each of the
+different subpopulations.  Using a standard Bayesian-type computation,
+each  individual is classified into one of the subpopulations, and the
+conditional estimate of the ith eta under the model for this
+subpopulation is used in the sample average for that subpopulation.
+If under the mth submodel, the ith eta does not influence  the  data
+from  any individual,  but it does influence the data from some
+individual under some other submodel, then the sample average for the
+ith eta  for  the mth  submodel  will  be 0.  If the ith eta does not
+influence the data from any individual under any model, then the
+sample average  for  the ith  eta for the mth submodel will usually be
+0, but it will not be if
+
+1. the ith eta is correlated with an eta that influences  some  individual's  data  under  the  mth  submodel, and
+2. that individual is classified to be in the mth subpopulation.
+
+The population average of the conditional estimates is  only
+approximately  zero  because a conditional estimate is a (Bayesian)
+posterior mode, and not a posterior expectation.  However with a
+mixture  model, with  the  estimate for a given individual, the
+posterior distribution is that for the subpopulation into which the
+individual is classified, and due to possible missclassification the
+expectation of the estimate may be even "further from" zero than with
+a  nonmixture  model.   For this  reason  too,  the  centered FOCE
+method may not work well with a mixture model.
+
+With a mixture model, or with a nonmixture model, one may implement  a
+second  Estimation  Step  (in a subsequent problem), and then a second
+ETABAR estimate (EB2) can be obtained, with  which  the  first  ETABAR
+estimate  (EB1)  can be compared.  If the data-analytic model is
+wellspecified, the two estimates should represent nearly  the  same
+quantity.   Using  an option on the $ESTIMATION record, the second
+P-value assesses the magnitude of the difference between EB1 and EB2,
+and a P-value  under  0.05  would  suggest that the data-analytic
+model is not well-specifed.  To obtain EB2, a data set is simulated
+under the fitted  model, and EB2 is obtained using this data set.
+Both EB1 and EB2 are (univariate) measures of central tendency of the
+distribution  of interindividual  "residuals", i.e. the distribution
+of the conditional estimates of the etas.  In both cases the residuals
+are  defined  in terms  of  the  data-analytic model.  But for EB1,
+the distribution is governed by the true (unknown) model, and for EB2,
+the distribution is governed by the fitted  model.  If the two models
+are "close", EB1 and EB2 will be close.  The conditional estimates of
+the  etas  from  the simulated  data should be based on the population
+parameter estimates from these data.  It may cost considerable CPU
+time  to  obtain  this second set of parameter estimates, and so it
+may not always be feasi- ble to compute EB2.
+
+One proceeds by constructing a problem that
+1. includes the same $INPUT record as was used with a previous  problem wherein EB1 was obtained.
+
+2. includes  an  $MSFI  record specifying a model specification file
+   from that previous problem, so that in particular, EB1 is available.
+
+3. includes a $SIMULATION record with the option TRUE=FINAL, so  that
+   a  data  set will be simulated using the final parameter estimate
+   from that previous problem.
+
+4. includes a $ESTIMATION record with  the  option  ETABARCHECK  (and
+   either the option METHOD=COND or METHOD=HYBRID).
+
+This will result in a simulated data set and calculted EB2,
+additionally
+- With ETABARCHECK, the P-value for EB2-EB1
+- With NOETABARCHECK
+  + For a nonmixture model, the P-value for EB2, and EB1 is ignored
+  + For a mixture model, no P-value will be output (only the standard error for EB2 will be  output).
