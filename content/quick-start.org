@@ -2,10 +2,27 @@
 
 * Quick start
 ** A single-subject PK model
-Below is the model input for Theophylline plasma concentration-time observations
+*** Data
+The data file P2DATA below shows Theophylline plasma concentration-time observations
 in a single individual after a single dose of 320 mg.
+#+begin_src dat
+         2     320.       0.        0.
+         2       0.        .27      1.71
+         2       0.        .52      7.91
+         2       0.       1.        8.31
+         2       0.       1.92      8.33
+         2       0.       3.5       6.85
+         2       0.       5.02      6.08
+         2       0.       7.03      5.4
+         2       0.       9.        4.55
+         2       0.      12.        3.01
+         2       0.      24.3        .90
+#+end_src
+
+*** Model
+We use input file =model1.ctl= to model the data [fn:1].
 #+begin_src php
-$PROB  SIMPLE NONLINEAR REGRESSION - THEOPHYLINE
+$PROB  SIMPLE NONLINEAR REGRESSION - THEOPHYLINE ; the problem in model.ctl
 $INPUT ID AMT TIME DV
 $DATA  P2DATA
 $SUBROUTINE ADVAN2
@@ -22,23 +39,10 @@ $ESTIMATION PRINT=5
 $COVARIANCE
 $TABLE ID AMT TIME
 #+end_src
-The data file P2DATA, as specified on line 2, contains
-#+begin_src dat
-         2     320.       0.        0.
-         2       0.        .27      1.71
-         2       0.        .52      7.91
-         2       0.       1.        8.31
-         2       0.       1.92      8.33
-         2       0.       3.5       6.85
-         2       0.       5.02      6.08
-         2       0.       7.03      5.4
-         2       0.       9.        4.55
-         2       0.      12.        3.01
-         2       0.      24.3        .90
-#+end_src
 
 Let us go through the /control stream/ input and data.
-- Control stream line 1 gives the NONMEM problem a name.
+- Control stream line 1 gives the NONMEM problem a name. NONMEM uses
+  ";" to indicate comment, thus it neglects everything after ";" on that line.
 - Control stream line 2 says that the data file column 1-4 contain subject ID, dosing amount (AMT, in mg here),
   observation time, and the observed concentrations (dependent value
   DV), respectively.
@@ -69,7 +73,7 @@ Let us go through the /control stream/ input and data.
      2         CENTRAL      ON         NO         YES        NO         YES
      3         OUTPUT       OFF        YES        NO         NO         NO
   #+end_src
-- Line 5-9 specify PK parameters (in =$PK= record) using THETA, the
+- Line 5-9 specify PK parameters (in =$PK= record) using THETA [fn:2], the
   parameters to be estimated by NONMEM. They are:  first-order
   absorption rate KA, rate constant of elimination K, and volume of
   distribution V.
@@ -84,7 +88,21 @@ Let us go through the /control stream/ input and data.
   ($COVARIANCE) requests standard error for the estimates.
 - Line 16 request a table output for the input data and certain computed quantities.
 
-Running the above model NONMEM will give the following output.
+
+*** Run
+We use NONMEM's Front End script =nmfe= to run the above model. The
+shipped script name is often appended with NONMEM version. For
+example, with NONMEM v7.6.0, do
+#+begin_src bash
+nmfe76 model1.ctl output.txt
+#+end_src
+You can see that =nmfe= requires two arguments, input model file and
+output plaintext file. In addition it supports many options to control
+the building and execution behavior. You may refer to its help (=nmfe76 --help=)
+printout for details.
+
+*** Results
+NONMEM will output the follow to the given output file (in our case, it is =output.txt=).
 #+begin_src txt
  ************************************************************************************************************************
  ********************                                                                                ********************
@@ -149,18 +167,18 @@ NONMEM report uses tags for output parsing. The above result shows
   goodness of fit statistic, much like a sum of squares. The parameter
   estimates (the parameter values at which the objective function is
   minimized) and their standard errors follow. Note that the estimate
-  of OMEGA, too, has a standard error. Finally, a fully informative
-  correlation matrix (CORR) of OMEGA and SIGMA are outputted. All
-  correlation matrices, whether to OMEGAS and SIGMAS, or pertaining to
+  of OMEGA [fn:2], too, has a standard error. Finally, a fully informative
+  correlation matrix (CORR) of OMEGA and SIGMA [fn:2] are outputted. All
+  correlation matrices, whether to OMEGAs and SIGMAs, or pertaining to
   the correlation matrix of estimates, are printed out with diagonal
   elements equal to the square root of diagonal element of covariance
   matrix (standard error/standard deviation, depending on context),
   and the off-diagonal elements are the correlation values.
 
 ** A population model for Phenobarbital
-About 60 infants were given phenobarbital therapeutically.
-
-A plasma concentration was measured in each some hours after the first
+*** Data
+About 60 infants were given phenobarbital therapeutically. A plasma
+concentration was measured in each some hours after the first
 (loading) dose, followed by multiple maintenance doses. A second, and
 sometimes a third concentration were measured later. In all, 155
 concentrations were observed. The first subject's data is shown below.
@@ -179,7 +197,9 @@ concentrations were observed. The first subject's data is shown below.
       1  112.5      .    1.4      7   31.0
 #+end_src
 
-We use the following NM-TRAN control records to model the data.
+*** Model
+We use the following NM-TRAN control records to model the data. It is
+stored in file "model2.ctl".
 #+begin_src php
 $PROBLEM PHENOBARB
 $INPUT   ID TIME AMT WT APGR DV
@@ -202,11 +222,12 @@ $ESTIMATION  PRINT=5
 $TABLE     ID TIME AMT WT APGR
 $COVARIANCE
 #+end_src
-Note that the $INPUT record now defines a new
-data item, WT, the patient weight.  It's value is given on
-every data record for an individual, in the column indicated.  This
-is so despite the fact that WT may not change within an individual.
-This is a bit repetitious, but convenient.
+Note that the $INPUT record now defines a new data item, WT, the
+patient weight.  It's value is given on every data record for an
+individual, in the column indicated.  This is so despite the fact that
+WT may not change within an individual. This is a bit repetitious, but
+convenient.
+
 The records are very similar to those for the theophylline problem,
 with notable differences:
 - The model is implemented using ADVAN1, not ADVAN2. ADVAN1 implements
@@ -235,7 +256,18 @@ with notable differences:
   fully in User guide.
 
 NONMEM is again instructed to estimate the parameters and
-their standard errors.  The results below are the output for the goodness of fit statistic
+their standard errors.
+*** Run
+This is the same as the previous model.
+#+begin_src bash
+nmfe76 model2.ctl output.txt
+#+end_src
+Note that we issue a same output file name =output.txt=. If this is
+done in a same path as the previous model, NONMEM will overwrites the
+file. Therefore a good practice is to have a separate directory for
+each run.
+*** Results
+The results below are the output for the goodness of fit statistic
 (the minimum value of the objective function) and the parameter
 estimates for the phenobarbital problem.
 #+begin_src txt
@@ -449,3 +481,10 @@ help you learn more about NONMEM.
 - [[guides/intro7.pdf][Introduction to NONMEM 7]] for additional options and advanced algorithms.
 - Clinical trial design using $DESIGN: [[https://ascpt.onlinelibrary.wiley.com/doi/pdf/10.1002/psp4.12713][Tutorial for DESIGN in NONMEM: Clinical trial evaluation and optimization. Bauer RJ, Hooker AC, Mentre F. CPT Pharmacometrics Syst Pharmacol. 2021;10:1452–1465]].
 - Introduction to discrete time and distributed time delay models: [[ http://doi.org/10.1002/psp4.70046][Tutorial for Modeling Delays in Biological Systems in the NONMEM Software. Bauer RJ, Krzyzanski W. CPT Pharmacometrics Syst Pharmacol. 2025.]]
+
+[fn:1] NONMEM model files are text files with =.ctl= extension. An
+alternative extension that is popular in =.mod=. In this document we
+use =.ctl=.
+[fn:2] Symols such as THETA, OMEGA, SIGMA are NONMEM's built-in
+variables. They are ubiquitous in NONMEM models so you want to be
+familiar with them. See User Guide and Reference Manual for details.
