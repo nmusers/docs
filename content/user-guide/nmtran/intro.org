@@ -1,0 +1,57 @@
+#+title: 1. Introduction
+
+* Introduction
+NM-TRAN stands for NONMEM Translator, a FORTRAN 90/95 library that preprocesses user inputs before a NONMEM run. It converts them into three things: a NONMEM data set, a NONMEM control stream, and needed subroutines.
+
+
+** What it does
+
+NM-TRAN takes a flexible input data set and turns it into a proper
+NONMEM data set. It also takes a user-friendly NM-TRAN control stream and translates it into a NONMEM control stream.
+
+Optionally, it generates full FORTRAN subroutines from abbreviated
+code—like a PRED routine that handles model derivatives automatically
+via symbolic differentiation. This makes models easier to write with
+explicit mixed effects model parameters.
+
+
+** Who should use it
+
+Though NONMEM input can be done without NM-TRAN, most models,
+including those in the NONMEM Documentation. We recommend it to all NONMEM
+users.
+
+
+** Example
+
+Feed NM-TRAN a data set (e.g., THEO) and control stream like this simplified one:
+#+begin_src php
+$PROB THEOPHYLLINE POPULATION DATA
+$INPUT ID DOSE TIME CP=DV WT
+$DATA THEO
+
+$PRED
+; Model equations here (KA, KE, CL, etc.)
+IF (DOSE.NE.0) THEN
+   DS=DOSE*WT
+   W=WT
+ENDIF
+; ... (full model)
+
+$THETA (.1,3,5) (.008,.08,.5) (.004,.04,.9)
+$OMEGA BLOCK(3) ...
+$SIGMA .4
+
+$EST MAXEVAL=450 PRINT=5
+$COV
+$TABLE ID DOSE WT TIME
+#+end_src
+
+NM-TRAN outputs ready-to-run NONMEM files, matching analyses like Guide I's theophylline example.
+
+
+** PREDPP and extras
+
+NM-TRAN also supports PREDPP (for PK tasks) by generating its
+subroutines. It also handles additional model inputs such mixture
+models (MIX) and Bayesian inference (PRIOR and BAYES).

@@ -1,0 +1,50 @@
+#+title: 2. Fundamentals & data
+
+* Fundamentals
+This chapter covers generated files, data preprocessing (formats, time
+translation, IDs), storage modules, odd-type data, and workflow.
+
+** Input
+NM-TRAN takes its input from two files: one file for NM-TRAN control
+stream, and one for the data set.  The first file, the control stream, points
+to the second, through $DATA control record.
+
+NM-TRAN outputs several files, including:
+| FILE    | Content                        | Usage            |
+|---------+--------------------------------+------------------|
+| FDATA   | NONMEM data set                | NONMEM input     |
+| FCON    | NONMEM control stream          | NONMEM input     |
+| FSUBS   | generated and user subroutines | build executible |
+| FSTREAM | NONMEM file stream             | NONMEM input     |
+| FREPORT | report file                    | Informational    |
+
+FDATA and FCON are needed in a NONMEM run. If NM-TRAN actually modifies the NM-TRAN data set,
+then the modification, the actual data set for NONMEM, is contained in
+FDATA. With NONMEM 7.5, an additional file, FDATA.csv is produced that
+outputs the contents of its input data file (typically FDATA) in a
+comma delimited file format, so you can check how NONMEM interprets
+the input data. The records in FDATA.csv may differ from those in
+FDATA in the following cases. If REPL/REPL_ is used, the replicated
+form of the data will appear in FDATA.csv. See @@html:<a href="/reference-manual/files/">reference manual</a>@@ for additional
+files and details.
+
+** Output
+NONMEM consumes the input files created by NM-TRAN, and generates  a number of files during the run.
+
+If an Model Specification File (MSF) is output, and intermediate output with iteration summaries
+is requested (i.e., $ESTIM options MSFI and PRINT are used), then
+NONMEM also writes the parameter estimates of these summaries to
+the console and to file INTER, which now exists after the run
+terminates.  INTER now include lines giving the parameter  estimates
+in their natural unscaled space  (NPARAMETR) as well as the UCP
+values (PARAMETER).
+
+Additional output files include
+files with  extensions  (suffixes)  .ext,  .cov,  .coi,
+ .cor,  .phi,  .phm,  .grd,  .shk,  .shm, .cnv, smt, .rmt, etc.
+The names of the files start with "root", where root is the root name of the NM-TRAN control stream file.
+The file root.ext is called the raw output file.
+The root name may be specified by $ESTIMATION record option FILE.
+** PRED
+
+** PREDPP
