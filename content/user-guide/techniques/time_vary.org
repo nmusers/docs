@@ -1,0 +1,28 @@
+#+title: Time-varying covariates
+{{< katex >}}{{< /katex >}}
+
+* Time-varying covariates
+Occasionally the covariates affecting
+individual parameters change over the course of the study. For example, if
+an individual had heart failure for part of his observation
+period but not the rest, the metabolic clearanceCL_{met} could change.
+Another example is when acute renal failure occurred to
+a patient, then the renal clearance CL_{ren} could change.
+
+This time-dependence can be implemented in PREDPP recursively. Recall
+the equations
+
+$$
+y_{ij} = f(x_{ij}, \phi_i) + \epsilon_{ij}.
+$$
+$$
+\phi_{i} = \mu(z_{i}, \theta) + \eta_{i}.
+$$
+
+from
+@@html:<a href="/user-guide/fundamentals/population/">population model</a>@@,  when NONMEM /advances/ system states from time \(t_j\) to \(t_{j+1}\), it uses covariates \(z\) (and in general \(x\))
+at time \(t_{j+1}\) to compute \(\phi\). Therefore in order to have \(\phi\) change appropriately with \(z\), on the data record for time point \(t_{j+1}\) we want to place a value of \(z\) corresponding to time period \((t_j, t_{j+1}]\). The key message is that the covariate values at \(t_{j+1}\) determine \(\phi\) in time period \((t_j, t_{j+1}]\).
+
+One challenge of the above approach is when the covariates in \(z\)
+are not measured during the time interval. In that case, one will have
+to use certain interpolation method.
