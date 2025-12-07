@@ -2,27 +2,25 @@
 {{< katex >}}{{< /katex >}}
 
 * Population models
-In this chapter concerns models for data from populations will be
-discussed. These models describe observations from a number of
-individuals sampled from the population.  The distinguishing feature
-of the data to which such models apply is that there is Imore than one
-observation from some (usually most) individuals. All the models
-discussed here are /parametric models/, in that observations are described
-with models with parameters. The model is capable of explaining the
-data variability due to the those unknown random variables.
+In this chapter we discuss models for populations data. Those data
+contain observations from a set of individuals sampled from a
+population. Such data are characterized by one or more
+observations for each individual. All the models
+discussed here are /parameter models/, in that observations are described
+with models with parameters. These models are capable of explaining the
+data variability due to the those unknown random parameters.
 
-** General
+** Problem formulation
 Individuals in a population of size \(N\) are different due to
-/fixed/ and/or /random/ effects. They are manifested
-as individual parameters,
-\(\phi_i\), \((i=1,\dots,N)\). Subscript \(i\) denotes certain individual.
-That is, first, each individual is
-Then a general formulation for mixed effects model is to use certain
-structure function \(f\) that depends on both known quantities
+/fixed/ and/or /random/ effects, manifested
+as individual parameters \(\phi_i\), \((i=1,\dots,N)\), with
+individual ID \(i\) in subscript. Then a general formulation for /mixed-effects/ model is to use certain
+function \(f\) of known quantities
 \(x_{ij}\) and unknown parameters \(\phi_i\) to describe the
-observations $y_{ij}. Since this \(f(x_{ij}, \phi_i)\) model cannot
-account for all the variability of \(y_{ij}\), it is additively
-appended with a /residual error/ \(\epsilon_{ij}\). In summary
+observations \(y_{ij}\). This function \(f()\) is sometimes refered as
+/structure model/. In reality \(f(x_{ij}, \phi_i)\) does not
+account for all the variability of \(y_{ij}\), therefore we additively
+complement it with a /residual error/ term \(\epsilon_{ij}\). In summary
 
 $$
 y_{ij} = f(x_{ij}, \phi_i) + \epsilon_{ij}.
@@ -32,53 +30,53 @@ Note
 - Subscript \(ij\), \(j=1\dots,N_i\) denotes observation \(j\) for
   individual \(i\). Individuals often do not have same number of
   observations. That is, in general \(N_i\ne N_k\) when \(i\ne k\).
-  The total number of observations in a data set is then \(N_{\text{obs}}=\sum_iN_i\).
+  The total number of observations in a data set is \(N_{\text{obs}}=\sum_iN_i\).
 
-- The "nonlinear" in "nonlinear mixed-effects model" comes from the
+- The term "nonlinear" in "nonlinear mixed-effects model" refers the
   fact that \(f()\) is often nonlinear with respect to \(x_{ij}\)
   and/or \(\phi_i\).
 
-- NONMEM assumes \(\epsilon\), as a vector for different \(i\) and \(j\), follows a multivariate normal
+- NONMEM assumes that \(\epsilon\), as a vector containing all
+  \(\epsilton_{ij}\) for all the \(i\)'s and \(j\)'s, follows a multivariate normal
   distribution [fn:3],
   $$
-  \eta \sim \text{MultiNormal}(0, \Sigma),
+  \epsilon \sim \text{MultiNormal}(0, \Sigma).
   $$
-  and uses reserved variable =SIGMA= for the covariance matrix
+  NONMEM uses reserved variable =SIGMA= for the covariance matrix
   \(\Sigma\). When \(\epsilon_{ij}\) are independent from each other,
-  \(\Sigma\) degenerates into single value \(\sigma^2\) to describe
+  \(\Sigma\) degenerates into a single value \(\sigma^2\). It describes
   the residual error variance of all the observations.
 
-
-Next we model \(\phi_i\)'s further, by /assuming/ they deviate a
-"typical" value by a random perturbation \(\eta_i\). The word "typical" here means
+Next we describe \(\phi_i\) using another model, by /assuming/each \(\phi_i\) deviates a
+"typical" value by a random perturbation \(\eta_i\). By "typical" we mean
 that the value is the same for individuals with same covariates
-\(z_{i}\), e.g. weight and height. Then we can use another function \(\mu()\) to describe the
-relationship between \(z_i\) and the "typical" value, and use
-\(\theta\) for the parameters in \(\mu()\). In other words
+\(z_{i}\), e.g. weight and height. This another model is described by
+function \(\mu()\). That is, \(\mu(z_i, \theta)\), with parameter
+\(\theta\) and covariate \(z_i\) gives the "typical" value of \(\phi_i\). In summary
 
 $$
 \phi_{i} = \mu(z_{i}, \theta) + \eta_{i}.
 $$
 
+Note
 - We refer \(z_i\) as /fixed effects/, and \(\theta\) /fixed effect
   parameters/ [fn:1]. NONMEM uses reserved variable =THETA= for
   \(\theta\) [fn:2].
 - We refer \(\eta_i\) as /random effects/. NONMEM uses reserved
   variable =ETA= for \(\eta\).
-- A nonlinear \(\mu()\) can contributes to the nonliearity nature of
-  NONMEM problems.
-- In general for each individual \(\theta\), \(\phi\), \(eta\) are vectors.
-- NONMEM assumes all \(\eta_i\)'s' follow a multivariate normal
+- A nonlinear \(\mu()\) contributes to additional nonliearity of the problem.
+- In general for each individual, \(\theta\), \(\phi\), and \(\eta\) are vectors.
+- NONMEM assumes all \(\eta_i\)'s follow a multivariate normal
   distribution [fn:3],
   $$
-  \eta_i \sim \text{MultiNormal}(0, \Omega),
+  \eta_i \sim \text{MultiNormal}(0, \Omega).
   $$
-  and uses reserved variable =OMEGA= for the covariance matrix \(\Omega\).
+  NONMEM uses reserved variable =OMEGA= for the covariance matrix \(\Omega\).
 - NONMEM output use =PHI= for \(\phi_i\)'s.
-- The above \(\mu() + \eta\) pattern can actually helps NONMEM improve
-  solution efficiency. See @@html:<a href="/user-guide/techniques/mu_model/">MU referencing</a>@@.
+- In some of NONMEM's solution algorithms the above \(\mu() + \eta\) pattern can improve
+  efficiency. See @@html:<a href="/user-guide/techniques/mu_model/">MU referencing</a>@@.
 
-** Structure parametric models
+** Structure parameter models
 Now let us examine a few common models for \(\mu()\). Assume \(\phi\)
 has clearance CL as one of its elements,
 then we use \(\tilde{\text{CL}_i}=\mu(z_i, \theta)\) for =TVCL= [fn:4], the "typical
@@ -152,6 +150,69 @@ affected CL_{met}, we do [fn:5]
 $$
 \tilde{\text{CL}}_\text{met} = (\theta_1 - \theta_2\text{HF})\text{WT}.
 $$
+See details in @@html:<a href="/user-guide/techniques/indi/"> indicator variable in modeling techniques</a>@@.
+
+** Population random effects models
+Under NONMEM nomenclature, there are two levels of random effects,
+\(\eta\) and \(\epsilon\):
+
+- \(\eta\) in the parameter model accounts for the /inter-individual/
+  variability in \(\phi\) that is not explained by \(\mu(z_i, \theta)\);
+- \(\epsilon\) accounts for the /intra-individual/ variability that is
+  not explained by \(f(x_{ij}, \phi_i)\), thus formulates the error model.
+
+The interindividual variability can arise from
+- the approximate nature of \(\mu()\) to express the relation between
+  covariates \(z\) and individual parameters \(\phi\);
+- the covariates \(z\) contain measurement error.
+
+The intraindividual variability can arise from
+- the approximate nature of the structure model \(\f()\);
+- observed quantities \(x\) contain measurement error;
+- the pharmacokinetic responses \(y\) contain measurement error (assay error).
+
+*** Models for Interindividual variability
+NONMEM uses \(\eta\) to describe interindividual variability.
+Its covariance matrix \(\Omega\) is symmetric and
+positive-semidefinite. NONMEM utilizes the symmetry so that only the
+/lower triangular elements/ are used to specifiy =OMEGA=. For example,
+in a two-compartment model we can have \(\eta=(\eta_{k10}, \eta_{k12},
+\eta_{k21})\) for the elimination and transfer coefficients. Then
+\(\Omega\) will be a 3x3 matrix but =OMEGA= contains only 6 elements:
+(\(\text{cov}(\cdot,\cdot)\) indicates covariance).
+
+$$
+\omega_{11}=\text{cov}(\eta_{k10}, \eta_{k10});\\
+\omega_{21}=\text{cov}(\eta_{k10}, \eta_{k12});\\
+\omega_{31}=\text{cov}(\eta_{k10}, \eta_{k21});\\
+\omega_{22}=\text{cov}(\eta_{k12}, \eta_{k12});\\
+\omega_{23}=\text{cov}(\eta_{k12}, \eta_{k21});\\
+\omega_{33}=\text{cov}(\eta_{k21}, \eta_{k21}).
+$$
+
+**** Additive model
+An additive model, for example for volumn of distribution V:
+
+$$
+\text{V}=\tilde{\text{V}}+\eta
+$$
+
+leads to unit-dependent \(\omega\), as changing the unit of V will
+cause \(\eta\) to change, so does its variance.
+
+**** Multiplicative model
+Also known as Constant Coefficient of Variation (CCV) model or
+proportional error model, a multiplicative model such as
+$$
+\text{V}=\tilde{\text{V}}(1+\eta)
+$$
+does not change \(\omega\) when unit of V is alterered.
+
+**** TODO Exponential model
+
+*** Generalized formulation
+
+** Population mixed effects model
 
 
 [fn:1] The nomenclature can be confusing in statistical literature, as
