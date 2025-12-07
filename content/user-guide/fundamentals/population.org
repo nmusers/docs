@@ -1,0 +1,164 @@
+#+title: 2. Population models
+{{< katex >}}{{< /katex >}}
+
+* Population models
+In this chapter concerns models for data from populations will be
+discussed. These models describe observations from a number of
+individuals sampled from the population.  The distinguishing feature
+of the data to which such models apply is that there is Imore than one
+observation from some (usually most) individuals. All the models
+discussed here are /parametric models/, in that observations are described
+with models with parameters. The model is capable of explaining the
+data variability due to the those unknown random variables.
+
+** General
+Individuals in a population of size \(N\) are different due to
+/fixed/ and/or /random/ effects. They are manifested
+as individual parameters,
+\(\phi_i\), \((i=1,\dots,N)\). Subscript \(i\) denotes certain individual.
+That is, first, each individual is
+Then a general formulation for mixed effects model is to use certain
+structure function \(f\) that depends on both known quantities
+\(x_{ij}\) and unknown parameters \(\phi_i\) to describe the
+observations $y_{ij}. Since this \(f(x_{ij}, \phi_i)\) model cannot
+account for all the variability of \(y_{ij}\), it is additively
+appended with a /residual error/ \(\epsilon_{ij}\). In summary
+
+$$
+y_{ij} = f(x_{ij}, \phi_i) + \epsilon_{ij}.
+$$
+
+Note
+- Subscript \(ij\), \(j=1\dots,N_i\) denotes observation \(j\) for
+  individual \(i\). Individuals often do not have same number of
+  observations. That is, in general \(N_i\ne N_k\) when \(i\ne k\).
+  The total number of observations in a data set is then \(N_{\text{obs}}=\sum_iN_i\).
+
+- The "nonlinear" in "nonlinear mixed-effects model" comes from the
+  fact that \(f()\) is often nonlinear with respect to \(x_{ij}\)
+  and/or \(\phi_i\).
+
+- NONMEM assumes \(\epsilon\), as a vector for different \(i\) and \(j\), follows a multivariate normal
+  distribution [fn:3],
+  $$
+  \eta \sim \text{MultiNormal}(0, \Sigma),
+  $$
+  and uses reserved variable =SIGMA= for the covariance matrix
+  \(\Sigma\). When \(\epsilon_{ij}\) are independent from each other,
+  \(\Sigma\) degenerates into single value \(\sigma^2\) to describe
+  the residual error variance of all the observations.
+
+
+Next we model \(\phi_i\)'s further, by /assuming/ they deviate a
+"typical" value by a random perturbation \(\eta_i\). The word "typical" here means
+that the value is the same for individuals with same covariates
+\(z_{i}\), e.g. weight and height. Then we can use another function \(\mu()\) to describe the
+relationship between \(z_i\) and the "typical" value, and use
+\(\theta\) for the parameters in \(\mu()\). In other words
+
+$$
+\phi_{i} = \mu(z_{i}, \theta) + \eta_{i}.
+$$
+
+- We refer \(z_i\) as /fixed effects/, and \(\theta\) /fixed effect
+  parameters/ [fn:1]. NONMEM uses reserved variable =THETA= for
+  \(\theta\) [fn:2].
+- We refer \(\eta_i\) as /random effects/. NONMEM uses reserved
+  variable =ETA= for \(\eta\).
+- A nonlinear \(\mu()\) can contributes to the nonliearity nature of
+  NONMEM problems.
+- In general for each individual \(\theta\), \(\phi\), \(eta\) are vectors.
+- NONMEM assumes all \(\eta_i\)'s' follow a multivariate normal
+  distribution [fn:3],
+  $$
+  \eta_i \sim \text{MultiNormal}(0, \Omega),
+  $$
+  and uses reserved variable =OMEGA= for the covariance matrix \(\Omega\).
+- NONMEM output use =PHI= for \(\phi_i\)'s.
+- The above \(\mu() + \eta\) pattern can actually helps NONMEM improve
+  solution efficiency. See @@html:<a href="/user-guide/techniques/mu_model/">MU referencing</a>@@.
+
+** Structure parametric models
+Now let us examine a few common models for \(\mu()\). Assume \(\phi\)
+has clearance CL as one of its elements,
+then we use \(\tilde{\text{CL}_i}=\mu(z_i, \theta)\) for =TVCL= [fn:4], the "typical
+value" of CL.
+
+*** Linear (additive) models
+The simplest form of \(\mu()\) is its being linearly related to
+\(\theta\). For example, if CL is
+the sum of renal and non-renal components (CL_{ren} and CL_{met}, respectively),
+and CL_{ren} is
+believed to be proportional to renal function (RF) as described according
+to a standard formula involving covariates in \(z\): age (AGE),
+serum creatinine (SECR), and weight (WT), then one might consider the
+following model (we omit subscript \(i\) to avoid clutter).
+
+$$
+\tilde{\text{CL}}_{\text{met}} = \theta_1 \text{WT},
+$$
+$$
+\text{RF}=\text{WT}\frac{1.66-0.011\text{AGE}}{\text{SECR}},
+$$
+$$
+\tilde{\text{CL}}_{\text{ren}} = \theta_4 \text{RF},
+$$
+$$
+\tilde{\text{CL}} = \tilde{\text{CL}}_{\text{ren}} + \tilde{\text{CL}}_{\text{met}}.
+$$
+Despite RF being a nonlinear function of covariates, the above model
+shows a linear \(\mu\) with respect to \(\theta\), as (we use \(\cdot\) for inner product)
+$$
+\tilde{\text{CL}} = (\text{WT}, \text{RF}) \cdot (\theta_1, \theta_4).
+$$
+*** Multiplicative model
+Multiplicative models are linear models on a logarithmic scale.
+For example, if patients covering a very wide range of weights
+are studied, metabolic clearance might vary with weight, but
+not linearly. Then instead of modeling them linearly, we assume
+$$
+\log(\tilde{\text{CL}}_{\text{met}}) = \theta_1 + \theta_2\log(\text{WT}),
+$$
+equivalently [fn:5]
+$$
+\tilde{\text{CL}}_{\text{met}} = \theta_1\text{WT}^{\theta_2}.
+$$
+Note that the two sets of \(\theta\)'s are not the same, but since
+they are unknown parameters we can transform them and fit either set
+in a model. This /reparameterization/ is common in statistical modeling.
+*** Saturation Models
+A useful model for processes reaching a maximum is a hyperbolic model.
+For example, if a second drug, (whose steady-state plasma
+concentration, Cpss_2 is known and given in the data set), is present
+in some individuals and it is believed to be an inhibitor of the
+metabolism of the study drug, one might consider
+
+$$
+\tilde{\text{CL}}_{\text{met}}=\text{WT} \left(\theta_1-\frac{\theta_2 \text{Cpss}_2}{\theta_3 + \text{Cpss}_2}\right)
+$$
+
+The relationshiup is shown in figure below.  The inhibition is expressed by the
+ratio occurring within the brackets and is a concave hyperbola,
+asymptoting
+to a maximum value equal to \(\theta_2\).  It is identical in form to
+the Michaelis-Menten model.
+
+[[/img/fig4.1.ubuntu.epsi.png]]
+
+*** Indicator variables
+Assume a binary variable HF documents the clinical condition of heart
+failure as "present" (HF=0) or "absent" (HF=1). To model heart failure
+affected CL_{met}, we do [fn:5]
+$$
+\tilde{\text{CL}}_\text{met} = (\theta_1 - \theta_2\text{HF})\text{WT}.
+$$
+
+
+[fn:1] The nomenclature can be confusing in statistical literature, as
+often people (including us) also call \(\theta\) the "fixed effects",
+and the value of \(\theta\) "fixed effects size". In this document we
+try to make the context clear whenever those terms are used.
+[fn:2] Later on we will discuss situations when not all \(\theta\)'s are associated with \(\mu\) or \(\eta\) in this way.
+[fn:3] In this document we use symbol \(\sim\) to indicate a distribution statement. This is common in statistical literature.
+[fn:4] Prepending "TV" to a quantity name is a common practice, but note "TVCL" is not a reserved name in NONMEM.
+[fn:5] Heart failure is expected to decrease metabolic clearance.  Thus using a minus sign here implies \(\theta_2\) is assumed positive.
