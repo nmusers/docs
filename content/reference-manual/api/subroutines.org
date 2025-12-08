@@ -1512,3 +1512,47 @@ abbreviated code and allows variables undefined in abbreviated code to
 be used as right-hand quantities in abbreviated code.
 
 REFERENCES: Guide IV, section IV.I
+
+* FSUBS
+NM-TRAN generates a special Fortran file "FSUBS" that contains
+subroutines and modules based on NM-TRAN input file.
+
+** =FSIZESR=
+Since v7.2+, NONMEM employs dynamic memory allocation. Subroutine =FSIZESR= contains the constants
+for the allocation. The $SIZES record can be used to override some of
+the values in FSIZESR. Constants set to 0 cannot be determined or are
+not given by NM-TRAN and will default to the values in
+resource/SIZES.f90 in NONMEM source code.
+
+** =NMPRD4=, =PRINFN=, and =DECLAREVARIABLES=
+Module =NMPRD4= stores NONMEM runtime variables.
+It is also accessible in user-supplied routines and generated code,
+and also by NONMEM. User can use $TABLE to output the module variables.
+It is possible for the user to set aside a portion of =NMPRD4= for
+variables defined in user-supplied code, or for variables directly
+controlled by the user (see COMACT, COMRES, COMSAV in Chapters III.B.7
+and IV.E.2).
+
+Module =PRINFN= is only for user-supplied and generated code.
+NM-TRAN creates this module only when $INFN is used.
+
+Module =DECLAREVARIABLES= stores variables in $ABBREVIATED DECLARE control record. (NM73)
+
+** =THETAISUB=, =THETARSUB=
+The two subroutines implement the $THETAI and $THETAR records, respectively.
+They are created only when the corresponding record is used.
+
+** =MUMODEL2=
+Subroutine =MUMODEL2= subroutine is based on the PRED or PK subroutine
+in FSUBS. It contains only statements (if any) for the MU model, which
+is used in the new (Bayseian) methods of NONMEM.
+
+Related to FSUBS, NM-TRAN the following files for user checking and
+debugging purposes. They are not directly
+used by NONMEM.
+- =FSUBS_MU.F90=: the file for =MUMODEL2= in FSUBS.
+- =FSIZES=: same as the =FSIZESR= routine in FSUBS.
+- =FMSG=: messages (information, warning, error) NM-TRAN run, same as displayed in terminal.
+- =FORIG=: the original (pre-replacement) abbreviated code and $TABLE and $SCATTER records.
+- =FREPL=: the new (post-replacement) abbreviated code and $TABLE and $SCATTER records.
+- =FSUBS2=, ==FSUBS.F90=: duplicates of =FSUBS=.

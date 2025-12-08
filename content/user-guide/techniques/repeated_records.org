@@ -1,0 +1,26 @@
+#+title: Repeated Observation Records
+
+* Repeated Observation Records
+
+One can use "Repeated Observation Records" to implement special
+methods such as stochastic differential
+equations. A record in a data file may be set up for repeated calls to
+PK  and  ERROR.   Each  time,  the  same record is passed to PK and/or
+ERROR, but with a different EVID.  The user's control stream model  in
+$PK or $ERROR may then take advantage of executing certain code conditional
+on the EVID value.  For this to occur, the user must  introduce
+one  or  more of the following data items in the data file, with these
+names:
+.LP
+ XVID1 XVID2 XVID3 XVID4 XVID5
+.LP
+These stand for "extra" EVIDs.  On the first  call  to  PK/ERROR,  the
+EVID is set to the value given in XVID1.  On the second call, the EVID
+is set to that in column XVID2, etc.  up to XVID5.  Only as many XVIDs
+as  are required are needed to be defined.  All the other items in the
+record do not change, except that if the present EVID used is  not  0,
+then  the MDV value is set to 1 for that call.  If an XVID is -1, then
+the call to PK/ERROR for that XVID is not made, nor for the  remaining
+XVIDs.   If  there  is an EVID column, the value in this column is not
+passed to PK/ERROR unless XVID1=-1 in which case a "normal" call  with
+that record occurs.

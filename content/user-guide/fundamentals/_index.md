@@ -1,5 +1,5 @@
 +++
-title = "Fundamentals"
+title = "1. Fundamentals"
 author = ["Yi Zhang"]
 draft = false
 bookCollapseSection = true

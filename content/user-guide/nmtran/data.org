@@ -1,0 +1,132 @@
+#+title: 2. Data
+
+* Data and event records
+Data are specified for NONMEM using /event records/ [fn:1].
+They represent temporal events such as dose events,
+observation events, and others such as the beginning
+of a urine collection and a measured change in kidney function.
+Data records (rows in the data file)
+correspond to different events, and must be in the order of time.
+
+Data records also represent individuals, by grouping an individual's records in contiguous
+records with a same /ID/. We refer to such a group an /individual record/.
+Data records in an individual record must be ordered in time.
+
+In the case of single subject data set, the records do not necessarily correspond on a one-to-one basis to either
+animal or human subjects: an individual record is simply any group of
+contiguous data records containing only one observation record and
+having the same ID data item. (Although, the presence of a
+multivariate observation means the individual record containing it has
+several observation records, each containing one element of the
+observation). In this case the time ordering of data records refers to
+the time ordering of data records /across all/ records.
+
+A typical NONMEM data set is like this (the first 9 /records/):
+#+begin_src dat
+ ID      TIME    C1      C2  ...  CN      DV     MDV
+  1       1.     .5      10        5              1
+  1       3.              9       10              1
+  1       6.              6              4.1      0
+  1       7.              7       10              1
+  1      10.              7              5.3      0
+  2       2.     .9       8        8              1
+  2       2.5             6                       1
+  2       6.              7                       1
+  2       7.              8              6.4      0
+#+end_src
+
+This data set there are nince data records corresponding
+to two individual records: five events for individual with ID=1,
+and four for individual with ID=2.  Three of these events are observation
+events, with DV (stands for "dependent value") provided.
+Label ID and DV are reserved /data items/, the same for TIME and MDV,
+for event time,  and missing dependent value, respectively.
+Label C1, C2, ..., CN are concomitant variable data items for
+additional event specification (such as EVID, see below) as well as covariates. Null (blank) entries are read in as zeros. They can also be explicitly put in as "." (dot) and "0".
+
+Now we discuss reserved data items.
+
+** Event identification: =EVID=
+Every event record must have =EVID=.
+This data item identifies the type of event.
+- =EVID=0=: observation event. in the event the DV data item is an
+  observation, and the MDV=0.  When =EVID!=0= DV data item can be any
+  value or blank, and the MDV=1.
+- =EVID=1=: dose event. There are three types of doses: bolus dose,
+  infusion of finite duration and continuous constant rate infusion
+  (effectively of infinite duration and leading to steady-state, thus
+  also called steady -state infusion). Repetitions of doses of the
+  first two types can also lead to steady-state (see SS data item).  A
+  dose event corresponds to either the time a bolus dose is given, or
+  the time an infusion is initiated, or the time a steady-state
+  infusion terminates. With a dose event certain other data items
+  which define the event further may also appear in the event record.
+- =EVID=2=: neither an observation nor dose event. The event is
+  referred to as of /other-type/. Examples include the time a urine
+  collection begins/ends and the time a change in a covariable (such
+  as glomelular filtration rate) is noted.
+- =EVID=3=: reset event. With a reset event the kinetic system is
+  reinitialized.  time is reset to the TIME data item, the amounts in
+  each compartment are reset to zero, and the on/off status of each
+  compartment is reset to its initial status.
+- =EVID=4=: reset-dose event. It combines a dose event and a reset
+  event: The system is first reset, and then a dose is given according
+  to the information given in those fields giving dose information.
+
+** The Time: =TIME=
+Every event record must have =TIME= [fn:2].
+The data item gives the time of the event.
+
+Unless in reset and reset-dose events where time is reset, event records must be ordered (within an individual record) in time. Namely,
+\(t_A\le t_B\) when event record A is followed by event record B.
+
+=TIME= is unitless. It may contain clock time, hh:mm, and =DATE= data
+item may also be present. They are converted to relative time internally.
+In addition, one can use the TRANSLATE=(TIME/f/d) option of $DATA record
+to request that TIME values be divided by f (typically, f is 24 to
+convert hours to days, with d significant digits.
+
+In NONMEM v7.4+, time data items may have any value, including negative values
+(earlier versions mandate non-negative values) [fn:3].
+
+** Dose Amount: =AMT=
+In a dose event =AMT= gives the amount of a bolus
+dose or of an infusion of finite duration. In those cases it must be
+positive.  However, if other data items in a dose event
+record (see below) indicate that the event record marks the termination of a
+steady-state infusion, then if given =AMT= must be 0.
+If all doses are steady-state infusions, =AMT= can be omitted.
+
+In observation, other-type, and reset event records if given =AMT= must be 0 .
+In a reset-dose event record the =AMT= data item should satisfy the requirements
+of the =AMT= data item in a dose event record.
+
+** Dose Rate: =RATE=
+In a dose record the RATE data item can assume four kinds of values.
+- =RATE>0=: an infusion rate.
+- =RATE=0=: instantaneous bolus dose.
+- =RATE=-1=: the dose is either a zero-order bolus dose (see section
+  III.F.3) with rate modeled in PK (see section III.F.4) or a
+  rate-modeled steady-state infusion (see section III.F.5).
+- =RATE=-2=: a zero-order bolus dose and that its duration is modeled
+  in PK (see section III.F.3).  In this case a positive =AMT=  must be
+  specified.
+
+=RATE= must be 0 in observation, other-type, and reset
+event records.
+In a reset-dose event record the RATE data item should satisfy the requirements
+of the RATE data item in a dose event record.
+
+=RATE= can be omitted if all doses are bolus.
+
+
+** Steady State: =SS=
+
+[fn:1] Strictly speaking, the event records feature is part of PREDPP,
+and NM-TRAN allows a more general format (discussed in Part 4).
+Essentially all modern NONMEM applications use event records for data specification.
+[fn:2] An example is when ADVAN9, ADVAN15, or ADVAN17 is used to solve
+algebraic equations solved.  In  this case =TIME= is optional.
+[fn:3] NM-TRAN has always allowed negative clock times when day-time
+translation is performed, and converted them to non-negative relative
+times.
