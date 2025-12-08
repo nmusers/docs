@@ -11,6 +11,9 @@ with models with parameters. These models are capable of explaining the
 data variability due to the those unknown random parameters.
 
 ** Problem formulation
+:PROPERTIES:
+:CUSTOM_ID: mixed_form
+:END:
 Individuals in a population of size \(N\) are different due to
 /fixed/ and/or /random/ effects, manifested
 as individual parameters \(\phi_i\), \((i=1,\dots,N)\), with
@@ -211,8 +214,44 @@ does not change \(\omega\) when unit of V is alterered.
 **** TODO Exponential model
 
 *** Generalized formulation
+Let us consider the following example. A study involves both patients in the intensive
+care unit (ICU) and in the non-acute care units.  One could postulate
+that ICU patients have higher variability in kinetics such as
+metabolic clearance of drug due to unmeasured factors. For example,
+their hepatic function could vary
+greatly. Even though the variation
+is actually due to a potentially measurable fixed effect
+(hepatic function), when such information is not
+available, \(\eta\) must account for the difference in variability in
+the two grups.  One approach to do this is through indicator variable
+ICU: ICU=1 for ICU patients and ICU=0 otherwise, and metabolic
+clearance model [fn:6]
 
-** Population mixed effects model
+$$
+\text{CL}_{\text{met}}= \tilde{\text{CL}}_{\text{met}} + (1-\text{ICU})\eta_1+\text{ICU}\eta_2,
+$$
+
+in addition to renal clearance model
+
+$$
+\text{CL}_{\text{ren}}= \tilde{\text{CL}}_{\text{ren}}(1 + \eta_3).
+$$
+
+Thus here \(\phi\) (corresponding to CL here), is associated to than
+one \(\eta\)'s (\(\eta\)_{1-3} here), and not in the form of
+\(\phi=\mu+\eta\). Another example where  [[#mixed_form][the additive form]]
+for \(\eta\) is not applicable is when \(\phi\) is associated with
+\(\eta\) nonlinearly.
+
+Hence we want to generalize the parameter model, so that [fn:7]
+
+$$
+\phi_i=\mu(z_i, \theta, \eta_i),
+$$
+and we allow the dimention of \(\phi_i\) and \(\eta_i\) to be different.
+
+** TODO Population mixed effects model
+
 
 
 [fn:1] The nomenclature can be confusing in statistical literature, as
@@ -223,3 +262,7 @@ try to make the context clear whenever those terms are used.
 [fn:3] In this document we use symbol \(\sim\) to indicate a distribution statement. This is common in statistical literature.
 [fn:4] Prepending "TV" to a quantity name is a common practice, but note "TVCL" is not a reserved name in NONMEM.
 [fn:5] Heart failure is expected to decrease metabolic clearance.  Thus using a minus sign here implies \(\theta_2\) is assumed positive.
+[fn:6] To avoid clutter here we use subscript for  different \(\eta\)
+for a same subject  instead of subject ID.
+[fn:7] Here the subscript is for subject ID. We hope the context is
+clear when we use the subscript differently.
