@@ -1,0 +1,94 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /Users/yi.zhang6/work/sandbox/docs/content/user-guide/nmtran/data.org
+
+
+* Event identification: =EVID=
+:PROPERTIES:
+:ARCHIVE_TIME: 2025-12-08 Mon 11:10
+:ARCHIVE_FILE: ~/work/sandbox/docs/content/user-guide/nmtran/data.org
+:ARCHIVE_OLPATH: Data and event records
+:ARCHIVE_CATEGORY: data
+:END:
+Every event record must have =EVID=.
+This data item identifies the type of event
+- =EVID=0=:
+A value of 0 indicates that the event is an
+.US observation event
+\&.
+With this type of an event the DV data item on the
+last data record of the event record is an observation, and
+the MDV data item on this data record is 0.  With all other
+types of events, the DV data item on the last record of the
+event record may be any value (e.g. blank), and the MDV
+data item on this data record is 1.
+.PP
+A value of 1 indicates that the event is a
+.US dose event
+\&.
+There are 3 types of doses: a bolus dose, an infusion (of finite duration),
+and a (continuous) constant rate infusion considered to be of effectively
+infinite duration and leading to steady-state. This last type of dose is called
+a
+.US steady
+.US -state infusion
+\&.
+Repetitions of doses of the first two types can
+also lead to steady-state (see section F).  A dose event corresponds to either
+the time a bolus dose is given, or the time an infusion is initiated, or the
+time a steady-state infusion terminates.
+With a dose event certain other data items which define the event further
+may also appear in the event record.
+.PP
+A value of 2 indicates that the event is neither an observation
+nor dose event.  The corresponding event is referred to as an
+.US other-type
+event.
+Examples of other-type events are: the time a urine collection begins, the time
+a urine collection ends, and the time a change in a covariable (such as
+glomelular filtration rate) is noted.
+The user may create an other-type event
+for whatever reasons he wishes; he need only mark an occurence
+of this type of event with an event record containing an EVID
+data item equal to 2.
+.PP
+A value of 3 marks a
+.US reset event
+\&.
+With a reset event the kinetic system is reinitialized.  Time is reset to
+\fIwhatever\fP time appears in the event record (e.g. 0), the amounts in each
+compartment are reset to zero, and the on/off status of each compartment is
+reset to its initial status (see section H).
+.PP
+A value of 4 marks a
+.US reset-dose event
+\&.
+With such an event
+the characteristics of a dose event and a reset event are
+combined.  The system is first reset,
+and then a dose is given according to the information given in those fields
+giving dose information (see below).
+.PP
+The "Repeated Observation Records" feature exists  to
+assist  in  specialized  methodologies such as stochastic differential
+equations. A record in a data file may be set up for repeated calls to
+PK  and  ERROR.   Each  time,  the  same record is passed to PK and/or
+ERROR, but with a different EVID.  The user's control stream model  in
+$PK or $ERROR may then take advantage of executing certain code conditional
+on the EVID value.  For this to occur, the user must  introduce
+one  or  more of the following data items in the data file, with these
+names:
+.LP
+ XVID1 XVID2 XVID3 XVID4 XVID5
+.LP
+These stand for "extra" EVIDs.  On the first  call  to  PK/ERROR,  the
+EVID is set to the value given in XVID1.  On the second call, the EVID
+is set to that in column XVID2, etc.  up to XVID5.  Only as many XVIDs
+as  are required are needed to be defined.  All the other items in the
+record do not change, except that if the present EVID used is  not  0,
+then  the MDV value is set to 1 for that call.  If an XVID is -1, then
+the call to PK/ERROR for that XVID is not made, nor for the  remaining
+XVIDs.   If  there  is an EVID column, the value in this column is not
+passed to PK/ERROR unless XVID1=-1 in which case a "normal" call  with
+that record occurs.
