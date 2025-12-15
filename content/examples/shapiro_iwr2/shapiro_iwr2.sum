@@ -1,0 +1,276 @@
+Multiple Estimation Method Run Summary File Run No: shapiro_iwr2
+[PDx-Pop 5.3 [15JAN2020] Revision]
+
+09:52 AM $SIZES ISAMPLEMAX=1100 ;Model Desc: Two compartment Model, Using ADVAN3, TRANS4 
+Stop Time:  Wed 08/31/2022  09:53 AM 
+Output Extracted from file: C:\Users\bauerr\pdxpop540\example1\shapiro_iwr2.res
+DataFile:  shapiro_iwr2.csv
+
+
+MODEL DEFINITION:
+ ADVAN3 TRANS4
+
+
+include \users\bauerr\pdxpop540\nonmem_reserved_general
+SAEM_EXTRA_REQUEST=1
+MU_1=THETA(1)
+MU_2=THETA(2)
+MU_3=THETA(3)
+MU_4=THETA(4)
+CL=DEXP(MU_1+ETA(1))
+V1=DEXP(MU_2+ETA(2))
+Q=DEXP(MU_3+ETA(3))
+V2=DEXP(MU_4+ETA(4))
+S1=V1
+
+
+include \users\bauerr\pdxpop540\nonmem_reserved_general
+SAEM_EXTRA_REQUEST=1
+IPRE=F
+IWRES=(DV-IPRE)/IPRE/SQRT(SIGMA(1,1))
+Y = F + F*EPS(1)
+
+; When SAEM_extra=1, then this particular set of individual
+; parameters were "accepted" So you may record them if you wish
+
+IF(SAEM_EXTRA==1 .AND. EVID==0 .AND. FIRST_WRITE==0) THEN
+IF(PNM_RUN_MODE==PNM_SINGLE) THEN ; best if a pnm file with -awnf is used.
+" OPEN(UNIT=52,FILE='shapiro_iwr2.iwr')
+ELSE ;If parallel, need to have different file name for each node
+" OPEN(UNIT=52,FILE='shapiro_iwr2_'//trim(tfi(pnm_node_number))//'.iwr')
+ENDIF
+IF(PNM_NODE_NUMBER==1) THEN ; Only one file should have header, for easy merging later
+" WRITE(52,96) 'SAMPLE ','ID ','TIME ','IWRES '
+" 96 FORMAT(A12,1X,A14,2(1X,A12))
+ENDIF
+FIRST_WRITE=1
+ENDIF
+
+
+
+IF(SAEM_EXTRA==1 .AND. EVID==0 ) THEN
+" WRITE(52,97) SAEM_SAMPLE,ID,TIME,IWRES
+" 97 FORMAT(I12,1X,F14.0,2(1X,1PG12.5))
+ENDIF
+
+; Initial values of THETA
+
+TABLES CREATED:
+ 'shapiro_iwr2.iwr')
+ 'shapiro_iwr2_'//trim(tfi(pnm_node_number))//'.iwr')
+ shapiro_iwr2.tab
+
+
+Estimation Methods:
+
+1. Results for  Stochastic Approximation Expectation-Maximization (No Prior)
+
+TERMINATION STATUS:
+ STOCHASTIC PORTION WAS COMPLETED
+ REDUCED STOCHASTIC PORTION WAS COMPLETED
+
+ ETABAR IS THE ARITHMETIC MEAN OF THE ETA-ESTIMATES,
+ AND THE P-VALUE IS GIVEN FOR THE NULL HYPOTHESIS THAT THE TRUE MEAN IS 0.
+ 
+ ETABAR:        -5.2589E-06 -1.7833E-05 -5.1481E-05 -2.7556E-05
+ SE:             3.7889E-02  3.0483E-02  2.6317E-02  3.2067E-02
+ N:                     100         100         100         100
+ 
+ P VAL.:         9.9989E-01  9.9953E-01  9.9844E-01  9.9931E-01
+ 
+ ETASHRINKSD(%)  3.6890E+00  2.2274E+01  2.9533E+01  1.4939E+01
+ ETASHRINKVR(%)  7.2418E+00  3.9587E+01  5.0344E+01  2.7647E+01
+ EBVSHRINKSD(%)  3.6952E+00  2.2273E+01  2.9531E+01  1.4966E+01
+ EBVSHRINKVR(%)  7.2538E+00  3.9585E+01  5.0341E+01  2.7692E+01
+ RELATIVEINF(%)  8.4321E+01  5.9160E+01  4.1080E+01  5.7727E+01
+ EPSSHRINKSD(%)  2.8639E+01
+ EPSSHRINKVR(%)  4.9076E+01
+ 
+  
+ TOTAL DATA POINTS NORMALLY DISTRIBUTED (N):          500
+ N*LOG(2PI) CONSTANT TO OBJECTIVE FUNCTION:    918.938533204673     
+ OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:   -2497.93015635093     
+ OBJECTIVE FUNCTION VALUE WITH CONSTANT:      -1578.99162314626     
+ REPORTED OBJECTIVE FUNCTION DOES NOT CONTAIN CONSTANT
+  
+ TOTAL EFFECTIVE ETAS (NIND*NETA):                           400
+ NIND*NETA*LOG(2PI) CONSTANT TO OBJECTIVE FUNCTION:    735.150826563738     
+ OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:   -2497.93015635093     
+ OBJECTIVE FUNCTION VALUE WITH CONSTANT:      -1762.77932978719     
+ REPORTED OBJECTIVE FUNCTION DOES NOT CONTAIN CONSTANT
+  
+ FINAL VALUE OF LIKELIHOOD FUNCTION: -2497.930
+ COVARIANCE STEP NOT IMPLEMENTED
+
+                                    95% CONFIDENCE INTERVAL    DESCRIPTOR/
+     FINAL ESTIMATE          %RSE       LBOUND       UBOUND    VARIABILITY
+__________________________________________________________________________________
+
+ THETA
+     1         1.63          ...           ...          ...         LN(CL)
+     2         1.55          ...           ...          ...         LN(V1)
+     3        0.728          ...           ...          ...          LN(Q)
+     4         2.33          ...           ...          ...         LN(V2)
+__________________________________________________________________________________
+                                                               INTERINDIVIDUAL
+ OMEGA                                                           VARIABILITY
+   1,1        0.155          ...           ...          ...   CV =         39.4%
+   2,1     -0.00727          ...           ...          ...    R =      -0.0471 
+   2,2        0.154          ...           ...          ...   CV =         39.2%
+   3,1     -0.00675          ...           ...          ...    R =      -0.0460 
+   3,2     -0.00113          ...           ...          ...    R =     -0.00772 
+   3,3        0.139          ...           ...          ...   CV =         37.3%
+   4,1      -0.0303          ...           ...          ...    R =       -0.204 
+   4,2       0.0179          ...           ...          ...    R =        0.121 
+   4,3      0.00539          ...           ...          ...    R =       0.0384 
+   4,4        0.142          ...           ...          ...   CV =         37.7%
+__________________________________________________________________________________
+                                                                  RESIDUAL 
+ SIGMA                                                           VARIABILITY
+   1,1       0.0591          ...           ...          ...   CV =         24.3%
+__________________________________________________________________________________
+*Indicates 95% confidence interval that includes zero
+%RSE is percent relative standard error (100% x SE/EST)
+
+        Akaike Information Criterion: -2467.93
+        Schwarz Bayesian Criterion:   -2404.71
+
+2. Results for  Stochastic Approximation Expectation-Maximization (Expectation Only) (No Prior)
+
+TERMINATION STATUS:
+ STOCHASTIC PORTION, EXPECTATION ONLY, WAS NOT TESTED FOR CONVERGENCE
+ REDUCED STOCHASTIC PORTION WAS COMPLETED, EXPECTATION ONLY
+
+ ETABAR IS THE ARITHMETIC MEAN OF THE ETA-ESTIMATES,
+ AND THE P-VALUE IS GIVEN FOR THE NULL HYPOTHESIS THAT THE TRUE MEAN IS 0.
+ 
+ ETABAR:         2.4732E-03  2.1523E-03  4.2013E-03  9.6889E-04
+ SE:             3.8102E-02  2.9995E-02  2.6499E-02  3.1849E-02
+ N:                     100         100         100         100
+ 
+ P VAL.:         9.4825E-01  9.4280E-01  8.7403E-01  9.7573E-01
+ 
+ ETASHRINKSD(%)  3.1465E+00  2.3517E+01  2.9046E+01  1.5516E+01
+ ETASHRINKVR(%)  6.1940E+00  4.1503E+01  4.9655E+01  2.8624E+01
+ EBVSHRINKSD(%)  2.6927E+00  1.4993E+01  2.2096E+01  1.1002E+01
+ EBVSHRINKVR(%)  5.3129E+00  2.7737E+01  3.9310E+01  2.0794E+01
+ RELATIVEINF(%)  9.0995E+01  7.1649E+01  5.6994E+01  7.2625E+01
+ EPSSHRINKSD(%)  3.0202E+01
+ EPSSHRINKVR(%)  5.1282E+01
+ 
+  
+ TOTAL DATA POINTS NORMALLY DISTRIBUTED (N):          500
+ N*LOG(2PI) CONSTANT TO OBJECTIVE FUNCTION:    918.938533204673     
+ OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:   -2553.62817133149     
+ OBJECTIVE FUNCTION VALUE WITH CONSTANT:      -1634.68963812682     
+ REPORTED OBJECTIVE FUNCTION DOES NOT CONTAIN CONSTANT
+  
+ TOTAL EFFECTIVE ETAS (NIND*NETA):                           400
+ NIND*NETA*LOG(2PI) CONSTANT TO OBJECTIVE FUNCTION:    735.150826563738     
+ OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:   -2553.62817133149     
+ OBJECTIVE FUNCTION VALUE WITH CONSTANT:      -1818.47734476775     
+ REPORTED OBJECTIVE FUNCTION DOES NOT CONTAIN CONSTANT
+  
+ FINAL VALUE OF LIKELIHOOD FUNCTION: -2553.628
+ COVARIANCE STEP NOT IMPLEMENTED
+
+                                    95% CONFIDENCE INTERVAL    DESCRIPTOR/
+     FINAL ESTIMATE          %RSE       LBOUND       UBOUND    VARIABILITY
+__________________________________________________________________________________
+
+ THETA
+     1         1.63          ...           ...          ...         LN(CL)
+     2         1.55          ...           ...          ...         LN(V1)
+     3        0.728          ...           ...          ...          LN(Q)
+     4         2.33          ...           ...          ...         LN(V2)
+__________________________________________________________________________________
+                                                               INTERINDIVIDUAL
+ OMEGA                                                           VARIABILITY
+   1,1        0.155          ...           ...          ...   CV =         39.4%
+   2,1     -0.00727          ...           ...          ...    R =      -0.0471 
+   2,2        0.154          ...           ...          ...   CV =         39.2%
+   3,1     -0.00675          ...           ...          ...    R =      -0.0460 
+   3,2     -0.00113          ...           ...          ...    R =     -0.00772 
+   3,3        0.139          ...           ...          ...   CV =         37.3%
+   4,1      -0.0303          ...           ...          ...    R =       -0.204 
+   4,2       0.0179          ...           ...          ...    R =        0.121 
+   4,3      0.00539          ...           ...          ...    R =       0.0384 
+   4,4        0.142          ...           ...          ...   CV =         37.7%
+__________________________________________________________________________________
+                                                                  RESIDUAL 
+ SIGMA                                                           VARIABILITY
+   1,1       0.0591          ...           ...          ...   CV =         24.3%
+__________________________________________________________________________________
+*Indicates 95% confidence interval that includes zero
+%RSE is percent relative standard error (100% x SE/EST)
+
+        Akaike Information Criterion: -2523.63
+        Schwarz Bayesian Criterion:   -2460.41
+
+3. Results for  Objective Function Evaluation by Importance Sampling (No Prior)
+
+TERMINATION STATUS:
+ EXPECTATION ONLY PROCESS WAS NOT COMPLETED
+
+
+ ETABAR IS THE ARITHMETIC MEAN OF THE ETA-ESTIMATES,
+ AND THE P-VALUE IS GIVEN FOR THE NULL HYPOTHESIS THAT THE TRUE MEAN IS 0.
+ 
+ ETABAR:         1.9463E-03  2.0924E-03  5.7363E-03  3.3594E-03
+ SE:             3.8097E-02  2.9932E-02  2.6588E-02  3.1984E-02
+ N:                     100         100         100         100
+ 
+ P VAL.:         9.5926E-01  9.4427E-01  8.2918E-01  9.1635E-01
+ 
+ ETASHRINKSD(%)  3.1591E+00  2.3678E+01  2.8808E+01  1.5160E+01
+ ETASHRINKVR(%)  6.2184E+00  4.1750E+01  4.9318E+01  2.8021E+01
+ EBVSHRINKSD(%)  3.6735E+00  2.1866E+01  3.0877E+01  1.5144E+01
+ EBVSHRINKVR(%)  7.2121E+00  3.8951E+01  5.2220E+01  2.7995E+01
+ RELATIVEINF(%)  8.4229E+01  5.9853E+01  3.8669E+01  5.6220E+01
+ EPSSHRINKSD(%)  2.9156E+01
+ EPSSHRINKVR(%)  4.9811E+01
+ 
+  
+ TOTAL DATA POINTS NORMALLY DISTRIBUTED (N):          500
+ N*LOG(2PI) CONSTANT TO OBJECTIVE FUNCTION:    918.938533204673     
+ OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:   -1144.09907821050     
+ OBJECTIVE FUNCTION VALUE WITH CONSTANT:      -225.160545005829     
+ REPORTED OBJECTIVE FUNCTION DOES NOT CONTAIN CONSTANT
+  
+ TOTAL EFFECTIVE ETAS (NIND*NETA):                           400
+  
+ FINAL VALUE OF OBJECTIVE FUNCTION: -1144.099
+ COVARIANCE STEP NOT IMPLEMENTED
+
+                                    95% CONFIDENCE INTERVAL    DESCRIPTOR/
+     FINAL ESTIMATE          %RSE       LBOUND       UBOUND    VARIABILITY
+__________________________________________________________________________________
+
+ THETA
+     1         1.63          ...           ...          ...         LN(CL)
+     2         1.55          ...           ...          ...         LN(V1)
+     3        0.728          ...           ...          ...          LN(Q)
+     4         2.33          ...           ...          ...         LN(V2)
+__________________________________________________________________________________
+                                                               INTERINDIVIDUAL
+ OMEGA                                                           VARIABILITY
+   1,1        0.155          ...           ...          ...   CV =         39.4%
+   2,1     -0.00727          ...           ...          ...    R =      -0.0471 
+   2,2        0.154          ...           ...          ...   CV =         39.2%
+   3,1     -0.00675          ...           ...          ...    R =      -0.0460 
+   3,2     -0.00113          ...           ...          ...    R =     -0.00772 
+   3,3        0.139          ...           ...          ...   CV =         37.3%
+   4,1      -0.0303          ...           ...          ...    R =       -0.204 
+   4,2       0.0179          ...           ...          ...    R =        0.121 
+   4,3      0.00539          ...           ...          ...    R =       0.0384 
+   4,4        0.142          ...           ...          ...   CV =         37.7%
+__________________________________________________________________________________
+                                                                  RESIDUAL 
+ SIGMA                                                           VARIABILITY
+   1,1       0.0591          ...           ...          ...   CV =         24.3%
+__________________________________________________________________________________
+*Indicates 95% confidence interval that includes zero
+%RSE is percent relative standard error (100% x SE/EST)
+
+        Akaike Information Criterion: -1114.1
+        Schwarz Bayesian Criterion:   -1050.88

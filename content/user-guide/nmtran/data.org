@@ -1,12 +1,19 @@
-#+title: 2. Data
+#+title: 1. Data
 {{< katex >}}{{< /katex >}}
 
 * Data and event records
-Data are specified for NONMEM using /event records/ [fn:1].
+From the last chapter we can see that the population data,
+corresponding observation \(y_{ij}\), \(x_{ij}\), \(z_i\), etc, have
+hiearchical (nested) structure: the data contains observations for
+each subject, as well as subject-level
+information that differ among subjects. NONMEM uses /tabulated data/
+to represent the above intra- and inter-subject variability.
+
+Such a NONMEM input data set consists /event records/ [fn:1].
 They represent temporal events such as dose events,
 observation events, and others such as the beginning
 of a urine collection and a measured change in kidney function.
-Data records (rows in the data file)
+Data records (rows in the data file) [fn:6]
 correspond to different events, and must be in the order of time.
 
 Data records also represent individuals, by grouping an individual's records in contiguous
@@ -23,7 +30,7 @@ observation). In this case the time ordering of data records refers to
 the time ordering of data records /across all/ records.
 
 A typical NONMEM data set is like this (the first 9 /records/):
-#+begin_src dat
+#+begin_src r
  ID      TIME    C1      C2  ...  CN      DV     MDV
   1       1.     .5      10        5              1
   1       3.              9       10              1
@@ -45,15 +52,36 @@ for event time,  and missing dependent value, respectively.
 Label C1, C2, ..., CN are concomitant variable data items for
 additional event specification (such as EVID, see below) as well as covariates. Null (blank) entries are read in as zeros. They can also be explicitly put in as "." (dot) and "0".
 
-Now we discuss reserved data items.
+Now we discuss commonly used data items for population data. See
+Reference manual for additional ones and further details.
 
-** Event identification: =EVID=
-Every event record must have =EVID=.
+** Depdent variable: DV and MDV
+There must always be a Dependent Variable data item labeled DV. This is for
+observations. There can be only one DV data item per data record.
+The position of the DV column can be flexible.
+
+MDV complemets DV to indicate missing observations [fn:7]:
+- MDV=0: DV for that record contains an observation value. The record is referred to as an observation record.
+- MDV=1: DV for that record does not contain a value of an observation.
+
+** Subject identification: ID
+For population data one must supply subject identification data item
+ID, and organize the data into two or more "individual records". An
+individual record is a group of contiguous data records with a same
+ID for a same individual. ID column
+does not have to be consecutive, increasing, unique, or begin with 1.
+For example, an ID column of 3, 5, 6, 10, 3, is acceptable as
+a sequence of IDs. Note the two instances of "3" IDs. Since they are separated by different IDs (5, 6, 10),
+they represent different individuals.
+
+
+** Event identification: EVID
+Every event record must have EVID.
 This data item identifies the type of event.
-- =EVID=0=: observation event. in the event the DV data item is an
-  observation, and the MDV=0.  When =EVID!=0= DV data item can be any
+- EVID=0: observation event. in the event the DV data item is an
+  observation, and the MDV=0.  When EVID!=0 DV data item can be any
   value or blank, and the MDV=1.
-- =EVID=1=: dose event. There are three types of doses: bolus dose,
+- EVID=1: dose event. There are three types of doses: bolus dose,
   infusion of finite duration and continuous constant rate infusion
   (effectively of infinite duration and leading to steady-state, thus
   also called steady -state infusion). Repetitions of doses of the
@@ -62,141 +90,346 @@ This data item identifies the type of event.
   the time an infusion is initiated, or the time a steady-state
   infusion terminates. With a dose event certain other data items
   which define the event further may also appear in the event record.
-- =EVID=2=: neither an observation nor dose event. The event is
+- EVID=2: neither an observation nor dose event. The event is
   referred to as of /other-type/. Examples include the time a urine
   collection begins/ends and the time a change in a covariable (such
   as glomelular filtration rate) is noted.
-- =EVID=3=: reset event. With a reset event the kinetic system is
+- EVID=3: reset event. With a reset event the kinetic system is
   reinitialized.  time is reset to the TIME data item, the amounts in
   each compartment are reset to zero, and the on/off status of each
   compartment is reset to its initial status.
-- =EVID=4=: reset-dose event. It combines a dose event and a reset
+- EVID=4: reset-dose event. It combines a dose event and a reset
   event: The system is first reset, and then a dose is given according
   to the information given in those fields giving dose information.
 
-** The Time: =TIME=
-Every event record must have =TIME= [fn:2].
-The data item gives the time of the event.
+** TIME and DATE
+Every event record must have TIME [fn:2] to specify the time of the event.
 
 Unless in reset and reset-dose events where time is reset, event records must be ordered (within an individual record) in time. Namely,
 \(t_A\le t_B\) when event record A is followed by event record B.
 
-=TIME= is unitless. It may contain clock time, hh:mm, and =DATE= data
-item may also be present. They are converted to relative time internally.
+TIME may contain clock time, hh:mm or hh:mm:ss.
+If certain record's TIME contains colon ":", all the TIME values will
+be converted to /elapsed (relative)/ values in hour. Incorporating DATE
+infromation, they are relative to each individual's first data record
+(the first record has TIME=0), such as
+#+begin_src r
+recorded time       relative time
+ID  TIME            ID  TIME
+1   9:15            1   0.00
+1   9:30            1   0.25
+1   10              1   0.75
+1   14:40           1   5.42
+1   32.5            1   23.25
+2   8               2   0.00
+2   8.0             2   0.00
+2   44:50           2   36.83
+2   58              2   50.00
+#+end_src
+Note that recorded time is over 24, indicating the records span into
+the second and third day. Alternatively, one can use DATE to represent
+the above records:
+#+begin_src r
+recorded time             relative time
+ID   DATE TIME            ID  DATE TIME
+1    1    9:15            1   1    0.00
+1    1    9:30            1   1    0.25
+1    1    10              1   1    0.75
+1    1    14:40           1   1    5.42
+1    2    8.5             1   2    23.25
+2    1    8               2   1    0.00
+2    1    8.0             2   1    0.00
+2    2    20:50           2   2    36.83
+2    3    10              2   3    50.00
+#+end_src
+DATE supports calendar dates in month-day-year format:
+#+begin_src r
+recorded time                   relative time
+ID   DATE       TIME            ID  TIME
+1    10-1-86    9:15            1   0.00
+1    10-1-86    9:30            1   0.25
+1    10-1-86    10              1   0.75
+1    10-1-1986  14:40           1   5.42
+1    10-2-1986  8.5             1   23.25
+2    10-12      8               2   0.00
+2    10-12      8.0             2   0.00
+2    10-13      20:50           2   36.83
+2    10-14      10              2   50.00
+#+end_src
+As shown the year can be skipped or supplied in two-digit and 4-digit format.
+
+Using DATE will trigger time convertion if without ":" in TIME entries.
+
+Reset events and reset-dose events also set TIME=0.
+
 In addition, one can use the TRANSLATE=(TIME/f/d) option of $DATA record
 to request that TIME values be divided by f (typically, f is 24 to
 convert hours to days, with d significant digits.
 
-In NONMEM v7.4+, time data items may have any value, including negative values
-(earlier versions mandate non-negative values) [fn:3].
-
-** Dose Amount: =AMT=
-In a dose event =AMT= gives the amount of a bolus
-dose or of an infusion of finite duration. In those cases it must be
+** Dose Amount: AMT
+In a dose event AMT gives the amount of a (instantaneous) bolus
+dose or of an infusion of finite duration, incorporating
+bioavailability, if any.. In those cases it must be
 positive.  However, if other data items in a dose event
 record (see below) indicate that the event record marks the termination of a
-steady-state infusion, then if given =AMT= must be 0.
-If all doses are steady-state infusions, =AMT= can be omitted.
+steady-state infusion, then if given AMT must be 0.
+If all doses are steady-state infusions, AMT can be omitted.
 
-In observation, other-type, and reset event records if given =AMT= must be 0 .
-In a reset-dose event record the =AMT= data item should satisfy the requirements
-of the =AMT= data item in a dose event record.
+In observation, other-type, and reset event records if given AMT must be 0 .
+In a reset-dose event record the AMT data item should satisfy the requirements
+of the AMT data item in a dose event record.
 
-** Dose Rate: =RATE=
+*** Bolus dose
+A dose record with AMT>0, RATE=0 and SS=0 specifies a bolus dose.
+Recall that if the $PK record computes a bioavailability fraction parameter for the compartment
+into which the dose is introduced, then the contents of the AMT data item is multiplied
+by the current value of this parameter before the amount is added to the compartment. A
+bolus dose enters the dose compartment immediately; the predicted (scaled) amount in
+the dose compartment, if displayed in a table or scatterplot, will
+include the dose. For example,
+a record
+#+begin_src r
+TIME     AMT
+4.        10.
+#+end_src
+for the model in Chapter 1 would be for a bolus dose, because
+RATE and SS are not given (by the $INPUT control record),
+and recall that blank/null entries imply zero values.
+
+A bolus dose to the central compartment might be interpreted as an IV bolus dose; to the
+depot it might be an oral tablet; to a peripheral compartment it might be an intra-muscular
+injection.
+
+** Dose rate: RATE
 In a dose record the RATE data item can have values
 - =RATE>0=: an infusion rate.
-- =RATE=0=: instantaneous bolus dose.
-- =RATE=-1=: the dose is either a zero-order bolus dose (see section
+- RATE=0: instantaneous bolus dose.
+- RATE=-1: the dose is either a zero-order bolus dose (see section
   III.F.3) with rate modeled in PK (see section III.F.4) or a
   rate-modeled steady-state infusion (see section III.F.5).
-- =RATE=-2=: a zero-order bolus dose and that its duration is modeled
-  in PK (see section III.F.3).  In this case a positive =AMT=  must be
+- RATE=-2: a zero-order bolus dose and that its duration is modeled
+  in PK (see section III.F.3).  In this case a positive AMT  must be
   specified.
 
-=RATE= must be 0 in observation, other-type, and reset
+RATE must be 0 in observation, other-type, and reset
 event records.
 In a reset-dose event record the RATE data item should satisfy the requirements
 of the RATE data item in a dose event record.
 
-=RATE= can be omitted if all doses are bolus.
+RATE can be omitted if all doses are bolus.
+
+*** Infusion dose
+Infusions are doses having AMT>0 and RATE>0, with duration AMT/RATE,
+and there is no explicit "end of infusion" record.
+
+As with bolus doses, AMT is first multiplied by the bioavailability parameter for the dose compartment, if any. Drug amounts in the system cannot be affected in a
+detectable way at the time an infusion begins by any drug introduced by the infusion; the
+predicted (scaled) amount in the dose compartment in the output
+will not include the dose. Infusions may overlap. That is, subsequent dose records may
+start new infusions before old ones have finished. It is acceptable
+if an infusion’s duration is large enough to extend beyond the time of
+the last event record for the individual, but the remainder of the
+drug is ignored. A reset or reset-dose event, or a steady-state dose
+event (SS=1, see next section), will also terminate any ongoing infusions.
+
+For example,
+#+begin_src r
+TIME     AMT     RATE
+4.       10.     2.
+#+end_src
+defines an infusion dose that begins at TIME=4, and terminates at TIME=4+10/2=9.
+
+** Interdose interval: II
+- If some steady-state dose event record has a positive AMT data item, then the II must be specified.
+- If some non-steady-state dose event record has a positive ADDL data item, II must be specified.
+
+II can be 0 or positive. For repeated doses II specifies the period.
+
+II must be 0 in steady-state infusion. observation, other-type, and reset event
+records.
+In a reset-dose event record II should satisfy the requirements of II in a dose event record.
+
+The same rule of hh:mm and DATE data for TIME applies to II. For
+example, II accepts ":30" for half-hour dose interval and it will be
+converted to "0.5". Similarly, one can use the TRANSLATE=(TIME/f/d) option of $DATA record
+to request that II values be divided by f (typically, f is 24 to
+convert hours to days, with d significant digits.
 
 
-** Steady State: =SS=
-It is helpful to review the background of steady-state kinetics [fn:4].
+** TODO Steady State: SS
+Steady state is an idealized state in a kinetic system. It is
+when the drug amount in the system has reached a /periodic/ pattern
+after a sequence of repeated dose at a regular /dose cycle/ [fn:4].
+The doses in each cycle may consist of a mixture of bolus doses and
+infusions of finite duration. For example, a dose cycle with 4-hours /period/
+may consist of a bolus dose of 10mg, immediately followed by a 30
+minute infusion of 10mg, so that the combination of doses is repeated
+every 4 hours. When the system is at such a state, we call the doses
+and cycles /stead-state doses/ and /steady-state cycles/.
 
-*** ackground
-Steady state is an idealized state in a kinetic system. In a model we
-can achieve steady states with one of the following approaches.
-**** Dose cycles
-Administering a sequence of doses in a regular cyclic fashion over a
-  sufficiently long time. Each cycle of these /dose cycles/ share same
-  doses, though they may consist of a mixture of bolus doses and
-  infusions of finite duration. For example, a dose cycle may consist
-  of an instantaneous bolus dose of 10mg, immediately followed by a 30
-  minute infusion of 10mg. This cycle is then repeated every 4 hours.
-  In other words, /the period of the cycle/ \(T\), is 4 hours in this
-  example.
-
-Let the dose times of the first cycle be \(t_1\le t_2\le
-  \dots \le t_n\). The above approach is to administor the same doses at
-  \(t_1+T, t_2+T, \dots, t_n+T\), then at \(t_1+2T, t_2+2T, \dots,
-  t_n+2T\), etc. The system is at steady state if for any \(t\) in
+Mathematically the state state is defined as following, Let the dose
+  times of certain cycle be \(t_1\le t_2\le
+  \dots \le t_n\), and of the next cycle be
+  \(t_1+T, t_2+T, \dots, t_n+T\), then at \(t_1+2T, t_2+2T, \dots, t_n+2T\), etc. The system is at steady state if for any \(t\) in
   interval \([t_1, t_1+T)\)  the drug amounts in the compartments \(A(t)\)
   equal to \(A(t+T)\), the amounts at \(t+T\).
 
-**** Steady-state infusions
-If a large enough number of dose cycles have occurred,
-the user might consider that an (approximate) steady-state
-has been reached by the time when the last cycle begins.
-This last dose cycle is called the
-/steady-state cycle/.
-The doses in this cycle are called
-/steady-state doses/.
-
-Therefore we can use a number of simultaneous
-  steady-state infusions to achive steady state. Consider two such infusions schemes. The first one terminates at time
-  \(t_1\le t_2\le \dots \le t_n\), and \(A(t)\) is the drug amount in
-  the system at time \(t\). The second one terminates at
-  \(t_1+\Delta\le t_2+\Delta\le \dots \le t_n+\Delta\), with \(B(t)\)
-  the drug amount at time \(t\). Then the
-  system is at steady state if there exists a \(\Delta\) such that
-  \(A(t)=B(t+\Delta)\), for any \(t\)  in \((t_1, t_n)\).
-
-One can use a regular cyclic dosage pattern in
-conjunction with simultaneous steady-state infusions.
-
-**** Steady-state dose records
 Intead of specifying a repeated number of dose event records, we use
 a special record for the last dose cycle (for steady-state infusions
 only records for the terminations are required, as shown above). These records
-are called
-/steady-state dose records/.
-They describe the administration of a sequence of same doses at a
-regular interval such that the system ends with steady state.
-This sequence of doses are called the /implied doses/, and we can imagine
-they have been administored since forever. In other words,
-the /implied dose times/ started at \(t=-\infty\).
+are called /steady-state dose records/.
+They describe the administration of a sequence of same doses that leads
+to the steady state at the specified TIME.
+This sequence of /implied doses/ is assumed to
+be ongoing since forever. In other words, the /implied dose times/ started at \(t=-\infty\).
+We use SS to flag steady-state dose records (see Reference manual for
+details, including the interpretation of SS=3).
+  - SS=0 indicates that the dose is not a steady state dose.
+  - SS=1 indicates that the dose is a steady state dose, and that the
+    compartment amounts are to be  reset  to  the  steady-state
+    amounts resulting  from  the  given  dose.
+  - SS=2 indicates that the dose is a steady state dose, and that the
+    compartment amounts are to be set to the  sum  of  the
+    steady-state amounts resulting from the given dose plus whatever
+    those amounts would have been at the event time were the
+    steady-state dose  not given.
 
-**** Steady state for linear systems
-**** =SS= data item
+*** Steady state with multiple bolus doses
+These are dose events having AMT>0, RATE=0, SS=1, and II>0. The II
+specifies the period of dose cycles. As with non-steady-state bolus
+doses, AMT is first multiplied by the bioavailability parameter for
+the dose compartment, if any.
 
-** Interdose interval: =II=
-- If some steady-state dose event record has a positive =AMT= data item, then the =II= must be specified.
-- If some non-steady-state dose event record has a positive =ADDL= data item, =II= must be specified.
+Figure below shows how drug levels vary with time. The concentration-time profiles over
+each interdose interval look the same since, in principle, there is an infinite number of
+implied doses.
 
-=II= can be 0 or positive. For repeated doses =II= specifies the period.
+#+caption: Figure 3.1. Steady-state with multiple bolus doses. The dose is given at time t. The interdose interval is I. Steady-state levels can be predicted between times t and t+I.
+#+ATTR_HTML: :style margin:20px 20px 20px 0px;
+@@html:<img src="/docs/img/new6.3.epsi.png">@@
 
-=II= must be 0 in steady-state infusion. observation, other-type, and reset event
-records.
-In a reset-dose event record =II= should satisfy the requirements of =II= in a dose event record.
+For example,
+#+begin_src r
+TIME     AMT     SS     II
+8        10.     1      12
+#+end_src
+specifies that an infinite number of bolus doses, 10 units each, have been given 12
+hours apart, with the last at time 8AM by which the system has reached steady
+state.
 
-Similar to =TIME=, =II= is unitless. It may contain clock time, hh:mm, and =DATE= data
-item may also be present. They are converted to relative time internally.
-In addition, one can use the TRANSLATE=(TIME/f/d) option of $DATA record
-to request that =II= values be divided by f (typically, f is 24 to
-convert hours to days, with d significant digits.
+*** Steady state with multiple infusions
+These are dose events having AMT>0, RATE>0, SS=1, and II>0. Each such event
+describes the last of a series of regularly spaced infusions, all of the same amount and
+rate. As with a non-steady-state infusion, the duration of each infusion is given by
+AMT/RATE. Figure 3.2 shows how drug levels vary with time. The concentration-time profiles over
+each interdose interval look the same since, in principle, there is an infinite number of
+implied doses. See figure below.
+#+caption: Figure 3.2. Steady-state with multiple infusions. The dose is given at time t. The interdose interval is I. Steady-state levels can be predicted between times t and t+I.
+#+ATTR_HTML: :style margin:20px 20px 20px 0px;
+@@html:<img src="/docs/img/fig6.4.ubuntu.epsi.png">@@
 
-** Compartment: =CMT=
+For example,
+#+begin_src r
+TIME     AMT     RATE     SS     II
+16       10.     5.       1      6
+#+end_src
+specifies that infusions, each 10 units and of duration 10/5=2, are assumed to have been given
+6 hours apart, with the last of these started at time 4PM, at which time steady-state is
+reached. The daily dose times were 4AM, 10AM, 4PM, and 10PM. Steady-state levels can be predicted between times 16 (4 PM) and 22 (10 PM) (provided there are no further doses introduced during this interval).
+
+*** Steady State with constant infusion
+These are dose events having AMT=0, RATE>0, SS=1, and II=0. Such an event consists
+of infusion with the stated rate, starting at time \(-\infty\), and ending at the time on the dose
+event record. Bioavailability fractions do not apply to these doses. Figure below shows how drug levels vary with time.
+#+caption: Figure 3.3. Steady-state with constant infusion. Steady-state level can be predicted only at time t.
+#+ATTR_HTML: :style margin:20px 20px 20px 0px;
+@@html:<img src="/docs/img/fig6.5.ubuntu.epsi.png">@@
+
+For example,
+#+begin_src r
+TIME     RATE     SS
+16       2.       1
+#+end_src
+specifies a steady-state infusion at rate 2, ending at 4 PM. A steady-state level
+can be predicted only at this time.
+
+*** Multiple Steady-State doses
+Doses with SS=2 are similar to non-steady-state doses in that compartment amounts are computed in two steps. First, compartment amounts are computed at the time on the dose event record based on the prior
+dosing history of the system. Second, steady-state amounts are computed from the dosing information on the record and added to the existing compartment amounts. Thus, if
+the kinetics are linear, this results in an application of the superposition principle wherein
+the amounts in the system resulting from doses described by dose event records preceding
+the time of the steady-state dose are superposed on the (steady-state) amounts in the system resulting from the steady-state dose and the implied doses.
+
+As with any steady-state dose, the steady-state amounts are obtained using the values of
+the pharmacokinetic parameters computed from the information on the steady-state dose
+record. In the case that SS=2, though, if these values differ from those computed from
+the information on the previous dose record(s), then the compartment amounts at the time
+in the steady-state dose record are not truly steady-state amounts, and the computed
+steady-state levels are not valid predictions. NONMEM will not detect this error. We
+emphasize that /superposition is only valid with linear kinetic systems/.
+SS=2 records can be used to achieve the specification of complicated dosing regimens.
+For example, figure below shows how drug levels vary with time when two different doses
+are alternated. In this illustration, two steady-state doses are specified, each with interdose interval I and with time between the two steady-state doses equal to I/2. Even more
+complex patterns are possible.
+
+#+caption: Figure 3.4. Multiple steady-state doses. Two separate bolus steady-state doses are given. The first dose event record is at time t. The second at time t+I/2. They each have interdose interval I. Steady-state levels can be predicted between times t+I/2 and and t+I.
+#+ATTR_HTML: :style margin:20px 20px 20px 0px;
+@@html:<img src="/docs/img/fig6.6.ubuntu.epsi.png">@@
+
+For example,
+#+begin_src r
+TIME     AMT     SS     II
+8        10.     1      24
+20       15.     2      24
+#+end_src
+describes the following dosing regimen: a dose of 10 units every
+morning at 8AM and a dose of 15 units every evening at 8PM. Note that
+steady-state is not truly established until after the second dose
+record; any observation events interposed between the two dose records
+will reflect only the first steady-state dosage (i.e., 10 units every
+8AM). Another way to achieve the same steady-state is to use
+#+begin_src r
+TIME     AMT     SS     II
+20       10.     1      12
+20       5.      2      24
+#+end_src
+This describes doses of 10 units every 12 hours, the last of which is
+given at 8PM (i.e. at 8 AM and 8 PM daily), plus additional doses of 5
+units at 8PM daily. In both examples, the steady-state levels can be
+predicted from time 20 hours to time 32 hours.
+
+*** Combining non-steady-state with steady-state Doses
+Non-steady-state dose records may appear before, among, or after steady-state dose
+records. Such a dose record may occur before a steady-state dose
+record to reflect a separate transient dose given among a series of
+regular doses leading to steady-state. One such example is when a
+patient under steady-state mistakenly takes an extra
+dose shortly before his appointment.
+
+A non-steady-state dose record may occur after a steady-state dose
+record in order to continue the pattern of doses beyond the
+steady-state dose. One may use this approach to calculate the system
+state beyond the end time for the last cycle specified in the
+steady-state record. For example,
+#+begin_src r
+TIME     AMT     SS     II
+8        10.     1      24
+20       15.     2      24
+32       10.     0      0
+44       15.     0      0
+#+end_src
+shows that the last two records continue the steady-state pattern of the first two. Steady-state
+levels may be predicted between times 20 and 56.
+
+Similarly, a steady-state constant infusion may be extended with a non-steady-state infusion. In the example below, steady-state levels can be predicted from time 0 to time 100.
+#+begin_src r
+TIME     RATE     AMT     SS
+0        30       0.      1
+0        30       3000.   0
+#+end_src
+
+
+** Compartment: CMT and PCMT
 The /observation compartment/ of a record contains the prediction for
 an observation. It can be either a scaled drug amount
 (see section III.F.1) or a modification of this quantity (see section IV.B.2).
@@ -235,21 +468,21 @@ If drug would normally move from compartment A to B, turning off B
 implies turning off A. In that case the drug amount either enters the
 output compartment (if on) or is lost from the system.
 
-*** =CMT= data item
-The optional =CMT= data item specifies the relevant compartment for a record:
+*** CMT data item
+The optional CMT data item specifies the relevant compartment for a record:
 - for an observation record, it specifies the observation compartment;
 - for a dose record, it specifies the dose compartment;
 - it turns a compartment on/off at the event time: a positive
   compartment number means ON, negative means OFF.
 
 For observation/dose(reset-dose) compartment for an observation/dose record.
-Not given or =CMT=0= implies the use of default compartments.
+Not given or CMT=0 implies the use of default compartments.
 
 If all one wants to accomplish at a certain time is to turn a
 compartment on (e.g. the output compartment, in order to begin a urine
 collection), then one should construct an /other-type/ event record
 that simply turns the compartment on, by
-giving the compartment number in =CMT=.
+giving the compartment number in CMT.
 
 To turn a compartment off at a given time, one should construct
 an other-type event record that gives the negative value of the compartment
@@ -269,23 +502,23 @@ compartment data item is nonzero, the designated compartment is turned
 on or off according to whether the data item is positive or negative (it must
 be plus with a reset-dose event record).
 
-** Prediction Compartment: =PCMT=
+*** Prediction Compartment
 NONMEM computes a prediction for each
 data record, regardless if it contains an observation: one can use other-type event records
 at times of interest, and output the predition in tables.
-- Data records with =CONT=1= are ignored thus the prediction is 0.
+- Data records with CONT=1 are ignored thus the prediction is 0.
 - For the last data record of an observation event record, the
   prediction is always either the scaled drug amount in the
   observation compartment (see section III.F.1), or a modification of
   this quantity (see section IV.B.2).
 - For the last data record of a non-observation record, the prediction is
 the prediction that would result for an observation of the default observation
-compartment (see section H), unless otherwise specified using =PCMT=.
+compartment (see section H), unless otherwise specified using PCMT.
 
-The optional =PCMT= data item specifies the compartment number for the prediction for the last
+The optional PCMT data item specifies the compartment number for the prediction for the last
 data record of the event record.  Thus predictions for
 different compartments can be displayed.
-Not given or =PCMT=0= in a non-observation event record implies
+Not given or PCMT=0 in a non-observation event record implies
 the prediction for the last data record of the event record
 is the prediction that would result for an observation of
 the default observation compartment.
@@ -295,95 +528,100 @@ compartment may also be given by the PCMT data item as the number 1000
 (this is true regardless of the type of the event record).
 With small models (number of compartments <= 99), this number may also be given as 100.
 
-** =CALL=
-The PK and ERROR subroutines need not be called with every event record
-(see sections III.H and IV.C).  When /call-limiting protocals/, calling-protocols limiting calls to PK or
-ERROR, are used, =CALL= data item can be used to overwrite and force a
-call to PK and/or ERROR.
-This can be used, for example, to selectively do PK calculations when
-some individuals' PK parameters are covariates dependent while the
-rest of the population's are not.
-
-The optional =CALL= data item can assume the following values.
-If it appears it has the values 0, 1, 2, 3, or 10.
-- =CALL=0=: in an event record, then calls to PK and ERROR with the record occur according to the calling-protocols implemented with PK and ERROR.
-- =CALL=1=: a call to PK is determined according to the calling-protocol implemented with PK, and a call to ERROR occurs.
-- =CALL=2=: a call to ERROR is determined according to the calling-protocol implemented with ERROR, and a call to PK occurs.
-- =CALL=3=: calls to both ERROR and PK occur.
-- =CALL=10=: with ADVAN9, ADVAN15, and ADVAN17, a call to ADVAN occurs
-  whether  or  not the TIME data item is defined, and whether or not
-  AES has used IDEFA(2) to limit calls to the ADVAN routine (See
-  Chapter VI, Section E.B). May be combined with values 1, 2, and 3.
-  e.g., CALL = 11 forces calls to  both  ADVAN  and  ERROR with the
-  event record.
-
-** Additional doses: =ADDL=
+** Additional doses: ADDL
 Instead of specifying a series of records for identical doses, user
-can use =ADDL= on a single dose event record. The dose specified on the dose event record is called the
+can use ADDL on a single dose event record. The dose specified on the dose event record is called the
 /initiating dose/, so that
-- =ADDL=0= means only the initiating dose in the record is administored;
-- =ADDL=n= for a positive =n= means =n= doses, /additional/ to the
-  initiating dose, are administored. In that case one must use
-  =II= to specify the constant interdose interval
+- ADDL=0 means only the initiating dose in the record is administored;
+- ADDLn= for a positive =n= means =n= doses, /additional/ to the
+  initiating dose, are given. In that case one must use
+  II to specify the constant interdose interval.
 
 If the initiating dose is lagged, the additional doses are also lagged
-(see section III.F.6).
-The term
-.US additional dose time
-refers either to the time an
-additional dose is given, if the dose is not lagged, or to the lagged time
-at which the dose actually enters the system, if the dose is lagged.
-Such a time is a nonevent dose time (see section III.B.2).
-At each additional dose time a dose like the initiating dose
-automatically enters the system.
-Until such a time as all the additional doses have entered, or until the last
-event time in an individual record is attained, whichever comes first, the
-dose record initiating the dose series is said to be
-.US active
-\&.
-Afterwards, the record is said to be
-.US inactive
-\&.
-(The additional dose data item can also be used when all the data are from a
-single subject, and then the term 'last event time in an individual record'
-should be understood to mean the last event time in the data set.
-This is a consequence of the single-subject assumption; see section IV.A.)\0
+(see section III.F.6). The /additional dose time/ are the time when
+such a dose actually enters the system, accounting for lag, if any. It
+is a nonevent dose time (see section III.B.2). At each additional dose
+time a dose like the initiating dose automatically enters the system.
+Until such a time as all the additional doses have entered, or until
+the last event time in an individual record is attained, whichever
+comes first, the dose record initiating the dose series is said to be
+active. Afterwards, the record is said to be inactive (The additional
+dose data item can also be used when all the data are from a single
+subject, and then the term 'last event time in an individual record'
+should be understood to mean the last event time in the data set. This
+is a consequence of the single-subject assumption; see section IV.A.)
 There can be at most 10 active dose event records at a time.
 
 Note that
-- The administration of an additional dose will not be expressed explicitly in a NONMEM table or scatterplot;
-- The ADDL data item must be 0 when the initiating dose is a steady-state
-infusion.
-However, the ADDL data item can be nonzero when the initiating dose is
-any other type of steady-state dose.  In this case, after the steady-state dose,
-an additional number of (transient) doses just like the steady-state dose are
-given.  (Recall that the steady-state dose is just the last of many
-doses identical to it and \fIleading\fP to a steady-state.)\0
-On the other hand, any steady-state dose event record with SS data item
-equal to 1 will deactivate
-any previous dose event record which happens to be active.
-Also, a reset and a reset-dose event record will deactivate any previous
-dose event record which happens to be active.
-Also, if a compartment is turned off with an other-type event record
-(see section H), this deactivates any previous dose event record with a
-dose to this compartment which happens to be active.
-- If given, =ADDL= must be 0 in observation, other-type, and reset event records.
+- the administration of an additional dose will not be expressed explicitly in a NONMEM table or scatterplot;
+- If given, ADDL must be 0 in observation, other-type, and reset event records.
+- ADDL must be 0 when the initiating dose is a steady-state
+  infusion. However, the ADDL data item can be nonzero when the
+  initiating dose is any other type of steady-state dose.  In this
+  case, after the steady-state dose, an additional number of
+  (transient) doses just like the steady-state dose are given.
+  (Recall that the steady-state dose is just the last of many doses
+  identical to it, leading to a steady-state). On the other hand, any
+  steady-state dose event record with SS1 will deactivate any
+  previous dose event record which happens to be active. Also, a reset
+  and a reset-dose event record will deactivate any previous dose
+  event record which happens to be active. Also, if a compartment is
+  turned off with an other-type event record (see section H), this
+  deactivates any previous dose event record with a dose to this
+  compartment which happens to be active.
 
-See also reserved variables  \fBADDL_ACTUAL,ADDL_TIMEDIFF,ADDL_TIME\fP
-in Chapter III.
+** TODO Examples
+*** Output compartment
+:PROPERTIES:
+:CUSTOM_ID: ex_data_output_comp
+:END:
+
+Consider the one-compartment model
+with first-order absorption with the sequence of events, including the
+collections and observations of urine concentration \(C_u\):
+| 6:00AM  | a bolus dose of 100 is given;                                                 |
+| 8:00AM  | a urine collection is started;                                                |
+| 9:30AM  | \(C_u\) and urine volume (UVOL) are measured and a new collection is started; |
+| 11:45AM | \(C_p\), \(C_u\), and UVOL are measured.                                      |
+The data records are as follows:
+#+begin_src r
+ID     TIME     EVID     UVOL     DV     CMT     AMT
+1      6.00     1        0        0      1       100
+1      8.00     2        0        0      3       0
+1      9.50     0        75       .058   -3      0
+1      9.50     2        0        0      3       0
+1      11.75    0        100      .067   -3      0
+1      11.75    0        100      5.80   2       0
+#+end_src
+Notice that urine collections start with an other-type event record (EVID=2) with CMT=3
+for the output compartment. This turns on the compartment on at 8AM,
+i.e. to begin accounting for the amount accumulating in this
+compartment from 8AM. To use other-type event records one must include
+the EVID data item. The CMT data item must be present in all event records
+since in order to specify the output compartment. The DV value on the observation record
+at 9:30AM is \(C_u\). The negative CMT in this record indicates that
+the output compartment is turned off at 9:30AM. Then to continue the collection, the compartment
+is explicitly turned on (line 5). Note that UVOL is recorded on both
+observation records at time 11:45AM. Strictly speaking, it need only be recorded on the sec-
+ond (Cu observation). This point is discussed further in Chapter 7, Section 4.3.3. See
+also Chapter 12, Section 7, for a modification to this data file for output-type compart-
+ments.
 
 [fn:1] Strictly speaking, the event records feature is part of PREDPP,
 and NM-TRAN allows a more general format (discussed in Part 4).
 Essentially all modern NONMEM applications use event records for data specification.
 [fn:2] An example is when ADVAN9, ADVAN15, or ADVAN17 is used to solve
-algebraic equations solved.  In  this case =TIME= is optional.
-[fn:3] NM-TRAN has always allowed negative clock times when day-time
-translation is performed, and converted them to non-negative relative
-times.
+algebraic equations solved.  In  this case TIME is optional.
 [fn:4] The steady-state kinetics described here is general, but the
-approach of =SS= data item in this section is not applicable to delay
+approach of SS data item in this section is not applicable to delay
 differential equations and some other systems, e.g., those with
 changes in kinetics outside the dosing interval. See
 @@html:<a href="/docs/user-guide/techniques/steady_state/">empirical approach for state state</a>@@ for those situations.
 [fn:5] Alternatively one can specify a dedicated subsequent other-type event record with the same
 time data item.
+[fn:6] In NONMEM v7.2+, there is no limit on the number of data items
+per data record. Ealier NONMEM v7.x versions limit it to 50 but
+this can be changed from the PD constant in file resources/SIZES.f90.
+[fn:7] In NONMEM v7.3+, there is no limit on the number of observation
+records per individual. Ealier NONMEM v7.x versions limit it to 250.
+To change this limit, see Users Guide III.

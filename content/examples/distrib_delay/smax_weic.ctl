@@ -1,0 +1,71 @@
+;DDE
+$PROBLEM Discrete Delay on Smax Drug Responsive Input function
+; turn off second derivative assessments, sometimes even 1st derivatives if only simulating
+$ABBR DERIV2=NO DERIV2=NOCOMMON DERIV1=NO
+$INPUT ID AMT TIME DV EVID MDV
+$DATA smax_gammat.dat IGNORE=C
+$SUBROUTINES ADVAN16 TOL=14 ATOL=14 
+$MODEL NCOMPARTMENTS=2
+
+$PK
+CALLFL=-2
+MXSTEP=2000000000
+SMAX=THETA(1)
+SC50=THETA(2)
+KIN0=THETA(3)
+AA=THETA(4)
+BB=THETA(5)
+Vmax = 2
+V50 = 3
+V = 1
+TEND=BB*(-LOG(0.0001))**(1.0D+00/AA)
+
+; Initial conditions
+A_0(1)=0.0
+A_0(2)=0.0
+
+$DES
+DADT(1)=0.0
+DADT(2)=0.0
+
+
+SUM=0.0
+SUMW=0.0
+
+;DOC 25 TS CS GQ(G,0.5,TEND)
+TAU1=TS
+AP_1_1=0.0
+LL=AA/BB*((TS/BB)**(AA-1.0))*EXP(-((TS/BB)**AA))
+CDELAY=AD_1_1/V
+FF=KIN0*(1.0+(SMAX*CDELAY)/(SC50+CDELAY))
+SUM=SUM+CS*LL*FF
+SUMW=SUMW+CS*LL
+;ENDDOC
+
+ADC=SUM/SUMW
+
+
+ C=A(1)/V
+ DADT(1)=-(VMAX*A(1))/(V50+A(1))
+ KINW=KIN0*(1.0+(SMAX*C)/(SC50+C))
+ DADT(2)=KINW-ADC
+
+$ERROR
+CC=A(1)/V
+A1=A(2)
+Y1=1.0
+IPRED=A(2)
+Y=IPRED*(1.0+EPS(1))
+kin = kin0*(1.0+(Smax*cc)/(SC50+cc))
+
+$THETA
+0.5
+10.0
+190.0
+7.0
+6.5
+
+$OMEGA (0.0 fixed)x4
+$SIGMA (0.0 fixed)
+$SIML (122345) ONLYSIM SUBP=1
+$TABLE TIME KIN IPRED NOPRINT NOAPPEND FILE=smax_weic.tab ONEHEADER FORMAT=S1PE20.13

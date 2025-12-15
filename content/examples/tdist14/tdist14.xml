@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="ASCII"?>
+<!DOCTYPE nm:output SYSTEM "output.dtd">
+<output>
+<start_datetime>2018-01-07T19:29:41.168</start_datetime>
+<control_stream><![CDATA[
+$PROB RUN# Example 1 (from samp5l)
+$INPUT ID TIME  DV=CONC AMT=DOSE RATE EVID MDV CMT
+$DATA tdist13.csv IGNORE=C
+
+$SUBROUTINES ADVAN3 TRANS4
+
+$PK
+MU_1=THETA(1)
+MU_2=THETA(2)
+MU_3=THETA(3)
+MU_4=THETA(4)
+NU=1.0
+CHISQ=SQRT( ETA(5)*ETA(5) )
+CL=EXP(MU_1+ETA(1)/CHISQ)
+V1=EXP(MU_2+ETA(2)/CHISQ)
+Q= EXP(MU_3+ETA(3)/CHISQ)
+V2=EXP(MU_4+ETA(4)/CHISQ)
+S1=V1
+
+$ERROR
+Y = F + F*EPS(1)
+
+;$THETA 1.68338E+00  1.58811E+00  8.12694E-01  2.37435E+00
+$THETA 2 2 2 2
+$OMEGA BLOCK(4)
+0.1
+0.01 0.1
+0.01 0.01 0.1
+0.01 0.01 0.01 0.1
+
+$OMEGA (1.0 FIXED)
+
+$SIGMA
+0.1
+
+;$EST METHOD=ITS INTERACTION MAXEVAL=9999 PRINT=5 NOHABORT SIGL=9 CTYPE=3 NITER=10 NONINFETA=1 MCETA=10
+$EST METHOD=SAEM AUTO=1 PRINT=20
+$EST METHOD=IMP LAPLACE INTERACTION MAXEVAL=9999 PRINT=1 NOHABORT ISAMPLE=3000 NITER=200 SIGL=9 ; DF=1 RANMETHOD=3S1P
+     CTYPE=3 MCETA=10
+$EST METHOD=1 INTERACTION MAXEVAL=9999 PRINT=1 NOHABORT NSIG=3 SIGL=9 NONINFETA=1 SLOW MCETA=10
+$COV MATRIX=R UNCONDITIONAL
+]]></control_stream>
+<nmtran><![CDATA[
+
+ WARNINGS AND ERRORS (IF ANY) FOR PROBLEM    1
+
+ (WARNING  2) NM-TRAN INFERS THAT THE DATA ARE POPULATION.
+
+ (WARNING  121) INTERACTION IS IMPLIED WITH EM/BAYES ESTIMATION METHODS
+
+ (MU_WARNING 13) MU_001: DOES NOT HAVE ADDITIVE ASSOCIATION WITH ETA(001)
+
+ (MU_WARNING 12) MU_001: SHOULD NOT BE ASSOCIATED WITH ETA(005)
+
+ (MU_WARNING 11) MU_001: SHOULD NOT BE ASSOCIATED WITH MORE THAN ONE ETA.
+
+ (MU_WARNING 13) MU_002: DOES NOT HAVE ADDITIVE ASSOCIATION WITH ETA(002)
+
+ (MU_WARNING 12) MU_002: SHOULD NOT BE ASSOCIATED WITH ETA(005)
+
+ (MU_WARNING 19) ETA(005): HAS ALREADY BEEN MU_ ASSOCIATED, CANNOT BE USED AGAIN.
+
+ (MU_WARNING 11) MU_002: SHOULD NOT BE ASSOCIATED WITH MORE THAN ONE ETA.
+
+ (MU_WARNING 13) MU_003: DOES NOT HAVE ADDITIVE ASSOCIATION WITH ETA(003)
+
+ (MU_WARNING 12) MU_003: SHOULD NOT BE ASSOCIATED WITH ETA(005)
+
+ (MU_WARNING 19) ETA(005): HAS ALREADY BEEN MU_ ASSOCIATED, CANNOT BE USED AGAIN.
+
+ (MU_WARNING 11) MU_003: SHOULD NOT BE ASSOCIATED WITH MORE THAN ONE ETA.
+
+ (MU_WARNING 13) MU_004: DOES NOT HAVE ADDITIVE ASSOCIATION WITH ETA(004)
+
+ (MU_WARNING 12) MU_004: SHOULD NOT BE ASSOCIATED WITH ETA(005)
+
+ (MU_WARNING 19) ETA(005): HAS ALREADY BEEN MU_ ASSOCIATED, CANNOT BE USED AGAIN.
+
+ (MU_WARNING 11) MU_004: SHOULD NOT BE ASSOCIATED WITH MORE THAN ONE ETA.
+
+ (WARNING  87) WITH "LAPLACIAN" AND "INTERACTION", "NUMERICAL" AND "SLOW"
+ ARE ALSO REQUIRED ON $ESTIM RECORD, AND "SLOW" IS REQUIRED ON $COV
+ RECORD. NM-TRAN HAS SUPPLIED THESE OPTIONS.
+
+ (WARNING  87) WITH "LAPLACIAN" AND "INTERACTION", "NUMERICAL" AND "SLOW"
+ ARE ALSO REQUIRED ON $ESTIM RECORD, AND "SLOW" IS REQUIRED ON $COV
+ RECORD. NM-TRAN HAS SUPPLIED THESE OPTIONS.
+]]></nmtran>
+<nonmem version='7.4.2'>
+<license_information><![CDATA[
+License Registered to: IDS NONMEM 7 TEAM
+Expiration Date:     2 JUN 2030
+Current Date:        7 JAN 2018
+Days until program expires :4525
+]]></license_information>
+<program_information><![CDATA[
+1NONLINEAR MIXED EFFECTS MODEL PROGRAM (NONMEM) VERSION 7.4.2
+ ORIGINALLY DEVELOPED BY STUART BEAL, LEWIS SHEINER, AND ALISON BOECKMANN
+ CURRENT DEVELOPERS ARE ROBERT BAUER, ICON DEVELOPMENT SOLUTIONS,
+ AND ALISON BOECKMANN. IMPLEMENTATION, EFFICIENCY, AND STANDARDIZATION
+ PERFORMED BY NOUS INFOSYSTEMS.
+]]></program_information>
+<problem number='1' subproblem='0' superproblem1='0' iteration1='0' superproblem2='0' iteration2='0'>
+<problem_title>RUN# Example 1 (from samp5l)</problem_title>
+<problem_information><![CDATA[
+
+ PROBLEM NO.:         1
+ RUN# Example 1 (from samp5l)
+0DATA CHECKOUT RUN:              NO
+ DATA SET LOCATED ON UNIT NO.:    2
+ THIS UNIT TO BE REWOUND:        NO
+ NO. OF DATA RECS IN DATA SET:      600
+ NO. OF DATA ITEMS IN DATA SET:   8
+ ID DATA ITEM IS DATA ITEM NO.:   1
+ DEP VARIABLE IS DATA ITEM NO.:   3
+ MDV DATA ITEM IS DATA ITEM NO.:  7
+0INDICES PASSED TO SUBROUTINE PRED:
+   6   2   4   5   0   0   8   0   0   0   0
+0LABELS FOR DATA ITEMS:
+ ID TIME CONC DOSE RATE EVID MDV CMT
+0FORMAT FOR DATA:
+ (7E10.0/E10.0)
+
+ TOT. NO. OF OBS RECS:      500
+ TOT. NO. OF INDIVIDUALS:      100
+0LENGTH OF THETA:   4
+0DEFAULT THETA BOUNDARY TEST OMITTED:    NO
+0OMEGA HAS BLOCK FORM:
+  1
+  1  1
+  1  1  1
+  1  1  1  1
+  0  0  0  0  2
+0DEFAULT OMEGA BOUNDARY TEST OMITTED:    NO
+0SIGMA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:   1
+0DEFAULT SIGMA BOUNDARY TEST OMITTED:    NO
+0INITIAL ESTIMATE OF THETA:
+   0.2000E+01  0.2000E+01  0.2000E+01  0.2000E+01
+0INITIAL ESTIMATE OF OMEGA:
+ BLOCK SET NO.   BLOCK                                                                    FIXED
+        1                                                                                   NO
+                  0.1000E+00
+                  0.1000E-01   0.1000E+00
+                  0.1000E-01   0.1000E-01   0.1000E+00
+                  0.1000E-01   0.1000E-01   0.1000E-01   0.1000E+00
+        2                                                                                  YES
+                  0.1000E+01
+0INITIAL ESTIMATE OF SIGMA:
+ 0.1000E+00
+0COVARIANCE STEP OMITTED:        NO
+ R MATRIX SUBSTITUTED:          YES
+ S MATRIX SUBSTITUTED:           NO
+ EIGENVLS. PRINTED:              NO
+ COMPRESSED FORMAT:              NO
+ GRADIENT METHOD USED:       SLOW
+ SIGDIGITS ETAHAT (SIGLO):                  -1
+ SIGDIGITS GRADIENTS (SIGL):                -1
+ EXCLUDE COV FOR FOCE (NOFCOV):              NO
+ TURN OFF Cholesky Transposition of R Matrix (CHOLROFF): NO
+ KNUTHSUMOFF:                                -1
+ RESUME COV ANALYSIS (RESUME):               NO
+ SIR SAMPLE SIZE (SIRSAMPLE):              -1
+ NON-LINEARLY TRANSFORM THETAS DURING COV (THBND): 1
+ PRECONDTIONING CYCLES (PRECOND):        0
+ PRECONDTIONING TYPES (PRECONDS):        TOS
+ FORCED PRECONDTIONING CYCLES (PFCOND):0
+ PRECONDTIONING TYPE (PRETYPE):        0
+ FORCED POS. DEFINITE SETTING: (FPOSDEF):0
+1DOUBLE PRECISION PREDPP VERSION 7.4.2
+
+ TWO COMPARTMENT MODEL (ADVAN3)
+0MAXIMUM NO. OF BASIC PK PARAMETERS:   4
+0BASIC PK PARAMETERS (AFTER TRANSLATION):
+   BASIC PK PARAMETER NO.  1: ELIMINATION RATE (K)
+   BASIC PK PARAMETER NO.  2: CENTRAL-TO-PERIPH. RATE (K12)
+   BASIC PK PARAMETER NO.  3: PERIPH.-TO-CENTRAL RATE (K21)
+ TRANSLATOR WILL CONVERT PARAMETERS
+ CL, V1, Q, V2 TO K, K12, K21 (TRANS4)
+0COMPARTMENT ATTRIBUTES
+ COMPT. NO.   FUNCTION   INITIAL    ON/OFF      DOSE      DEFAULT    DEFAULT
+                         STATUS     ALLOWED    ALLOWED    FOR DOSE   FOR OBS.
+    1         CENTRAL      ON         NO         YES        YES        YES
+    2         PERIPH.      ON         NO         YES        NO         NO
+    3         OUTPUT       OFF        YES        NO         NO         NO
+1
+ ADDITIONAL PK PARAMETERS - ASSIGNMENT OF ROWS IN GG
+ COMPT. NO.                             INDICES
+              SCALE      BIOAVAIL.   ZERO-ORDER  ZERO-ORDER  ABSORB
+                         FRACTION    RATE        DURATION    LAG
+    1            5           *           *           *           *
+    2            *           *           *           *           *
+    3            *           -           -           -           -
+             - PARAMETER IS NOT ALLOWED FOR THIS MODEL
+             * PARAMETER IS NOT SUPPLIED BY PK SUBROUTINE;
+               WILL DEFAULT TO ONE IF APPLICABLE
+0ERROR IN LOG Y IS MODELED
+0DATA ITEM INDICES USED BY PRED ARE:
+   EVENT ID DATA ITEM IS DATA ITEM NO.:      6
+   TIME DATA ITEM IS DATA ITEM NO.:          2
+   DOSE AMOUNT DATA ITEM IS DATA ITEM NO.:   4
+   DOSE RATE DATA ITEM IS DATA ITEM NO.:     5
+   COMPT. NO. DATA ITEM IS DATA ITEM NO.:    8
+
+0PK SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+ PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
+0DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+ OTHERWISE, ERROR SUBROUTINE CALLED ONCE IN THIS PROBLEM.
+]]></problem_information>
+<problem_options
+ data_checkout_run='no' data_unit='2' data_rewind='no' data_nrec='600' data_nitems='8' data_id='1'
+ data_l2='0' data_dv='3' data_mdv='7' data_mrg='0' data_raw='0' data_rpt='0' data_sub_array1='0'
+ data_sub_array2='0' data_sub_array3='0' data_pred_indices='6,2,4,5,0,0,8,0,0,0,0'
+ data_format='(7e10.0/e10.0)' data_nobs='500' data_nind='100' data_mdv100='0' nthetat='4'
+ theta_bound_test_omitted='no' omega_blockdim='5' omega_bound_test_omitted='no' sigma_diagdim='1'
+ sigma_bound_test_omitted='no' cov_omitted='no' cov_matrix='r' cov_eigen_print='no'
+ cov_compressed='no' cov_slow_gradient='slow' cov_siglocov='-1' cov_siglcov='-1' cov_tol='-1'
+ cov_atol='-1' cov_nofcov='no' cov_cholroff='no' cov_knuthsumoff='-1' cov_resume='no'
+ cov_sirsample='-1' cov_thbnd='1' cov_precond='0' cov_preconds='tos' cov_pfcond='0' cov_pretype='0'
+ cov_fposdef='0' pred_advan='3' pred_evid='6' pred_time='2' pred_amt='4' pred_rate='5' pred_cmt='8'
+/>
+<estimation number='1' type='0'>
+<table_series>1</table_series>
+<estimation_method>saem_noprior</estimation_method>
+<estimation_title>Stochastic Approximation Expectation-Maximization (No Prior)</estimation_title>
+<estimation_information><![CDATA[
+ ESTIMATION STEP OMITTED:                 NO
+ ANALYSIS TYPE:                           POPULATION
+ NUMBER OF SADDLE POINT RESET ITERATIONS:      0
+ GRADIENT METHOD USED:               NOSLOW
+ CONDITIONAL ESTIMATES USED:              YES
+ CENTERED ETA:                            NO
+ EPS-ETA INTERACTION:                     YES
+ LAPLACIAN OBJ. FUNC.:                    NO
+ NO. OF FUNCT. EVALS. ALLOWED:            624
+ NO. OF SIG. FIGURES REQUIRED:            3
+ INTERMEDIATE PRINTOUT:                   YES
+ ESTIMATE OUTPUT TO MSF:                  NO
+ IND. OBJ. FUNC. VALUES SORTED:           NO
+ NUMERICAL DERIVATIVE
+       FILE REQUEST (NUMDER):               NONE
+ MAP (ETAHAT) ESTIMATION METHOD (OPTMAP):   0
+ ETA HESSIAN EVALUATION METHOD (ETADER):    0
+ INITIAL ETA FOR MAP ESTIMATION (MCETA):    0
+ SIGDIGITS FOR MAP ESTIMATION (SIGLO):      100
+ GRADIENT SIGDIGITS OF
+       FIXED EFFECTS PARAMETERS (SIGL):     100
+ NOPRIOR SETTING (NOPRIOR):                 ON
+ NOCOV SETTING (NOCOV):                     OFF
+ DERCONT SETTING (DERCONT):                 OFF
+ FINAL ETA RE-EVALUATION (FNLETA):          ON
+ EXCLUDE NON-INFLUENTIAL (NON-INFL.) ETAS
+       IN SHRINKAGE (ETASTYPE):             NO
+ NON-INFL. ETA CORRECTION (NONINFETA):      OFF
+ RAW OUTPUT FILE (FILE): tdist14.ext
+ EXCLUDE TITLE (NOTITLE):                   NO
+ EXCLUDE COLUMN LABELS (NOLABEL):           NO
+ FORMAT FOR ADDITIONAL FILES (FORMAT):      S1PE12.5
+ PARAMETER ORDER FOR OUTPUTS (ORDER):       TSOL
+ WISHART PRIOR DF INTERPRETATION (WISHTYPE):0
+ KNUTHSUMOFF:                               0
+ INCLUDE LNTWOPI:                           NO
+ INCLUDE CONSTANT TERM TO PRIOR (PRIORC):   NO
+ INCLUDE CONSTANT TERM TO OMEGA (ETA) (OLNTWOPI):NO
+ EM OR BAYESIAN METHOD USED:                STOCHASTIC APPROXIMATION EXPECTATION MAXIMIZATION (SAEM)
+ MU MODELING PATTERN (MUM):
+ GRADIENT/GIBBS PATTERN (GRD):
+ AUTOMATIC SETTING FEATURE (AUTO):          ON
+ CONVERGENCE TYPE (CTYPE):                  3
+ CONVERGENCE INTERVAL (CINTERVAL):          0
+ CONVERGENCE ITERATIONS (CITER):            10
+ CONVERGENCE ALPHA ERROR (CALPHA):          5.000000000000000E-02
+ BURN-IN ITERATIONS (NBURN):                4000
+ ITERATIONS (NITER):                        1000
+ ANEAL SETTING (CONSTRAIN):                 1
+ STARTING SEED FOR MC METHODS (SEED):       11456
+ MC SAMPLES PER SUBJECT (ISAMPLE):          2
+ MAXIMUM SAMPLES PER SUBJECT FOR AUTOMATIC
+ ISAMPLE ADJUSTMENT (ISAMPEND):             10
+ RANDOM SAMPLING METHOD (RANMETHOD):        3U
+ EXPECTATION ONLY (EONLY):                  0
+ PROPOSAL DENSITY SCALING RANGE
+              (ISCALE_MIN, ISCALE_MAX):     1.000000000000000E-06   ,1000000.00000000
+ SAMPLE ACCEPTANCE RATE (IACCEPT):          0.400000000000000
+ METROPOLIS HASTINGS SAMPLING FOR INDIVIDUAL ETAS:
+ SAMPLES FOR GLOBAL SEARCH KERNEL (ISAMPLE_M1):          2
+ SAMPLES FOR NEIGHBOR SEARCH KERNEL (ISAMPLE_M1A):       0
+ SAMPLES FOR MASS/IMP/POST. MATRIX SEARCH (ISAMPLE_M1B): 2
+ SAMPLES FOR LOCAL SEARCH KERNEL (ISAMPLE_M2):           2
+ SAMPLES FOR LOCAL UNIVARIATE KERNEL (ISAMPLE_M3):       2
+ PWR. WT. MASS/IMP/POST MATRIX ACCUM. FOR ETAS (IKAPPA): 1.00000000000000
+ MASS/IMP./POST. MATRIX REFRESH SETTING (MASSREST):      -1
+
+]]></estimation_information>
+<estimation_options
+ estim_omitted='no' analysis_type='pop' saddle_reset='0' saddle_hess='0' slow_gradient='noslow'
+ cond_estim='yes' centered_eta='no' epseta_interaction='yes' laplace='no' predflag='0' maxfn='624'
+ nsig='3' msfo='no' objsort='no' numder='0' optmap='0' etader='0' mceta='0' siglo='100' sigl='100'
+ noprior='1' nocov='0' dercont='0' atol='0' fnleta='1' etastype='0' noninfeta='0' file='tdist14.ext'
+ notitle='0' nolabel='0' format='s1pe12.5' order='tsol' wishtype='0' knuthsumoff='0' lntwopi='0'
+ priorc='0' olntwopi='0' estimation_method='saem' mum='BLANK' grd='BLANK' auto='1' ctype='3'
+ cinterval='0' citer='10' calpha='5.000000000000000E-02' nburn='4000' niter='1000' constrain='1'
+ anneal='BLANK' seed='11456' isample='2' isampend='10' ranmethod='3u' eonly='0'
+ iscale_min='1.000000000000000E-06' iscale_max='1000000.00000000' iaccept='0.400000000000000'
+ isample_m1='2' isample_m1a='0' isample_m1b='2' isample_m2='2' isample_m3='2'
+ ikappa='1.00000000000000' massreset='-1'
+/>
+<monitor>
+<obj iteration='-200'>16066.0463591578</obj>
+<obj iteration='-180'>-2767.76343600291</obj>
+<obj iteration='-160'>-3140.62945049483</obj>
+<obj iteration='-140'>-3331.46975879672</obj>
+<obj iteration='-120'>-3439.85276794551</obj>
+<obj iteration='-100'>-3494.57072791701</obj>
+<obj iteration='-80'>-3531.45454587120</obj>
+<obj iteration='-60'>-3613.83649981901</obj>
+<obj iteration='-40'>-3709.48182711929</obj>
+<obj iteration='-20'>-3743.62346534187</obj>
+<obj iteration='-4000'>-3562.03679676437</obj>
+<obj iteration='-3980'>-3699.87158615267</obj>
+<obj iteration='-3960'>-3863.10316909559</obj>
+<obj iteration='-3940'>-3910.52008267794</obj>
+<obj iteration='-3920'>-3923.22986319123</obj>
+<obj iteration='-3900'>-3981.98037813716</obj>
+<obj iteration='-3880'>-3931.54800538074</obj>
+<obj iteration='-3860'>-3923.01551124234</obj>
+<obj iteration='-3840'>-3943.25783015853</obj>
+<obj iteration='-3820'>-3975.73876181036</obj>
+<obj iteration='-3800'>-3981.58680651993</obj>
+<obj iteration='-3780'>-3932.95902500816</obj>
+<obj iteration='-3760'>-3964.41530812886</obj>
+<obj iteration='-3740'>-3981.33806782139</obj>
+<obj iteration='-3720'>-3989.95811443324</obj>
+<obj iteration='-3700'>-4008.19374737592</obj>
+<obj iteration='-3680'>-3980.75581254465</obj>
+<obj iteration='-3660'>-3959.69012834183</obj>
+<obj iteration='-3640'>-3964.60763049223</obj>
+<obj iteration='-3620'>-4019.79825962491</obj>
+<obj iteration='-3600'>-3931.67412697993</obj>
+<obj iteration='-3580'>-3907.70256153050</obj>
+<obj iteration='-3560'>-3939.08905576743</obj>
+<obj iteration='-3540'>-3945.58152736767</obj>
+<obj iteration='-3520'>-4010.16601712438</obj>
+<obj iteration='-3500'>-4001.54643380199</obj>
+<obj iteration='-3480'>-3952.88705766555</obj>
+<obj iteration='-3460'>-3980.53457287347</obj>
+<obj iteration='-3441'>-3925.68614999765</obj>
+<obj iteration='0'>-3918.82732640667</obj>
+<obj iteration='20'>-3985.53002170880</obj>
+<obj iteration='40'>-4009.56191985748</obj>
+<obj iteration='60'>-4019.75670582878</obj>
+<obj iteration='80'>-4031.52627124329</obj>
+<obj iteration='100'>-4039.06985773134</obj>
+<obj iteration='120'>-4044.14380153600</obj>
+<obj iteration='140'>-4046.44998143234</obj>
+<obj iteration='160'>-4051.82873701758</obj>
+<obj iteration='180'>-4056.19357029579</obj>
+<obj iteration='200'>-4059.94539353000</obj>
+<obj iteration='220'>-4063.23658493046</obj>
+<obj iteration='240'>-4065.40431561176</obj>
+<obj iteration='260'>-4067.08070452525</obj>
+<obj iteration='280'>-4069.63507762464</obj>
+<obj iteration='300'>-4071.55003501540</obj>
+<obj iteration='320'>-4073.15267996354</obj>
+<obj iteration='340'>-4073.72737676685</obj>
+<obj iteration='360'>-4074.30404501579</obj>
+<obj iteration='380'>-4076.07800463601</obj>
+<obj iteration='400'>-4078.13195266227</obj>
+<obj iteration='420'>-4080.30141407820</obj>
+<obj iteration='440'>-4081.76091351566</obj>
+<obj iteration='460'>-4083.14462135308</obj>
+<obj iteration='480'>-4084.60920615308</obj>
+<obj iteration='500'>-4085.26971549111</obj>
+<obj iteration='520'>-4085.81685074263</obj>
+<obj iteration='540'>-4086.19861606742</obj>
+<obj iteration='560'>-4086.59896263435</obj>
+<obj iteration='580'>-4087.28009549879</obj>
+<obj iteration='600'>-4088.09893804331</obj>
+<obj iteration='620'>-4089.81625929441</obj>

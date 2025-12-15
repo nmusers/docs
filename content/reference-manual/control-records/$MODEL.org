@@ -1,11 +1,5 @@
-
-
-
 * $MODEL
  Specifies the MODEL subroutine of PREDPP.
-
-
-
 ** USAGE
 
 #+begin_src php
@@ -22,75 +16,73 @@
 #+end_src
 
 ** DISCUSSION
- Required with a general ADVAN (ADVAN5,6,7,8,9,13,14,15,16,17,18).
+Required with a general ADVAN (ADVAN5,6,7,8,9,13,14,15,16,17,18). It
+is only required for the first problem specification. It applies for
+all problem specifications in the control stream, and it must not
+appear with a problem specification other than the first.
+
 
 ** OPTIONS
 
 *** NCOMPARTMENTS=n1
-      Total  number  of compartments other than the output compartment.
-      Default: the number of COMPARTMENT options.  May  also  be  coded
-      NCM or NCOMPS.
+The total  number  of compartments other than the output compartment.
+Default: the number of COMPARTMENT options.  May  also  be  coded NCM
+or NCOMPS. The maximum valee is given by constant PC in
+resource/SIZES.f90; With NONMEM 7, the default is 30. (The value may
+be over-ridden by user via $SIZES record up to a maximum of 999).
 
 *** NEQUILIBRIUM=n2
-      Number of equilibrium compartments.  Default: 0
+Number of equilibrium compartments, n2 must be less than
+or equal to n1. If omitted, n2 is computed from the attributes of the COMPARTMENT
+clauses. If given, the last n2 compartments are understood to be equilibrium
+compartments, whether or not any of these compartments are defined with COMPARTMENT clauses
+which include the EQUILIBRIUM attribute.
 
 *** NPARAMETERS=n3
-      Number  of  basic PK parameters.  Default: The number of basic PK
-      parameters defined in the $PK  abbreviated  code.   May  also  be
-      coded  NPARAMS.   May  be  0  with  the general non-linear models
-      (ADVAN6, ADVAN8,  ADVAN9,  ADVAN13,  ADVAN14,  ADVAN15,  ADVAN16,
-      ADVAN17, ADVAN18).
+Number  of  basic PK parameters.  Default: The number of basic PK
+parameters defined in the $PK  abbreviated  code.   May  also  be
+coded  NPARAMS.   May  be  0  with  the general non-linear models
+(ADVAN6, ADVAN8,  ADVAN9,  ADVAN13,  ADVAN14,  ADVAN15,  ADVAN16,
+ADVAN17, ADVAN18). When omiited or general linear model is used, the
+number of basic PK parameters is the total number of K-type parameters
+recognized in the abbreviated code. In the case of a general nonlinear
+model and TRANS1, the number of basic parameters is the the largest
+subscript used with the P array in PK code, or the number of variables
+defined in PK abbreviated code and used in DES and/or AES abbreviated
+codes, whichever is greater. See next section C.5.
 
-*** COMPARTMENT= ([name] [attribute1] [attribute2] ...)
-      Each  COMPARTMENT  option defines a single compartment.  Compart-
-      ments are numbered in the order in which they are  defined.   The
-      name  option gives the name for the compartment.  The name option
-      may not be one of the compartment attributes below, unless it  is
-      enclosed in quotes (' or ").
-      If  the  name  option  is not used, then the compartment is named
-      "COMPn," where n is the compartment number.
+*** COMPARTMENT= ([name] [attribute1] ...)
+Each  COMPARTMENT  option defines a single compartment.  Compartments
+are numbered in the order in which they are  defined.  The name
+option gives the name for the compartment.  The name option may not be
+one of the compartment attributes below, unless it  is enclosed in
+quotes (' or "). If  the  name  option  is not used, then the
+compartment is named "COMPn," where n is the compartment number.
 
-      Attributes are chosen from the following list.  When an attribute
-      is not chosen, its opposite is the default.
+Attributes are chosen from the following list.
 
-        INITIALOFF - Compartment is initially off.
-        NOOFF - Compartment may not be turned on or off.
-        NODOSE - Compartment may not receive a dose.
-        EQUILIBRIUM   -   Compartment  is  an  equilibrium  compartment
-        (ADVAN9, ADVAN15, and ADVAN17 only; implies NODOSE).
-        EXCLUDE - Compartment amount is excluded from  the  computation
-        of the amount (Amt) of the output compartment (ADVAN9, ADVAN15,
-        and ADVAN17 only).  [Amt=(total amount of drug thus  far  input
-        into system) minus (total amount remaining in the system)]
+- INITIALOFF: Compartment is initially off.
+- NOOFF: Compartment may not be turned on or off.
+- NODOSE: Compartment may not receive a dose.
+- EQUILIBRIUM:  Compartment  is  an  equilibrium  compartment (ADVAN9,
+  ADVAN15, and ADVAN17 only; implies NODOSE).
+- EXCLUDE: Compartment amount is excluded from  the  computation of
+  the amount (Amt) of the output compartment (ADVAN9, ADVAN15, and
+  ADVAN17 only).  [Amt=(total amount of drug thus  far  input into
+  system) minus (total amount remaining in the system)]
 
-      The following two attributes have no opposites.
+The following two attributes have no opposites.
 
-        DEFOBSERVATION  -  Compartment  is the default observation com-
-        partment.
-        DEFDOSE - Compartment is the default dose compartment.
-        If no compartment has the DEFOBSERVATION attribute, the default
-        is  the first compartment with the name CENTRAL; otherwise, the
-        first  compartment.   If  no  compartment   has   the   DEFDOSE
-        attribute,  the  default is the first compartment with the name
-        DEPOT which may receive doses; otherwise, the first compartment
-        which may receive doses.
+- DEFOBSERVATION: Compartment  is the default observation compartment.
+  If omitted, the first compartment defined with the name "CENTRAL" is
+  the default observation compartment. If no "CENTRAL" compartment
+  named, the first compartment is the default observation compartment.
+- DEFDOSE: Compartment is the default dose compartment. If omiited,
+  the  default is the first compartment with the name DEPOT which may
+  receive doses; otherwise, the first compartment which may receive
+  doses.
 
-*** LINK compname [TO|AND] compname BY k [l]
-      Link  clauses  are  used  with ADVAN5 and ADVAN7, but only in the
-      absence of $PK abbreviated code.  They are rarely used,  and  are
-      described in Guide IV.
-
-*** I_SS= n
-      I_SS  may  be  used  with  the general non-linear models (ADVAN6,
-      ADVAN8, ADVAN9, ADVAN13, ADVAN14, ADVAN15 ) to request  the  ini-
-      tial state feature of PREDPP.  Values of n are
-        0 No initial state state (the default)
-        1 Initial steady state
-        2 Initial steady state, adds to current compartment amounts.
-        3 Initial steady state, use current compartment amounts as ini-
-        tial estimates.
-
- The attributes INITIALOFF NODOSE define  an  output-type  compartment.
+The attributes INITIALOFF NODOSE define  an  output-type  compartment.
  As with the output compartment, it is possible to use a negative value
  of CMT to obtain an observation and turn off such a  compartment  with
  one  observation  record. Like the output compartment, it is initially
@@ -100,21 +92,47 @@
  output  compartment,  a  differential equation (DADT) must be supplied
  for an output-type compartment.
 
- (See advan68, advan9_15, $pk)
- (See Initial Steady State: I_SS,ISSMOD).
+*** LINK compname [TO|AND] compname BY k [l]
+Link  clauses  are  used  with ADVAN5/ADVAN7 /and/ when the PK routine is user-supplied
+LINK defines a route of first-order drug distribution between two
+compartments A & B that are specified in the COMPARTMENT clause (a compartment
+number can also be used).
+
+#+begin_src php
+LINK A TO B BY k
+#+end_src
+indicates the distribution occurs from A to B, with rate constant "k".[fn:1]
+(It is the number of the row of the GG array where, as a result of
+basic parameter translation by the TRANS routine, the
+typical/subject-specific value and
+ETA derivatives for k can be located; see Guide VI, section III.M.)
+
+#+begin_src php
+LINK A AND B BY k l
+#+end_src
+indicates a two-way distribution with rate constant k (A to B) and l (B to A).
+
+*** I_SS= n
+I_SS  may  be  used  with  the general non-linear models (ADVAN6,
+      ADVAN8, ADVAN9, ADVAN13, ADVAN14, ADVAN15 ) to request  the  initial state feature of PREDPP.  Values of n are
+  - I_SS=0: No initial state state (the default)
+  - I_SS=1: Initial steady state
+  - I_SS=2: Initial steady state, adds to current compartment amounts.
+  - I_SS=3: Initial steady state, use current compartment amounts as initial estimates.
+
+(See Initial Steady State: I_SS,ISSMOD).
 
 *** RECORD ORDER:
  Follows $SUBROUTINES
  Precedes $PK (if present)
 
 *** SYMBOLIC LABEL SUBSTITUTIONS OF MODEL COMPARTMENTS  (NM75)
+Compartment names defined in $MODEL are  automatically  available  for
+substitution  in  abbreviated code.  This is referred to as "implicit"
+compartment name substitution.  It is  an  alternative  to  "explicit"
+compartmet name substitution using $ABBR REPLACE records
 
- Compartment names defined in $MODEL are  automatically  available  for
- substitution  in  abbreviated code.  This is referred to as "implicit"
- compartment name substitution.  It is  an  alternative  to  "explicit"
- compartmet name substitution using $ABBR REPLACE records
-
- For example:
+For example:
 
  #+begin_src php
  $MODEL
@@ -140,10 +158,11 @@
  In the generated code, compartment names are replaced by the appropri-
  ate values 1, 2, etc.
 
- See INTRODUCTION TO NONMEM 7, Symbolic Label  Substitutions  of  Model
+See INTRODUCTION TO NONMEM 7, Symbolic Label  Substitutions  of  Model
  Compartments
 
-** REFERENCES
-Guide IV, section V.C.4
-** REFERENCES
-Guide VI, section VI.B
+
+[fn:1] K is an alias for LINK. In addition, "BY" may be coded "IS", or
+=, or omitted. Thus "Kmn=k" is equivalent to "LINK m TO n BY k". When the
+number of compartments exceeds 10, the LINK clause syntax "Kmn=k" may be ambiguous. The letter T
+may be used to separate the two compartment numbers KmTn.

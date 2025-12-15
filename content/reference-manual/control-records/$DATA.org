@@ -1,13 +1,5 @@
-
-
-
 * $DATA
  Describes the NM-TRAN data set
-
-
-
-** USAGE
-
 #+begin_src php
  $DATA  [filename|*] [(format)] [IGNORE=c1] [NULL=c2]
         [IGNORE=(list)...|ACCEPT=(list)...]
@@ -20,57 +12,69 @@
         [MISDAT=r...]
         [FDATACSV...]
         [REPL=n...]
-#+end_src
-
-** EXAMPLE
-#+begin_src php
+; EXAMPLE
  $DATA       DATAFILE
 #+end_src
 
 ** DISCUSSION
- This  record  specifies  the data set to be used.  It is required with
- the first problem specification.  It must precede  any  other  NM-TRAN
- control  record  that refers to specific data item types.  May also be
- coded $INFILE.
-
- Optional with the second or  subsequent  problem  specifications.   If
- omitted,  NONMEM re-uses the data set from the previous problem (which
- will include any modifications made via transgeneration, e.g., via use
- of NONMEM's PASS, or via simulation).
+This  record  specifies  the data set to be used.  It is required with
+the first problem specification.  It must precede  any  other  NM-TRAN
+control  record  that refers to specific data item types.  May also be
+coded $INFILE. Optional with the second or  subsequent  problem
+specifications. If the $DATA record is missing from the problem specification,
+the problem uses the same NONMEM data set as that used in the previous
+problem.  With the previous problem the user might have modified data items
+from those found in the NONMEM data set at the beginning of that problem
+(e.g. the modification may have occurred in the
+simulation step, or in the initialization/finalization
+step - see Guide II, section D.2.2, Guide VI, section VI.A),
+and then the data set used in the current problem (NONMEM's internal
+copy of the data set) contains the modified
+data items.  Using an asterisk in the $DATA record, in place of the file
+name, has the same effect as omitting the $DATA record.  However, when
+one wants to use the =CHECKOUT= option, as well as use the NONMEM
+data set from the previous problem, the asterisk must be used.
+In this case no other options should be used.
 
 ** OPTIONS
 
 *** filename
-      Name  of  the  file  containing  the data set.  Must be the first
-      option.  If it contains commas, semicolons, or parentheses,  then
-      it  must  be  surrounded  by  single quotes ' or double quotes ".
-      Filename may also contain  equal  signs  if  it  is  enclosed  in
-      quotes.   If  the file is opened by NM-TRAN, filename may contain
-      embedded spaces if it is enclosed in quotes, and may  contain  at
-      most  80  characters.  If the file is opened by NONMEM, the file-
-      name may not contain embedded spaces, and may contain at most  71
-      characters.   If  filename is the same as any option of the $DATA
-      record, it must be enclosed in quotes.
+Name  of  the  file  containing  the data set.  Must be the first
+option.  If it contains commas, semicolons, or parentheses,  then it
+must  be  surrounded  by  single quotes ' or double quotes ". Filename
+may also contain  equal  signs  if  it  is  enclosed  in quotes.   If
+the file is opened by NM-TRAN, filename may contain embedded spaces if
+it is enclosed in quotes, and may  contain  at most  80  characters.
+If the file is opened by NONMEM, the filename may not contain
+embedded spaces, and may contain at most  71 characters.   If
+filename is the same as any option of the $DATA record, it must be
+enclosed in quotes.
 
-      * may be coded in a problem subsequent to the  first.   This  has
-      the  same  effect as omitting the $DATA record (NONMEM is told to
-      re-use the previous data set), but allows the CHECKOUT option  to
-      be included.  With *, no other option may be included.
+"*" may be coded in a problem subsequent to the  first.   This  has
+the  same  effect as omitting the $DATA record (NONMEM is told to
+re-use the previous data set), but allows the CHECKOUT option  to be
+included.  With *, no other option may be included.
 
 *** (format)
-      FORTRAN format specification to be used to read the data.  Format
-      codes F, E, and X may be used, but not I.  When a format is  pro-
-      vided,  the  label  DROP  cannot be used on the $INPUT record and
-      options WIDE and NULL may not be coded.  If omitted, NM-TRAN will
-      generate a suitable FORMAT specification.
+The format refers to a FORTRAN format specification to be used by NONMEM
+to read the NONMEM data records.  Note that this specification is to be
+enclosed in parentheses.  Format codes F, E, and X may be used, but not I.
+The format will also be used by NONMEM to read the NONMEM data records,
+after it had been modified to account for
+generated data items.
+If a format is provided, the label
+DROP cannot be used, and the WIDE and NULL options may not be used.
+If a format is omitted, the NONMEM records can still be read, and a format
+specification which is appropriate for reading
+the NONMEM data records will be generated.
+In this case a NONMEM data set is found in FDATA (see Guide IV section II.B).
+
 
 *** RECORDS=n1
-      The number of records to be read from the NM-TRAN data set.  Com-
-      ment records are not counted.   If  NM-TRAN  does  not  drop  any
+The number of records to be read from the NM-TRAN data set.  Comments are not counted.   If  NM-TRAN  does  not  drop  any
       records from its data set (see IGNORE list and ACCEPT list), then
       n1 is also the number of records written to the NONMEM data  set.
-      If  NM-TRAN drops records, then the total number of records writ-
-      ten to the NONMEM data set is n1  minus  the  number  of  dropped
+      If  NM-TRAN drops records, then the total number of records written to the NONMEM data set is n1  minus  the  number  of  dropped
       records.
       With   NONMEM   7.5,  records  may  also  be  dropped  using  the
       PRED_IGNORE_DATA  block  of  abbreviated  code.  The  same  total
@@ -81,32 +85,39 @@
       to  a  NONMEM  FINISH  record)  minus  the  number of comment and
       dropped records.  May also be coded NRECORDS, RECS, or NRECS.
 
-      If the option is coded as RECORDS=label, where label  is  a  data
-      item  label, NM-TRAN understands the data records for the problem
-      to start with the first data record of the NM-TRAN data  set  (at
-      the  place  where  the file is positioned before data records are
-      read; see the NOREWIND option), and to include as well, those and
-      only  those  subsequent  contiguous  data records having the same
-      value of the data item as does the first record.  It  counts  the
-      total  number of these data records, minus any comment or dropped
-      records, and puts this number in the NONMEM control file.
+If the option is coded as =RECORDS=label= for data item =label=,
+NONMEM understands the data records for the problem to start with
+the first data record of the NONMEM data set (at the place where
+the file is positioned before data records are read; see
+the NOREWIND option), and to include as well, those and only those subsequent
+contiguous data records having the same value of the data item as does the
+first record.  It counts the total
+number of these data records, minus any comment or dropped records,
+and puts this number in the NONMEM control file.
 
-      In particular, the ID label may be used  (or  alternatively,  the
-      option  may be coded RECORDS=IR, RECORDS=INDREC, or RECORDS=INDI-
-      VIDUALRECORD).  If a label other than  ID  is  used,  the  $INPUT
-      record  must  precede  the $DATA record.  If the data are single-
-      subject data, the ID  data  items  used  to  determine  the  data
-      records for the problem are those labeled ID (not .ID.).
+In particular, the ID label may be used (or alternatively, the option
+may be coded =RECORDS=IR=, =RECORDS=INDREC=,
+or =RECORDS=INDIVIDUALRECORD=).
+If a label other than ID is used, the $INPUT record must precede the
+$DATA record.  If the data are single-subject data,
+the ID data items used to determine the data records for the problem are
+those labeled ID (not .ID.).
 
-      If  there  is  more  than  one problem specification with a $DATA
-      record that includes an option of the  form  RECORDS=label,  then
-      either  none  of  these  $DATA  records may also include a format
-      specification, or all of them must include the same format speci-
-      fication.  (See  records=id).
+If there is more than one problem specification with a $DATA record that
+includes an option of the form =RECORDS==label, then either none of these
+$DATA records may also include a format specification, or all of them must
+include the same format specification.
 
 *** LRECL=n2
-      The number of characters in a logical record.  Needed for certain
-      operating systems (e.g., IBM/CMS).
+only needed when the format is omitted, and when either (i)
+the operating system (e.g. IBM/CMS) raises
+a fatal error when a FORTRAN program tries to read more characters from
+a logical record than the number
+of characters in the record, or (ii) the operating system
+imposes a maximum record length which is smaller than 999 characters (e.g.
+CRAY/CTSS).
+The number n2 is the number of characters in the NONMEM data
+records.
 
 *** IGNORE=c1
       [Note: The following two options, IGNORE  and  ACCEPT  allow  the
@@ -219,72 +230,84 @@
       ACCEPT=(GEN.NE.1,AGE.LE.60)
 
 *** PRED_IGNORE_DATA (NM75)
-      Informs  NONMEM that a PRED_IGNORE_DATA pass through the data set
-      is  required.    If   the   abbreviated   code   uses   variables
-      PRED_IGNORE_DATA  or  PRED_IGNORE_DATA_TEST,  this option is sup-
-      plied.  The  explicit  option  is  needed  if  the  use  of   the
-      PRED_IGNORE_DATA  variables  occurs  in  user-written or verbatim
-      code, so that NMTRAN is unaware of it.
-      (See Guide Introduction_7 "Extension to $DATA  IGNORE=st  filter-
-      ing")
+Data records  may  be  dropped  using  by PRED or PREDPP using the
+PRED_IGNORE_DATA  block  of  abbreviated  code. See Chapter IV.E.6.
+This option informs  NONMEM that a PRED_IGNORE_DATA pass through the
+data set is  required.    If   the   abbreviated   code   uses
+variables PRED_IGNORE_DATA  or  PRED_IGNORE_DATA_TEST,  this option is
+supplied.  The  explicit  option  is  needed  if  the  use of   the
+PRED_IGNORE_DATA  variables  occurs  in  user-written or verbatim
+code, so that NMTRAN is unaware of it.
+(See Guide Introduction_7 "PRED_IGNORE_DATA Feature (NM75)")
+
 
 *** NULL=c2
-      Specifies  that null data items in the NM-TRAN data set are to be
-      replaced in the NONMEM data  set  by  the  character  c2.   E.g.,
-      NULL=0 or NULL=..
-      Null data items consist of a single dot (.) or consecutive commas
-      or consecutive tab characters.  c2 may be  any  character  except
-      space (" ") or semicolon (";").
-      Also  permitted: NULL='c' or NULL="c", where c may be any charac-
-      ter.
-      If this option is omitted, NM-TRAN  replaces  each  null  with  a
-      space.
+Specifies  that null data items in the NM-TRAN data set are to be
+replaced in the NONMEM data  set  by  the  character  c2.   E.g.,
+NULL=0. Null data items consist of a single dot (.) or consecutive
+commas or consecutive tab characters.  c2 may be  any  character
+except space (" ") or semicolon (";"). Also  permitted: NULL='c' or
+NULL="c", where c may be any charac- ter. If this option is omitted,
+NM-TRAN  replaces  each  null  with  a space. The default is a blank.
 
-*** NOWIDE
-      Requests  that  NM-TRAN  attempt  to  limit FDATA to 80-character
-      records.  Space between adjacent columns may  be  suppressed  and
-      multi-line records may be generated.  This is the default.
-
-*** WIDE Requests  that  FDATA  contain  single-line  records, and that at
-      least one space separate columns.  (Records in FDATA  will  never
-      be  wider  than 300 characters.)  With this option, there will be
-      no FINISH (FIN) record in the NONMEM data set.
+*** NOWIDE | WIDE
+NOWIDE requests  that  NM-TRAN  attempt  to  limit FDATA to
+80-character records.  Space between adjacent columns may  be
+suppressed  and multi-line records may be generated.  This is the
+default. WIDE requests  that  FDATA  contain  single-line  records,
+and that at least one space separate columns.  (Records in FDATA  will
+never be  wider  than 300 characters.)  With this option, there will
+be no FINISH (FIN) record in the NONMEM data set.
 
 *** NOREWIND|REWIND
-      With the first problem specification in  a  control  stream,  the
-      file is positioned at its initial point so that the first NM-TRAN
-      data set in the file is used.  The options  REWIND  and  NOREWIND
-      apply only with a $DATA record in a subsequent problem specifica-
-      tion, and only when the file named on the record is the  same  as
-      that  specified for the previous problem.  When the file named on
-      the record is different from  that  specified  for  the  previous
-      problem,  the file is (re)positioned at its initial point so that
-      the first NM-TRAN data set in the file is used.
-      REWIND: Reposition the file at its intial point so that the first
-      NM-TRAN data set in the file is re-used.
-      (Whether  the  file  input  to NONMEM itself will be repositioned
-      depends on whether this file is FDATA or  is  one  named  in  the
-      $DATA  record;  see  NONMEM  Users  Guide, Part IV for a complete
-      explanation.)
-      NOREWIND: Leave the file at its current position so that the next
-      NM-TRAN  data set in the file is used.  The $DATA record with the
-      previous problem specification must  have  included  the  RECORDS
-      option (or a FINISH record must have terminated the data set used
-      in the previous problem), so that NM-TRAN did not read to a phys-
-      ical end-of-file.  This is the default.
+=NOREWIND= specifies that the file is not to be
+rewound before it is read, and =REWIND= specifies that the file is to be
+rewound.
+These options are ignored if used on the $DATA record appearing in the first
+problem specification of the NONMEM control stream, or on a $DATA record
+appearing in a subsequent problem specification when this record contains a
+file name different from that contained on the $DATA record of the prior
+problem specification.  In these cases the file is automatically rewound.
+The =REWIND= and =NOREWIND= options are significant only when there are
+multiple problem specifications in the NONMEM control stream, and when the
+$DATA records appearing in two consecutive problem specifications, corresponding
+to two problems A and B, contain the
+same file name.  In this situation:
+
+When the =REWIND= option is used on the
+the $DATA record for problem B, the
+first NONMEM data set on the file is re-used for problem B.
+If NONMEM does not modify this data set,
+then an instruction to rewind the (same) file is also contained in the
+NONMEM control stream problem specification for problem B.
+If NONMEM does modify the data set, then the NONMEM data set for problem B is
+placed on FDATA
+after the last NONMEM data set already present on FDATA, and no instruction to
+rewind FDATA is contained in the NONMEM control stream problem specification
+for problem B.
+
+If the =NOREWIND= option is used on
+the $DATA record for problem B, or neither option is used, then the file is not
+rewound, and the NONMEM data set on this file that follows the one used for
+problem A is used for problem B.  In this case note that the $DATA
+record with problem A must have contained the =RECORDS= option or the
+NONMEM data set used for problem A must end with a FINISH record.
+Also in this case, no instruction to rewind the file containing the NONMEM
+data set for problem B (whether this file is the file named in the $DATA record or whether
+it is FDATA) is contained in the NONMEM control stream problem specification
+for problem B.
+
 
 *** CHECKOUT
-      Requests  that  NONMEM implement the data checkout mode, in which
-      the PRED  routine  is  not  called  and  predictions,  residuals,
-      weighted residuals and the objective function are not computed.
-      May also be coded CHECKDATA.  No tasks other than $TABLE or $SCAT
-      can be specified.
-      With NONMEM 7.5, an additional file, FDATA.csv is  produced  that
-      outputs  the contents of its input data file (typically FDATA) in
-      a comma delimited file format, so you can check how NONMEM inter-
-      prets  the  input data.  If the REPL option of $DATA or the REPL_
-      data item is used, the replicated form of the data will appear in
-      FDATA.csv.
+Requests  that  NONMEM implement the data checkout mode, in which the
+PRED  routine  is  not  called  and  predictions,  residuals, weighted
+residuals and the objective function are not computed. May also be
+coded CHECKDATA.  No tasks other than $TABLE or $SCAT can be
+specified. With NONMEM 7.5, an additional file, FDATA.csv is  produced
+that outputs  the contents of its input data file (typically FDATA) in
+a comma delimited file format, so you can check how NONMEM interprets
+the  input data.  If the REPL option of $DATA or the REPL_ data item
+is used, the replicated form of the data will appear in FDATA.csv.
 
 *** NOOPEN
       NM-TRAN will not open the named data file.  This permits the data
@@ -385,18 +408,18 @@
       (See Guide Introduction_7 "Extension to $DATA  IGNORE=st  filter-
       ing")
 
-*** NOFDATACSV (NM760)                                                     |
-      An  additional  file, FDATA.csv is produced that outputs the con- |
-      tents of its input data file (typically FDATA) in a  comma  input |
-      data.  The records in FDATA.csv may differ from those in FDATA in |
-      the following cases.  If REPL/REPL_ is used, the replicated  form |
-      of  the data will appear in FDATA.csv.  Also, records excluded by |
-      PRED_IGNORE_DATA will not be present in FDATA.csv.  The  creation |
-      of  FDATA.csv  can  cause  a long period of data file loading and |
-      processing at the beginning of a run, if the FDATA file  is  very |
-      large  (such  as  >1 MB).  As of nm760, the creation of this file |
-      can be prevented by adding the option  NOFDATACSV  on  the  $DATA |
-      record.                                                           |
+*** NOFDATACSV (NM760)
+      An  additional  file, FDATA.csv is produced that outputs the con-
+      tents of its input data file (typically FDATA) in a  comma  input
+      data.  The records in FDATA.csv may differ from those in FDATA in
+      the following cases.  If REPL/REPL_ is used, the replicated  form
+      of  the data will appear in FDATA.csv.  Also, records excluded by
+      PRED_IGNORE_DATA will not be present in FDATA.csv.  The  creation
+      of  FDATA.csv  can  cause  a long period of data file loading and
+      processing at the beginning of a run, if the FDATA file  is  very
+      large  (such  as  >1 MB).  As of nm760, the creation of this file
+      can be prevented by adding the option  NOFDATACSV  on  the  $DATA
+      record.
 
  Another  change  in  NONMEM  VI  2.0 is that tab characters (and other
  characters that are smaller than blank  in  the  computer's  collating
@@ -414,8 +437,8 @@
  (See Guide IV, section II.C.2)
 
 ** REFERENCES
-Guide IV, section III.B.5
+See Guide Introduction_7 "$DATA NOFDATACSV (NM752)"
+See Introduction to NONMEM 7 and Guide VIII
+
 ** REFERENCES
 Guide V, section 6.4
-** REFERENCES
-Guide Introduction_7

@@ -1,3 +1,968 @@
-#+title: 3. Control records
+#+title: 2. Control records
+{{< katex >}}{{< /katex >}}
+
+* Model specification and control records
+NONMEM uses /control records/ for model specification. Each record
+begins with a reserved keyword that starts with "$". They follow a few general
+rules.
+- A control record may have /options/. Those options are also reserved
+  keywords for NONMEM.
+- Some records and options have alias or abbreviations. For example
+  record $COVARIANCE can have aliases such as
+  #+begin_src php
+    $COV
+    $COVAR
+  #+end_src
+  the sections below and the reference manual for the alias of reocrds and options.
+- Record and option order is immaterial unless specified.
+- ";" indicates comments. On a line NONMEM ignores the content beyond
+  ";". NONMEM also ignores empty lines.
+- A control record may span multiple lines, which NONMEM treats as a
+  single record until the next control record begins. Except for
+  $ESTIMATION, $TABLE, and $SCATTER, all records sharing the same name
+  (or alias) are combined and interpreted as one.. Therefore
+  #+begin_src php
+    $THETA  7 ;Mean Clearance
+           20 ;Mean Volume
+    $OMEGA  .5  4
+    $THETA  .7
+    $OMEGA  .005
+  #+end_src
+  is equivalent to
+  #+begin_src php
+    $THETA 7 20 .7
+    $OMEGA .5 4 .005
+  #+end_src
+- In NONMEM v7.3+, "&" at the end of line indicates line continuation (Fortran-style continuation).
+  One can use ";" to escape "&" at the end of a line when it is intended for
+  something else, e.g.
+  #+begin_src php
+    FORMAT=s1PE15.8:160& ;
+  #+end_src
+- Options can be separated by commas "," as well as spaces, e.g.
+  #+begin_src php
+    MAXEVAL=400    SIGDIGITS=4, PRINT=5
+  #+end_src
+  Options of form "A=B" must be on a same line. The "="
+  sign can have spaces around or even be omitted, thus the
+  following are equivalent
+  #+begin_src php
+    MAX=300
+    MAX = 300
+    MAX 300
+  #+end_src
+- Strings for filenames on control records is not length-limited but
+  must be on a same line. A filename may not contain embedded spaces. If
+  it contains commas, semicolons, or parentheses, or if it starts with
+  an equal sign, then it must be surrounded by single quotes ' or
+  double quotes ".  An option name may not be used as a filename
+  unless it is surrounded by quotes.
+- The numerical values in $THETA, $OMEGA, and $SIGMA can have to 30
+  characters. They can use scientific notation (the numerical notation
+  using exponential symbol "E"), e.g. 1.2345E+03.
 
 * Control records
+In the rest of the chapter we introduce some commonly control records
+and options (see Reference manual for additional entries and further details), in
+the order how we approach a problem using NONMEM models:
+- define the problem;
+- prepare the data;
+- choose a kinetics model and its parameterization;
+- choose an estimation method;
+- get the results.
+Though this process is always iterative by nature, it helps us
+understand the roles of the control records involved and keep in mind
+the big picture of model building.
+
+Unless explained otherwise, each section of control record begins with
+a code block for its usage and an example. We use the following notations.
+- Any or all arguments in =[ ]= are optional, e.g. =[foo bar]=, and
+  equivalently =[foo] [bar]=,  means =foo= and =bar= are both optional.
+- Options delimited by =|= cannot be used together, e.g. =option=a|b=
+  means one must choose to specify =option=a= or =option=b=.
+- =...= indicates reaptable arguments, e.g. =filename ...= means one can
+  supply multiple files, and =[label|value]...= means =label1 value2 value3 label4= is allowed.
+- A keyword with "(NONMEM version)" appended indicates the
+  record/option as introduced in that version. For example "$DEFAULT
+  (NM74)" means the record was introduced in NONMEM v7.4.
+- Starting in v7.2 NONMEM  is no longer case-sensitive to reserved
+  keywords, reserved variables, or user-defined variables.
+
+**  $PROBLEM
+#+begin_src php
+$PROBLEM [text]
+; Example:
+$PROB  THEOPHYLLINE   POPULATION DATA
+#+end_src
+
+The text becomes a heading for the NONMEM printout. This record is required.
+A $PROBLEM record other than the first one marks the beginning of another problem specification.
+
+The text must be contained on a single record, and
+only the first 72 characters of text (starting with the second character
+after the record name) are used in the heading.  Spaces and
+semicolons in the text are included /as is/.
+
+**  $INPUT
+#+begin_src php
+$INPUT item ...
+; Example:
+$INPUT      ID DOSE TIME CP=DV WT
+#+end_src
+
+$INPUT define the data item in NONMEM data records,
+in the order of their appearance.
+
+This record is required, and it must precede any other
+NONMEM control record in the problem specification that refers to
+specific data item types.
+
+Each item has form B or A=B, where A and B are data item labels.
+Each data item label consists of letters (A-Z) and numerals (0-9), but it
+must begin with a letter. The form A=B indicates A and B are synonyms. In this case at least one
+of them must be a reserved label. For example, =CP=DV= defines =CP= as
+a synonym of =DV=, and =CP= is used as the label in NONMEM output.
+
+All the reserved data items from the previous chapter can be specified
+as items.
+
+
+**  $DATA
+#+begin_src php
+ $DATA  [filename|*]
+        [IGNORE=(list)...|ACCEPT=(list)...]
+; Example
+$DATA       DATAFILE
+#+end_src
+This record gives the name of the file containing the NONMEM data set.
+
+This record is required with the first problem specification, and with any
+problem specification where the NONMEM data set differs from that of the
+preceding problem specification.
+
+The filename must be the first option on the record.
+
+Below we only discuss commonly used options. See Reference manual for details.
+
+IGNORE option specifies records to be dropped from the NONMEM data set.
+  + =IGNORE=c1= means data column (data item) =c1= of the data set
+    will be ignored.  =c1= can be any character other than a blank or
+    semicolon.  In the $DATA record it can be enclosed by single
+    quotes or by double quotes, in which case a semi-colon is
+    permitted. By default NONMEM ignores data records beginning with
+    "#".
+
+  + =IGNORE=@=  signifies  that  any  data  record having an
+    alphabetic character or @ as its first non-blank character (not
+    just in column  1) should be ignored.  Alphabetic characters are
+    the letters A-Z and a-z.  This permits a table file having header
+    lines to be used as an NONMEM data set.
+
+  + =IGNORE=(list)= (NM7) ignores a list of one or more data item
+    labels, with logical operators and values, of the form
+    "label=value", "label.EQ.value", "label.NE.value",
+    "label.GT.value", "label.GE.value", "label.LT.value", and
+    "label.LE.value". If the logical operator is omitted, the default
+    is "=". With each data record, the value of the data item with the
+    given label and the value in the list are compared according to
+    the logical operator, and if result is "true", the record is
+    ignored, See Reference manual for details of /ignoring by
+    conditions/.
+
+  + ACCEPT=(list) The ACCEPT list option is the logical inverse of the
+    IGNORE list option. It specifies conditions for acceptance of
+    records. An ACCEPT list cannot be used together with an IGNORE
+    list.
+
+    See Guide VIII Ignore_accept example.
+
+Option =NULL= specifies the character
+used for  null data values in the NONMEM
+data set.
+Every occurrence in the NONMEM data set of a dot surrounded by
+blanks/commas/tab characters,
+or of consecutive commas or consecutive tab characters,
+is replaced by a null data item in the NONMEM data set.
+Null data items are also supplied for data items that are missing from
+the end of an NONMEM data record (there may be several missing from
+the end of any given record) but that are defined in the $INPUT record.
+The default is blank.
+
+The option =CHECKOUT= specifies that NONMEM is to run in data
+checkout mode.  In this mode, tables and scatterplots can be requested,
+so that the data can be examined,
+but no computations involving the model are performed, so that this
+examination cannot be hindered by problems
+with the logic in user-written routines or abbreviated codes.
+These routines and codes need only be syntactically correct.
+The predictions, residuals, weighted residuals, =ETA='s and
+PRED-defined items that are displayed in tables and
+scatterplots (see sections B.16 and IV.F) are all 0.
+=CHECKDATA= can be used as an alias.
+
+**  $SUBROUTINES
+#+begin_src php
+$SUBROUTINES [subname = name] ...
+; Example
+$SUBROUTINES ADVAN3 TRNAS2
+#+end_src
+
+Recall that NONMEM requires a PRED routine for model predictions, with
+built-in ADVAN routines for common models and matching TRANS routines
+for parameterization. The $SUBROUTINES record is used to specify them:
+it describes which pharmacokinetic model is to be used.
+There are many reserved subnames (subroutine names),
+here we only discuss a few: ADVAN, TRANS, and SS.
+
+For PK models user can choose from the following ADVAN routines
+- ADVAN1 (One Compartment Linear Model)
+- ADVAN2 (One Compartment Linear Model with First Order Absorption)
+- ADVAN3 (Two Compartment Linear Model)
+- ADVAN4 (Two Compartment Linear Model with First Order Absorption)
+- ADVAN10 (One Compartment Model with Michaelis-Menten Elimination)
+- ADVAN11 (Three Compartment Linear Model)
+- ADVAN12 (Three Compartment Linear Model with First Order Absorption)
+NONMEM has additional ADVANs for more general models. See Reference
+manual for details.
+
+The following applies when using ADVAN models.
+1. The compartments are numbered. These numbers are used in two places. First, they are
+   used in the CMT and PCMT data items to describe specific
+   compartments. Second, the compartment number n is part of the name
+   of PK parameters such as compartment scale (Sn), as discussed
+   below.
+2. Each model has a /default observation compartment/, which for each of
+   the above ADVAN's happens to be the central compartment. If an
+   event record contains an observation, the prediction associated
+   with that record will be the scaled drug amount in this
+   compartment, unless the CMT data item on the record specifies
+   differently. The prediction associated with a non-observational
+   event record will again be the scaled drug amount in this
+   compartment, unless the PCMT data item on the record specifies
+   differently.
+3. Each model has a /default dose compartment/. Unless specified
+   differently by the CMT data item, it is understood that a dose is
+   input into this compartment. default dose compartment With ADVAN1,
+   ADVAN3, and ADVAN10, this is the central compartment. With ADVAN2
+   and ADVAN4, a drug depot compartment is part of the model and is
+   the default dose compartment. In these cases, if a dose is to go
+   directly into the central compartment, its compartment number (2)
+   must be present in the CMT data item of the dose record. Note that
+   it is not required that there be doses into the depot compartment.
+   In a study involving mixed oral and IV doses, for example, some
+   patients may receive only IV doses. All dose event records for such
+   patients will have the value 2 in the CMT data item.
+4. Each model has an /output compartment/. The amount of drug in this
+   compartment is the accumulated amount of drug eliminated from the
+   system and typically represents the amount of drug accumulated in
+   the urine. This compartment is special: It may not receive a dose;
+   it is initially off, and it remains off (so that the amount therein
+   remains zero) until it is explicitly turned on by an other type
+   event record with the  output compartment's number in the CMT data
+   item. The output value \(A_o\) between time \(t_1\) and \(t_2\) is
+   computed according to mass balance:
+   \(A_o=\sum A(t_1) + \text{Dose amount} - \sum A(t_2)\). That is, it
+   is the difference between the total drug amount in all the
+   compartments at \(t_1\) and \(t_2\), incorporating the drug added
+   to the system in \(t_1, t_2\) through doses. It also incorporates the output fraction
+   \(F_0\), if given. If an output compartment is turned off \(A_0\)
+   is reset to 0 (If the compartment is interpreted as a urine
+   compartment, this is equivalent to "emptying" the compartment).
+   This is done by giving a CMT of an other-type or observation event record.
+5. On event records, the output compartment is referred to by the
+   compartment number according to ADVAN. A PK parameter which refers
+   to the output compartment may use either this number or 0 (zero).
+   Thus, F0 and F2 both denote the output fraction for ADVAN1;
+   similarly, S0 and S4 both denote the scale for ADVAN4's output
+   compartment. SC denotes the scale for any ADVAN's central
+   compartment.
+6. Each model has a set of /basic PK parameters/ They are the
+   /microconstants/ used to compute the amounts of drug via the
+   kinetic equations for the model. Each one also has a set of
+   additional optional PK parameters, including compartment scales
+   (Sn), bioavailability fractions (Fn), and output fraction (F0).
+   Compartment scales are typically used to convert amounts to
+   concentrations, but they also can be used for other purposes.
+   Bioavailability fractions adjusts dose amounts by multiplication.
+7. Every ADVAN has a default paramer TRANS1, coresponding to the
+   microconstants parameterization.
+8. Each model's PK parameters must be computed for it by a subroutine
+   named PK. The error model must be described by a subroutine named
+   ERROR. $PK and $ERROR abbreviated code provide an easy way to
+   specify the essential computations that must occur in these
+   subroutines.
+
+# **  $ABBREVIATED
+# #+begin_src php
+#  $ABBREVIATED  [COMRES=n1] [COMSAV=n2]
+#                [DERIV2=NO] [DERIV2=NOCOMMON] [DERIV1=NO]
+#                [FASTDER | NOFASTDER]
+#                [CHECKMU | NOCHECKMU]
+#                [DES=COMPACT|DES=FULL]
+#                [REPLACE left_string = right_string ] ...
+#                [DECLARE [type] [DOWHILE] name [(dimension [,dimension])] ...
+#                [PROTECT]
+#                [FUNCTION function_name(input_vector_name,dimension[,usage])]
+#                [VECTOR input_vector_name(dimension)]
+# $ABBREVIATED    COMRES=2
+# #+end_src
+# Optional. May be used when $PK, $ERROR, or $PRED abbreviated code is
+# present. Must precede all blocks of  abbreviated  code.
+# appear.  Then it only should appear with the first problem specification,
+# and before any abbreviated code.
+# With  NONMEM 7.4,
+# may also be used when there is no abbreviated code.  For example,
+# #+begin_src php
+# $ABBR REPLACE
+# #+end_src
+# may be used for  label  substitution  in  NONMEM  report
+# files.
+
+# Abbreviated code is described in next Chapter.
+
+
+** $THETA
+#+begin_src php
+$THETA  value1  [value2]  [value3] ...
+         [(value)xn] ...
+         [label=value] ...
+         [ABORT|NOABORT|NOABORTFIRST]
+
+; Example
+$THETA  (.1,3.,5.) (.008,.08,.5) (.004,.04,.9)
+#+end_src
+
+This record gives initial estimates for =THETA='s, as well as bounds on the
+final estimates.
+
+A value has one of four forms:
+#+begin_src php
+1. init [FIXED]
+2. (low, init, [up] [FIXED])
+3. (low,,up)
+4. (value)xn (NM72)
+#+end_src
+where init is the initial estimate, and low and up are lower and upper
+bounds respectively.  The lower bound can be =-INF=, and
+the upper bound can be =INF=, unless form 3 is used,
+in which case both bounds must be finite numbers.
+Form 3 is used when the user requires some help in obtaining an initial
+estimate for the parameter.  Usually, though, the user should be able to
+develop a reasonable initial estimate, and when he can, there is some savings
+in computation time.  An initial estimate equal to 0 is not allowed, unless
+the =FIXED= option is used.  Use of this option indicates that the final
+parameter estimate is to be constrained to equal the initial parameter estimate.
+If this option is used with form 2, then low, init and up must all be
+equal.
+
+Another example:
+#+begin_src php
+$THETA  3 FIXED  (-INF,.08,.5) (.004,,.9)
+#+end_src
+where the three forms used are 1,2 and 3, in that order.
+
+Parentheses around init with form 1 are optional. The designation =INF= can
+also be coded =INFINITY=, =INFIN=, or =1000000=.
+All the numbers given are assumed to be /real/.
+
+In form 4,
+any  initial  value or group of initial values may be enclosed in
+parentheses and followed by =xn=, which means  to  replicate  the
+values n times.
+The values within the parenthesis may have any  of  the  above  forms.
+For example, the following two are equivalent:
+
+#+begin_src php
+$THETA 2 2 2 2 (0.001,0.1,1000) (0.001,0.1,1000) (0.001,0.1,1000)
+       (0.5 FIXED) (0.5 FIXED)
+
+$THETA (2)x4 (0.001,0.1,1000)x3 (0.5 FIXED)x2
+#+end_src
+
+If form 3 is used, a search for an initial estimate is undertaken by NONMEM.  A number of points in a subspace of the THETA
+space will be examined.  This subspace consists of the multidimensional
+rectangle formed by the lower and upper bounds for all parameters whose values
+are of form 3.  The number of points examined will be automatically
+determined by NONMEM, or it can be specified by the number n with
+the =NUMBERPOINTS= option.
+
+The options =ABORT= and
+=NOABORT=  and  =NOABORTFIRST=
+apply during the search.  See Reference manuual and next chapter for details.
+
+*** Initial estimates for \(\theta\)
+When estimating parameters, good initial estimates for
+THETA can be important. Poor estimates can cause excessive amounts of
+computer time, to produce parameter estimates that are not physiologically reasonable, or
+to fail the model fitting at all. For some drugs and models, initial estimates for
+be obtained from published literature, previous studies, or preivous
+model runs. Highly accurate values should be perturbed, say about 10%, before being used as initial estimates in a NONMEM run. (Initial estimates that are too close to what may be the actual final estimates will cause prob-
+lems in a NONMEM run; see Chapter Guide V Chapt 13).
+
+One approach with population data, where there is a reasonable amount of data for each
+individual, is as follows. It is often easier to guess at appropriate parameter values for
+individual data than for population data. So, first estimate each individual’s parameter
+values using only the data from the individual. The mean values of the individuals’
+parameter estimates can then be used as the initial parameter estimates in the population
+analysis. Results from individual runs can also be used to obtain
+initial estimates for elements of OMEGA and SIGMA (see below).
+
+Another approach is simply to let NONMEM find an initial estimate. NONMEM has an
+automatic strategy for so doing (see Guide V Chapter 12, Section 4.4).
+
+** $PK
+:PROPERTIES:
+:CUSTOM_ID: guide_$pk
+:END:
+
+Recall there are parameters associated with each ADVAN PK model, and often we
+want to associate them with data such as covariates. For example, as
+shown earlier we can have a linear regression model for clearance CL,
+using weight WT. We also want to specify how those parameters are
+associated with THETA and ETA. We do that in a $PK record.
+
+A $PK record is initiated by the control record name "$PK" that is
+followed by a section of abbreviated code that we call "$PK block". The block consists of
+statements—one per line—that assembles standard FORTRAN statements. In fact, they form a simplified subset of the FORTRAN language, including:
+- Simple assignment statements;
+- Certain types of conditional (IF) statements;
+- Selected forms of CALL, WRITE, PRINT, RETURN, OPEN, CLOSE, and REWIND statements.
+
+Every $PK block must contain assignment statements that define values
+for all basic PK parameters corresponding to the specified ADVAN and
+TRANS combination. Optionally, $PK statements may also include
+assignments for one or more additional PK parameters.
+
+*** Structure models
+For example, recall the structure models from the previous chapter.
+They bear almost literal translation in $PK blocks (assume WT, AGE, and SECR are available through $INPUT).
+- Linear model
+  $$
+  \tilde{\text{CL}}_{\text{met}} = \theta_1 \text{WT},
+  $$
+  $$
+  \text{RF}=\text{WT}\frac{1.66-0.011\text{AGE}}{\text{SECR}},
+  $$
+  $$
+  \tilde{\text{CL}}_{\text{ren}} = \theta_4 \text{RF},
+  $$
+  $$
+  \tilde{\text{CL}} = \tilde{\text{CL}}_{\text{ren}} + \tilde{\text{CL}}_{\text{met}}
+  $$
+  #+begin_src php
+    TVCLM=THETA(1)*WT
+    RF=WT*(1.66-.011*AGE)/SECR
+    TVCLR=THETA(4)*RF
+    TVCL=TVCLM+TVCLR
+  #+end_src
+
+- Multiplicative model
+  $$
+  \tilde{\text{CL}}_{\text{met}} = \theta_1\text{WT}^{\theta_2}.
+  $$
+  #+begin_src php
+    TVCLM=THETA(1)*WT**THETA(2)
+  #+end_src
+
+- Saturation model
+  $$
+  \tilde{\text{CL}}_{\text{met}}=\text{WT} \left(\theta_1-\frac{\theta_2 \text{Cpss}_2}{\theta_3 + \text{Cpss}_2}\right)
+  $$
+  #+begin_src php
+    TVCLM=WT*(THETA(1)-THETA(2)*CPSS2/(THETA(3)+CPSS2))
+  #+end_src
+
+- Indicator variables
+  $$
+  \tilde{\text{CL}}_\text{met} = (\theta_1 - \theta_2\text{HF})\text{WT}.
+  $$
+  #+begin_src php
+    TVCLM=(THETA(1)-THETA(2)*HF)*WT
+  #+end_src
+  or alternatively using the IF-ELSE clause
+  #+begin_src php
+    IF (HF.EQ.0) THEN
+      TVCLM=THETA(1)*WT
+    ELSE
+      TVCLM=(THETA(1)-THETA(2))*WT
+    ENDIF
+  #+end_src
+*** Scaling
+Recall in the last chapter we calculated concentration from drug
+amount using scaling: \(c(t)=A(t)/V\). Recall that a PK compartment in
+the model has its numbering (see, e.g. ADVANs), correspondingly
+scaling parameters are accessible in a $PK block using the
+compartment number n. For eample, when the unit of \(V\) is changed
+from kiloliter to liter in a one-compartment model, we can do
+#+begin_src f90
+S1=V/1000
+#+end_src
+
+Scaling parameters can also be based on a data item.
+Recall the @@html:<a href="/docs/user-guide/nmtran/data/#ex_data_output_comp">output compartment example</a>@@.
+With urine concentration observation \(C_u\), it is necessary to
+provide urine volume to scale for the output compartment.
+Suppose this data item is included in the $INPUT record as UVOL:
+#+begin_src php
+$INPUT ID TIME EVID UVOL DV CMT AMT
+#+end_src
+an additional $PK statement is necessary:
+#+begin_src f90
+S0=UVOL
+#+end_src
+UVOL need be recorded on only those observation events to which it applies, although it
+does no harm to record it on other event records. For example, it may well happen that
+both plasma and urine responses are measured at the same time, so that there are two
+observation event records with the same value of TIME, one for each compartment
+observed at that time. Consider, for example, the sample data below.
+Assume that the central compartment is compartment 2 and the output compartment is
+compartment 3. (recall the use of -3 to signify that compartment 3 is to be turned off after
+the observation time. The compartment will remain off until the time
+another urine collection begins, as indicated with an other type
+record). Either of the two approaches below produces the correct value of S0:
+- Record UVOL on the event record to which it applies. The order of the records does not matter.
+#+begin_src r
+TIME     UVOL     DV     CMT
+10.      0        5.80   2
+10.      100      .067   -3
+#+end_src
+- Record UVOL on all event records having the same value of TIME. The order of the records does not matter.
+#+begin_src r
+TIME     UVOL     DV     CMT
+10.      100      5.80   2
+10.      100      .067   -3
+#+end_src
+# todo: G5 Chap7 p79 "The following will not produce the correct value
+# of S0 unless PREDPP is instructed to evaluate the $PK statements only once for each distinct value of TIME:""
+*** Bioavailability fraction
+$PK block parameters "Fn", where n is the number of a compartment into which a dose
+may be introduced, are bioavailability fractions: if a dose record
+specifies a dose amount AMT for
+compartment n,
+the dose amount introduced into the system is AMT\(\times\)Fn, e.g. a
+bolus dose AMT for the central compartment in the one-compartment
+model is AMT\(\times\)F1. If omitted the default values of Fn are 1
+(the dose is 100% available to the system).
+
+For example, suppose two different preparations that results in
+different bioavailability of the same drug are administered
+to compartment 1 of a model.
+We can use a indicator variable (or
+data item) PREP for the preparation: PREP=1 for the first
+preparation and PREP=0 for the second. Usually the method of drug administration permits the ratio of the
+bioavailabilities to be estimated, but
+not the bioavailabilities value themselves. We let the
+bioavailability ratio of PREP=0 to PREP=1 be \(\theta_6\). Without
+loss of generality, we also let F1=1 for PREP=1.
+The following three ways can be used to express this.
+#+begin_src f90
+  ; 1
+  F1=PREP+(1-PREP)*THETA(6)
+
+  ; 2
+  F1=1
+  IF (PREP.EQ.0) F1=THETA(6)
+
+  ; 3
+  IF (PREP.EQ.0) THEN
+    F1=THETA(6)
+  ELSE
+    F1=1
+  ENDIF
+#+end_src
+*** Output fraction
+The Output Fraction parameter, F0, is an optional PK parameter of every
+model. Recall that every model contains an output compartment.
+If this compartment has been turned on prior to the advance from time \(t_{j-1}\) to \(t_j\),
+then the amount of drug lost from the system during this interval via
+elimination is multiplied by F0 and added to the prior contents of the
+output compartment. If omitted in the $PK block, F0=1 by default (
+100% of the drug excreted goes to the output compartment). For
+example,
+assuming that the variables CLREN (renal clearance) and CL
+(total clearance) have been calculated with earlier $PK statements,
+one can use
+#+begin_src f90
+F0=CLREN/CL
+#+end_src
+to calculate F0.
+
+*** Random effects
+The most common use of $PK block is to formulate individual parameters
+\(\phi\) using fixed effects in \(\theta\) (THETA) and random effects
+\(\eta\) (ETA).
+
+For example, below are three different ways of coding a model for an individual’s value of clearance:
+#+begin_src f90
+; 1
+TVCL=THETA(1)
+CL=TVCL+ETA(1)
+
+; 2
+CL=THETA(1)
+CL=CL+ETA(1)
+
+; 3
+CL=THETA(1)+ETA(1)
+#+end_src
+Approach 1 above is better styled because it distinguishes the model for the typical value
+from the model for the individual’s value.
+
+Similarly, the multiplicate interindividual variability can be
+expressed as
+#+begin_src php
+CL=TVCL*(1+ETA(1))
+; or
+CL=TVCL + TVCL*ETA(1)
+#+end_src
+
+and the @@html:<a href="/docs/user-guide/fundamentals/population/#general_mu_eta_form">ICU example</a>@@ in generalized formulation can be coded as
+#+begin_src php
+CLM=TVCLM+(1-ICU)*ETA(1)+ICU*ETA(2)
+#+end_src
+
+Note that THETA and ETA do not have to match in their numbering.
+The two lines below are of the same effect except that in the output
+one would have to associate the numbering of THETA and ETA correctly.
+#+begin_src php
+CL=THETA(1)+ETA(1) ; ETA(1) is the random effect for THETA(1)
+
+CL=THETA(1)+ETA(2) ; ETA(2) is the random effect for THETA(1)
+#+end_src
+
+** $DES
+Similar to $PK block, abbreivated code following $DES
+is called a $DES block.
+This record is optional. It is used to specify the right-hand-side
+(RHS) \(g()\) of the ODE system:
+$$
+\frac{dA(t)}{dt}=g(A(t), x, \theta, t).
+$$
+The $DES block provides variables "DADT(n)" for \(\frac{dA}{dt}\). The
+block can also use variables defined in a preceding $PK block. For
+example, the ODE system for the two-compartment model with first-order
+absorption can be specified as
+#+begin_src php
+$PK
+  KA= ...
+  KCP= ...
+  KPC= ...
+  KC0= ...
+$DES
+  DADT(1)=-KA*A(1) ; GUT
+  DADT(2)=KA*A(1)-(KCP+KC0)*A(2)+KPC*A(3) ; CENTRAL
+  DADT(3)=KCP*A(2)-KPC*A(3) ; PERIPHERAL
+#+end_src
+Intertally the $PK parameters are accessed by $DES as a vector "P".
+
+In addition to specifying \(g()\), the $DES block is also in charge of calculating
+$$
+\frac{dg_i}{dA_j}, \quad \frac{dg_i}{dP_k}, \quad \frac{dg_i}{dt}.
+$$
+Here \(i and j\) are state dimention id's and \(k\) the internal
+parameter id's.
+
+$DES block implies that user intends to have the ODEs solved
+numerically, therefore it must be used along with AVDANs for numerical
+ODE solvers (ADVAN6, ADVAN8, ADVAN13, ADVAN14, ADVAN16, ADVAN18).
+
+** $ERROR
+$ERROR record with its code block ("$ERROR block") specifies the
+error structure of the model. Since the residual error is directly
+associated to the likelihood, $ERROR block basically describes the
+likelihood by associating the prediction \(F\) and residual error
+\(\epsilon\) with observation \(y\). In a $ERROR block the three quantities correspond
+to reserved variable F, ERR (or EPS), and Y, respectively.
+
+*** Error models
+For example, the following blocks define different error structures.
+#+begin_src f90
+  ; Additive error
+  Y=F+ERR(1)
+
+  ; proportional error
+  Y=F+F*ERR(1) ; equivalently Y=F*(1+ERR(1))
+
+  ; exponential error (proportional error in log-scale)
+  Y=F*EXP(ERR(1))
+
+  ; combined additive and proportional error
+  Y=F+F*ERR(1)+ERR(2)
+#+end_src
+
+*** Two types of observations
+Measurements from different compartments of the model are recorded in
+the DV data item of different observation event records. The CMT data item identifies the compartment from which the prediction associated with the event record is to be obtained. When the $ERROR statements are evaluated for a given event record, the variable F contains the prediction from the compartment
+specified for that event record. All that need be done is to select the correct error model,
+depending on the compartment. Suppose, for example, that ADVAN2 is used, so that the
+central compartment is compartment 2 and the output (urine)
+compartment is compartment 3. An additive error model for the
+observations can be coded as
+#+begin_src f90
+  TYP=0  ; type of observation
+  IF (CMT.EQ.2) TYP=1
+  Y=F+TYP*ERR(1)+(1-TYP)*ERR(2)
+#+end_src
+equivalently
+#+begin_src f90
+IF (CMT.EQ.2) THEN
+  Y=F+ERR(1)
+ELSE
+  Y=F+ERR(2)
+ENDIF
+#+end_src
+
+** $MODEL
+$MODEL can be used to compartment names that are available  for
+ substitution  in  abbreviated code.  This is referred to as "implicit"
+ compartment name substitution.  It is  an  alternative  to  "explicit"
+ compartmet name substitution using $ABBR REPLACE records.
+
+For example:
+
+#+begin_src php
+ $MODEL
+ COMP=(GUT,DEFDOS)
+ COMP=(CENTRAL,DEFOBS)
+ COMP=(PERI)
+#+end_src
+allows  susbsitutions  to  be  made for A(GUT), DADT(GUT), A(CENTRAL),
+DADT(CENTRAL), etc, so you may use these symbols in  the  abbreviated
+code. The two-compartment ODEs from $DES can be then written as
+#+begin_src php
+ $DES
+ DADT(GUT)=-KA*A(GUT)
+ DADT(CENTRAL)=KA*A(GUT)-(KCP+KC0)*A(CENTRAL)+KPC*A(PERI)
+ DADT(PERI)=KCP*A(CENTRAL)-KPC*A(PERI)
+  ...
+ $ERROR
+ IPRED=A(CENTRAL)/S2
+#+end_src
+
+**  $OMEGA and $SIGMA
+Recall that in a population Model
+\(\Omega\) (OMEGA) is the covariance matrix for \(\eta\), the random
+interindividual variability,
+and \(\Sigma\) (SIGMA) the covariance matrix for \(\epsilon\)
+the random intraindividual variability. NONMEM has corresponding
+$OMEGA and $SIGMA record to specify the structure and initial
+estimates of OMEGA and SIGMA, respectively.
+
+For example, the $OMEGA record in
+#+begin_src php
+CL=TVCL+ETA(1)
+V=TVVD+ETA(2)
+$OMEGA .0000055, .0
+; equivalently
+$OMEGA .0000005 ; VARIANCE IN CL
+       .04      ; VARIANCE IN V
+#+end_src
+says that the initial estimate for \(\Omega_{11}\), the variance of \(\eta_1\) is
+5.5\(\times\)\(10^{-6}\), and \(\Omega_{22}\), the variance of
+\(\eta_2\) is 0.04. They correspond to the intial estimate of the
+variance for CL and V, respectively.
+
+Similarly,
+#+begin_src php
+$ERROR
+Y=F+ERR(1)
+$SIGMA 25
+#+end_src
+specifies that the initial estimate for \(\Sigma_{11}=\text{var}(\epsilon_1)=25\).
+
+One can also fix certain elements of OMEGA and SIMGA constant. For
+example
+#+begin_src php
+$OMEGA 0 FIXED 0.0225
+; equivalently
+$OMEGA (0 FIXED) 0.0225
+#+end_src
+fixes \(\Omega_{11}\) as constant 0 while assigning initial estimate
+of \(\Omega_{22}\)  0.0225. Simiar to \(\theta\), initial estimate of
+OMEGA and SIMGA elements cannot be zero.
+
+**  $PRED
+Recall that NONMEM requires a PRED routine for model predictions.
+There are three ways to provide such a routine:
+1. select a built-in models such as supplying ADVAN to $SUBROUTINE and
+   using $PK block.
+2. write a Fortran routine PRED and supply it to $SUBROUTINE;
+3. use $PRED record to specify the model using abbreviated code.
+
+The $PRED record is optional.  If it appears, it must be with the first
+problem specification, and only with this problem specification.
+
+*** Pharmacodynamic model
+We saw earlier that $ERROR statements can be used to adjust the scaled
+drug concentration F as well as introducing new \(\theta\) and \(\eta\)
+variables. This allows pharmacodynamic (PD) modeling to relate the predicted effect
+to a pharmacokinetic quantity such as plasma concentration. In this
+example, we assume this relationship between drug effects \(E\) and
+concentration \(C_p\) follows Emax model:
+$$
+E=E_{\text{max}}\frac{C_p}{C_{50}+C_p},
+$$
+and the pharmacodynamics parameters \(E_{\text{max}}\) and \(C_{50}\)
+modeled as
+$$
+E_{\text{max}}=\theta_1 + \eta_1,\quad C_{50}=\theta_2+\eta_2.
+$$
+Model below shows how to fit the model.
+#+begin_src php
+$PROBLEM PHARMACODYNAMIC MODEL USING $ERROR STATEMENTS
+$INPUT ID TIME AMT INDK INDV DV
+$DATA EFFDATA
+$SUBROUTINE ADVAN1
+$PK
+K=INDK
+V=INDV
+S1=V
+$ERROR
+EMAX=THETA(1)+ETA(1)
+C50=THETA(2)+ETA(2)
+E=EMAX*F/(C50+F)
+Y=E+ERR(1)
+$THETA 100 20
+$OMEGA 400 16
+$SIGMA 4
+$ESTIMATION
+#+end_src
+
+Alternatively we can use $PRED to write the model. When using $PRED one is responsible of specifying the entire statement
+for \(y\) (reserved variable Y in NONMEM):
+$$
+y_{ij}=f(x_{ij}, \phi_{ij}) + \epsilon_{ij}.
+$$
+Suppose that in the above example, drug concentration \(C_p\) is
+always measured at the same time as drug effectso that we can use it
+directly in the Emax model. This means that the \(C_p\) is now an
+independent variable, rather than as the DV data item. This also means
+that a PK model is not needed and we can write out the Emax model in
+the $PRED block:
+#+begin_src php
+$PROBLEM A SIMPLE PHARMACODYNAMIC MODEL
+$INPUT ID TIME CP DV
+$DATA EFFDATA
+$PRED
+EMAX=THETA(1)+ETA(1)
+C50=THETA(2)+ETA(2)
+E=EMAX*CP/(C50+CP)
+Y=E+ERR(1)
+$THETA 100 20
+$OMEGA 400 16
+$SIGMA 4
+$ESTIMATION
+#+end_src
+
+
+
+**  $ESTIMATION
+This record requests Estimation Step. In the step, NONMEM fits the
+model using either maximum likelihood estimation (MLE) or Bayesian
+estimation. We will discuss MLE in this section and return to Bayesian
+methods later.
+
+With MLE NONMEM searches for estimates \(\hat{\theta}\),
+\(\hat{\Omega}\),  and \(\hat{\Sigma}\) that minimize the objective
+function value (OFV) -2\(\mathcal{L}\), with \(\mathcal{L}\) the
+log-likelihood.
+
+The most frequently used options of $ESTIMATION are as follows [fn:1].
+- METHOD=1: NONMEM uses conditional estimates for the etas during the computation of the
+objective function. METHOD=1 is also called the "first order
+conditional estimation (FOCE) method." It may also be used as
+METHOD=CONDITIONAL. When the option INTERACTION is also present:
+#+begin_src php
+$ESTIMATION METHOD=1 INTERACTION
+#+end_src
+the method is called the "FOCE with INTERACTION method" (FOCEI). It is
+recommended for continuous variables unless the data are very sparse. These methods are discussed in Guide VII, Conditional Estimation Methods.
+- SIGDIGITS=n: By default, the search continues until the estimates of all elements of
+(THETA, OMEGA, SIGMA) have been determined to at least 3 significant figures. Because only 3 significant
+digits are used to print parameter estimates in the output, and for other reasons as
+well, this amount of accuracy is often sufficient. However, the SIGDIGITS option
+can be used to request a different number (n) of significant digits.
+- MAXEVAL=n: the Estimation Step always runs with a specific limit on the number of objective
+function evaluations allowed during the search, as a protection against infinite loops
+and excessively long runs. The default maximum is computed according to the
+number of parameters being estimated. The MAXEVALS option can be used to
+request a different number (n) for the maximum number of function evaluations
+- PRINT=n: as the Estimation Step progresses, by default it prints intermediate output summarizing the progress of the search. The search proceeds in stages, called iterations.
+At the end of certain iterations a summarization is printed which consists of the values of the objective function, its gradient vector with respect to the parameters, and
+the parameter values themselves. By default, this summarization is only printed for
+the first and last iterations. The PRINT option can be used to request a number (n)
+such that starting from the first iteration, only n-1 iterations are skipped before
+another summarization is printed.
+
+An example of using the options is (recall NONMEM supports aliases for control records and options):
+#+begin_src php
+$ESTM SIG=6,MAX=900,PRI=5
+#+end_src
+
+**  $COVARIANCE
+In a Covariance Step, NONMEM obtains information on the precision of the parameter
+estimates obtained in the Estimation Step (therefore it must be
+preceded by $ESTIMATION). The $COVARIANCE control record outputs (as in NONMEM
+output) "STANDARD ERROR OF ESTIMATE", "COVARIANCE MATRIX OF ESTIMATE", "CORRELATION
+MATRIX OF ESTIMATE", and "INVERSE COVARIANCE MATRIX OF ESTIMATE".
+
+** $TABLE
+$TABLE records request output, in addition to values of DV, prediction
+(PRED), residuals (RES) and weighted residuals (WRES). These four items are always printed in the tables. If omitted, NONMEM does not produce
+the corresponding additional output. Tables generated after all other
+tasks have been performed. This affects the values displayed for
+. If the Estimation Step is not run, then the initial estimates of the parameters are
+used to compute these quantities. If the Estimation Step is run, then the final parameter
+estimates are used. The UNCONDITIONAL option requests
+that output be generated even if the Estimation Step ends
+unsuccessfully. This is the default. The CONDITIONAL option of these records requests that output of this type be generated only if the Estimation Step terminates successfully.
+
+**  $SIMULATION
+The term "simulation" refers to using model to generate data.
+
+In a Simulation Step with a preceding Estimation Step, each value of the DV data item of each record with
+MDV=0 is replaced by a simulated observation generated from the model, but including
+statistical variability†. The prediction is based on final THETA
+estimates, as well as ETA and EPS specified according to
+user-specified random distributions (e.g., with variances given by the
+initial estimates of OMEGA and SIGMA). If OMEGA and SIGMA are fixed to
+zero, ETA and EPS do not affect the simulated values.
+
+A simple form of simulation is performed when the Estimation Step is omitted but the Table
+Step is implemented. The predictions are then based on the
+information in the data records and the initial estimates of THETA.
+Random variables ETA and EPS (if any) have no effect on
+the predictions. If the only purpose of the run is to obtain simulated
+values, and these variables are present, it is best (but not required) that their variances be
+fixed to 0. NONMEM does not compute the objective function in this circumstance.
+
+**  $ETAS,$PHIS (NM73)
+By default, the initial value used for ETA's in the Estimation Step search is 0.
+The $ETAS and $PHIS records provide different initial estimates.
+When the record is $PHIS,
+values are entered as phi values (convenient for EM methods). Recall
+the relationship \(\phi=\mu + \eta\).
+
+Example:
+#+begin_src php
+$ETAS 0.4 3.0 3.0 5.0
+
+$PHIS 0.4 3.0 3.0 5.0
+
+$ETAS FILE=myprevious.phi FORMAT=s1pE15.8 TBLN=3
+
+$PHIS FILE=myprevious.phi FORMAT=s1pE15.8 TBLN=3
+#+end_src
+
+Contents from a .iph file can be brought in.
+As a .iph file has both ETA() and PHI() items, ETA() will be selected
+for a $ETAS record, and PHI() will be selected for a $PHIS record.
+The first ITERATION>0 is selected, unless a particular iteration is specified, for example:
+
+#+begin_src php
+$ETAS FILE=myprevious.iph TBLN=3 ITERATION=123
+#+end_src
+
+[fn:1] The default METHOD is METHOD=0. In this method NONMEM always sets \(\eta=0\) for all \(\eta\)'s (ETAs)
+  during the computation of the OFV. This is also called the "first
+  order (FO) method." Despite being default it is no longer popularly used.

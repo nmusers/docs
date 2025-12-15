@@ -1,0 +1,294 @@
+;DDE
+;NN1=100
+;PRC=0.01
+;DISTRIB=WEIBULLCDF(VG)
+$SIZES PC=110
+$PROBLEM LOGISTIC Distributed transit compartments on Smax Drug Responsive Input function
+; turn off second derivative assessments, sometimes even 1st derivatives if only simulating
+$ABBR FUNCTION TRANSITG_SDIM1(VG,113)
+$ABBR FUNCTION WEIBULLCDF(*,10)
+$ABBR FUNCTION WEIBULLCDFINV(*,10)
+$ABBR DERIV2=NO DERIV2=NOCOMMON DERIV1=NO
+$INPUT ID AMT TIME DV EVID MDV
+$DATA smax_weibull.dat IGNORE=C
+$SUBROUTINES ADVAN13 TOL=10 ATOL=10
+$MODEL NCOMPARTMENTS=102
+
+$PK
+CALLFL=-2
+MXSTEP=2000000000
+SMAX=THETA(1)
+SC50=THETA(2)
+KIN0=THETA(3)
+AA=THETA(4)
+BB=THETA(5)
+Vmax = 2
+V50 = 3
+V = 1
+
+VG(2)=AA
+VG(3)=BB
+
+; Initial conditions
+A_0(1)=0.0
+A_0(2)=5.0
+
+
+; INITIALIZING EQUATIONS FOR DDE COMPARTMENTS
+
+$DES
+" FIRST
+" EXTERNAL WEIBULLCDF
+ VG(2)=AA
+ VG(3)=BB
+
+
+
+
+
+; DELAY SETUP FOR EQUATION SET 1
+ C=A(1)/V
+ KIN=KIN0*(1.0+(SMAX*C)/(SC50+C))
+ APG_KIN_1=KIN0
+  TZ_GD=T-PASTZERO
+ T_O=0.0
+  IF(TZ_GD>=0.0) T_O=1.0
+NNU_1=100
+VG(1)=1.0-0.01
+TTEND_1=WEIBULLCDFINV(VG)
+KK_1=NNU_1/TTEND_1
+DTT_1=1.0/KK_1
+IF(TTEND_1==-1.0D+300) EXIT 2
+VG(1)=DTT_1
+"VG(11)=LOC(WEIBULLCDF)
+VG(12)=-1.0D+300
+    DADT(3)=KK_1*(KIN-A(3)-APG_KIN_1)
+VG(13)=A(3)
+    DADT(4)=KK_1*(A(3)-A(4))
+VG(14)=A(4)
+    DADT(5)=KK_1*(A(4)-A(5))
+VG(15)=A(5)
+    DADT(6)=KK_1*(A(5)-A(6))
+VG(16)=A(6)
+    DADT(7)=KK_1*(A(6)-A(7))
+VG(17)=A(7)
+    DADT(8)=KK_1*(A(7)-A(8))
+VG(18)=A(8)
+    DADT(9)=KK_1*(A(8)-A(9))
+VG(19)=A(9)
+    DADT(10)=KK_1*(A(9)-A(10))
+VG(20)=A(10)
+    DADT(11)=KK_1*(A(10)-A(11))
+VG(21)=A(11)
+    DADT(12)=KK_1*(A(11)-A(12))
+VG(22)=A(12)
+    DADT(13)=KK_1*(A(12)-A(13))
+VG(23)=A(13)
+    DADT(14)=KK_1*(A(13)-A(14))
+VG(24)=A(14)
+    DADT(15)=KK_1*(A(14)-A(15))
+VG(25)=A(15)
+    DADT(16)=KK_1*(A(15)-A(16))
+VG(26)=A(16)
+    DADT(17)=KK_1*(A(16)-A(17))
+VG(27)=A(17)
+    DADT(18)=KK_1*(A(17)-A(18))
+VG(28)=A(18)
+    DADT(19)=KK_1*(A(18)-A(19))
+VG(29)=A(19)
+    DADT(20)=KK_1*(A(19)-A(20))
+VG(30)=A(20)
+    DADT(21)=KK_1*(A(20)-A(21))
+VG(31)=A(21)
+    DADT(22)=KK_1*(A(21)-A(22))
+VG(32)=A(22)
+    DADT(23)=KK_1*(A(22)-A(23))
+VG(33)=A(23)
+    DADT(24)=KK_1*(A(23)-A(24))
+VG(34)=A(24)
+    DADT(25)=KK_1*(A(24)-A(25))
+VG(35)=A(25)
+    DADT(26)=KK_1*(A(25)-A(26))
+VG(36)=A(26)
+    DADT(27)=KK_1*(A(26)-A(27))
+VG(37)=A(27)
+    DADT(28)=KK_1*(A(27)-A(28))
+VG(38)=A(28)
+    DADT(29)=KK_1*(A(28)-A(29))
+VG(39)=A(29)
+    DADT(30)=KK_1*(A(29)-A(30))
+VG(40)=A(30)
+    DADT(31)=KK_1*(A(30)-A(31))
+VG(41)=A(31)
+    DADT(32)=KK_1*(A(31)-A(32))
+VG(42)=A(32)
+    DADT(33)=KK_1*(A(32)-A(33))
+VG(43)=A(33)
+    DADT(34)=KK_1*(A(33)-A(34))
+VG(44)=A(34)
+    DADT(35)=KK_1*(A(34)-A(35))
+VG(45)=A(35)
+    DADT(36)=KK_1*(A(35)-A(36))
+VG(46)=A(36)
+    DADT(37)=KK_1*(A(36)-A(37))
+VG(47)=A(37)
+    DADT(38)=KK_1*(A(37)-A(38))
+VG(48)=A(38)
+    DADT(39)=KK_1*(A(38)-A(39))
+VG(49)=A(39)
+    DADT(40)=KK_1*(A(39)-A(40))
+VG(50)=A(40)
+    DADT(41)=KK_1*(A(40)-A(41))
+VG(51)=A(41)
+    DADT(42)=KK_1*(A(41)-A(42))
+VG(52)=A(42)
+    DADT(43)=KK_1*(A(42)-A(43))
+VG(53)=A(43)
+    DADT(44)=KK_1*(A(43)-A(44))
+VG(54)=A(44)
+    DADT(45)=KK_1*(A(44)-A(45))
+VG(55)=A(45)
+    DADT(46)=KK_1*(A(45)-A(46))
+VG(56)=A(46)
+    DADT(47)=KK_1*(A(46)-A(47))
+VG(57)=A(47)
+    DADT(48)=KK_1*(A(47)-A(48))
+VG(58)=A(48)
+    DADT(49)=KK_1*(A(48)-A(49))
+VG(59)=A(49)
+    DADT(50)=KK_1*(A(49)-A(50))
+VG(60)=A(50)
+    DADT(51)=KK_1*(A(50)-A(51))
+VG(61)=A(51)
+    DADT(52)=KK_1*(A(51)-A(52))
+VG(62)=A(52)
+    DADT(53)=KK_1*(A(52)-A(53))
+VG(63)=A(53)
+    DADT(54)=KK_1*(A(53)-A(54))
+VG(64)=A(54)
+    DADT(55)=KK_1*(A(54)-A(55))
+VG(65)=A(55)
+    DADT(56)=KK_1*(A(55)-A(56))
+VG(66)=A(56)
+    DADT(57)=KK_1*(A(56)-A(57))
+VG(67)=A(57)
+    DADT(58)=KK_1*(A(57)-A(58))
+VG(68)=A(58)
+    DADT(59)=KK_1*(A(58)-A(59))
+VG(69)=A(59)
+    DADT(60)=KK_1*(A(59)-A(60))
+VG(70)=A(60)
+    DADT(61)=KK_1*(A(60)-A(61))
+VG(71)=A(61)
+    DADT(62)=KK_1*(A(61)-A(62))
+VG(72)=A(62)
+    DADT(63)=KK_1*(A(62)-A(63))
+VG(73)=A(63)
+    DADT(64)=KK_1*(A(63)-A(64))
+VG(74)=A(64)
+    DADT(65)=KK_1*(A(64)-A(65))
+VG(75)=A(65)
+    DADT(66)=KK_1*(A(65)-A(66))
+VG(76)=A(66)
+    DADT(67)=KK_1*(A(66)-A(67))
+VG(77)=A(67)
+    DADT(68)=KK_1*(A(67)-A(68))
+VG(78)=A(68)
+    DADT(69)=KK_1*(A(68)-A(69))
+VG(79)=A(69)
+    DADT(70)=KK_1*(A(69)-A(70))
+VG(80)=A(70)
+    DADT(71)=KK_1*(A(70)-A(71))
+VG(81)=A(71)
+    DADT(72)=KK_1*(A(71)-A(72))
+VG(82)=A(72)
+    DADT(73)=KK_1*(A(72)-A(73))
+VG(83)=A(73)
+    DADT(74)=KK_1*(A(73)-A(74))
+VG(84)=A(74)
+    DADT(75)=KK_1*(A(74)-A(75))
+VG(85)=A(75)
+    DADT(76)=KK_1*(A(75)-A(76))
+VG(86)=A(76)
+    DADT(77)=KK_1*(A(76)-A(77))
+VG(87)=A(77)
+    DADT(78)=KK_1*(A(77)-A(78))
+VG(88)=A(78)
+    DADT(79)=KK_1*(A(78)-A(79))
+VG(89)=A(79)
+    DADT(80)=KK_1*(A(79)-A(80))
+VG(90)=A(80)
+    DADT(81)=KK_1*(A(80)-A(81))
+VG(91)=A(81)
+    DADT(82)=KK_1*(A(81)-A(82))
+VG(92)=A(82)
+    DADT(83)=KK_1*(A(82)-A(83))
+VG(93)=A(83)
+    DADT(84)=KK_1*(A(83)-A(84))
+VG(94)=A(84)
+    DADT(85)=KK_1*(A(84)-A(85))
+VG(95)=A(85)
+    DADT(86)=KK_1*(A(85)-A(86))
+VG(96)=A(86)
+    DADT(87)=KK_1*(A(86)-A(87))
+VG(97)=A(87)
+    DADT(88)=KK_1*(A(87)-A(88))
+VG(98)=A(88)
+    DADT(89)=KK_1*(A(88)-A(89))
+VG(99)=A(89)
+    DADT(90)=KK_1*(A(89)-A(90))
+VG(100)=A(90)
+    DADT(91)=KK_1*(A(90)-A(91))
+VG(101)=A(91)
+    DADT(92)=KK_1*(A(91)-A(92))
+VG(102)=A(92)
+    DADT(93)=KK_1*(A(92)-A(93))
+VG(103)=A(93)
+    DADT(94)=KK_1*(A(93)-A(94))
+VG(104)=A(94)
+    DADT(95)=KK_1*(A(94)-A(95))
+VG(105)=A(95)
+    DADT(96)=KK_1*(A(95)-A(96))
+VG(106)=A(96)
+    DADT(97)=KK_1*(A(96)-A(97))
+VG(107)=A(97)
+    DADT(98)=KK_1*(A(97)-A(98))
+VG(108)=A(98)
+    DADT(99)=KK_1*(A(98)-A(99))
+VG(109)=A(99)
+    DADT(100)=KK_1*(A(99)-A(100))
+VG(110)=A(100)
+    DADT(101)=KK_1*(A(100)-A(101))
+VG(111)=A(101)
+    DADT(102)=KK_1*(A(101)-A(102))
+VG(112)=A(102)
+VG(113)=-1.0D+300
+SUM_1=TRANSITG_SDIM1(VG)
+  ADG_KIN_1=SUM_1+A(102)+APG_KIN_1
+
+ DADT(1)=-(VMAX*A(1))/(V50+A(1))
+ DADT(2)=KIN-ADG_KIN_1
+
+
+$ERROR
+A1=A(2)
+
+
+Y1=1.0
+IPRED=A(2)
+Y=IPRED*(1.0+EPS(1))
+
+$THETA
+0.5
+10.0
+0.8
+7.0
+6.5
+
+$OMEGA (0.0 fixed)x4
+
+$SIGMA (0.0 fixed)
+
+$SIML (122345) ONLYSIM SUBP=1
+
+$TABLE TIME KIN IPRED NOPRINT NOAPPEND FILE=smax_weibulldt.tab ONEHEADER FORMAT=S1PE20.13

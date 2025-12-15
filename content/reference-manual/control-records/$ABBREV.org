@@ -29,7 +29,42 @@ used for  label  substitution  in  NONMEM  report files.
 ** OPTIONS
 
 *** COMRES=n1 ('common reserve')
-      COMRES gives instructions to NM-TRAN.
+One use of the option =COMRES= involves the presence of both
+abbreviated and user-supplied subroutines.
+Values for variables defined in abbreviated codes
+may be displayed in tables and scatterplots.
+These variables are listed (i.e. their values are stored) in a NONMEM
+MODULE NMPRD4 in the generated subroutine.
+(With versions of NONMEM prior to nm7, NMPRD4 was a named FORTRAN common,
+hence the use of options "COM...".)
+User-supplied FORTRAN routines may also list variables whose values are to be
+displayed in NMPRD4.  The first \(\text{n}_{1}\) positions in NMPRD4
+are reserved for the use of these routines; generated subroutines
+will not list variables defined in abbreviated codes in these
+positions.  If there are no abbreviated codes, not only is =COMRES=
+not needed for this purpose, it may not be used.
+All variables listed in NMPRD4 must be double precision.
+.\"variables if double precision NONMEM is used; otherwise, they must be
+.\"single precision variables.
+The number \(\text{n}_{1}\) can be nonnegative, and
+if the option is not used, it is understood to be 0.  It can also be -1,
+in which case no variables defined in abbreviated codes are listed in
+NMPRD4.  In this regard, see also section IV.H.
+
+All variables defined in an abbreviated code are listed in NMPRD4,
+whether or not their values are displayed.  Thus with PREDPP, where
+there may be more than one abbreviated code, each such variable is
+recognized as the same variable in all abbreviated codes in which it is
+used.  If it desireable to avoid this type of global definition, then the option
+value -1 can be used.  See also section IV.H.
+
+The option =COMSAV= may be used when the variable =COMACT=
+is used in abbreviated code (see section
+IV.E.2).
+It defines the SAVE region of NMPRD4.
+In this case the option =COMRES= should also be used, and
+\(\text{n}_{2}\) must satisfy @0~<=~n sub 2~<=~n sub 1@.
+
 
 **** n=-1
 Do not store any variables in the global variable array, VRBL, in the NMPRD4 module.
@@ -89,8 +124,18 @@ by COM(I).
       NOFIRSTDERCODE is set to 1.
 
 ***  DERIV2=NO
-      Prevents  the computation of second derivatives, which are needed
-      only for the Laplacian method.
+      Prevents  the computation of second-order derivatives, which are needed
+      only for the Laplacian method. If it does appear, if PREDPP is not used, and if the Laplacian estimation
+method is requested in a subsequent run using the same load module,
+then, in effect, the first-order conditional estimation method is used
+in that run, although using somewhat more computer time than is necessary.
+However, care should be taken to avoid this situation.
+If the option appears, and PREDPP is used, then the Laplacian estimation method
+must not be requested in a subsequent run using the same load module,
+even when all second-partial derivatives that might be computed
+are uniformly zero (in which case code computing these zeros
+is actually not generated whether or not the option appears).
+
 
 ***  DERIV2=NOCOMMON
       Permits the computation of these derivatives, but  prevents  them
@@ -101,13 +146,20 @@ by COM(I).
       variables happen to have second derivatives, and whether  or  not
       the Laplacian method is used.
 
-***  FASTDER, NOFASTDER
-      With NONMEM 7.2 and higher, NM-TRAN collects statements that compute first-partial eta-derivatives together in  FSUBS,  and  they
-      are  performed  only when NONMEM sets IFIRSTEM=1.  NOFASTDER prevents NM-TRAN from doing this, and restores the order  of  statements in FSUBS to what it was in previous versions.
+***  FASTDER | NOFASTDER  (NM72)
+Code to compute first-partial derivatives with respect to @eta@
+variables is always generated from abbreviated codes. These
+derivatives are almost always needed by classical NONMEM methods with
+population data. However, NONMEM does not always use these derivatives
+for the newer Bayesian methods. Since NONMEM 7.2, NONMEM collects
+(re-arranges) all code for first derivative computation so that only a
+few tests (for FIRSTEM==1; see Chapter IV.E.4) are needed to compute
+them when NONMEM indicates that it needs first-partial derivatives,
+and skip them  otherwise. This is explicitly requested by option
+=FASTDER=, which is the default. The collection (re-arrangement) of
+first derivative code can be prevented with option =NOFASTDER=.
 
-      FASTDER  requests  that  the  statements be collected, and is the
-      default.
-      (See Partial Derivative Indicators).
+(See Partial Derivative Indicators).
 
 ***  CHECKMU, NOCHECKMU
       With NONMEM 7.2 and higher, NM-TRAN checks the  MU  model  statements  in  abbreviated  code  and issues warning messages if they

@@ -1,0 +1,179 @@
+;DDE
+;Define as a comment the largest size for NU1 that one is likely to need.
+;ddexpand will create up to 10 transfer compartments for this example.
+; Specify as ;NNx or ;NUx
+;NN1=10
+$PROBLEM LOGISTIC with fractional transit compartments
+; turn off second derivative assessments, sometimes even 1st derivatives if only simulating
+$ABBR DERIV2=NO DERIV2=NOCOMMON ; DERIV1=NO
+$INPUT ID AMT TIME PRDV DV EVID MDV
+$DATA logt.dat IGNORE=C
+$SUBROUTINES ADVAN16 TOL=10 ATOL=10 ; OTHER=ddeslvu.f90
+$MODEL NCOMPARTMENTS=11
+
+$PK
+CALLFL=-2
+MXSTEP=2000000000
+KG=THETA(1)
+Y0=THETA(2)
+YSS=THETA(3)
+TAU1=THETA(4)
+; The NU1 specified here should be no greater than the NN1 transit compartments
+; defined in the comment earlier.
+NU1=2.5
+
+; Initial conditions
+A_0(1)=Y0
+
+
+
+; INITIALIZING EQUATIONS FOR DDE COMPARTMENTS
+  TG_DEL=1.0D-08
+  NU_1=NU1
+  KTR_1=NU_1/TAU1
+  LKTR_1=LOG(KTR_1)
+ XNU_1=MAX(INT(NU_1)+1,0)
+ YNU_1=NU_1-XNU_1+1.0
+  LGEXP_1=-GAMLN(YNU_1)
+
+$DES
+  ; AD_1_1 is the State value of A(1) delayed for time TAU1.
+  ; AP_1_1 is the State value of A(1) in the past, for time delay TAU1.
+
+
+; DELAY SETUP FOR EQUATION SET 1
+ APT_1_1=Y0
+  TZ_GD=T-PASTZERO
+  TZ_G=TZ_GD+TG_DEL
+ T_O=0.0
+  IF(TZ_GD>=0.0) T_O=1.0
+  IF(T_O==0.0) TZ_G=1.0
+ IX_=1
+    SUM_1=0.0
+IF(IX_>XNU_1) THEN
+    DADT(2)=0.0
+ENDIF
+IF(IX_==XNU_1) THEN
+   SUM_1=T_O*((1.0-YNU_1)*A(1)+YNU_1*(A(2)+APT_1_1))
+ENDIF
+IF(IX_<=XNU_1) THEN
+  IX_=IX_+1
+ DADT(2)=T_O*KTR_1*(A(1)-A(2)-APT_1_1)
+ENDIF
+IF(IX_>XNU_1) THEN
+    DADT(3)=0.0
+ENDIF
+IF(IX_==XNU_1) THEN
+   SUM_1=T_O*((1.0-YNU_1)*A(2)+YNU_1*A(3)+APT_1_1)
+ENDIF
+IF(IX_<=XNU_1) THEN
+  IX_=IX_+1
+    DADT(3)=T_O*KTR_1*(A(2)-A(3))
+ENDIF
+IF(IX_>XNU_1) THEN
+    DADT(4)=0.0
+ENDIF
+IF(IX_==XNU_1) THEN
+   SUM_1=T_O*((1.0-YNU_1)*A(3)+YNU_1*A(4)+APT_1_1)
+ENDIF
+IF(IX_<=XNU_1) THEN
+  IX_=IX_+1
+    DADT(4)=T_O*KTR_1*(A(3)-A(4))
+ENDIF
+IF(IX_>XNU_1) THEN
+    DADT(5)=0.0
+ENDIF
+IF(IX_==XNU_1) THEN
+   SUM_1=T_O*((1.0-YNU_1)*A(4)+YNU_1*A(5)+APT_1_1)
+ENDIF
+IF(IX_<=XNU_1) THEN
+  IX_=IX_+1
+    DADT(5)=T_O*KTR_1*(A(4)-A(5))
+ENDIF
+IF(IX_>XNU_1) THEN
+    DADT(6)=0.0
+ENDIF
+IF(IX_==XNU_1) THEN
+   SUM_1=T_O*((1.0-YNU_1)*A(5)+YNU_1*A(6)+APT_1_1)
+ENDIF
+IF(IX_<=XNU_1) THEN
+  IX_=IX_+1
+    DADT(6)=T_O*KTR_1*(A(5)-A(6))
+ENDIF
+IF(IX_>XNU_1) THEN
+    DADT(7)=0.0
+ENDIF
+IF(IX_==XNU_1) THEN
+   SUM_1=T_O*((1.0-YNU_1)*A(6)+YNU_1*A(7)+APT_1_1)
+ENDIF
+IF(IX_<=XNU_1) THEN
+  IX_=IX_+1
+    DADT(7)=T_O*KTR_1*(A(6)-A(7))
+ENDIF
+IF(IX_>XNU_1) THEN
+    DADT(8)=0.0
+ENDIF
+IF(IX_==XNU_1) THEN
+   SUM_1=T_O*((1.0-YNU_1)*A(7)+YNU_1*A(8)+APT_1_1)
+ENDIF
+IF(IX_<=XNU_1) THEN
+  IX_=IX_+1
+    DADT(8)=T_O*KTR_1*(A(7)-A(8))
+ENDIF
+IF(IX_>XNU_1) THEN
+    DADT(9)=0.0
+ENDIF
+IF(IX_==XNU_1) THEN
+   SUM_1=T_O*((1.0-YNU_1)*A(8)+YNU_1*A(9)+APT_1_1)
+ENDIF
+IF(IX_<=XNU_1) THEN
+  IX_=IX_+1
+    DADT(9)=T_O*KTR_1*(A(8)-A(9))
+ENDIF
+IF(IX_>XNU_1) THEN
+    DADT(10)=0.0
+ENDIF
+IF(IX_==XNU_1) THEN
+   SUM_1=T_O*((1.0-YNU_1)*A(9)+YNU_1*A(10)+APT_1_1)
+ENDIF
+IF(IX_<=XNU_1) THEN
+  IX_=IX_+1
+    DADT(10)=T_O*KTR_1*(A(9)-A(10))
+ENDIF
+IF(IX_>XNU_1) THEN
+    DADT(11)=0.0
+ENDIF
+IF(IX_==XNU_1) THEN
+   SUM_1=T_O*((1.0-YNU_1)*A(10)+YNU_1*A(11)+APT_1_1)
+ENDIF
+IF(IX_<=XNU_1) THEN
+  IX_=IX_+1
+    DADT(11)=T_O*KTR_1*(A(10)-A(11))
+ENDIF
+    ADT_1_1=(1.0-T_O)*APT_1_1+SUM_1
+
+; DELAY EQUATIONS FOR EQUATION SET 0 (BASE EQUATIONS)
+ DADT(1)=KG*(1.0-ADT_1_1/YSS)*A(1)
+
+
+$ERROR
+A1=A(1)
+
+
+Y1=1.0
+IPRED=A(1)
+Y=IPRED*(1.0+EPS(1))
+
+$THETA
+0.2D+00
+1.0D+00
+10.0D+00
+5.0D+00
+
+$OMEGA (0.0 fixed)x4
+
+$SIGMA (0.0 fixed)
+
+$SIML (122345) ONLYSIM SUBP=1
+
+$TABLE TIME ID IPRED NOPRINT NOAPPEND FILE=logt.tab ONEHEADER

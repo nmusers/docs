@@ -1,0 +1,528 @@
+---
+title: "Quick start"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: true
+weight: 11
+---
+
+* Quick start
+** A single-subject PK model
+*** Data
+The data file P2DATA below shows Theophylline plasma concentration-time observations
+in a single individual after a single dose of 320 mg.
+#+begin_src r
+         2     320.       0.        0.
+         2       0.        .27      1.71
+         2       0.        .52      7.91
+         2       0.       1.        8.31
+         2       0.       1.92      8.33
+         2       0.       3.5       6.85
+         2       0.       5.02      6.08
+         2       0.       7.03      5.4
+         2       0.       9.        4.55
+         2       0.      12.        3.01
+         2       0.      24.3        .90
+#+end_src
+
+*** Model
+Below is the NONMEM model.
+#+begin_src php
+$PROB  SIMPLE NONLINEAR REGRESSION - THEOPHYLINE ; the problem in model.ctl
+$INPUT ID AMT TIME DV
+$DATA  P2DATA
+$SUBROUTINE ADVAN2
+$PK
+ KA=THETA(1)
+ K=THETA(2)
+ V=THETA(3)
+ S2=V
+$ERROR
+ Y=F+ERR(1)
+$THETA  (0, 1.7)  (0, .102)  (0, 29.)
+$OMEGA  1.2
+$ESTIMATION PRINT=5
+$COVARIANCE
+$TABLE ID AMT TIME
+#+end_src
+
+Let us go through the /control stream/ input and data.
+- Control stream line 1 gives the NONMEM problem a name. NONMEM uses
+  ";" to indicate comment, thus it neglects everything after ";" on that line.
+- Control stream line 2 says that the data file column 1-4 contain subject ID, dosing amount (AMT, in mg here),
+  observation time, and the observed concentrations (dependent value
+  DV), respectively.
+- Control stream line 3 contains the data file name, P2DATA.
+- Line 4 says we use one-compartment model with first-order absorption
+  from PREDPP. The model =ADVAN2= specifies a DEPOT compartment (where
+  the dose goes, and), and a CENTRAL compartment. It also indicates
+  that drug enters from DEPOT to CENTRAL compartment by a first order
+  process. Note, that the default compartment for doses (i.e., where
+  PREDPP will add doses if not otherwise instructed) is the DEPOT
+  compartment, as it should be.
+
+  This is confirmed by the model run output
+  #+begin_src txt
+  ONE COMPARTMENT MODEL WITH FIRST-ORDER ABSORPTION (ADVAN2)
+
+  MAXIMUM NO. OF BASIC PK PARAMETERS:   3
+
+  BASIC PK PARAMETERS (AFTER TRANSLATION):
+    ELIMINATION RATE (K) IS BASIC PK PARAMETER NO.:  1
+    ABSORPTION RATE (KA) IS BASIC PK PARAMETER NO.:  3
+
+
+  COMPARTMENT ATTRIBUTES
+  COMPT. NO.   FUNCTION   INITIAL    ON/OFF      DOSE      DEFAULT    DEFAULT
+                          STATUS     ALLOWED    ALLOWED    FOR DOSE   FOR OBS.
+     1         DEPOT        OFF        YES        YES        YES        NO
+     2         CENTRAL      ON         NO         YES        NO         YES
+     3         OUTPUT       OFF        YES        NO         NO         NO
+  #+end_src
+- Line 5-9 specify PK parameters (in =$PK= record) using THETA [fn:2], the
+  parameters to be estimated by NONMEM. They are:  first-order
+  absorption rate KA, rate constant of elimination K, and volume of
+  distribution V.
+- Line 10-11 specify the likelihood structure to be from a
+  normally-distributed additive error =ERR(1)= between observation and prediction.
+- Line 12 provides information about possible values of each element
+  of THETA in the format of (lower bound, initial estimate, upper
+  bound). The only two entries for each THETA implies no upper bound
+  (or upper bound=INFinity).
+- Line 13 gives sinitial estimate of the variance (\(\sigma^2\)) of =ERR(1)=.
+- Line 14 ($ESTIMATION) suggests NONMEM to obtain estimates of parameters. Line 15
+  ($COVARIANCE) requests standard error for the estimates.
+- Line 16 request a table output for the input data and certain computed quantities.
+
+
+*** Run
+Assume the above model is stored in =model1.ctl= [fn:1]. We use
+NONMEM's Front End script =nmfe= to run the above model. The script in
+releases often has NONMEM version in its name. For
+example, with NONMEM v7.6.0, we do the following in command line.
+#+begin_src bash
+nmfe76 model1.ctl output.txt
+#+end_src
+You can see that =nmfe= requires two arguments, input model file and
+output plaintext file. In addition it supports many options to control
+the building and execution behavior. You may refer to its help (=nmfe76 --help=)
+printout for details.
+
+*** Results
+NONMEM will output the follow to the given output file (in our case, it is =output.txt=).
+#+begin_src txt
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                                   FIRST ORDER                                  ********************
+ #OBJT:**************                       MINIMUM VALUE OF OBJECTIVE FUNCTION                      ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+
+
+ #OBJV:********************************************        8.940       **************************************************
+
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                                   FIRST ORDER                                  ********************
+ ********************                             FINAL PARAMETER ESTIMATE                           ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+
+ THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
+
+         TH 1      TH 2      TH 3
+         1.94E+00  1.02E-01  3.20E+01
+
+
+ OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
+
+         ETA1
+ ETA1    8.99E-01
+
+
+ OMEGA - CORR MATRIX FOR RANDOM EFFECTS - ETAS  *******
+
+         ETA1
+ ETA1    9.48E-01
+
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                                   FIRST ORDER                                  ********************
+ ********************                            STANDARD ERROR OF ESTIMATE                          ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+
+
+ THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
+
+         TH 1      TH 2      TH 3
+         6.28E-01  7.37E-03  1.25E+00
+
+ OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
+
+         ETA1
+ ETA1    5.45E-01
+
+ OMEGA - CORR MATRIX FOR RANDOM EFFECTS - ETAS  *******
+
+         ETA1
+  ETA1    2.87E-01
+#+end_src
+NONMEM report uses tags for output parsing. The above result shows
+- #OBJT tag: description of the objective function;
+- #OBJV tag: the minimum value of the objective function. It is a
+  goodness of fit statistic, much like a sum of squares. The parameter
+  estimates (the parameter values at which the objective function is
+  minimized) and their standard errors follow. Note that the estimate
+  of OMEGA [fn:2], too, has a standard error. Finally, a fully informative
+  correlation matrix (CORR) of OMEGA and SIGMA [fn:2] are outputted. All
+  correlation matrices, whether to OMEGAs and SIGMAs, or pertaining to
+  the correlation matrix of estimates, are printed out with diagonal
+  elements equal to the square root of diagonal element of covariance
+  matrix (standard error/standard deviation, depending on context),
+  and the off-diagonal elements are the correlation values.
+
+** A population model
+:PROPERTIES:
+:CUSTOM_ID: quick-start-ex2
+:END:
+*** Data
+About 60 infants were given phenobarbital therapeutically. A plasma
+concentration was measured in each some hours after the first
+(loading) dose, followed by multiple maintenance doses. A second, and
+sometimes a third concentration were measured later. In all, 155
+concentrations were observed. The first subject's data is shown below.
+#+begin_src r
+      1    0.    25.0    1.4      7      .
+      1    2.0      .    1.4      7   17.3
+      1   12.5    3.5    1.4      7      .
+      1   24.5    3.5    1.4      7      .
+      1   37.0    3.5    1.4      7      .
+      1   48.0    3.5    1.4      7      .
+      1   60.5    3.5    1.4      7      .
+      1   72.5    3.5    1.4      7      .
+      1   85.3    3.5    1.4      7      .
+      1   96.5    3.5    1.4      7      .
+      1  108.5    3.5    1.4      7      .
+      1  112.5      .    1.4      7   31.0
+#+end_src
+
+*** Model
+We use the following NM-TRAN control records to model the data.
+#+begin_src php
+$PROBLEM PHENOBARB
+$INPUT   ID TIME AMT WT APGR DV
+$DATA    PHENO
+$SUBROUTINE ADVAN1
+$PK
+   TVCL=THETA(1)
+   CL=TVCL+ETA(1)
+   TVVD=THETA(2)
+   V=TVVD+ETA(2)
+   K=CL/V
+   S1=V
+$ERROR
+   Y=F+ERR(1)
+$THETA  (0,.0047) (0,.99)
+$OMEGA  .0000055, .04
+$SIGMA  25
+$ESTIMATION  PRINT=5
+$TABLE     ID TIME AMT WT APGR
+$COVARIANCE
+#+end_src
+Note that the $INPUT record now defines a new data item, WT, the
+patient weight.  It's value is given on every data record for an
+individual, in the column indicated.  This is so despite the fact that
+WT may not change within an individual. This is a bit repetitious, but
+convenient.
+
+The records are very similar to those for the theophylline problem,
+with notable differences:
+- The model is implemented using ADVAN1, not ADVAN2. ADVAN1 implements
+  the one-compartment (monoexponential) model, without one-compartment
+  model first order absorption.  No absorption model was needed for
+  this problem because all concentrations were measured many hours
+  after the last (oral) dose, so absorption could be considered to be
+  complete, and, for the purposes of data analysis, immediate.
+- The data for each infant is similar to those shown. Now all of the
+  data records for each infant start with the same value for the ID
+  data item (column 1), but this value differs between infants.
+- The parameters of the one-compartment model are defined by the
+  abbreviated code following the $PK statement: elimination rate K,
+  based on Clearance (CL) and
+  Volume of Distribution (V).  However, here each parameter is not
+  simply equal to one of NONMEM's parameters (an element of THETA).
+  Rather, CL, for example, is equal to a parameter (THETA(1)) plus a
+  new term, ETA(1).  The latter expresses interindividual variable
+  variability, and stands for the deviation of the individual's true
+  clearance (CL) from the population value (TVCL, Typical Value of
+  CLearance, which, in turn, is simply THETA(1)). This way the model
+  incorporates the interindividual variability.
+- The initial estimate of the variance of =ERR(1)= was given on a
+  $OMEGA record for the single-subject model, while  here it is given
+  on a $SIGMA record.  This difference in NONMEM conventions between
+  individual type data and population type data will be discussed more
+  fully in User guide.
+
+NONMEM is again instructed to estimate the parameters and
+their standard errors.
+*** Run
+Stored the model file "model2.ctl", we do the same as in the previous example:
+#+begin_src bash
+nmfe76 model2.ctl output.txt
+#+end_src
+Note that we issue a same output file name =output.txt=. If this is
+done in a same path as the previous model, NONMEM will overwrites the
+file. Therefore a good practice is to have a separate directory for
+each run.
+*** Results
+The results below are the output for the goodness of fit statistic
+(the minimum value of the objective function) and the parameter
+estimates for the phenobarbital problem.
+#+begin_src txt
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                                   FIRST ORDER                                  ********************
+ #OBJT:**************                       MINIMUM VALUE OF OBJECTIVE FUNCTION                      ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+
+ #OBJV:********************************************      717.203       **************************************************
+1
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                                   FIRST ORDER                                  ********************
+ ********************                             FINAL PARAMETER ESTIMATE                           ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+
+ THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
+         TH 1      TH 2
+         5.48E-03  1.40E+00
+
+
+ OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
+         ETA1      ETA2
+ ETA1    6.85E-06
+ ETA2    0.00E+00  2.86E-01
+
+ SIGMA - COV MATRIX FOR RANDOM EFFECTS - EPSILONS  ****
+         EPS1
+ EPS1    8.01E+00
+
+ OMEGA - CORR MATRIX FOR RANDOM EFFECTS - ETAS  *******
+         ETA1      ETA2
+ ETA1    2.62E-03
+ ETA2    0.00E+00  5.34E-01
+
+ SIGMA - CORR MATRIX FOR RANDOM EFFECTS - EPSILONS  ***
+         EPS1
+ EPS1    2.83E+00
+#+end_src
+and output for the standard errors
+of the parameter estimates for the phenobarbital problem.
+#+begin_src txt
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                                   FIRST ORDER                                  ********************
+ ********************                            STANDARD ERROR OF ESTIMATE                          ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+
+ THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
+         TH 1      TH 2
+         4.86E-04  7.86E-02
+
+ OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
+         ETA1      ETA2
+ ETA1    2.27E-06
+ ETA2   .........  8.36E-02
+
+ SIGMA - COV MATRIX FOR RANDOM EFFECTS - EPSILONS  ****
+         EPS1
+ EPS1    1.49E+00
+
+ OMEGA - CORR MATRIX FOR RANDOM EFFECTS - ETAS  *******
+         ETA1      ETA2
+ ETA1    4.35E-04
+ ETA2   .........  7.82E-02
+
+ SIGMA - CORR MATRIX FOR RANDOM EFFECTS - EPSILONS  ***
+         EPS1
+ EPS1    2.64E-01
+#+end_src
+Note that now there are estimates of the variances of the interindividual differences in CL (OMEGA - ETA1) and V (OMEGA - ETA2), as well as of the residual error variance (denoted by SIGMA in NONMEM output when the data SIGMA are from a population). There are also standard errors for these estimates.
+
+With the weight data, we can improve the above model by using it to
+explain away some variability of CL and V. Specifically, we can add WT to
+the regression of the typical values of CL and V:
+#+begin_src php
+...
+$PK
+   TVCL=THETA(1)+THETA(3)*WT
+   CL=TVCL+ETA(1)
+   TVVD=THETA(2)+THETA(4)*WT
+   V=TVVD+ETA(2)
+...
+#+end_src
+The new model's output for the goodness of fit statistic
+(the minimum value of the objective function) and the parameter
+estimates for the phenobarbital problem is
+#+begin_src txt
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                                   FIRST ORDER                                  ********************
+ #OBJT:**************                       MINIMUM VALUE OF OBJECTIVE FUNCTION                      ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+
+ #OBJV:********************************************      609.179       **************************************************
+1
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                                   FIRST ORDER                                  ********************
+ ********************                             FINAL PARAMETER ESTIMATE                           ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+
+ THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
+         TH 1      TH 2      TH 3      TH 4
+         2.70E-05  1.19E-01  4.75E-03  9.19E-01
+
+ OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
+         ETA1      ETA2
+ ETA1    1.37E-06
+ ETA2    0.00E+00  7.51E-02
+
+ SIGMA - COV MATRIX FOR RANDOM EFFECTS - EPSILONS  ****
+         EPS1
+ EPS1    8.70E+00
+
+ OMEGA - CORR MATRIX FOR RANDOM EFFECTS - ETAS  *******
+         ETA1      ETA2
+ ETA1    1.17E-03
+ ETA2    0.00E+00  2.74E-01
+
+ SIGMA - CORR MATRIX FOR RANDOM EFFECTS - EPSILONS  ***
+         EPS1
+ EPS1    2.95E+00
+#+end_src
+and output for the standard errors
+of the parameter estimates is
+#+begin_src txt
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                                   FIRST ORDER                                  ********************
+ ********************                            STANDARD ERROR OF ESTIMATE                          ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+
+ THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
+         TH 1      TH 2      TH 3      TH 4
+         0.00E+00  1.48E-01  2.24E-04  1.13E-01
+
+ OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
+         ETA1      ETA2
+ ETA1    7.30E-07
+ ETA2   .........  3.63E-02
+
+ SIGMA - COV MATRIX FOR RANDOM EFFECTS - EPSILONS  ****
+         EPS1
+ EPS1    1.71E+00
+
+ OMEGA - CORR MATRIX FOR RANDOM EFFECTS - ETAS  *******
+         ETA1      ETA2
+ ETA1    3.12E-04
+ ETA2   .........  6.63E-02
+
+ SIGMA - CORR MATRIX FOR RANDOM EFFECTS - EPSILONS  ***
+         EPS1
+ EPS1    2.90E-01
+#+end_src
+Note the improvement in the minimum objective function value, and the
+decreases in the sizes of the estimates of the inter-individual
+variances: with weight in the model, there is less unexplained
+inter-individual variability.  As will be discussed in the User Guide,
+the decrease in the objective function can be used for a formal
+hypothesis test of the appropriateness of the new model the effect of
+weight on the pharmacokinetic parameters.
+
+Note also the very small values estimated for THETA(1) and standard
+error. In fact the THETA(1) has virtually collapsed to 0. The
+intercept term of TVCL does not appear to be an important part of the
+model.
+
+The examples highlight:
+- NONMEM can fit both individual and population models.
+
+- NONMEM has a menu of pharmacokinetic models from which the one
+  appropriate to the problem at hand can be chosen.
+
+- The user specifies the relationship of pharmacokinetic parameters to
+  independent variables (such as WT in the phenobarbital example),
+  using "population" parameters that will be estimated.
+
+- The user also specifies which parameters vary between individuals,
+  and the form (model) for this variability, as well as the form
+  (model) for the differences between observations from an individual
+  and their predictions for this individual.
+
+- NONMEM estimates parameters describing both kinds of variability.
+
+- NONMEM provides estimates (standard errors) of the precision of its
+  parameter estimates, including those describing variability.
+
+** Futher reading
+We invite you to go through the User Guide of this documentation to
+learn more about NONMEM. We also include publication list below. It progresses from beginner to advanced levels.
+
+- A short guide to get one started with using NONMEM, particularly the
+  FOCE method: NONMEM Tutorial Part I: Description of Commands and
+  Options, With Simple Examples of Population Analysis. CPT
+  Pharmacometrics Syst. Pharmacol. (2019) XX, 1–13. [[https://ascpt.onlinelibrary.wiley.com/doi/pdf/10.1002/psp4.12404][Link]].
+- Introduction to Population Pharmacokinetic / Pharmacodynamic
+  Analysis with Nonlinear Mixed Effects Models 1st Edition by Joel S.
+  Owen, Jill Fiedler-Kelly. 2014, John Wiley and Sons, Inc., Hoboken,
+  NJ. ISBN 978-0-470-58229-9.
+- Basic Concepts in Population Modeling, Simulation, and Model-Based
+  Drug Development. DR Mould and RN Upton. CPT: Pharmacometrics &
+  Systems Pharmacology (2012) 1, e6. [[https://ascpt.onlinelibrary.wiley.com/doi/epdf/10.1038/psp.2012.4][Link]].
+- Basic Concepts in Population Modeling, Simulation, and
+  Model-Based Drug Development—Part 2: Introduction to Pharmacokinetic
+  Modeling Methods. DR Mould and RN Upton CPT: Pharmacometrics &
+  Systems Pharmacology (2013) 2, e38. [[https://ascpt.onlinelibrary.wiley.com/doi/pdf/10.1038/psp.2013.14][Link]].
+- [[/guides/V.pdf][NONMEM Guide V: Introductory Guide]]. Chapters 4-11.
+- Basic Concepts in Population Modeling, Simulation, and
+  Model-Based Drug Development: Part 3—Introduction to Pharmacodynamic
+  Modeling Methods. RN Upton1 and DR Mould. CPT Pharmacometrics
+  Syst. Pharmacol. (2014) 3, e88. [[https://ascpt.onlinelibrary.wiley.com/doi/pdf/10.1038/psp.2013.71][Link]].
+- [[guides/VI.pdf][NMONMEM Guide VI: PREDPP Guide]] for details of various built-in models and
+  their parameters. See especially chapter VII, sections C.1 through
+  C.18 for the parameter definitions of all the ADVAN’s. Read chapter
+  3 sections A-E, F.2-F.9, chapter 4 sections A-C, chapter 6 sections
+  C-E for fundamental information of using these ADVAN’s.
+- Short article on the basic theory of estimation methods, and some
+  advanced examples of Expectation-Maximization methods and MCMC
+  Bayesian methods: NONMEM Tutorial Part II: Estimation Methods and
+  Advanced Examples. CPT Pharmacometrics Syst. Pharmacol. (2019) XX,
+  1–19. [[https://ascpt.onlinelibrary.wiley.com/doi/pdf/10.1002/psp4.12422][Link]].
+- [[guides/VIII.pdf][NONMEM Guide VIII: Help Guide]] for the reference to all of the NONMEM options.
+- [[guides/intro7.pdf][Introduction to NONMEM 7]] for additional options and advanced algorithms.
+- Clinical trial design using $DESIGN: Tutorial for DESIGN in
+  NONMEM: Clinical trial evaluation and optimization. Bauer RJ, Hooker
+  AC, Mentre F. CPT Pharmacometrics Syst Pharmacol. 2021;10:1452–1465. [[https://ascpt.onlinelibrary.wiley.com/doi/pdf/10.1002/psp4.12713][Link]].
+- Gibiansky L, Gibiansky E, Bauer R (2012) Comparison of Nonmem 7.2
+  estimation methods and parallel processing efficiency on a
+  target-mediated drug disposition model. J Pharmacokinet Pharmacodyn
+  39(1):17–35.
+- Introduction to discrete time and distributed time delay models:
+  Tutorial for Modeling Delays in Biological Systems in the NONMEM
+  Software. Bauer RJ, Krzyzanski W. CPT Pharmacometrics Syst
+  Pharmacol. 2025. [[http://doi.org/10.1002/psp4.70046][Link]].
+
+[fn:1] NONMEM model files are text files with =.ctl= extension.
+Another popular extension is =.mod=. In this document we use =.ctl=.
+
+[fn:2] Symols such as THETA, OMEGA, SIGMA are NONMEM's built-in
+variables. They are ubiquitous in NONMEM models so you want to be
+familiar with them. See @@html:<a href="/docs/user-guide/fundamentals/population/">User Guide</a>@@ and Reference Manual for details.

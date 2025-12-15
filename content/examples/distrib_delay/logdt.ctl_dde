@@ -1,0 +1,138 @@
+;DDE
+;NN1=27
+;PRC1=0.01
+;DISTRIB1=WEIBULLCDF(VG)
+$PROBLEM LOGISTIC with distributed transit compartments
+; turn off second derivative assessments, sometimes even 1st derivatives if only simulating
+$ABBR FUNCTION TRANSITG_SDIM1(VG,40)
+$ABBR FUNCTION WEIBULLCDF(*,10)
+$ABBR FUNCTION WEIBULLCDFINV(*,10)
+$ABBR DERIV2=NO DERIV2=NOCOMMON ; DERIV1=NO
+$INPUT ID AMT TIME PRDV DV EVID MDV
+$DATA logt.dat IGNORE=C
+$SUBROUTINES ADVAN15 TOL=10 ATOL=10 ; OTHER=ddeslvu.f90
+$MODEL NCOMPARTMENTS=28
+
+$PK
+CALLFL=-2
+MXSTEP=2000000000
+KG=THETA(1)
+Y0=THETA(2)
+YSS=THETA(3)
+TAU1=THETA(4)
+NU1=2.5
+; Define parameters to Weibull distribution
+VG(2)=NU1
+VG(3)=TAU1
+
+; Initial conditions
+A_0(1)=Y0
+
+
+
+; INITIALIZING EQUATIONS FOR DDE COMPARTMENTS
+
+$DES
+" FIRST
+" EXTERNAL WEIBULLCDF
+; Define parameters to Weibull distribution again, for $DES record
+ VG(2)=NU1
+ VG(3)=TAU1
+; ADG_1_1 is the State value of A(1) delayed for time TAU1, using a general distribution.
+; APG_1_1 is the State value of A(1) in the past, for time delay TAU1.
+
+ APG_1_1=Y0
+  TZ_GD=T-PASTZERO
+ T_O=0.0
+  IF(TZ_GD>=0.0) T_O=1.0
+NNU_1=27
+VG(1)=1.0-0.01
+TTEND_1=WEIBULLCDFINV(VG)
+KK_1=NNU_1/TTEND_1
+DTT_1=1.0/KK_1
+IF(TTEND_1==-1.0D+300) EXIT 2
+VG(1)=DTT_1
+"VG(11)=LOC(WEIBULLCDF)
+VG(12)=-1.0D+300
+    DADT(2)=KK_1*(A(1)-A(2)-APG_1_1)
+VG(13)=A(2)
+    DADT(3)=KK_1*(A(2)-A(3))
+VG(14)=A(3)
+    DADT(4)=KK_1*(A(3)-A(4))
+VG(15)=A(4)
+    DADT(5)=KK_1*(A(4)-A(5))
+VG(16)=A(5)
+    DADT(6)=KK_1*(A(5)-A(6))
+VG(17)=A(6)
+    DADT(7)=KK_1*(A(6)-A(7))
+VG(18)=A(7)
+    DADT(8)=KK_1*(A(7)-A(8))
+VG(19)=A(8)
+    DADT(9)=KK_1*(A(8)-A(9))
+VG(20)=A(9)
+    DADT(10)=KK_1*(A(9)-A(10))
+VG(21)=A(10)
+    DADT(11)=KK_1*(A(10)-A(11))
+VG(22)=A(11)
+    DADT(12)=KK_1*(A(11)-A(12))
+VG(23)=A(12)
+    DADT(13)=KK_1*(A(12)-A(13))
+VG(24)=A(13)
+    DADT(14)=KK_1*(A(13)-A(14))
+VG(25)=A(14)
+    DADT(15)=KK_1*(A(14)-A(15))
+VG(26)=A(15)
+    DADT(16)=KK_1*(A(15)-A(16))
+VG(27)=A(16)
+    DADT(17)=KK_1*(A(16)-A(17))
+VG(28)=A(17)
+    DADT(18)=KK_1*(A(17)-A(18))
+VG(29)=A(18)
+    DADT(19)=KK_1*(A(18)-A(19))
+VG(30)=A(19)
+    DADT(20)=KK_1*(A(19)-A(20))
+VG(31)=A(20)
+    DADT(21)=KK_1*(A(20)-A(21))
+VG(32)=A(21)
+    DADT(22)=KK_1*(A(21)-A(22))
+VG(33)=A(22)
+    DADT(23)=KK_1*(A(22)-A(23))
+VG(34)=A(23)
+    DADT(24)=KK_1*(A(23)-A(24))
+VG(35)=A(24)
+    DADT(25)=KK_1*(A(24)-A(25))
+VG(36)=A(25)
+    DADT(26)=KK_1*(A(25)-A(26))
+VG(37)=A(26)
+    DADT(27)=KK_1*(A(26)-A(27))
+VG(38)=A(27)
+    DADT(28)=KK_1*(A(27)-A(28))
+VG(39)=A(28)
+VG(40)=-1.0D+300
+SUM_1=TRANSITG_SDIM1(VG)
+  ADG_1_1=SUM_1+A(28)+APG_1_1
+
+ DADT(1)=KG*(1.0-ADG_1_1/YSS)*A(1)
+
+
+$ERROR
+A1=A(1)
+
+
+Y1=1.0
+IPRED=A(1)
+Y=IPRED*(1.0+EPS(1))
+
+$THETA
+0.2D+00
+1.0D+00
+10.0D+00
+2.0D+00
+
+$OMEGA (0.0 fixed)x4
+
+$SIGMA (0.0 fixed)
+
+$SIML (122345) ONLYSIM SUBP=1
+
+$TABLE TIME IPRED NOPRINT NOAPPEND FILE=logdt.tab ONEHEADER FORMAT=S1PE20.13

@@ -1,0 +1,67 @@
+$PROBLEM IAV
+$INPUT ID AMT TIME DV EVID MDV CMT 
+$DATA IAV.csv IGNORE=C
+$SUBROUTINES ADVAN16 TOL=12
+$MODEL NCOMPARTMENTS=5 
+
+$PK
+BETA=THETA(1)*EXP(ETA(1))
+K=THETA(2)
+DELTA=THETA(3)
+PP=THETA(4)
+CC=THETA(5)
+RR0=THETA(6)
+V0=THETA(7)
+EP=THETA(8)
+ALPHA=THETA(9)
+;  TAUy
+TAU1=THETA(10)
+
+U0=CC*DELTA*RR0/(PP*BETA)
+
+; Initial conditions
+A_0(1)=U0
+A_0(2)=0
+A_0(3)=0
+A_0(4)=V0
+A_0(5)=0
+
+$DES
+; AD_x_y is the State value of A(x) delayed for time TAUy.  
+; AP_x_y is the State value of A(x) in the past, for time delay TAUy.  
+;PAST
+AP_3_1=0
+;BASE EQUATIONS 
+DADT(1)=-BETA*A(1)*A(4)
+DADT(2)=BETA*A(1)*A(4)-K*A(2)/(1+EP*A(5))
+DADT(3)=K*A(2)/(1+EP*A(5))-DELTA*A(3)
+DADT(4)=PP*A(3)-CC*A(4)
+DADT(5)=AD_3_1-ALPHA*A(5)
+
+$ERROR
+
+Y1=A(4)  
+IF(CMT==4) IPRED=Y1
+IF(CMT==4) Y=IPRED+EPS(1)
+
+$THETA
+0.000021  ; 1: BETA
+48.6      ; 2: K
+10.9      ; 3: DELTA
+0.13      ; 4: PP
+11.0      ; 5: CC
+6.4       ; 6: RR0
+0.00001   ; 7: V0
+0.0073    ; 8: EP
+4.7       ; 9: ALPHA
+1.0       ;10: TAU1 
+
+$OMEGA
+0 FIX  
+
+$SIGMA
+0 FIX
+$SIMULATION (567811 NORMAL) ONLYSIMULATION SUBPROBLEMS=1
+
+$TABLE ID TIME IPRED DV EVID CMT NOAPPEND NOPRINT ONEHEADER
+FILE=IAV.tab

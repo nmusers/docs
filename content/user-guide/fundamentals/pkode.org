@@ -1,0 +1,149 @@
+#+title: 2. PK and ODEs
+{{< katex >}}{{< /katex >}}
+
+* Pharmacokinetics and ordinary differential equations
+Since pharmacokinetics (PK) always involves time \(t\), we make it explicit
+in the population data formulation from the last chapter. To simplify
+notation we also remove the subscripts for the moment:
+
+$$
+y = f(x, \phi, t) + \epsilon.
+$$
+Here \(x\), \(y\), \(\phi\), and \(\epsilon\) can be vectors.
+
+For example, let us consider \(x=D\),
+\(D\) being the single bolus dose amount, and \(\theta=(V, k)\) with \(V\)
+for the volumne of distribution and \(k\) the elminination
+coefficient, in one-compartment models.
+For the plasma concentration observation \(y\), we have
+$$
+y=\frac{D}{V}e^{-kt} +\epsilon,
+$$
+thus the canonical form of \(f\) is
+$$
+F=f(D, (V, k), t)=\frac{D}{V}e^{-kt}
+$$
+
+Here \(F\) denotes the model /prediction/, the return of \(f\) that
+depends on dose, subject parameters, and time.
+
+** PRED routine
+In general, the user must provide a function \(f()\), called the
+PRED routine in NONMEM. It takes THETA and each data record (encoding
+covariates and time), computes the prediction, and stores it in the
+reserved variable F.
+
+We can specify any PRED as long as the above /signature/ [fn:1] is
+followed. For example, we can use PRED to describe a logistic \(f\):
+$$
+f(x, \theta, t) = f(t_0, (\alpha, \beta, \gamma), t) = \frac{\gamma}{1+\alpha e^{-\beta(t-t_0)}},
+$$
+and supply it to a disease progression model in which the clinical
+outcome follows an S‑shaped time course.
+
+** Ordinary differential equations
+Ordinary differential equations (ODEs) are often used in mechanistic
+PK models. In fact, the one-compartment model from earlier is based on
+an ODE model: our \(f(D, (V,k), t)\) is the solution of
+$$
+\frac{df}{dt} = -kf(t), \quad f(t=0) = \frac{D}{V}.
+$$
+In general, since the PK ODEs are constructed based on mass
+conservation, we would like to formulate them in terms of drug amount \(A(t)\),
+and write the above ODE as
+$$
+\frac{dA}{dt} = -kA(t), \quad A(t=0) = A,
+$$
+and recover the concentration as \(c(t) = A(t)/V\). This conversion
+between \(c(t)\) and \(A(t)\) is an
+example of /scaling/, with \(V\) being the scaling parameter here. Scaling is
+often used when the observation is concentration while the PK model
+is based on drug (or other substance) amount.
+Again, NONMEM has a
+reserved variable A corresponding to ODE states \(A\) in the model,
+S for scale parameters,
+and a control record $DES (Differential Equation Systems) to
+specifiy the ODEs.
+
+Let us consider the two-compartment model with first-order
+absorption as another example. The ODE systsem is
+
+$$
+\frac{dA_0}{dt} = -k_aA_0(t),\\
+\frac{dA_1}{dt} = k_aA_0(t) - (k_{12}+k_e)A_1(t) + k_{21}A_2(t),\\
+\frac{dA_2}{dt} = k_{12}A_1(t)-k_{21}A_2(t).
+$$
+Here \(A_0\),  \(A_1\), \(A_2\) are the drug amount in depot (gut),
+central, and peripheral compartments, respectively, and the system has four
+coefficients: \(k_a\), \(k_{12}\), \(k_{21}\), \(k_e\), to quantify
+the absorption, the transfer between the central and peripheral compartments,
+as well as the elimination. In general, the system can be formulated
+as
+
+$$
+\frac{dA(t)}{dt}=g(A(t), x, \theta, t).
+$$
+
+We can keep increasing the complexity of the system, by increasing the
+dimenion of \(A()\), and/or the complexity of the right-hand-size
+(RHS) function \(g\), then translate it into PRED, to account for more
+complicated models. But it quickly becomes intractable because the solution
+can be either too long to write out, or more likely does not exist
+in close form to begin with.
+
+NONMEM tackles this problem by allowing user to specify the RHS \(g()\)
+directly, so that it can solve the ODEs /numerically/. That way we do not have to
+write out the solution \(A\) (or \(f\)) manually. In fact, NONMEM
+provides a library of commonly-used PK models. For those models we do
+not even have to specify \(g()\). Since these models describe how
+\(A(t)\) /advances/ in time, in NONMEM they called ADVAN routines.
+
+** Parameterization
+Another way to write the above two-compartment models is to use PK
+parameters such as clearance (\(\text{CL}\) and \(\text{Q}\)) and volumn of distribution
+(\(V_1\) and \(V_2\)). They are
+related to the \(k\)'s as (\(k_a\) remains the same)
+$$
+k_e=\frac{\text{CL}}{V_1},\quad k_{12}=\frac{\text{Q}}{V_1},\quad k_{21}=\frac{\text{Q}}{V_2}.
+$$
+This /TRANSformation/ of parameters does not change the ODE model, but
+merely /reparameterizes/ it, and NONMEM
+provides routines called TRANS for the built-in PK models. User can choose
+between different TRANS routines for a given PK model.
+
+** Dose
+It is helpful to see doses in PK studies from the pespective of ODEs,
+as dosing can be represented as either setting the initial condition of
+the ODEs, or amending the RHS function \(g()\). Specifically, consider
+a bolus dose \(D\) administored to the depot/gut compartment \(A_0\)
+at \(t=t_0\).
+This is equivalent to setting the initial condition
+$$
+A_0(t_0) = D.
+$$
+If instead \(D\) is administored in the central compartment, we have
+$$
+A_1(t_0) = D.
+$$
+
+Now let us consider the case of infusions. An constant infusion with
+rate \(r\) given
+between time \(t_1\) and \(t_2\) amounts to adding \(r\) to RHS
+\(g()\). Take the above two-compartment model for example. If the
+infusion is given to the central compartment, we have (omitting the other compartments)
+$$
+\frac{dA_1}{dt} = k_aA_0(t) - (k_{12}+k_e)A_1(t) + k_{21}A_2(t) + r,\quad t \text{ in } (t_1, t_2).
+$$
+After the infusion, assuming there is no doses given, we return to
+$$
+\frac{dA_1}{dt} = k_aA_0(t) - (k_{12}+k_e)A_1(t) + k_{21}A_2(t) + r,\quad t > t_2.
+$$
+
+
+** TODO Covariates and PK modeling
+
+
+[fn:1] A function signature specifies the
+function's input (arguments) and output (return). NONMEM's
+implementation of PRED actually involves
+additional arguments, but they are not essential here.

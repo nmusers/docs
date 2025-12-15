@@ -1,39 +1,51 @@
-
-
-
 * $INDEX
 
- Defines values for the PRED/PREDPP INDXS array.
-
-
-
-** USAGE
-
+Defines values for the PRED/PREDPP INDXS array.
 #+begin_src php
- $INDEX  [label1|value1]  [label2|value2]  [label3|value3] ...
-#+end_src
-
-** EXAMPLE
-#+begin_src php
- $INDEX   DOSE  1
+$INDEX  [label|value]...
+; Example
+$INDEX   DOSE  1
 #+end_src
 
 ** DISCUSSION
- Optional. Used only with user-supplied FORTRAN subroutines (ERROR, PK,
- INFN, PRED) which make explicit use of the INDXS array.  May  also  be
- coded $INDXS or $INDEXES.
+Optional. Used only with user-supplied FORTRAN subroutines (ERROR, PK,
+INFN, PRED) that make explicit use of the INDXS array.  The labels
+are those of data items from the $INPUT record.
+The values are integers no larger than the number of items
+in the $INPUT record, not counting in those specified by =DROP=.
+(The index of a data item is its position in the NONMEM data record).
+The above example if given along with an $INPUT record
+#+begin_src php
+$INPUT ID DOSE TIME CP=DV WT
+#+end_src
+would imply
+#+begin_src f90
+   INDXS(1)=2
+   INDXS(2)=1
+#+end_src
+
+INDXS is an array which is one of the arguments to certain
+user-supplied subroutines; see Guide I, section C.4.1, or
+Guide VI, sections III.C, IV.B, and VI.A.  The array cannot be used with an
+abbreviated code.  Therefore, the
+$INDEX record is not of interest to users of NONMEM who only use
+abbreviated codes.
+
+In the above description INDXS(I) should be understood to always mean the Ith
+element of the INDXS array that is available to a user-written
+routine.  With PREDPP
+the routine actually has access to only
+part of a larger INDXS array, only to elements 12-50 of the larger array.
+NONMEM stores the indices of certain data items of use to PREDPP in elements
+1-11, but PREDPP renumbers elements 12-50 to 1-39 before passing INDXS as
+an argument to the routine.
+
+$INDXS,  $INDEXES are aliases for $INDEX.
 
 ** OPTIONS
-
- The  labels  are those of data items on the $INPUT record.  The values
- are integers no larger than the number of data  items  in  the  NONMEM
- input  data  set.   Either the index of the data items with  labeli or
- valuei  is stored in INDXS(i).  (The index of a data item is its posi-
- tion in the NONMEM data record.)
+The  labels  are those of data items on the $INPUT record.  The values are integers no larger than the number of data  items  in  the  NONMEM input  data  set.   Either the index of the data items with  labeli or valuei  is stored in INDXS(i).  (The index of a data item is its position in the NONMEM data record.)
 
 ** REFERENCES
 Guide I, section C.4.1
 ** REFERENCES
-Guide IV, section III.B.3
-** REFERENCES
-Guide VI, section III.C , V.A
+Guide VI, section V.A
