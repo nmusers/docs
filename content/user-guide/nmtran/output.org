@@ -1,0 +1,39 @@
+#+title: 3. Output
+{{< katex >}}{{< /katex >}}
+
+* NONMEM output
+In this chapter we interpret in detail the output of NONMEM runs. We
+use the following model as an running example. In the previous chapter
+we have covered all the control records in this model.
+
+#+INCLUDE: "/examples/pheno_wt_cl_v/model.ctl" src php
+
+** Model input
+The first page of NONMEM’s output is shown below. On this page, NONMEM
+repeats the instructions it was given in the control file and describes the data
+file. The first page of the output should be checked carefully. Problems in a NONMEM
+run can often be traced to errors in the problem specification. For example, always check
+that the initial parameter estimates were entered correctly
+
+#+INCLUDE: "/examples/pheno_wt_cl_v/10.2.ascii" src txt
+
+Most lines above are easy to interpret. We make several comments as follows.
+- Line 21 gives the labels for all the data items. The first six
+  labels are specified in $INPUT. The next two (EVID, MDV) are those
+  of two data items added to the data set by NONMEM (NONMEM deduces
+  EVID and MDV from given data items. It also supplies data
+  item PRED (prediction), RES (residual), and WRES (weighted residual)).
+  In the formulation of \(y=f(x, \phi, t)+\epsilon\), ID,
+  TIME, AMT, WT, and APGR are elements of \(x\), DV is \(y\), and PRED
+  is described by $SUBROUTINE and $PK records.
+
+- Line 27-43 describe the contents of the $THETA, $OMEGA and $SIGMA.
+  First the number of elements in line 27, 29 and 31, then their
+  initial estimates are displayed. In line 35-38, value 0.1000e+07 and
+  -0.1000e+07 are NONMEM’s way of expressing the values \(\infty\) and
+  \(-\infty\), i.e., of describing THETAs that are unbounded on one or
+  both sides. Line 40-41 show the low triangular part of the
+  \(\Omega\) matrix: the diagonal entries are the variances
+  \(\eta\)'s. Since line 29 states that NONMEM understands Ω to be
+  diagonalthe, the off-diagonal element \(\text{cov}(\eta_1,\eta_2)\) is
+  automatically set to zero.
