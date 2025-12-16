@@ -1,30 +1,78 @@
-
-
-
 * $BIND
 Define data values used by $PK, $DES, and $AES.
-
-
-
-** USAGE
 #+begin_src php
- $BIND  [value1]  [value2] ...
+; Usage
+$BIND  value ...
 #+end_src
 
-
 ** DISCUSSION
- $BIND  is  optional.   It  may  be  used  when $PK abbreviated code is
- present and this code requests that the PK  subroutine  be  called  at
- additional  or  lagged dose times (CALLFL=-2).  It is used to override
- the default values of user-defined variables used in the code when the
- PK  routine is called at these particular dose times.  It is also used
- to override the default values of user-defined variables used in  $DES
- and $AES abbreviated code during an advance to an additional or lagged
- dose time.
+$BIND  is  optional. This record is used in conjunction with the
+$INPUT record to further define the meaning of certain data items
+occuring as right-hand quantities in an abbreviated code for PK when
+PK is called at nonevent dose times (see below and Guide VI, section
+III.B.2). (Normally, PK is not called at these times.) At such calls,
+PK has access to several different data items of the same type, from
+several different event records. The definitions in the $BIND record
+precisely determine which of these data items are represented by the
+label for the data item type used in the abbreviated code.
 
- $BIND has no effect when PK is called at a model event time (MTIME).
+A nonevent dose time is a time that a lagged dose or additional dose
+enters, or starts to enter, the system. It is some time after the
+event time occuring on the dose record. When PK is called at such a
+time, information from three event records is available. These are the
+dose record itself, the last event record, and the next event record.
+The last event record is the last event record with event time
+occuring before the nonevent dose time. The next event record is the
+first event record with event time occuring after the nonevent dose
+time. This event record is also called the argument record (see Guide
+VI, section III.B.2). PK is called at nonevent dose times only if a
+certain PK calling-protocol is requested (see section C.5).
 
- Let t be a time at which an additional or lagged dose enters the  system.   If t1 is the greatest event time not exceeding the time t, then
+$BIND  may  be  used  when $PK abbreviated code is present and this
+code requests that the PK  subroutine  be  called  at additional  or
+lagged dose times (CALLFL=-2).  It is used to override the default
+values of user-defined variables used in the code when the PK  routine
+is called at these particular dose times.  It is also used to override
+the default values of user-defined variables used in  $DES and $AES
+abbreviated code during an advance to an additional or lagged dose
+time.
+
+NONMEM data item ID, L2, MDV, DV are not affected by the $BIND
+definitions. At a nonevent dose time, these labels always represent
+the data items from the dose record; this is the mandatory
+representation. Some data items types are PREDPP data item types: AMT,
+RATE, SS, ADD, II, MT, CMT, CALL, EVID, and these are not affected by
+the $BIND definitions. These labels also always represent the data
+items from the dose record; this is the mandatory representation. The
+TIME data item type is a PREDPP data item type, and it is not affected
+by the $BIND definition; the label always represents the time data
+item from the next event record. The other data item types (labeled WT
+and PREP in the above example) are only recognized and responded to by
+the user’s PK routine. With the $BIND record the user may define the
+label of such a data item type to represent the data item from the
+dose record, the last event record, or the next event record. If a
+label definition for a data item type is not given explicitly, then by
+default the label represents the data item from the next event record.
+
+If the value is (explicitly) DOSE, LAST, or NEXT, the label represents
+the item from the dose record, the last event record, or the next
+event record, respectively. If one of these values is used, it should
+not contradict the mandatory representation for the label (of a NONMEM
+or PREDPP data item). The value ’-’ serves as a place holder; a value
+is assumed that corresponds to the mandatory or default
+representation. If the number n is less than the total number of
+labels listed on the $INPUT record, the values corresponding to the
+remaining labels are taken to correspond to the respective mandatory
+and default representations. If the $BIND record is not used, the
+values corresponding to all labels are taken to correspond to the
+respective mandatory and default representations.
+
+If n values are given, n should not exceed the total number of labels listed on the $INPUT
+record, including all DROP and SKIP labels. The ith value corresponds to the ith label.
+
+$BIND has no effect when PK is called at a model event time (MTIME).
+
+Let t be a time at which an additional or lagged dose enters the  system.   If t1 is the greatest event time not exceeding the time t, then
  the "last event record" is the last event record with event  time  t1,
  and  the  "next  event  record" is the event record following the last
  event record.
@@ -58,8 +106,6 @@ Define data values used by $PK, $DES, and $AES.
  $BIND - - - - - - -
  #+end_src
  has the same effect as if no $BIND record were present.
-
- EXAMPLE:
 
  #+begin_src php
    $INPUT ID TIME DATE=DROP AMT DV WGT  PREP  X   HGT
@@ -112,29 +158,29 @@ Define data values used by $PK, $DES, and $AES.
       that the PK routine be called to compute values of the PK parameters at additional and lagged dose times.  When $PK does not contain this pseudo-statement, there is no  such  call,  and  at  an
       additional or lagged dose time, the PK parameters have those values computed with the next event record.
 
- When the $PK code is implemented with an event  record,  the  variable
+When the $PK code is implemented with an event  record,  the  variable
  DOSTIM  is  0.  When it is implemented at an additional or lagged dose
  time, the value of this variable is the time in question.  By default,
  data items used in abbreviated code have values from either the initiating dose record (DOSREC) or the next event record (EVTREC),  according to this rule:
 
- NONMEM  data items and PREDPP data items (other than TIME) have values
+NONMEM  data items and PREDPP data items (other than TIME) have values
  from the original dose event record (DOSREC).  These are:
-
+ #+begin_src f90
  DV MDV ID L2 MRG_ RAW_ REPL_ EVID AMT RATE SS II CMT  PCMT  CALL  CONT
  ADDL DATE DAT1 DAT2 DAT3
-
+ #+end_src
  TIME  and  all  user-defined  data items have the values from the next
  event record (EVTREC).  This default can be overridden using the $BIND
  record.
 
- EXAMPLE:
-
- The  $BIND  record  is  a  convenience; it does nothing that cannot be
+EXAMPLE:
+The  $BIND  record  is  a  convenience; it does nothing that cannot be
  accomplished with abbreviated code.  Suppose X is a user-defined  data
  item.  The following three fragments of code create a variable XB with
  the same values at calls with additional and lagged doses that X would
  have if there were a $BIND record specifying the following for X.
 
+#+begin_src f90
  DOSE:
    IF (DOSTIM.EQ.0) THEN
    XB=X
@@ -149,11 +195,8 @@ Define data values used by $PK, $DES, and $AES.
    IF (DOSTIM.EQ.0) THEN
    XB=X
    ENDIF
+#+end_src
 
-   In this case, when DOSTIM>0, XB retains its value from the previous
-   call to PK.
+In this case, when DOSTIM>0, XB retains its value from the previous call to PK.
 
- (See bind example).
-
-** REFERENCES
-Guide IV, section V.C.2 , V.C.5
+(See bind example).

@@ -1,8 +1,8 @@
 * $AES
 Marks the beginning of abbreviated code for the AES routine
 
-** USAGE
 #+begin_src php
+; Usage
  $AES
  abbreviated code
 #+end_src
@@ -10,6 +10,25 @@ Marks the beginning of abbreviated code for the AES routine
 ** DISCUSSION
 The  $AES record is used to compute algebraic expressions which can be regarded as specifying equilibrium kinetics.  It is used with PREDPP's ADVAN9 and ADVAN15 and ADVAN17.
 (See $AESINITIAL).
+The complete AES routine can be divided into two parts: code which computes the amounts in the equilibrium compartments at the beginning of the integration interval (these amounts depend on the amounts
+in the nonequilibrium compartments) and code which computes values for the right sides of the algebraic
+equations. An abbreviated code for AES is actually divided into two abbreviated codes which correspond to the two parts of the complete AES routine. This record gives an abbreviated code for the second part of the AES routine. The $AESINITIAL record gives an abbreviated code for
+the first part. The $AES record, along with all its continuation
+records, is called a $AES block.
+
+This record is optional. If it appears, it must be with the first problem specification, and only this problem
+specfication. If there are no equilibrium compartments, but ADVAN9 or ADVAN15 is used, the record
+need not appear. It may not appear when the MODEL routine is user-supplied. Implicit basic PK param-
+eters may be used in the $AES block (see below) only when the $PK block precedes the $AES block.
+
+The mandatory left-hand quantities are values of expressions which when set to 0, constitute the system
+of algebraic equations describing the equilibrium kinetics. They are symbolized by E(n). The number
+n must be an equilibrium compartment number. However, there need not be any particular relationship
+between the subscripts and the equilibrium compartments. At least one such quantity must be computed.
+
+Symbolic differentiation is used to obtain code used in the generated subroutine to compute the elements
+of the DA, DP, and DT arrays.
+
 See @@html:<a href="/docs/reference-manual/abbr/">abbreviated code</a>@@ for general rules.
 Specific rules follow.
 
