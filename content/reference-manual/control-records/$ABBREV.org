@@ -1,8 +1,10 @@
+#+title: $ABBREVIATED
+{{< katex >}}{{< /katex >}}
+
 * $ABBREVIATED
 
-
-** USAGE
 #+begin_src php
+; USAGE
  $ABBREVIATED  [COMRES=n1] [COMSAV=n2]
                [DERIV2=NO] [DERIV2=NOCOMMON] [DERIV1=NO]
                [FASTDER | NOFASTDER]
@@ -13,7 +15,11 @@
                [PROTECT]
                [FUNCTION function_name(input_vector_name,dimension[,usage])]
                [VECTOR input_vector_name(dimension)]
+
+; example
+$ABBREVIATED    COMRES=2
 #+end_src
+
 ** DISCUSSION
 Optional.   May be used
 when $PK, $ERROR, or $PRED abbreviated code is present. Must precede
@@ -21,35 +27,27 @@ all blocks of  abbreviated  code.   With  NONMEM 7.4, may also be used
 when there is no abbreviated code.  For example, $ABBR REPLACE may be
 used for  label  substitution  in  NONMEM  report files.
 
-** SAMPLE
- #+begin_src php
- $ABBREVIATED    COMRES=2
- #+end_src
-
 ** OPTIONS
 
-*** COMRES=n1 ('common reserve')
-One use of the option =COMRES= involves the presence of both
-abbreviated and user-supplied subroutines.
-Values for variables defined in abbreviated codes
-may be displayed in tables and scatterplots.
-These variables are listed (i.e. their values are stored) in a NONMEM
-MODULE NMPRD4 in the generated subroutine.
-(With versions of NONMEM prior to nm7, NMPRD4 was a named FORTRAN common,
-hence the use of options "COM...".)
-User-supplied FORTRAN routines may also list variables whose values are to be
-displayed in NMPRD4.  The first \(\text{n}_{1}\) positions in NMPRD4
-are reserved for the use of these routines; generated subroutines
-will not list variables defined in abbreviated codes in these
-positions.  If there are no abbreviated codes, not only is =COMRES=
-not needed for this purpose, it may not be used.
-All variables listed in NMPRD4 must be double precision.
-.\"variables if double precision NONMEM is used; otherwise, they must be
-.\"single precision variables.
-The number \(\text{n}_{1}\) can be nonnegative, and
-if the option is not used, it is understood to be 0.  It can also be -1,
-in which case no variables defined in abbreviated codes are listed in
-NMPRD4.  In this regard, see also section IV.H.
+*** COMRES=n1
+Stands for "common reserve", one use of the option COMRES involves the presence of both abbreviated
+and user-supplied subroutines. Values for variables defined in
+abbreviated codes may be displayed in tables and scatterplots. These
+variables are listed (i.e. their values are stored) in a NONMEM MODULE
+NMPRD4 in the generated subroutine. (With versions of NONMEM prior to
+nm7, NMPRD4 was a named FORTRAN common, hence the use of options
+"COM..."). User-supplied FORTRAN routines may also list variables
+whose values are to be displayed in NMPRD4.  The first \(n_1\)
+positions in NMPRD4 are reserved for the use of these routines;
+generated subroutines will not list variables defined in abbreviated
+codes in these positions.  If there are no abbreviated codes, not only
+is =COMRES= not needed for this purpose, it may not be used. All
+variables listed in NMPRD4 must be double precision. .\"variables if
+double precision NONMEM is used; otherwise, they must be .\"single
+precision variables. The number \(\text{n}_{1}\) can be nonnegative,
+and if the option is not used, it is understood to be 0.  It can also
+be -1, in which case no variables defined in abbreviated codes are
+listed in NMPRD4.  In this regard, see also section IV.H.
 
 All variables defined in an abbreviated code are listed in NMPRD4,
 whether or not their values are displayed.  Thus with PREDPP, where
@@ -58,22 +56,16 @@ recognized as the same variable in all abbreviated codes in which it is
 used.  If it desireable to avoid this type of global definition, then the option
 value -1 can be used.  See also section IV.H.
 
-The option =COMSAV= may be used when the variable =COMACT=
-is used in abbreviated code (see section
-IV.E.2).
-It defines the SAVE region of NMPRD4.
-In this case the option =COMRES= should also be used, and
-\(\text{n}_{2}\) must satisfy @0~<=~n sub 2~<=~n sub 1@.
+The option COMSAV ("common save") may be used when the variable COMACT is used in
+abbreviated code (see section IV.E.2). It defines the SAVE region of NMPRD4.
+In this case the option COMRES should also be used, and
+\(n_2\) must satisfy \( 0 \le n_2 \le n_1\).
 
+- \(n_1=-1\): do not store any variables in the global variable array, VRBL, in the NMPRD4 module.
 
-**** n=-1
-Do not store any variables in the global variable array, VRBL, in the NMPRD4 module.
+- \(n_1=0\): store  variables  in  NMPRD4  with  no  reserved  positions  (the default).
 
-**** n=0
-Store  variables  in  NMPRD4  with  no  reserved  positions  (the default)
-
-**** n=n1
-Store variables in NMPRD4, but reserve the first n1 positions
+- \(n_1>0\): store variables in NMPRD4, but reserve the first \(n_1\) positions.
 
 With  abbreviated  code, the Ith position in NMPRD4 is referenced
 by COM(I).
@@ -91,7 +83,7 @@ by COM(I).
       the  pseudo-statement  COMRES=-1,  which  prevents  any  variable
       defined in that particular block from being stored in NMPRD4.
 
-***  COMSAV= n2 ('common save')
+***  COMSAV= n2
       Values  of  variables  displayed  in  tables and scatterplots are
       obtained from NMPRD4.   There  are  particular  times  when  data
       records  are  passed  to  PRED for the purpose of obtaining these
@@ -161,7 +153,7 @@ first derivative code can be prevented with option =NOFASTDER=.
 
 (See Partial Derivative Indicators).
 
-***  CHECKMU, NOCHECKMU
+***  CHECKMU | NOCHECKMU
       With NONMEM 7.2 and higher, NM-TRAN checks the  MU  model  statements  in  abbreviated  code  and issues warning messages if they
       appear to contain mistakes.  This can take a long time for  large
       control streams.  Also, in the examples directory, there are control streams for which the check  is  too  difficult  for  NMTRAN
@@ -172,27 +164,25 @@ first derivative code can be prevented with option =NOFASTDER=.
       CHECKMU requests that MU model statements be checked, and is  the
       default.  Neither option affects the generated code.
 
-***  DES=FULL
-      Arrays of the DES routine are stored in non-compact form.
-      With  $ESTIMATION  METHOD=COND LAPLACIAN, the option NUMERICAL is
-      also required.
-      DES=FULL is the default with  ADVAN9  and  ADVAN15  and  ADVAN17.
-      (Prior to NONMEM 7.4, FULL was required with ADVAN13.)
+***  DES=FULL | COMPACT
+- DES=FULL: Arrays of the DES routine are stored in non-compact form.
+  With  $ESTIMATION  METHOD=COND LAPLACIAN, the option NUMERICAL is
+  also required. DES=FULL is the default with  ADVAN9  and  ADVAN15
+  and  ADVAN17. (Prior to NONMEM 7.4, FULL was required with ADVAN13.)
 
-***  DES=COMPACT
-      Arrays of the DES routine are stored in compact form.
-      Required  with Laplacian method; optional otherwise.  This is the
-      default, except with ADVAN9 and ADVAN15 and ADVAN17.
+- DES=COMPACT: Arrays of the DES routine are stored in compact form.
+  Required  with Laplacian method; optional otherwise.  This is the
+  default, except with ADVAN9 and ADVAN15 and ADVAN17.
 
-***  REPLACE left_string = right_string
-      There are several different forms of the REPLACE option.  They do
-      not affect verbatim code.  Case is ignored.
-
-**** 1. Simple replacement
-#+begin_src php
+***  REPLACE
+#+begin_src f90
+; Usage
 REPLACE left_string = right_string
 #+end_src
-      May  be  used  in  all  blocks of abbreviated code and $TABLE and
+There are several different forms of the REPLACE option.  They do not affect verbatim code.  Case is ignored.
+
+**** 1. Simple replacement
+May  be  used  in  all  blocks of abbreviated code and $TABLE and
       $SCATTER records.  Left_string is replaced by right_string.   The
       search   is   "anchored"  by  a  Fortran  identifier.   That  is,
       left_string is parsed for the first Fortran  identifier  and  the
@@ -412,7 +402,11 @@ REPLACE left_string = right_string
       and task specification records.
       These may be helpful for debugging.
 
-***  DECLARE [INTEGER] [DOWHILE] name [(dimension [,dimension])] ...
+***  DECLARE
+#+begin_src f90
+  ; Usage
+  DECLARE [INTEGER] [DOWHILE] name [(dimension [,dimension])] ...
+#+end_src
       One  or  names  may  be  coded. They are referred to as "declared
       variables."  IF INTEGER or DOWHILE is  coded,  the  type  of  the
       variable is integer.  Otherwise, the type of the variable is double precision.  If one or two dimensions are declared, the  variable  being declared is an array.  Each dimension may be a number
@@ -465,7 +459,11 @@ REPLACE left_string = right_string
 
       (See protect functions).
 
-***  FUNCTION function_name(input_vector_name,dimension[,usage])
+***  FUNCTION
+#+begin_src php
+; Usage
+$ABBR FUNCTION function_name(input_vector_name,dimension[,usage])
+#+end_src
       With all versions of NONMEM since NONMEM VI, user-supplied  functions  are permitted in abbreviated code with reserved names such
       as FUNCA, FUNCB, ...,  and argument vectors with  reserved  names
       such as VECTRA, VECTRB, .....  With NONMEM 7.4, extended reserved
@@ -617,6 +615,6 @@ REPLACE left_string = right_string
       as shown in  the Abbreviated Function help item.
 
 ** REFERENCES
-Guide IV, section III.B.7 , IV
+Guide IV, section IV
 
 Guide Introduction_7
