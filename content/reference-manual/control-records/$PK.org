@@ -3,20 +3,34 @@ Marks the beginning of abbreviated code for the PK Routine. The
 record  is  used to model the values of basic and additional
 pharmacokinetic parameters.
 
-** USAGE
 #+begin_src php
- $PK
- abbreviated code
+$PK
+abbreviated code
 #+end_src
 
-Basic PK parameters are  typically  the  rate  constants
-("micro-constants") for use in kinetic formulas.  $PK can compute
-instead parameters such as clearance and volume, and a translator
-("TRANS")  subroutine  can  be  used to convert these to rate
-constants.  See additional PK parameters below.
+** Discussion
+This record gives an abbreviated code for the PK routine. The record along with all its continuation records is
+called a $PK block.
+
+This record is optional. If given it must only be with the first
+problem specification, preceding any $ERROR records. It cannot be used
+with a user-supplied MODEL subroutine or TRANS routine (see Guide VI, section III.M).
+
+$PK statements must include assignment statements giving a value to every basic PK
+parameter for the given ADVAN and TRANS combination. They
+may also include assignment statements giving values to one or more of
+the additional PK parameters.
+
+Basic parameters are typically the rate constants
+("micro-constants") for use in kinetic formulas, or
+parameters specified through transformation
+("TRANS"), such as clearance and volume.
+
+Additional parameters are listed below.
 
 See @@html:<a href="/docs/reference-manual/abbr/">abbreviated code</a>@@ for general rules for abbreviated code.
 
+** Assignment: left-hand quantities
 Left-hand quantities in assignment statements must include Basic  PK
 parameters  according to the  ADVAN and TRANS routines used, as well
 as additional optional parameters.
@@ -34,13 +48,34 @@ Basic PK parameters:
 | K K12 K21 K13 K31 CL Q2 Q3 V1 V2 V3 ALPHA BETA GAMMA    | (ADVAN11)                                                                      |
 | KA K K23 K32 K24 K42 CL Q3 Q4 V2 V3 V4 ALPHA BETA GAMMA | (ADVAN12)                                                                      |
 
-P(n) are referred to as "explicit" basic PK parameters. Any variable
-defined in $PK may be used on the right-hand side in a $DES or $AES
-block; these are "implicit" basic PK parameters.
+For ADVAN5 and ADVAN7 (the general linear models), the basic PK
+parameters are the rate constants. The reserved variable symbolizing
+the rate constant that quantifies the first-order distribution of drug
+from compartment number m to compartment number n is Kmn. (See section
+C.4 for a description of compartment numbering.) The occurence of this
+variable on the left of an assignment statement or conditional
+assignment statement establishes the possiblity that this distribution
+can take place. The variable Km0 may be used instead of Kmn, where n
+is the number of the output compartment. When the number of
+compartments exceeds 10, the syntax Kmn=k may be ambiguous. The letter
+T may be used to separate the two compartment numbers KmTn. The rate
+constants are numbered (these numbers are used internally by the
+ADVAN) according to the order in which they appear in the abbreviated
+code. See Guide IV, the first example in Appendix VIII.
 
-Additional optional PK parameters inlucde (the digit following the letter indicates compartment number).
+For ADVAN6, ADVAN8, ADVAN9, ADVAN13, ADVAN14, ADVAN15 (the general nonlinear models),
+the reserved array elements symbolizing explicit basic PK parameters are P(1),
+P(2), etc. The value of the nth element of the P vector passed to DES and AES (see sections C.7-9 and
+Guide VI, sections VI.C, VI.E) is the value stored in P(n). These values, like other PK-defined items
+may be displayed; the appropriate labels are described below. P(n) are
+referred to as "explicit" basic PK parameters. Any variable defined in
+$PK may be used on the right-hand side in a $DES or $AES block; these
+are "implicit" basic PK parameters. Implicit basic PK parameters are discussed
+in sections C.7-9.
 
-** Scale parameters Sn
+Additional optional PK parameters include PK-defined (i.e.,
+PRED-defined) items, and the ones listed below (the digit following the letter indicates compartment number).
+*** Scale parameters Sn
 For each observation (or at any time other than  an  observation  time
 for which a prediction is needed), PREDPP computes a prediction
 available to the ERROR routine.  Associated with  each  observation
@@ -51,19 +86,18 @@ scaling parameter. There is one such parameter associated with every
 compartment  of  the kinetic model (including the output compartment).
 If omitted, scaling  parameters defaul to 1.0.
 
-A scaling parameter is computed in the PK routine.
-information in the event record.
+The variable S0 may be used instead of
+Sn, where n is the number of the output compartment. The variable SC may be used to mean the scaling
+parameter with the central compartment.
 
 (See also PK, $PK).
 
 See Chapter  6,  Section  9, The Output Compartment: Urine Collections and Observations
  Chapter 7, Secton 4.3.3. Scaling by a Data Item
 
- REFERENCES: Guide IV, section V.C.5
 
- REFERENCES: Guide VI, section III.F.1 , V.H
 
-** Bio-availability fractions Fn
+*** Bio-availability fractions Fn
 With each possible  dose  compartment  of  the  kinetic model (the output compartment is not a possible
  dose compartment), there is associated  one  bioavailability  fraction
  parameter Fn.
@@ -85,11 +119,7 @@ doses leading to the steady-state.
 
  (See cmt, pk, default_compartment).
 
- REFERENCES: Guide IV, section V.C.5
-
- REFERENCES: Guide VI, section III.F.6 , V.F.1 , V.H
-
-** Output fractions Fn, F0, FO.
+*** Output fractions Fn, F0, FO.
 With any of the kinetic models a (peripheral)  output  compartment  is
 always  present.  Associated  with this compartment is a PK parameter,
 the output fraction. Of the entire amount, Ao, of drug  introduced
@@ -110,11 +140,7 @@ the central for plasma observations, with any ADVAN.
 
  (See cmt, pk, default_compartment).
 
- REFERENCES: Guide IV, section V.C.5
-
- REFERENCES: Guide VI, section III.F.7
-
-** Infusion rates Rn
+*** Infusion rates Rn
 There is one rate parameter associated with every possible  dose
 compartment  of the kinetic model (the output compartment is not a
 possible dose compartment) and the rate parameter used for a given
@@ -150,14 +176,7 @@ parameter applies to the dose and to all the additional doses.
 
  (See exogenous supplementation example).
 
- REFERENCES: Guide IV, section V.C.5
-
- REFERENCES: Guide V, section 12.2.3
-
- REFERENCES: Guide VI, section III.F.4-5
-
-
-** Infusion durations Dn, e.g.: D1 D2 D3.
+*** Infusion durations Dn
 There is one duration parameter associated with  every  possible  dose
 compartment of the kinetic model (the output compartment is not a
 possible dose compartment) and the duration parameter used  for  a
@@ -187,13 +206,7 @@ doses.
 
 (See multiple dose example).
 
-REFERENCES: Guide IV, section V.C.5
-
-REFERENCES: Guide V, section 12.2.3
-
-REFERENCES: Guide VI, section III.F.3
-
-** Absorption lags ALAGn
+*** Absorption lags ALAGn
 There is one absorption lag time  (parameter)  associated  with  every
 possible dose compartment of the kinetic model (the output compartment
 is not a possible dose compartment) and the absorption lag  time  used
@@ -215,11 +228,7 @@ An absorption lag time for a dose is computed by the PK routine using, if needed
 
 (See cmt, pk, default_compartment).
 
-REFERENCES: Guide IV, section V.C.5
-
-REFERENCES:  Guide VI, section III.F.6 , V.F.1 , V.H
-
-** Time scale: TSCALE (may be written XSCALE).
+*** Time scale: TSCALE
 If  a  time  scale parameter is modeled by PK, then time itself may be
 scaled differently between individuals.  There is a single time  scale
 parameter  that multiplies all rate constants. The parameter acts
@@ -232,29 +241,43 @@ always under- stood to be 1.
 The time scale parameter does not scale the duration parameter D of a
 duration-modeled zero-order bolus dose.
 
+TSCALE may be written as XSCALE.
+
 PREDPP ignores the time scale parameter with general nonlinear models (ADVAN6, 8, 9, 13,14,15,16,17,18).
 
 (See pk).
 
-REFERENCES: Guide IV, section V.C.5
-
-REFERENCES: Guide VI, section III.F.8
-
-** Model event times MTIME(i), e.g.: MTIME(1) MTIME(2).
+*** Model event times MTIME(i)
      (The subscript i is not a compartment number.)
      (See MTIME)
 
-** Initial compartment amounts (Optional), e.g..: A_0(1) A_0(2).
-   (See Compartment Initialization Block)
+*** Initial compartment amounts A_0
+Array elements A_0(1), ..., A_0(n) may be used on the left-hand to assign initial values to compartments. A reserved right-hand variable, A_0FLAG, is set to 1 by PREDPP when PK may initialize
+compartments to specific amounts. For example,
+#+begin_src f90
+  IF (A_0FLG.EQ.1) THEN
+  ! compartment initialization block to specify A_0(n)=....
+  ENDIF
+#+end_src
+This specifies the initial amount for compartment n. A_INITIAL(n) is a synonym for A_0(n).
+The above code fragment is an explicit compartment initialization
+block. A_0(n) may also be assigned a value with an unconditional
+statement. This defines an implicit compartment initialization block. NMTRAN inserts "IF (A_0FLG.EQ.1) ..." before the statement and "ENDIF" after it. Indicator variables may be used to avoid conditional assignment statements.
 
-**   Initial steady state flag I_SS (Optional).
-   (See advan68, advan9,  $model)
-   (See Initial Steady State: I_SS,ISSMOD).
+See Compartment Initialization Block.
 
-**   PK-defined (i.e., PRED-defined) items
+*** Initial steady state flag I_SS
+Reserved left-hand variable I_SS may be set to the same values as the I_SS option of $MODEL
+record. This allows initial steady-state to be set conditionally, e.g., if some subjects are at steady-state
+and others are not.
 
-** Right-hand quantities
+(See advan68, advan9,  $model)
 
+(See Initial Steady State: I_SS,ISSMOD).
+
+
+** Assignment: right-hand quantities
+Right-hand quantities include
 - Data item labels specified on the $INPUT statement.
 
 - THETA(n).
@@ -263,32 +286,53 @@ REFERENCES: Guide VI, section III.F.8
 
 - PK-defined items that appeared earlier as left-hand quantities.
 
-- NEWIND: same as the NEWIND argument passed by NONMEM to PREDPP.
-  + NEWIND=0: First record of the data set. THETA value may differ
+Some special quantitie are described below.
+
+*** NEWIND
+Same as the NEWIND argument passed by NONMEM to PREDPP.
+  + NEWIND=0: PK is called with the first record of the data set. THETA value may differ
     from value at last call with this record.
-  + NEWIND=1: First record of the data set, THETA value does not
+  + NEWIND=1: PK is called with the first event record of the second
+    or subsequent individual record. THETA value does not
     differ from value at last call with this record, and PRED is
     nonrecursive (see I_REC), or, First record of a subsequent
     individual record.
-  + NEWIND=2: Subsequent data record of an individual record.
+  + NEWIND=2:  PK is called with the second or subsequent data record of an individual record.
 
-- ICALL Same as the ICALL argument passed by NONMEM to PREDPP.
+*** ICALL
+Same as the ICALL argument passed by NONMEM to PREDPP.
   + ICALL=1: Initialization.
   + ICALL=2: Normal call.
   + ICALL=3: Finalization.
-  + ICALL=4: Simulation.
-  + ICALL=5: Expectation.
+  + ICALL=4: regular call in simulation.
+  + ICALL=5: Expectation. Call to PK occurs when expectations are
+    being computed (the marginal data item MRG_ has a non-zero value
+    for some records).
   + ICALL=6: Raw data averages.
   + Special rules apply to blocks of abbreviated code that are executed when ICALL is not 2.
       (See Initialization-Finalization block, Simulation block).
       (See Expectation block, Data_Average block).
 
-- Global Variables in Modules
+If there is abbreviated code in the $PK block that tests for ICALL=0, ICALL=1, or ICALL=3, this code
+is moved by NM-TRAN to the INFN routine as if it had been coded explicitly as part of an $INFN block.
+Such code is called $PK-INFN code. With verbatim code in the FIRST
+block (see Guide IV section IV.I), ICALL
+will never have the value 0 or 3. ICALL has the value 1 if the call to PK is the first call to PK in the
+problem. At this call, the THETA’s are the initial estimates; the ETA’s are undefined. Verbatim code is
+not moved to the INFN routine.
 
-- Certain variables in FORTRAN modules can be used.
-  (See Variables_in_modules)
+** Global Variables in Modules
+*** COMRES
+If COMRES=1 is not present in $ABBREVIATED or $PK records, then
+PK-defined variables are listed in NMPRD4 (see Guide IV sections III.B.7 and IV.H) and may be used in other routines and blocks of abbreviated code. The symbol COM(n) may
+be used on the left or the right if n refers to a reserved position in
+MODULE NMPRD4 (see Guide IV section
+III.E.3). Variables defined in $INFN and listed in MODULE PRINFN are also global and may be used in
+$PK and other blocks of abbreviated code, on the left and on the right. Variables defined by $ABBREVIATED DECLARE records are also global and may be used in $PK and other blocks of abbreviated code,
+on the left and on the right
 
-- DOSTIM DOSREC(n)
+
+*** DOSTIM DOSREC(n)
   + If PK is not being called at an additional or lagged dose time,
     then DOSTIM = 0 and all elements of DOSREC are 0.
 
@@ -303,7 +347,8 @@ REFERENCES: Guide VI, section III.F.8
     have  values  from  the initiating  dose  event  record.   (The
     $BIND record may be used to override this.)
 
-- A(n), TSTATE: A(n) are the latest computed compartment amounts, and
+*** A(n) TSTATE
+A(n) are the latest computed compartment amounts, and
   TSTATE is  the time  at which they were computed.  That is, A(n) are
   the amounts at the previous event time, or if at a later time, but
   before the  time for which PK is being called, a lagged or
@@ -318,24 +363,34 @@ REFERENCES: Guide VI, section III.F.8
   then the symbol A can be used as a data item label or as a name of a
   PK-defined item.
 
-- A_0FLG:  signals  a  record with which it is possible to initialize a compartment amount.
+*** A_0FLG
+signals  a  record with which it is possible to initialize a compartment amount.
    (See Compartment Initialization Block)
 
-- Forbidden Variable Names:
+** Forbidden Variable Names
   IDEF IREV EVTREC NVNT INDXS IRGG GG NETAS DADT(n) E(n) EPS(n)
 
-** PSEUDO ASSIGNMENT STATEMENTS
-- COMRES=-1
+** CALLFL=n
+The special pseudo assignment statement
+uses different permissible values for n for different PK calling-protocols. A calling protocol phrase can
+be used instead of the CALLFL pseudostatement. The phrase must be enclosed in parentheses. Examples of phrases follow each value of CALLFL.
 
-- CALLFL=-2: Call with every event record and at additional and lagged dose times.
-- CALLFL=-1: Call with every event record.
-- CALLFL=0: Call with first event record and new TIME values.
-- CALLFL=1: Call once per individual record.
-  Of  the  last four, CALLFL=-2 is the default when DOSREC, DOSTIM, or
-  MTIME are used  explicitly  in  the  abbreviated  code.   Otherwise,
-  CALLFL=-1 is the default.
+- CALLFL=-2: PK called with every event record and at every nonevent
+  dose time. Calling phrase: $PK (NON-EVENT), $PK (ADDITIONAL OR LAGGED).
+- CALLFL=-1: PK called with every event record (default). Calling
+  phrase:  $PK (EVERY EVENT), $PK (EVERY).
+- CALLFL=0: PK called with first event record of the individual record
+  and with every subsequent event record where the time data item
+  differs from the time data item of the previous event record.
+  Calling phrase: $PK (NEW TIME), $PK (NEW EVENT TIME).
+- CALLFL=1: Call once per individual record. Calling phrase: $PK (ONCE
+  PER INDIVIDUAL RECORD), $PK (ONCE/IND.REC.).
 
-- The  pseudo-assignments  statements  may be enclosed in
+Of  the  last four, CALLFL=-2 is the default when DOSREC, DOSTIM, or
+MTIME are used  explicitly  in  the  abbreviated  code. Otherwise,
+CALLFL=-1 is the default. CALLFL must be -2 when the $BIND record is used.
+
+The  pseudo-assignments  statements  may be enclosed in
   parentheses. If two of them are present in the same set of
   parentheses,  separate them with a semicolon.  A calling protocol
   phrase may be used within parentheses instead of a
@@ -347,7 +402,13 @@ REFERENCES: Guide VI, section III.F.8
      $PK (EVERY EVENT)      ; same as CALLFL=-1
      $PK (NONEVENT)         ; same as CALLFL=-2
   #+end_src
-** RECORD ORDER:
+
+CALLFL=0 and CALLFL=1 correspond to call-limiting protocols. Limiting calls to PK, when this causes no undesireable effect, can result in a substantial reduction in CPU time. The CALL data item can be used with a
+call-limiting protocol to override the protocol and force calls with specific event records; see Guide VI,
+section V.J. Using CALLFL=0 or CALLFL=1 with single-subject data means PK is called with the first event
+record of the data set, instead of the first event record of the individual record.
+
+** RECORD ORDER
    Follows $SUBROUTINES and $INPUT
    Follows  $MODEL  (with  General  Nonlinear  Kinetics  Models ADVAN6,
    ADVAN8,  ADVAN9,  ADVAN13,  ADVAN14,  ADVAN15,   ADVAN16,   ADVAN17,
@@ -355,8 +416,4 @@ REFERENCES: Guide VI, section III.F.8
    Precedes $ERROR (if present)
 
 ** REFERENCES
-Guide IV, section V.C.5
-** REFERENCES
-Guide V, section 7
-** REFERENCES
-Guide VI, section III
+Guide VI, section III, V.F, V.H

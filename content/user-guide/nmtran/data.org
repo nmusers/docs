@@ -2,23 +2,26 @@
 {{< katex >}}{{< /katex >}}
 
 * Data and event records
-From the last chapter we can see that the population data,
-corresponding observation \(y_{ij}\), \(x_{ij}\), \(z_i\), etc, have
-hiearchical (nested) structure: the data contains observations for
-each subject, as well as subject-level
-information that differ among subjects. NONMEM uses /tabulated data/
-to represent the above intra- and inter-subject variability.
+In the next three chapters, we go through NONMEM's data and model specification, as
+well as interpret its sample outputs.
 
-Such a NONMEM input data set consists /event records/ [fn:1].
-They represent temporal events such as dose events,
-observation events, and others such as the beginning
+In the previous chapters we saw that the population data
+\(y_{ij}\), \(x_{ij}\), \(z_i\), etc, have a
+hierarchical (nested) structure: the data describe observations for
+each subject as well as varying subject information. Since NONMEM uses /tabulated data/
+to represent this intra- and inter-subject variability, we should
+expect certain redundancy in the encoding.
+
+A NONMEM input data set consists of /event records/ [fn:1],
+representing temporal events such as dosing,
+observation, and events as the beginning
 of a urine collection and a measured change in kidney function.
 Data records (rows in the data file) [fn:6]
 correspond to different events, and must be in the order of time.
 
 Data records also represent individuals, by grouping an individual's records in contiguous
 records with a same /ID/. We refer to such a group an /individual record/.
-Data records in an individual record must be ordered in time.
+Data records in an individual record must also be ordered in time.
 
 In the case of single subject data set, the records do not necessarily correspond on a one-to-one basis to either
 animal or human subjects: an individual record is simply any group of
@@ -29,7 +32,7 @@ several observation records, each containing one element of the
 observation). In this case the time ordering of data records refers to
 the time ordering of data records /across all/ records.
 
-A typical NONMEM data set is like this (the first 9 /records/):
+The first 9 records of a typical NONMEM data set is shown below.
 #+begin_src r
  ID      TIME    C1      C2  ...  CN      DV     MDV
   1       1.     .5      10        5              1
@@ -42,22 +45,21 @@ A typical NONMEM data set is like this (the first 9 /records/):
   2       6.              7                       1
   2       7.              8              6.4      0
 #+end_src
-
-This data set there are nince data records corresponding
-to two individual records: five events for individual with ID=1,
+We see the nine records correspond to
+two individual records: five events for individual with ID=1,
 and four for individual with ID=2.  Three of these events are observation
-events, with DV (stands for "dependent value") provided.
-Label ID and DV are reserved /data items/, the same for TIME and MDV,
-for event time,  and missing dependent value, respectively.
+events, with DV (Dependent Variable) provided.
+Label ID and DV are reserved /data items/, same for TIME (event time)
+and MDV (Missing Dependent Variable).
 Label C1, C2, ..., CN are concomitant variable data items for
 additional event specification (such as EVID, see below) as well as covariates. Null (blank) entries are read in as zeros. They can also be explicitly put in as "." (dot) and "0".
 
 Now we discuss commonly used data items for population data. See
-Reference manual for additional ones and further details.
+Reference manual for additional ones and more details.
 
 ** Depdent variable: DV and MDV
 There must always be a Dependent Variable data item labeled DV. This is for
-observations. There can be only one DV data item per data record.
+observations \(y\). There can be only one DV data item per data record.
 The position of the DV column can be flexible.
 
 MDV complemets DV to indicate missing observations [fn:7]:
@@ -74,33 +76,29 @@ For example, an ID column of 3, 5, 6, 10, 3, is acceptable as
 a sequence of IDs. Note the two instances of "3" IDs. Since they are separated by different IDs (5, 6, 10),
 they represent different individuals.
 
-
 ** Event identification: EVID
 Every event record must have EVID.
 This data item identifies the type of event.
-- EVID=0: observation event. in the event the DV data item is an
-  observation, and the MDV=0.  When EVID!=0 DV data item can be any
+- EVID=0: observation event. The DV data item in the record is an
+  observation, and MDV=0 (if specified).  When EVID!=0 DV data item can be any
   value or blank, and the MDV=1.
 - EVID=1: dose event. There are three types of doses: bolus dose,
-  infusion of finite duration and continuous constant rate infusion
+  infusion of finite duration, and continuous constant rate infusion
   (effectively of infinite duration and leading to steady-state, thus
-  also called steady -state infusion). Repetitions of doses of the
-  first two types can also lead to steady-state (see SS data item).  A
+  also called steady -state infusion). A
   dose event corresponds to either the time a bolus dose is given, or
   the time an infusion is initiated, or the time a steady-state
-  infusion terminates. With a dose event certain other data items
-  which define the event further may also appear in the event record.
-- EVID=2: neither an observation nor dose event. The event is
-  referred to as of /other-type/. Examples include the time a urine
-  collection begins/ends and the time a change in a covariable (such
+  infusion terminates.
+- EVID=2: /other-type/ event, namely neither an observation nor dose event. Examples include the time a urine
+  collection begins/ends and the time a change in a covariate (such
   as glomelular filtration rate) is noted.
 - EVID=3: reset event. With a reset event the kinetic system is
-  reinitialized.  time is reset to the TIME data item, the amounts in
-  each compartment are reset to zero, and the on/off status of each
-  compartment is reset to its initial status.
+  reinitialized.  Time is reset to TIME in the record, the amounts in
+  each compartment to zero, and the on/off status of each
+  compartment to its initial status.
 - EVID=4: reset-dose event. It combines a dose event and a reset
-  event: The system is first reset, and then a dose is given according
-  to the information given in those fields giving dose information.
+  event by first resetting the system then applying the dose according
+  to the information given.
 
 ** TIME and DATE
 Every event record must have TIME [fn:2] to specify the time of the event.
@@ -110,8 +108,8 @@ Unless in reset and reset-dose events where time is reset, event records must be
 
 TIME may contain clock time, hh:mm or hh:mm:ss.
 If certain record's TIME contains colon ":", all the TIME values will
-be converted to /elapsed (relative)/ values in hour. Incorporating DATE
-infromation, they are relative to each individual's first data record
+be converted to /elapsed (relative)/ values in hour. Incorporating
+DATE (see below), they are relative to each individual's first data record
 (the first record has TIME=0), such as
 #+begin_src r
 recorded time       relative time
@@ -142,7 +140,7 @@ ID   DATE TIME            ID  DATE TIME
 2    2    20:50           2   2    36.83
 2    3    10              2   3    50.00
 #+end_src
-DATE supports calendar dates in month-day-year format:
+DATE supports calendar dates in month-day-year format. The year can be skipped or supplied in two-digit and 4-digit format:
 #+begin_src r
 recorded time                   relative time
 ID   DATE       TIME            ID  TIME
@@ -156,9 +154,8 @@ ID   DATE       TIME            ID  TIME
 2    10-13      20:50           2   36.83
 2    10-14      10              2   50.00
 #+end_src
-As shown the year can be skipped or supplied in two-digit and 4-digit format.
 
-Using DATE will trigger time convertion if without ":" in TIME entries.
+Using DATE will trigger time convertion even if without ":" in TIME column.
 
 Reset events and reset-dose events also set TIME=0.
 
@@ -168,14 +165,13 @@ convert hours to days, with d significant digits.
 
 ** Dose Amount: AMT
 In a dose event AMT gives the amount of a (instantaneous) bolus
-dose or of an infusion of finite duration, incorporating
-bioavailability, if any.. In those cases it must be
-positive.  However, if other data items in a dose event
+dose or a finite-duration infusion, incorporating
+bioavailability fraction. If other data items in a dose event
 record (see below) indicate that the event record marks the termination of a
 steady-state infusion, then if given AMT must be 0.
 If all doses are steady-state infusions, AMT can be omitted.
 
-In observation, other-type, and reset event records if given AMT must be 0 .
+In observation, other-type, and reset event records, if given AMT must be 0 .
 In a reset-dose event record the AMT data item should satisfy the requirements
 of the AMT data item in a dose event record.
 
@@ -193,8 +189,8 @@ TIME     AMT
 4.        10.
 #+end_src
 for the model in Chapter 1 would be for a bolus dose, because
-RATE and SS are not given (by the $INPUT control record),
-and recall that blank/null entries imply zero values.
+RATE and SS are not given in the $INPUT control record
+(recall that blank/null are treated as zero).
 
 A bolus dose to the central compartment might be interpreted as an IV bolus dose; to the
 depot it might be an oral tablet; to a peripheral compartment it might be an intra-muscular
@@ -608,8 +604,11 @@ also Chapter 12, Section 7, for a modification to this data file for output-type
 ments.
 
 [fn:1] Strictly speaking, the event records feature is part of PREDPP,
-and NM-TRAN allows a more general format (discussed in Part 4).
-Essentially all modern NONMEM applications use event records for data specification.
+NONMEM's populaion PK modeling sub-library.
+Traditionally NONMEM uses a more general format.
+But since essentially all modern NONMEM applications use event records
+for data specification and control records (see next chapter), that is what we will do in
+this document.
 [fn:2] An example is when ADVAN9, ADVAN15, or ADVAN17 is used to solve
 algebraic equations solved.  In  this case TIME is optional.
 [fn:4] The steady-state kinetics described here is general, but the
