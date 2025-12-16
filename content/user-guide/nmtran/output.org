@@ -37,3 +37,125 @@ Most lines above are easy to interpret. We make several comments as follows.
   \(\eta\)'s. Since line 29 states that NONMEM understands Ω to be
   diagonalthe, the off-diagonal element \(\text{cov}(\eta_1,\eta_2)\) is
   automatically set to zero.
+
+Output below describes the options of the $ESTIMATION.
+#+INCLUDE: "/examples/pheno_wt_cl_v/10.2b.ascii" src txt
+
+NONMEM uses tag "#" to sectionize output files. The "#TBLN"  entry on line 1
+indicates estimation step is numbered "1". If additional $ESTIMATION record
+are used their output will be labeld in corresponding "#TBLN"s.
+Despite we only used the PRINT option, the output shows all the
+default options values. For example, line 10 shows the maximum
+number of evaluations of the objective function during the Estimation
+Step is 360, and line 11 shows the desired number of significant
+digits in the final parameter estimate is 3.
+
+NONMEM's built-in ADVAN models, TRANS parameterizations, and $PK block specifications are in
+fact from a sub-library called PREDPP (PRED of Population
+Pharmacokinetics). The output below shows the ADVAN and TRANS routines used
+#+INCLUDE: "/examples/pheno_wt_cl_v/10.3.ascii" src txt
+and the parameterization details.
+#+INCLUDE: "/examples/pheno_wt_cl_v/10.4.ascii" src txt
+Several notes regarding the above output.
+- In line 5, we see compartment number 1 (central compartment for
+  ADVAN1) has a scaling parameter ("3" indicates storage location and
+  unimportant here). This is corresponding to "S1" assignment in the
+  model. Positions marked with "*", such as the bioavailability
+  fraction, correspond to additional PK parameters that are allowed by
+  the model but that are not assigned a value by $PK statements.
+  Positions marked with "-" correspond to additional parameters that
+  are not permitted. For instance, dose-related parameters are not
+  allowed for compartment 2 (the output compartment), because this
+  compartment cannot receive doses.
+
+- Line 10-13 describe the locations  of PREDPP data items in the input
+  data record. Note that data item 7, Event ID, was appended. Line 15
+  shows thats by default $PK statements are evaluated with every event
+  record. Lagged and additional doses are discussed later in this
+  document. They are not used in this example.
+
+- Line 18 shows that the $ERROR statements describe a simple error
+  model that needs be evaluated only once at the beginning of the
+  problem. Line 17 indicates that, should the Simu- lation Step be
+  implemented, PREDPP will disregard this limitation and evaluate the
+  $ERROR statements with every event record, so that
+  randomly-generated values of intra-individual error can be applied
+  at every observation event. (This example does not involve
+  simulation, but the PK and ERROR routines which implement the $PK
+  and $ERROR statements are capable of supporting all NONMEM tasks,
+  including simulations).
+
+** Diagnostic output from the estimation step
+The output elow is from the Estimation Step.
+#+INCLUDE: "/examples/pheno_wt_cl_v/10.5.ascii" src txt
+Lines 1 through 33 are referred to as the intermediate output.
+(Iteration 0 indicates the initial estimation). . With NONMEM 7, the
+parameter estimates are displayed in their natural (unscaled) space,
+as indicated by "NPARAMETR" labels. "PARAMETER" labels give the
+unconstrained parameter (UCP) estimates. The
+parameter search is carried out in a different parameter space, before transformed to
+UCP. In the transformation process a scaling occurs so that
+the initial estimate of each of the UCP is 0.1. Thus, in line 7, all
+parameters are .1 at iteration 0. Parameters are output in the order
+of \(\theta\) elements, \(\Omega\) elements, \(\Sigma\) elements. In
+this example, they are \(\theta_1\), \(\theta_2\), \(\theta_3\),
+\(\theta_4\), \(\Omega_{11}\), \(\Omega_{22}\), and \(\Sigma_{11}\).
+"GRANDENT" labels the partial derivatives of the objective function
+with respect to the parameter.
+
+As the iterations progress, we see that both the objective function
+value and parameters change rapidly at first and less so as the
+solution closes in the final values. In the meantime, the gradients
+approach 0.
+
+Note that The values computed for the gradients are very sensitive to differences in computer arith-
+metic and precision. If a given NONMEM run is repeated on a different computer, or on
+the same computer with different machine precision or a different FORTRAN compiler, it
+is likely that the gradients will be different. This will cause the search to follow a different path to the minimum, so that lines 4 through 33 may be quite different. However,
+each final estimate of a parameter should always be the same to the number of requested
+significant digits. (Minor differences may also be observed in the output of the Covariance Step, below; this output is also sensitive to computational differences).
+
+Lines 34 to 37 are always printed, regardless if the itermediate
+printout is suppressed or not. The summary output statements of the
+estimation results begins with the
+tag "#TERM" on line 34 and ends with the #TERE tag on line 48. Line 35, "MINI-
+MIZATION SUCCESSFUL", signifies that the search appears to have located a minimum
+of the objective function. The final parameter estimates must be examined in their (untransformed)
+space, based on domain knowledge and physiological plausibility, among
+others. The Estimation Step is not always successful and we
+will discuss the error messages later.
+
+The number of significant digits in the final estimate is given in
+line 37 as 3.7. This can be interpreted as meaning that no
+(transformed) parameter estimate is actually determined to less than
+3.7 significant digits. More specifically, when the UCP estimates were
+compared between the last two iterations, none differed in the first
+(almost) 4 significant figures including leading zeros after the
+decimal point. Because NONMEM displays only 3 significant digits in
+the printed parameter estimates, and for other reasons as well, by
+default NM-TRAN requests only 3 significant digits.
+
+** Covariance step output
+Output is from the Covariance Step, requested
+via the $COVARIANCE record. It shows the standard errors of the
+parameter estimates. Note that "........"  denotes a value (such as the standard error
+for \(\hat{\Omega}_{12}\)) that is 0 by definition, rather than due to computation.
+#+INCLUDE: "/examples/pheno_wt_cl_v/10.6.ascii" src txt
+
+The low triangular output of the covariance matrix, the correlation
+matrix, and the inverse of covariance matrix are similar and omitted
+here.
+
+** Table output
+Below is the first 12 lines of the table file produced by the $TABLE
+record. The ID indicate it is from the first individual.
+#+INCLUDE: "/examples/pheno_wt_cl_v/10.10.ascii" src txt
+Each row in the table corresponds to a record of the input file, and the rows appear in the
+same order as do the corresponding records of the input data file. Note that the values of
+RES and WRES are always shown as zero for non-observation records†, whereas a (possibly) nonzero value of PRED is printed for every record.
+
+If there are more than 900 data records, separate tables are produced for groups of 900
+records. The last table contains the remaining records. If the rows of the table are sorted,
+each group of records is sorted separately. When the input data file is large, the table will
+require many pages to print. Therefore, the $TABLE record should be omitted unless
+needed for diagnostic purposes (such as when initially checking a new data set or model).

@@ -5,6 +5,7 @@ draft: false
 bookCollapseSection: false
 weight: 9
 ---
+{{< katex >}}{{< /katex >}}
 
 * Quick start
 ** A single-subject PK model
@@ -79,21 +80,20 @@ Let us go through the /control stream/ input and data.
      2         CENTRAL      ON         NO         YES        NO         YES
      3         OUTPUT       OFF        YES        NO         NO         NO
   #+end_src
-- Line 5-9 specify PK parameters (in =$PK= record) using THETA [fn:2], the
+- Line 5-9 specify PK parameters (in $PK record) using THETA [fn:2], the
   parameters to be estimated by NONMEM. They are:  first-order
   absorption rate KA, rate constant of elimination K, and volume of
   distribution V.
 - Line 10-11 specify the likelihood structure to be from a
-  normally-distributed additive error =ERR(1)= between observation and prediction.
+  normally-distributed additive error ERR(1) between observation and prediction.
 - Line 12 provides information about possible values of each element
   of THETA in the format of (lower bound, initial estimate, upper
   bound). The only two entries for each THETA implies no upper bound
   (or upper bound=INFinity).
-- Line 13 gives sinitial estimate of the variance (\(\sigma^2\)) of =ERR(1)=.
+- Line 13 gives sinitial estimate of the variance \(\sigma^2\) of =ERR(1)=.
 - Line 14 ($ESTIMATION) suggests NONMEM to obtain estimates of parameters. Line 15
   ($COVARIANCE) requests standard error for the estimates.
 - Line 16 request a table output for the input data and certain computed quantities.
-
 
 *** Run
 Assume the above model is stored in =model1.ctl= [fn:1]. We use
@@ -109,25 +109,9 @@ the building and execution behavior. You may refer to its help (=nmfe76 --help=)
 printout for details.
 
 *** Results
-NONMEM will output the follow to the given output file (in our case, it is =output.txt=).
+NONMEM will print a few pages in =output.txt=. For example, on page
+"FINAL PARAMETER ESTIMATE" it shows
 #+begin_src txt
- ************************************************************************************************************************
- ********************                                                                                ********************
- ********************                                   FIRST ORDER                                  ********************
- #OBJT:**************                       MINIMUM VALUE OF OBJECTIVE FUNCTION                      ********************
- ********************                                                                                ********************
- ************************************************************************************************************************
-
-
- #OBJV:********************************************        8.940       **************************************************
-
- ************************************************************************************************************************
- ********************                                                                                ********************
- ********************                                   FIRST ORDER                                  ********************
- ********************                             FINAL PARAMETER ESTIMATE                           ********************
- ********************                                                                                ********************
- ************************************************************************************************************************
-
  THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
 
          TH 1      TH 2      TH 3
@@ -144,15 +128,10 @@ NONMEM will output the follow to the given output file (in our case, it is =outp
 
          ETA1
  ETA1    9.48E-01
+#+end_src
 
- ************************************************************************************************************************
- ********************                                                                                ********************
- ********************                                   FIRST ORDER                                  ********************
- ********************                            STANDARD ERROR OF ESTIMATE                          ********************
- ********************                                                                                ********************
- ************************************************************************************************************************
-
-
+and on "STANDARD ERROR OF ESTIMATE" it shows
+#+begin_src txt
  THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
 
          TH 1      TH 2      TH 3
@@ -168,19 +147,6 @@ NONMEM will output the follow to the given output file (in our case, it is =outp
          ETA1
   ETA1    2.87E-01
 #+end_src
-NONMEM report uses tags for output parsing. The above result shows
-- #OBJT tag: description of the objective function;
-- #OBJV tag: the minimum value of the objective function. It is a
-  goodness of fit statistic, much like a sum of squares. The parameter
-  estimates (the parameter values at which the objective function is
-  minimized) and their standard errors follow. Note that the estimate
-  of OMEGA [fn:2], too, has a standard error. Finally, a fully informative
-  correlation matrix (CORR) of OMEGA and SIGMA [fn:2] are outputted. All
-  correlation matrices, whether to OMEGAs and SIGMAs, or pertaining to
-  the correlation matrix of estimates, are printed out with diagonal
-  elements equal to the square root of diagonal element of covariance
-  matrix (standard error/standard deviation, depending on context),
-  and the off-diagonal elements are the correlation values.
 
 ** A population model
 :PROPERTIES:
@@ -276,26 +242,8 @@ done in a same path as the previous model, NONMEM will overwrites the
 file. Therefore a good practice is to have a separate directory for
 each run.
 *** Results
-The results below are the output for the goodness of fit statistic
-(the minimum value of the objective function) and the parameter
-estimates for the phenobarbital problem.
+The results below are the output of the "FINAL PARAMETER ESTIMATE" page
 #+begin_src txt
- ************************************************************************************************************************
- ********************                                                                                ********************
- ********************                                   FIRST ORDER                                  ********************
- #OBJT:**************                       MINIMUM VALUE OF OBJECTIVE FUNCTION                      ********************
- ********************                                                                                ********************
- ************************************************************************************************************************
-
- #OBJV:********************************************      717.203       **************************************************
-1
- ************************************************************************************************************************
- ********************                                                                                ********************
- ********************                                   FIRST ORDER                                  ********************
- ********************                             FINAL PARAMETER ESTIMATE                           ********************
- ********************                                                                                ********************
- ************************************************************************************************************************
-
  THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
          TH 1      TH 2
          5.48E-03  1.40E+00
@@ -319,16 +267,8 @@ estimates for the phenobarbital problem.
          EPS1
  EPS1    2.83E+00
 #+end_src
-and output for the standard errors
-of the parameter estimates for the phenobarbital problem.
+and the "STANDARD ERROR OF ESTIMATE" page.
 #+begin_src txt
- ************************************************************************************************************************
- ********************                                                                                ********************
- ********************                                   FIRST ORDER                                  ********************
- ********************                            STANDARD ERROR OF ESTIMATE                          ********************
- ********************                                                                                ********************
- ************************************************************************************************************************
-
  THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
          TH 1      TH 2
          4.86E-04  7.86E-02
@@ -365,26 +305,8 @@ $PK
    V=TVVD+ETA(2)
 ...
 #+end_src
-The new model's output for the goodness of fit statistic
-(the minimum value of the objective function) and the parameter
-estimates for the phenobarbital problem is
+The new model's output of estimates:
 #+begin_src txt
- ************************************************************************************************************************
- ********************                                                                                ********************
- ********************                                   FIRST ORDER                                  ********************
- #OBJT:**************                       MINIMUM VALUE OF OBJECTIVE FUNCTION                      ********************
- ********************                                                                                ********************
- ************************************************************************************************************************
-
- #OBJV:********************************************      609.179       **************************************************
-1
- ************************************************************************************************************************
- ********************                                                                                ********************
- ********************                                   FIRST ORDER                                  ********************
- ********************                             FINAL PARAMETER ESTIMATE                           ********************
- ********************                                                                                ********************
- ************************************************************************************************************************
-
  THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
          TH 1      TH 2      TH 3      TH 4
          2.70E-05  1.19E-01  4.75E-03  9.19E-01
@@ -407,16 +329,9 @@ estimates for the phenobarbital problem is
          EPS1
  EPS1    2.95E+00
 #+end_src
-and output for the standard errors
+and output for the standard errors:
 of the parameter estimates is
 #+begin_src txt
- ************************************************************************************************************************
- ********************                                                                                ********************
- ********************                                   FIRST ORDER                                  ********************
- ********************                            STANDARD ERROR OF ESTIMATE                          ********************
- ********************                                                                                ********************
- ************************************************************************************************************************
-
  THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
          TH 1      TH 2      TH 3      TH 4
          0.00E+00  1.48E-01  2.24E-04  1.13E-01
@@ -439,13 +354,9 @@ of the parameter estimates is
          EPS1
  EPS1    2.90E-01
 #+end_src
-Note the improvement in the minimum objective function value, and the
-decreases in the sizes of the estimates of the inter-individual
+Note the decreases in the sizes of the estimates of the inter-individual
 variances: with weight in the model, there is less unexplained
-inter-individual variability.  As will be discussed in the User Guide,
-the decrease in the objective function can be used for a formal
-hypothesis test of the appropriateness of the new model the effect of
-weight on the pharmacokinetic parameters.
+inter-individual variability.
 
 Note also the very small values estimated for THETA(1) and standard
 error. In fact the THETA(1) has virtually collapsed to 0. The
