@@ -1,6 +1,8 @@
+#+title: $AESINIT
+{{< katex >}}{{< /katex >}}
+
 * $AESINIT
- Marks the beginning of abbreviated code for the AES routine.
-** USAGE
+Marks the beginning of abbreviated code for the AES routine.
 #+begin_src php
  $AESINITIAL
  abbreviated code
@@ -10,11 +12,26 @@
 The  $AESINITIAL record is used to compute the amounts in the
 equilibrium compartments at the beginning of an integration interval.
 It  is used  with  PREDPP's  ADVAN9, ADVAN15, and ADVAN17.  May also
-be coded $AES0. (See $AES). See @@html:<a href="/docs/reference-manual/abbr/">abbreviated code</a>@@ for general rules. Specific rules follow.
+be coded $AES0. (See $AES).
 
-*** ASSIGNMENT AND CONDITIONAL STATEMENTS
-Left-hand quantities in assignment statements:
+The complete AES routine can be divided into two parts: code which computes the amounts in the equilibrium compartments at the beginning of an integration interval (these amounts depend on the amounts in the nonequilibrium compartments) and code which computes values for the right sides of the algebraic equations. An abbreviated code for AES is actually divided into two abbreviated codes which correspond to the two parts of the complete AES routine. This record gives an abbreviated code for the first part of the AES routine. @@html:<a href="/docs/reference-manual/control-records/aesinit">The $AES record</a>@@ gives an abbreviated code for the second part. The $AESINITIAL record, along with all its continuation records, is called a $AESINITIAL block.
 
+This record is optional. If it appears, it must be with the first
+problem specification, and only this problem specfication. If there
+are no equilibrium compartments, but ADVAN9 or ADVAN15 is used, the
+record need not appear. It may not appear when the MODEL routine is
+user-supplied. Implicit basic PK parameters may be used in the
+$AESINITIAL block (see below) only when the $PK block precedes the
+$AESINITIAL block.
+
+In order to compute the amounts in the equilibrium compartments at the beginning of an integration
+interval, the algebraic system must be solved. However, only an approximate solution is needed. If
+requested, this will be used only as an initial solution, and ADVAN9
+will numerically obtain a more precise solution.
+
+See @@html:<a href="/docs/reference-manual/abbr/">abbreviated code</a>@@ for general rules. Specific rules follow.
+
+** Assignment: left-hand quantities
 - A(ncm1+1), A(ncm1+2), ...  (Required. The amounts in  the
   equilibrium compartments at the beginning of the integration
   interval. ncm1 is the number of nonequilibrium compartments.)
@@ -24,7 +41,7 @@ Left-hand quantities in assignment statements:
 
 - AESINITIAL-defined (i.e., PRED-defined) items.
 
-Right-hand quantities in assignment statement and in conditions:
+** Assignment: right-hand quantities
 
 - A(1), A(2), ...   (Current compartment amounts; may be  random  variables.)
 
@@ -40,36 +57,31 @@ Right-hand quantities in assignment statement and in conditions:
 
 - THETA(n).
 
-- Global Variables in Modules.
+- Global Variables in Modules: certain variables in FORTRAN modules can be used.
 
-- Forbidden Variable Names: IR DA DP DT E(n) ETA(n) EPS(n) ERR(n)
+Forbidden Variable Names: IR DA DP DT E(n) ETA(n) EPS(n) ERR(n)
 
-*** PSEUDO ASSIGNMENT STATEMENTS
-
+** PSEUDO ASSIGNMENT STATEMENTS
 - COMRES=-1
 
-- CALLFL=-1: Call ADVAN and AES with every event record (default).
-- CALLFL=1: Call ADVAN and AES once per individual record. (CALLFL may
-  be used only when the TIME data item is not defined.)  The pseudo
-  assignments statements may be enclosed in parentheses.  If both are
-  present  within the same set of parentheses, separate them with a
-  semicolon.  Within parentheses, a calling protocol phrase may be
-  used instead of CALLFL, and either upper or lower case may be used.
-  E.g.,
-  #+begin_src php
-  $AESINIT (ONCE PER IR)     ; same as CALLFL=1
-  $AESINIT (EVERY EVENT)     ; same as CALLFL=-1 (default)
+- Calling protocol:
+  + CALLFL=-1: Call ADVAN and AES with every event record (default).
+  + CALLFL=1: Call ADVAN and AES once per individual record. (CALLFL may be used only when the TIME data item is not defined.)
+  The pseudo assignments statements may be enclosed in parentheses.
+  If both are present  within the same set of parentheses, separate
+  them with a semicolon.  Within parentheses, a calling protocol
+  phrase may be used instead of CALLFL, and either upper or lower case
+  may be used. E.g.,
+  #+begin_src perl
+  $AESINIT (ONCE PER IR)     ;#  same as CALLFL=1
+  $AESINIT (EVERY EVENT)     ;#  same as CALLFL=-1 (default)
   #+end_src
+  See @@html:<a href="/docs/reference-manual/abbr/#calling_protocol">caling protocols</a>@@  for details.
 
- (See calling protocol).
-
-*** RECORD ORDER:
-
+** RECORD ORDER
  - Follows $SUBROUTINES $INPUT $MODEL $PK
 
  - Precedes $AES
 
 ** REFERENCES
-Guide IV, section V.C.8
-
 Guide VI, section VI.E

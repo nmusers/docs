@@ -1,15 +1,23 @@
+#+title: $AES
+{{< katex >}}{{< /katex >}}
+
 * $AES
+:PROPERTIES:
+:CUSTOM_ID: aes_record
+:END:
+
 Marks the beginning of abbreviated code for the AES routine
 
-#+begin_src php
-; Usage
+#+begin_src perl
  $AES
  abbreviated code
 #+end_src
 
 ** DISCUSSION
-The  $AES record is used to compute algebraic expressions which can be regarded as specifying equilibrium kinetics.  It is used with PREDPP's ADVAN9 and ADVAN15 and ADVAN17.
-(See $AESINITIAL).
+The $AES record is used to compute algebraic expressions which can be
+regarded as specifying equilibrium kinetics. It is used with PREDPP's
+ADVAN9 and ADVAN15 and ADVAN17. (See $AESINITIAL).
+
 The complete AES routine can be divided into two parts: code which computes the amounts in the equilibrium compartments at the beginning of the integration interval (these amounts depend on the amounts
 in the nonequilibrium compartments) and code which computes values for the right sides of the algebraic
 equations. An abbreviated code for AES is actually divided into two abbreviated codes which correspond to the two parts of the complete AES routine. This record gives an abbreviated code for the second part of the AES routine. The $AESINITIAL record gives an abbreviated code for
@@ -32,9 +40,8 @@ of the DA, DP, and DT arrays.
 See @@html:<a href="/docs/reference-manual/abbr/">abbreviated code</a>@@ for general rules.
 Specific rules follow.
 
-*** ASSIGNMENT AND CONDITIONAL STATEMENTS
-Left-hand quantities in assignment statements:
-- E(ncm1+1), E(ncm1+2), ...  (Required. Expressions which, when set to
+** Assignment: left-hand quantities
+- E(ncm1+i), E(ncm1+2), ...  (Required. Expressions which, when set to
   0, constitute the system of  algebraic  expressions  describing  the
   equilibrium  kinetics. ncm1 is the number of nonequilibrium
   compartments.)  The indices "(...)" may be omitted, in which  case
@@ -43,7 +50,7 @@ Left-hand quantities in assignment statements:
   defined  conditionally (i.e., using an IF statement).
 - AES-defined (i.e., PRED-defined) items.
 
-Right-hand quantities in assignment statement and in conditions:
+** Assignment: right-hand quantities
 - A(1),  A(2), ...   (Current compartment amounts; may be random variables.)
 
 - P(1), P(2), ...   (Post-translation basic PK parameters; may be random variables.)
@@ -62,7 +69,9 @@ Right-hand quantities in assignment statement and in conditions:
 
 - THETA(n).
 
-- Global Variables in Modules. The following are of particular interest.
+- Global Variables in Modules: certain variables in FORTRAN modules can be used.
+
+The following are of particular interest.
   + DOSTIM: DOSTIM  is  the  time of a lagged dose or additional dose
     to which the system is being advanced.  Abbreviated code in $AES
     may  test DOSTIM.  It may use DOSTIM on the right, unless DOSTIM
@@ -78,9 +87,10 @@ Right-hand quantities in assignment statement and in conditions:
     advance  to  a particular  time  (event  or  non-event time),
     ISFINL=1 at a final call to AES at that time.  Otherwise,
     ISFINL=0.
-- Forbidden Variable Names: IR DA DP DT ETA(n) EPS(n) ERR(n)
 
-*** RECORD ORDER
+Forbidden Variable Names: IR DA DP DT ETA(n) EPS(n) ERR(n)
+
+** RECORD ORDER
 
 - Follows $SUBROUTINES $INPUT $MODEL $PK
 
@@ -89,6 +99,6 @@ Right-hand quantities in assignment statement and in conditions:
  (See aes).
 
 ** REFERENCES
-Guide IV, section V.C.9
-
 Guide VI, section VI.E
+
+Guide VIII, aes, advan9_15, advan9_17
