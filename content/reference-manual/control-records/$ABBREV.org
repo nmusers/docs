@@ -3,8 +3,7 @@
 
 * $ABBREVIATED
 
-#+begin_src php
-; USAGE
+#+begin_src perl
  $ABBREVIATED  [COMRES=n1] [COMSAV=n2]
                [DERIV2=NO] [DERIV2=NOCOMMON] [DERIV1=NO]
                [FASTDER | NOFASTDER]
@@ -16,8 +15,8 @@
                [FUNCTION function_name(input_vector_name,dimension[,usage])]
                [VECTOR input_vector_name(dimension)]
 
-; example
-$ABBREVIATED    COMRES=2
+;# Example
+$ABBREVIATED COMRES=2
 #+end_src
 
 ** DISCUSSION
@@ -176,7 +175,6 @@ first derivative code can be prevented with option =NOFASTDER=.
 
 ***  REPLACE
 #+begin_src f90
-; Usage
 REPLACE left_string = right_string
 #+end_src
 There are several different forms of the REPLACE option.  They do not affect verbatim code.  Case is ignored.
@@ -196,7 +194,7 @@ May  be  used  in  all  blocks of abbreviated code and $TABLE and
 
       Examples:
 
-      #+begin_src php
+      #+begin_src perl
       $ABBR REPLACE PI=3.14159265
       $ABBR REPLACE THETA(CL)=THETA(4)
       $ABBR REPLACE ETA(CL)=ETA(5)
@@ -221,7 +219,7 @@ May  be  used  in  all  blocks of abbreviated code and $TABLE and
       "ETA(CL)" in the NONMEM  report  and  any  table  file  in  which
       "ETA(3)" is  listed.
 
-      #+begin_src php
+      #+begin_src perl
       $ABBR REPLACE ETA(CL)=ETA(3)
       #+end_src
 
@@ -249,9 +247,9 @@ May  be  used  in  all  blocks of abbreviated code and $TABLE and
       See INTRODUCTION  TO  NONMEM  7,  Symbolic Label Substitutions of
       Model Compartments
 
-**** 2. Replacement with selection by data item
-#+begin_src php
-      $ABBR REPLACE VAR(d)=VAR(n1,n2,..,nk)
+**** 2. By data item
+#+begin_src perl
+  $ABBR REPLACE VAR(d)=VAR(n1,n2,..,nk)
 #+end_src
       May be used in $PK, $ERROR, $PRED blocks only.  VAR must  one  of
       ETA,  EPS, THETA. (ERR is not permitted.)  d must be a data item.
@@ -297,7 +295,7 @@ May  be  used  in  all  blocks of abbreviated code and $TABLE and
         IF (DOSN>1) F1=1*EXP(ETA(DOSN))
       #+end_src
 
-**** 3. Replacement with selection by data item and parameter
+**** 3. By data item and parameter
 #+begin_src php
       $ABBR REPLACE VAR(p_d)=VAR(n1,n2,..,nk)
 #+end_src
@@ -521,7 +519,6 @@ $ABBR FUNCTION function_name(input_vector_name,dimension[,usage])
       $ABBR FUNCTION BIVARIATE(VBI,5,3)
       #+end_src
 
-
       A  vector VBI is defined of length 5.  There is a function called
       BIVARIATE.  When BIVARIATE is used, the value 5 is passed  to  it
       as  argument NDIM.  BIVARIATE uses 5 elements from the input vector.  Function BIVARIATE may appear in abbreviated code at most 3
@@ -536,15 +533,15 @@ $ABBR FUNCTION function_name(input_vector_name,dimension[,usage])
       functions are in Abbreviated Function.
 
       Here is an example of abbreviated code that uses BVI and BIVARIATE:
-      #+begin_src php
+      #+begin_src perl
       $PK ...
       VBI(1)=RHO
       VBI(2)=5
       VBI(3)=6
-      VBI(4)=1 ;***0 = Upper tail as in Drezner & Wesolowsky
-               ; 1 = Bottom tail***;
-      VBI(5)=1 ;***0 = 3 pt approximation
-                ; 1 = 5 point approximation***;
+      VBI(4)=1 ;#  0 = Upper tail as in Drezner & Wesolowsky
+               ;#  1 = Bottom tail;
+      VBI(5)=1 ;#  0 = 3 pt approximation
+               ;#  1 = 5 point approximation;
       BV=BIVARIATE(VBI)
       #+end_src
 
@@ -569,7 +566,7 @@ $ABBR FUNCTION function_name(input_vector_name,dimension[,usage])
       #+end_src
 
       In abbreviated code, any of the following are permitted:
-      #+begin_src php
+      #+begin_src f90
       BVI=BIVARIATE(VBI)
       BVQ=BIVARIATE(VQI)
       BVQI=BIVARIATEQ(VBI)
@@ -587,14 +584,13 @@ $ABBR FUNCTION function_name(input_vector_name,dimension[,usage])
       be correct if BIVARIATEQ does not use more than  5  positions  in
       the argument vector.
 
- A  vector  and its length may be declared independently of a function,
- and vice versa.  The asterisk is used as a placeholder, e.g.,
+A vector and its length may be declared independently of a function, and vice versa.  The asterisk is used as a placeholder, e.g.,
 
- #+begin_src php
+ #+begin_src perl
       $ABBR FUNCTION BIVARIATE(*,5)
-      ; when BIVARIATE is called, NDIM will be 5
+      ;# when BIVARIATE is called, NDIM will be 5
       $ABBR FUNCTION BIVARIATEQ(*,10)
-      ; when BIVARIATEQ is called, NDIM will be 10
+      ;# when BIVARIATEQ is called, NDIM will be 10
       $ABBR VECTOR VQI(15)
  #+end_src
 
@@ -615,6 +611,4 @@ $ABBR FUNCTION function_name(input_vector_name,dimension[,usage])
       as shown in  the Abbreviated Function help item.
 
 ** REFERENCES
-Guide IV, section IV
-
 Guide Introduction_7
