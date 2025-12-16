@@ -247,7 +247,7 @@ important to know which values  are  used in the computation of the
 items as displayed.
 
 Consider this fragment of an NM-TRAN control stream:
-#+begin_src php
+#+begin_src perl
    $PK
    CL=THETA(1)*EXP(ETA(1))
    $TABLE CL ETA(1)
@@ -335,7 +335,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
 (See mrg, raw, template).
 
 - Example 1: output typical and conditional values using different variables.
-  #+begin_src php
+  #+begin_src perl
    $PK
     ...
    TVCL=THETA(1)
@@ -346,7 +346,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
   TVCL is a typical value by definition. CL is a conditional value.
 
 - Example 2: output typical and conditional values of the same variables.
-  #+begin_src php
+  #+begin_src perl
    $PK
     ...
    CL=THETA(1)*EXP(ETA(1))
@@ -366,7 +366,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
 - Example 3:  output  typical and conditional values of the
   prediction, and the individual residual and weighted residual
   values.
-  #+begin_src php
+  #+begin_src perl
    $ERROR
    IPRED=F
    IRES=DV-IPRED
@@ -385,7 +385,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
 
   If  predicted  values  of  F may be zero, then division by zero can
   be avoided by code such as the following.
-  #+begin_src php
+  #+begin_src perl
    $ERROR
    IPRED=F
    IRES=DV-IPRED
@@ -399,7 +399,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
   constant CV intraindividual error model, to output weighted
   intra-individual residual that is used during Estimation when the
   FOCE method without interaction is used.
-  #+begin_src php
+  #+begin_src perl
    $ERROR
    Y=F+F*EPS(1)
    IPRED=F
@@ -436,14 +436,14 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
 
   With NONMEM 7, alternatively one can use reserved  residual
   variables CIWRES(=WR)  and CIWRESI(=WR2):
-  #+begin_src php
+  #+begin_src perl
    $ERROR
    Y=F+F*EPS(1)
    $ESTIM METHOD=COND
    $TABLE IPRD CIPRED CIWRES CIWRESI
   #+end_src
 - Example 5: output simulated values:
-  #+begin_src php
+  #+begin_src perl
    $PK
     ...
    CL=THETA(1)*EXP(ETA(1))
@@ -454,7 +454,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
   ETA(1) and CL are simulated values.
 
 - Example 6: output simulated and estimated values:
-  #+begin_src php
+  #+begin_src perl
    $INPUT  .... CLSM E1SM ...
    $PK
     ...
@@ -473,7 +473,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
   and 4 are the typical values.
 
 - Example 7: output conditional values of a variable in  each  of  two  mixture subpopulations.
-  #+begin_src php
+  #+begin_src perl
    $PK
       ...
    IF (MIXNUM.EQ.1) CL=  ...
@@ -494,7 +494,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
 
 - Example 8: output conditional values of a variable in the
   subpopulation into which the individual is classified.
-  #+begin_src php
+  #+begin_src perl
    $PK
       ...
    IF (MIXNUM.EQ.1) CL=  ...
@@ -1336,7 +1336,7 @@ With  NM-TRAN, specification that an existing Model Specification File
 is to be input is done by placing the file's name on the $MSFI record.
 
 With NONMEM 7.3, when MSF or MSFO option is used to  specify  an  MSFO file in the $EST record e.g.,
- #+begin_src php
+ #+begin_src perl
  $EST ... MSFO=msfroot.msf
  #+end_src
  then  in addition to the main MSF file msfroot.msf, an extra file msfroot_ETAS.msf will also be produced, and provide  additional  information  when  a  $MSFI record is used in a subsequent problem or control stream.  File msfroot_ETAS.msf contains individual etas and phis  gen- erated  during  estimation  (except FO method, which does not generate non-zero etas during estimation, and not POSTHOC evaluated etas.)  The use  of  an  extension  in the file name, e.g., .msf, is optional.  If file _ETAS does not exist, NONMEM issues a warning, e.g.,
@@ -1349,7 +1349,7 @@ If  the  Covariance  Step  is  also  implemented,  extra  files   msfroot_RMAT.m
 
 For an example see the fragment of the control stream for the first run below.  The Estimation Step is run for a limited  num- ber of evaluations of the objective function (200).
 
-#+begin_src php
+#+begin_src perl
  $THETA  (.1,3,5) (.008,.08,.5) (.004,.04,.9)
  $OMEGA BLOCK(3)  6 .005 .0002 .3 .006 .4
  $SIGMA  .4
@@ -1357,7 +1357,7 @@ For an example see the fragment of the control stream for the first run below.  
 #+end_src
  After  review  of  the  first  run's  output, it is decided to let the search continue.  The continuation will start from the iteration  during which the 200th objective function evaluation occurred in the previous search.  A fragment of the control stream  for  the  second  run follows.   $THETA,  $OMEGA,  and  $SIGMA  need  not,  and  may not, be present.  The Estimation Step is allowed to  run  to  completion,  and standard  errors  and  a  table are requested.  A new MSF is obtained, which will allow additional tables and  scatterplots  to  be  obtained later.
 
- #+begin_src php
+ #+begin_src perl
  $MSFI msf1
  $EST PRINT=5 MSFO=msf2
  $COV

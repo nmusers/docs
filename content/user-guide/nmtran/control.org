@@ -9,7 +9,7 @@ rules.
   keywords for NONMEM.
 - Some records and options have alias or abbreviations. For example
   record $COVARIANCE can have aliases such as
-  #+begin_src php
+  #+begin_src perl
     $COV
     $COVAR
   #+end_src
@@ -21,7 +21,7 @@ rules.
   single record until the next control record begins. Except for
   $ESTIMATION, $TABLE, and $SCATTER, all records sharing the same name
   (or alias) are combined and interpreted as one.. Therefore
-  #+begin_src php
+  #+begin_src perl
     $THETA  7 ;Mean Clearance
            20 ;Mean Volume
     $OMEGA  .5  4
@@ -29,24 +29,24 @@ rules.
     $OMEGA  .005
   #+end_src
   is equivalent to
-  #+begin_src php
+  #+begin_src perl
     $THETA 7 20 .7
     $OMEGA .5 4 .005
   #+end_src
 - In NONMEM v7.3+, "&" at the end of line indicates line continuation (Fortran-style continuation).
   One can use ";" to escape "&" at the end of a line when it is intended for
   something else, e.g.
-  #+begin_src php
+  #+begin_src perl
     FORMAT=s1PE15.8:160& ;
   #+end_src
 - Options can be separated by commas "," as well as spaces, e.g.
-  #+begin_src php
+  #+begin_src perl
     MAXEVAL=400    SIGDIGITS=4, PRINT=5
   #+end_src
   Options of form "A=B" must be on a same line. The "="
   sign can have spaces around or even be omitted, thus the
   following are equivalent
-  #+begin_src php
+  #+begin_src perl
     MAX=300
     MAX = 300
     MAX 300
@@ -89,7 +89,7 @@ a code block for its usage and an example. We use the following notations.
   keywords, reserved variables, or user-defined variables.
 
 **  $PROBLEM
-#+begin_src php
+#+begin_src perl
 $PROBLEM [text]
 ; Example:
 $PROB  THEOPHYLLINE   POPULATION DATA
@@ -104,7 +104,7 @@ after the record name) are used in the heading.  Spaces and
 semicolons in the text are included /as is/.
 
 **  $INPUT
-#+begin_src php
+#+begin_src perl
 $INPUT item ...
 ; Example:
 $INPUT      ID DOSE TIME CP=DV WT
@@ -128,7 +128,7 @@ as items.
 
 
 **  $DATA
-#+begin_src php
+#+begin_src perl
  $DATA  [filename|*]
         [IGNORE=(list)...|ACCEPT=(list)...]
 ; Example
@@ -201,7 +201,7 @@ scatterplots (see sections B.16 and IV.F) are all 0.
 =CHECKDATA= can be used as an alias.
 
 **  $SUBROUTINES
-#+begin_src php
+#+begin_src perl
 $SUBROUTINES [subname = name] ...
 ; Example
 $SUBROUTINES ADVAN3 TRNAS2
@@ -293,7 +293,7 @@ The following applies when using ADVAN models.
    subroutines.
 
 # **  $ABBREVIATED
-# #+begin_src php
+# #+begin_src perl
 #  $ABBREVIATED  [COMRES=n1] [COMSAV=n2]
 #                [DERIV2=NO] [DERIV2=NOCOMMON] [DERIV1=NO]
 #                [FASTDER | NOFASTDER]
@@ -312,7 +312,7 @@ The following applies when using ADVAN models.
 # and before any abbreviated code.
 # With  NONMEM 7.4,
 # may also be used when there is no abbreviated code.  For example,
-# #+begin_src php
+# #+begin_src perl
 # $ABBR REPLACE
 # #+end_src
 # may be used for  label  substitution  in  NONMEM  report
@@ -322,7 +322,7 @@ The following applies when using ADVAN models.
 
 
 ** $THETA
-#+begin_src php
+#+begin_src perl
 $THETA  value1  [value2]  [value3] ...
          [(value)xn] ...
          [label=value] ...
@@ -336,7 +336,7 @@ This record gives initial estimates for =THETA='s, as well as bounds on the
 final estimates.
 
 A value has one of four forms:
-#+begin_src php
+#+begin_src perl
 1. init [FIXED]
 2. (low, init, [up] [FIXED])
 3. (low,,up)
@@ -356,7 +356,7 @@ If this option is used with form 2, then low, init and up must all be
 equal.
 
 Another example:
-#+begin_src php
+#+begin_src perl
 $THETA  3 FIXED  (-INF,.08,.5) (.004,,.9)
 #+end_src
 where the three forms used are 1,2 and 3, in that order.
@@ -372,7 +372,7 @@ values n times.
 The values within the parenthesis may have any  of  the  above  forms.
 For example, the following two are equivalent:
 
-#+begin_src php
+#+begin_src perl
 $THETA 2 2 2 2 (0.001,0.1,1000) (0.001,0.1,1000) (0.001,0.1,1000)
        (0.5 FIXED) (0.5 FIXED)
 
@@ -449,7 +449,7 @@ They bear almost literal translation in $PK blocks (assume WT, AGE, and SECR are
   $$
   \tilde{\text{CL}} = \tilde{\text{CL}}_{\text{ren}} + \tilde{\text{CL}}_{\text{met}}
   $$
-  #+begin_src php
+  #+begin_src perl
     TVCLM=THETA(1)*WT
     RF=WT*(1.66-.011*AGE)/SECR
     TVCLR=THETA(4)*RF
@@ -460,7 +460,7 @@ They bear almost literal translation in $PK blocks (assume WT, AGE, and SECR are
   $$
   \tilde{\text{CL}}_{\text{met}} = \theta_1\text{WT}^{\theta_2}.
   $$
-  #+begin_src php
+  #+begin_src perl
     TVCLM=THETA(1)*WT**THETA(2)
   #+end_src
 
@@ -468,7 +468,7 @@ They bear almost literal translation in $PK blocks (assume WT, AGE, and SECR are
   $$
   \tilde{\text{CL}}_{\text{met}}=\text{WT} \left(\theta_1-\frac{\theta_2 \text{Cpss}_2}{\theta_3 + \text{Cpss}_2}\right)
   $$
-  #+begin_src php
+  #+begin_src perl
     TVCLM=WT*(THETA(1)-THETA(2)*CPSS2/(THETA(3)+CPSS2))
   #+end_src
 
@@ -476,11 +476,11 @@ They bear almost literal translation in $PK blocks (assume WT, AGE, and SECR are
   $$
   \tilde{\text{CL}}_\text{met} = (\theta_1 - \theta_2\text{HF})\text{WT}.
   $$
-  #+begin_src php
+  #+begin_src perl
     TVCLM=(THETA(1)-THETA(2)*HF)*WT
   #+end_src
   or alternatively using the IF-ELSE clause
-  #+begin_src php
+  #+begin_src perl
     IF (HF.EQ.0) THEN
       TVCLM=THETA(1)*WT
     ELSE
@@ -503,7 +503,7 @@ Recall the @@html:<a href="/docs/user-guide/nmtran/data/#ex_data_output_comp">ou
 With urine concentration observation \(C_u\), it is necessary to
 provide urine volume to scale for the output compartment.
 Suppose this data item is included in the $INPUT record as UVOL:
-#+begin_src php
+#+begin_src perl
 $INPUT ID TIME EVID UVOL DV CMT AMT
 #+end_src
 an additional $PK statement is necessary:
@@ -610,21 +610,21 @@ from the model for the individual’s value.
 
 Similarly, the multiplicate interindividual variability can be
 expressed as
-#+begin_src php
+#+begin_src perl
 CL=TVCL*(1+ETA(1))
 ; or
 CL=TVCL + TVCL*ETA(1)
 #+end_src
 
 and the @@html:<a href="/docs/user-guide/fundamentals/population/#general_mu_eta_form">ICU example</a>@@ in generalized formulation can be coded as
-#+begin_src php
+#+begin_src perl
 CLM=TVCLM+(1-ICU)*ETA(1)+ICU*ETA(2)
 #+end_src
 
 Note that THETA and ETA do not have to match in their numbering.
 The two lines below are of the same effect except that in the output
 one would have to associate the numbering of THETA and ETA correctly.
-#+begin_src php
+#+begin_src perl
 CL=THETA(1)+ETA(1) ; ETA(1) is the random effect for THETA(1)
 
 CL=THETA(1)+ETA(2) ; ETA(2) is the random effect for THETA(1)
@@ -642,7 +642,7 @@ The $DES block provides variables "DADT(n)" for \(\frac{dA}{dt}\). The
 block can also use variables defined in a preceding $PK block. For
 example, the ODE system for the two-compartment model with first-order
 absorption can be specified as
-#+begin_src php
+#+begin_src perl
 $PK
   KA= ...
   KCP= ...
@@ -720,7 +720,7 @@ $MODEL can be used to compartment names that are available  for
 
 For example:
 
-#+begin_src php
+#+begin_src perl
  $MODEL
  COMP=(GUT,DEFDOS)
  COMP=(CENTRAL,DEFOBS)
@@ -729,7 +729,7 @@ For example:
 allows  susbsitutions  to  be  made for A(GUT), DADT(GUT), A(CENTRAL),
 DADT(CENTRAL), etc, so you may use these symbols in  the  abbreviated
 code. The two-compartment ODEs from $DES can be then written as
-#+begin_src php
+#+begin_src perl
  $DES
  DADT(GUT)=-KA*A(GUT)
  DADT(CENTRAL)=KA*A(GUT)-(KCP+KC0)*A(CENTRAL)+KPC*A(PERI)
@@ -749,7 +749,7 @@ $OMEGA and $SIGMA record to specify the structure and initial
 estimates of OMEGA and SIGMA, respectively.
 
 For example, the $OMEGA record in
-#+begin_src php
+#+begin_src perl
 CL=TVCL+ETA(1)
 V=TVVD+ETA(2)
 $OMEGA .0000055, .0
@@ -763,7 +763,7 @@ says that the initial estimate for \(\Omega_{11}\), the variance of \(\eta_1\) i
 variance for CL and V, respectively.
 
 Similarly,
-#+begin_src php
+#+begin_src perl
 $ERROR
 Y=F+ERR(1)
 $SIGMA 25
@@ -772,7 +772,7 @@ specifies that the initial estimate for \(\Sigma_{11}=\text{var}(\epsilon_1)=25\
 
 One can also fix certain elements of OMEGA and SIMGA constant. For
 example
-#+begin_src php
+#+begin_src perl
 $OMEGA 0 FIXED 0.0225
 ; equivalently
 $OMEGA (0 FIXED) 0.0225
@@ -808,7 +808,7 @@ $$
 E_{\text{max}}=\theta_1 + \eta_1,\quad C_{50}=\theta_2+\eta_2.
 $$
 Model below shows how to fit the model.
-#+begin_src php
+#+begin_src perl
 $PROBLEM PHARMACODYNAMIC MODEL USING $ERROR STATEMENTS
 $INPUT ID TIME AMT INDK INDV DV
 $DATA EFFDATA
@@ -839,7 +839,7 @@ directly in the Emax model. This means that the \(C_p\) is now an
 independent variable, rather than as the DV data item. This also means
 that a PK model is not needed and we can write out the Emax model in
 the $PRED block:
-#+begin_src php
+#+begin_src perl
 $PROBLEM A SIMPLE PHARMACODYNAMIC MODEL
 $INPUT ID TIME CP DV
 $DATA EFFDATA
@@ -872,7 +872,7 @@ The most frequently used options of $ESTIMATION are as follows [fn:1].
 objective function. METHOD=1 is also called the "first order
 conditional estimation (FOCE) method." It may also be used as
 METHOD=CONDITIONAL. When the option INTERACTION is also present:
-#+begin_src php
+#+begin_src perl
 $ESTIMATION METHOD=1 INTERACTION
 #+end_src
 the method is called the "FOCE with INTERACTION method" (FOCEI). It is
@@ -895,7 +895,7 @@ such that starting from the first iteration, only n-1 iterations are skipped bef
 another summarization is printed.
 
 An example of using the options is (recall NONMEM supports aliases for control records and options):
-#+begin_src php
+#+begin_src perl
 $ESTM SIG=6,MAX=900,PRI=5
 #+end_src
 
@@ -943,7 +943,7 @@ When the record is $PHIS,
 values are entered as \(\phi\) (recall \(\phi=\mu + \eta\)) values (convenient for EM methods).
 
 Example:
-#+begin_src php
+#+begin_src perl
 $ETAS 0.4 3.0 3.0 5.0
 
 $PHIS 0.4 3.0 3.0 5.0
@@ -958,7 +958,7 @@ As a .iph file has both ETA() and PHI() items, ETA() will be selected
 for a $ETAS record, and PHI() will be selected for a $PHIS record.
 The first ITERATION>0 is selected, unless a particular iteration is specified, for example:
 
-#+begin_src php
+#+begin_src perl
 $ETAS FILE=myprevious.iph TBLN=3 ITERATION=123
 #+end_src
 

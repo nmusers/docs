@@ -373,13 +373,13 @@ blocks (See Individual objective function example).
 
 They may also be displayed in a table, using
 
-#+begin_src php
+#+begin_src perl
  $ABBR COMRES=2
 #+end_src
 
 in the $ERROR or $PK block:
 
-#+begin_src php
+#+begin_src perl
  IF (COMACT.EQ.1) THEN
   COM(1)=IIDX(NIREC)
   COM(2)=CNTID(NIREC)
@@ -387,12 +387,12 @@ in the $ERROR or $PK block:
 #+end_src
 The following, for example,  will produced a separate  table  for  the values:
 
-#+begin_src php
+#+begin_src perl
  $TABLE IID=COM(1) CNT=COM(2) FILE=comvals NOAPPEND NOPRINT FIRSTONLY
 #+end_src
 
 Note: With earlier versions than NONMEM 7.3, verbatim code is needed:
-#+begin_src php
+#+begin_src perl
  "  COM(1)=IIDX(NIREC)
  "  COM(2)=CNTID(NIREC)
 #+end_src
@@ -931,7 +931,7 @@ The NSIG and SIG values should only be used with ICALL = 3.
 Variables used with mixture models.
 
 USAGE:
-#+begin_src php
+#+begin_src perl
       IF (MIXNUM.EQ.1) THEN
         ...
       ENDIF
@@ -973,7 +973,7 @@ or consequence from the estimation set by NONMEM.
 
   In abbreviated code, MIXP may be coded in either of three ways:
 
-  #+begin_src php
+  #+begin_src perl
   MIXP(MIXNUM)
   MIXP
   MIXP(i)
@@ -1167,7 +1167,7 @@ with two different diagonal blocks, then one might  use this  code,
 in  which  each sigma  block has its own autocorrelation parameter
 theta(4) or theta(5):
 
-#+begin_src php
+#+begin_src perl
  $ABBREVIATED DECLARE T1(NO)
  $ABBREVIATED DECLARE INTEGER I1
  $ABBREVIATED DECLARE DOWHILE J1
@@ -1192,7 +1192,7 @@ If you wish to have more control as to when  the  CORRL2  is  used  to
 model  among  the  individual data records within the L2 records,
 consider the following example:
 
-#+begin_src php
+#+begin_src perl
  $ABBR DECLARE T1(NO),
  $ABBR DECLARE INTEGER I1, DOWHILE J1
 
@@ -1375,7 +1375,7 @@ REFERENCES: Guide Introduction_7
   NPDE_MODE=0.
 
 - Example: the code below incorporates Limit of Quantification (LOQ) data into NPDE assessments.
-  #+begin_src php
+  #+begin_src perl
   ; TYPE and LOQ are user-defined in previous code, or data item.
   $ERROR
   SD = THETA(5)
@@ -1575,7 +1575,7 @@ Limitation: may not be used with the LIKELIHOOD or -2LOGLIKELIHOOD options.
 
 With NM-TRAN, in a finalization block of abbreviated code one may set SKIP_ and/or use the following phrases:
 
-#+begin_src php
+#+begin_src perl
  END PROBLEM                              ;same as SKIP_=1
  END SECOND-LEVEL SUPERPROBLEM            ;same as SKIP_=3
  END FIRST-LEVEL SUPERPROBLEM             ;same as SKIP_=5
@@ -1584,7 +1584,7 @@ With NM-TRAN, in a finalization block of abbreviated code one may set SKIP_ and/
 #+end_src
 
 In other words, the following three are equivalent:
-#+begin_src php
+#+begin_src perl
       SKIP_=2
 
       IF (...) THEN
@@ -1615,7 +1615,7 @@ In other words, the following three are equivalent:
   LIKELIHOOD/-2LOGLIKIHOOD value for this particular observation.
 
 - F_FLAG may be set in NM-TRAN abbreviated code:
-  #+begin_src php
+  #+begin_src perl
    IF (TYPE.EQ.1) THEN
       Y=THETA(1)+ETA(1)+ERR(1) ; a prediction
    ELSE
@@ -1935,7 +1935,7 @@ stored locally and will not be changed by NONMEM at ICALL 2 or 4.)
 
 Variables from a given block of abbreviated code can be excluded  from
 the module by including the following pseudo-statement in that block:
-#+begin_src php
+#+begin_src perl
 COMRES=-1
 #+end_src
 Variables from all blocks of abbreviated code can be
@@ -2084,7 +2084,7 @@ MDVRES=0 by default.
   residual algorithm can assess the remaining normally distributed
   values for that subject.
 
-  #+begin_src php
+  #+begin_src perl
   $ERROR
   SD = THETA(5)
   IPRED = LOG(F)
@@ -2129,7 +2129,7 @@ same  effect  as  defining  MTIME(i+1)=0.   PK  may redefine MTIME(i).
 An ETA may be used in the definition of MTIME(i).
 
 Example:
-#+begin_src php
+#+begin_src perl
   MTIME(1)=THETA(1)
 #+end_src
 
@@ -2633,7 +2633,7 @@ Differential Equations.  Sometimes you may wish to have the equations
 transition  from  the  past  to  the present other than at time T=0.
 In this case, set PASTZERO to a  non-zero  (including  negative)
 value.   For example,
-#+begin_src php
+#+begin_src perl
  $DES PASTZERO=-10.0
 #+end_src
 
@@ -2678,7 +2678,7 @@ may wish to capture a maximal or minimal value during  $DES,  and  the
 overshoot  should be turned off for this purpose. This is readily done
 by setting ITASK_=4 in $PK or $ERROR. E.g.,
 
-#+begin_src php
+#+begin_src perl
  $PK ITASK_=4
 #+end_src
 
@@ -2716,7 +2716,7 @@ a gamma function shaped input with a large N>20 parameter, can  create
 a stiff, pseudo-bolus input that may be missed by one of these ADVANs.
 One way to avoid missing this input is to  set  the  integration  step
 size to an upper limit:
-#+begin_src php
+#+begin_src perl
  $PK HMAX_=0.01
 #+end_src
 One  may also set the initial step size (HINIT_), or minimal step size

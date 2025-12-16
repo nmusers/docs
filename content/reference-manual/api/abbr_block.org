@@ -57,7 +57,7 @@ describes the values of ICALL as seen by PRED.
 
 ** Compartment initialization
 Usage:
-#+begin_src php
+#+begin_src perl
 $PK
 IF (A_0FLG.EQ.1) THEN
  ... compartment initialization block ...
@@ -166,18 +166,18 @@ the output compartment can not be set.
 *** Examples
 - The following two fragments of code yield identical results:
   Explicit compartment initialization block:
-  #+begin_src php
+  #+begin_src perl
   IF (A_0FLG.EQ.1) THEN
    A_0(1)=THETA(1)*(1+ETA(1))
   ENDIF
   #+end_src
   Implicit compartment initialization block:
-  #+begin_src php
+  #+begin_src perl
    A_0(1)=THETA(1)*(1+ETA(1))
   #+end_src
 
 - Conditional assignment of A_0(n), depending on a data item or user-defined variable X.
-  #+begin_src php
+  #+begin_src perl
   IF (A_0FLG.EQ.1) THEN
       IF (X.EQ.1) THEN
       A_0(1)=THETA(1)*(1+ETA(1))
@@ -188,29 +188,29 @@ the output compartment can not be set.
   #+end_src
   An alternative is to use an indicator  variable.  E.g.,  if X is a 0/1 variable, then the above is
   equivalent to
-  #+begin_src php
+  #+begin_src perl
     A_0(1)=X*THETA(1)*(1+ETA(1))+(1-X)*A_0(1)=THETA(2)*(1+ETA(2))
   #+end_src
 
 - Suppose compartment initialization should occur only during the
   Simulation step.  The following is not permitted:
-  #+begin_src php
+  #+begin_src perl
     IF (ICALL.EQ.4.AND.A_0FLG.EQ.1) A_0(1)=THETA(1)*(1+ETA(1))
   #+end_src
   Instead, use:
-  #+begin_src php
+  #+begin_src perl
   IF (ICALL.EQ.4) THEN
     IF (A_0FLG.EQ.1) A_0(1)=THETA(1)*(1+ETA(1))
   ENDIF
   #+end_src
   or simply
-  #+begin_src php
+  #+begin_src perl
   IF (ICALL.EQ.4) THEN
     A_0(1)=THETA(1)*(1+ETA(1))
   ENDIF
   #+end_src
   or even better
-  #+begin_src php
+  #+begin_src perl
   IF (ICALL.EQ.4) A_0(1)=THETA(1)*(1+ETA(1))
   #+end_src
 
@@ -218,7 +218,7 @@ See also: @@html:<a href="/docs/reference-manual/api/subroutines/#PK">PK</a>@@.
 
 ** Compartment update (NM75)
 Usage
-#+begin_src php
+#+begin_src perl
  $PK
  IF (A_UFLG.EQ.1) THEN
   ... compartment update block ...
@@ -231,7 +231,7 @@ values may be set in the array A_U(n).   The  user should  use  MTIME
 to  designate a variable time position at which an abrupt change in
 compartment amounts occurs.  One could input  a  dose as follows:
 
-#+begin_src php
+#+begin_src perl
  MTIME(1)=wtime
  MTDIFF=1
  AZTEST=A_0FLG
@@ -265,7 +265,7 @@ to 0.  An un-assigned A_U(k) should retain its value, A_u(k)=A_u(k).
 
 ** DATA_AVERAGE
 Usage:
-#+begin_src php
+#+begin_src perl
  $ERROR
  IF (ICALL.EQ.6) THEN
   ... data average block ...
@@ -285,7 +285,7 @@ average.
 In  the following  example,  the displayed DV value for each template
 record is the proportion of DV items greater than 10 on those  records
 matching the template record.
-#+begin_src php
+#+begin_src perl
   Y=...
   TRDV=DV
   IF (ICALL.EQ.6) THEN
@@ -299,7 +299,7 @@ example,  suppose  that the DV variable is set to a value only when it
 exceeds 2, so that the  average  is  the  proportion  of  observations
 exceeding  10 among those that exceed 2.  The code is as follows.  See
 note 2 below on the returned value of F.
-#+begin_src php
+#+begin_src perl
  Y=...
  TRDV=DV
  IF (ICALL.EQ.6) THEN
@@ -369,7 +369,7 @@ ones whose value for Q is of interest.
 Under a well-specifed model, ETA(1) should be independent of
  X, and so one might want to use an average of Q across the  eta  estimates from all individuals (with observation records).  Then one might (i) during copying passes, for each individual record compute Q  using the  specific value X=x - regardless of what value of X appears in the individual record, and (ii) include the record
 
-#+begin_src php
+#+begin_src perl
  $OMIT X
 #+end_src
 to prevent the values of X from affecting the match with the  template record.
@@ -380,7 +380,7 @@ the purpose of forming averages other than the average Q, and it is at
 least  awkward  if one is interested in the expected value of PA for a
 variety of values of X.  Here is an alternative strategy.
 
-#+begin_src php
+#+begin_src perl
  $ABB COMRES=4 COMSAV=4
  $ERROR
   ...
@@ -412,7 +412,7 @@ template records with different values of X.
 *** Example E
 Examples A-C are not explicit about how the mixture probabilities  are computed.   They  might be obtained via MIXP, in which case during the copying passes (similar to what happens at ICALL=6  with  example  D), with  a given individual record, they are the probabilities pertaining to that record.  As long as the mixture probabilities do not depend on interindividual-varying  covariates, the mixture probabilities are the same no matter what individual record it is  to  which  they  pertain. But if the probabilities depend on interindividual-varying covariates, and especially if one wants to estimate the expected value  of  Q  for numerous different sets of values for these covariates, then one might use:
 
-#+begin_src php
+#+begin_src perl
  $ERROR
  include nonmem_reserved_general
  Y=...
@@ -436,7 +436,7 @@ the different subpopulations.  With versions prior to NONMEM 7.3,  the
 probabilities  in MIXPT must be referenced via verbatim code (note the
 double quotes).
 
-#+begin_src php
+#+begin_src perl
  $ERROR
  " USE ROCM_REAL MIXPT=>MIXP_RAW
   ...
@@ -456,7 +456,7 @@ double quotes).
   PRED (ERROR) exits.
 
 - Loops  are  permitted  in a data average block.  The syntax is as follows.
-  #+begin_src php
+  #+begin_src perl
     DO WHILE (condition)
      .. statements ..
     END DO
@@ -485,7 +485,7 @@ double quotes).
 
 ** PRED_IGNORE_DATA (NM75)
 Usage:
-#+begin_src php
+#+begin_src perl
  $INFN
      IF(PRED_IGNORE_DATA_TEST==1) THEN
      PRED_IGNORE_DATA=0
@@ -509,7 +509,7 @@ PRED_IGNORE_DATA to a non-zero value within $INFN, @@html:<a href="/docs/referen
 each  record  to  be ignored.
 
 - It may be useful to package PRED_IGNORE_DATA statements within
-  #+begin_src php
+  #+begin_src perl
   IF(PRED_IGNORE_DATA_TEST==1) THEN
   ...
   RETURN
@@ -553,7 +553,7 @@ each  record  to  be ignored.
 
 
 - It is possible to restrict PRED_IGNORE_DATA actions  to  a  particular problem number:
-  #+begin_src php
+  #+begin_src perl
   IF(IPROB==2.AND.PRED_IGNORE_DATA_TEST==1) THEN
   PRED_IGNORE_DATA=0
   IF(AGE>35.0) PRED_IGNORE_DATA=1
@@ -570,7 +570,7 @@ each  record  to  be ignored.
 
 ** Initialization-finalization
 Usage:
-#+begin_src php
+#+begin_src perl
  $PRED
     IF (ICALL.EQ.1) CALL SUPP(0,1)
  ...
@@ -633,7 +633,7 @@ signalled by values of the variable ICALL:
 An  initialization  block  is a block of abbreviated code that is only
 executed at ICALL=0 or ICALL=1.  A finalization block is  a  block  of
 abbreviated code that is only executed at ICALL=3.  E.g.,
-#+begin_src php
+#+begin_src perl
   IF (ICALL.EQ.1) THEN
    ... initialization block ...
   ENDIF
@@ -670,7 +670,7 @@ In addition, these rules apply:
 
 - Calls to certain NONMEM routines are permitted:
 
-  #+begin_src php
+  #+begin_src perl
        CALL PASS(MODE)
        CALL RANDOM(n,R)
        CALL SUPP(ie,ic)
@@ -713,7 +713,7 @@ In addition, these rules apply:
        END DO
   #+end_src
   Here is an example of a transgeneration loop.
-  #+begin_src php
+  #+begin_src perl
     $PRED
        IF (ICALL.EQ.0) THEN
             MODE=0
@@ -728,7 +728,7 @@ In addition, these rules apply:
        ENDIF
    #+end_src
    This type of usage of the PASS routine can be coded more  simply, as follows:
-   #+begin_src php
+   #+begin_src perl
        $PRED
        IF (ICALL.EQ.0) THEN
             DOWHILE (DATA)
@@ -757,7 +757,7 @@ In addition, these rules apply:
     + At ICALL=1, THETA contains the initial estimates for the current problem.
     + At ICALL=3, THETA contains the final estimates for the  current  problem.
   Here is an example of code that could be used during a simulation with multiple subproblems.
-  #+begin_src php
+  #+begin_src perl
      $PRED
        IF (ICALL.EQ.1) THEN
           SUM=0
@@ -778,7 +778,7 @@ In addition, these rules apply:
   in initialization and finalization blocks.  (Note also that
   unsubscripted arrays may appear in a WRITE statement.)
 
-  #+begin_src php
+  #+begin_src perl
      OMEGA(n,m)
      SIGMA(n,m)
   #+end_src
@@ -788,7 +788,7 @@ In addition, these rules apply:
   finalization blocks.
   (Note also that unsubscripted arrays may appear in a WRITE statement.)
 
-  #+begin_src php
+  #+begin_src perl
       SETHET(n)
        SETHETR(n)
        SEOMEG(n,m)
@@ -800,7 +800,7 @@ In addition, these rules apply:
        (See write print).
 
 - The following statements are forbidden:
-  #+begin_src php
+  #+begin_src perl
        CALL SIMETA(ETA)
        CALL SIMEPS(EPS)
   #+end_src
@@ -813,7 +813,7 @@ In addition, these rules apply:
 
 ** Copying
 Usage:
-#+begin_src php
+#+begin_src perl
   IF (COMACT.EQ.1) TVCL=CL
 #+end_src
 During specific “copying passes” data records are sent to PRED and
@@ -893,7 +893,7 @@ COMACT is set by NONMEM; COMSAV by PRED.
       + COMACT=3: This is a copying pass with conditional
         (nonparametric) estimates  of  ETAS.   Such  a  pass takes
         place when the control stream includes this record:
-        #+begin_src php
+        #+begin_src perl
 	  $NONPARAMETRIC ETAS
 	#+end_src
 
@@ -917,7 +917,7 @@ COMACT is set by NONMEM; COMSAV by PRED.
 
 
 *** Examples
-#+begin_src php
+#+begin_src perl
  $ERROR
  Y=F+F*EPS(1)
  IPRED=F
@@ -958,7 +958,7 @@ concerned about this option.
 
 ** Simulation
 Usage:
-#+begin_src php
+#+begin_src perl
  $PK
   IF (ICALL.EQ.4) CL=THETA(1)+ETA(1)
 #+end_src
@@ -967,7 +967,7 @@ executed when ICALL=4 (during simulation).  Such blocks may be present
 in $PK,  $ERROR,  and $PRED, and may be implemented by means of
 generated FORTRAN subroutines.  E.g.,
 
-#+begin_src php
+#+begin_src perl
  IF (ICALL.EQ.4) THEN
   ... simulation block ...
  ENDIF
@@ -983,7 +983,7 @@ Special rules.
     the event  or  data  record,  and then the local variable having
     that label.  E.g.,  suppose WT is listed in $INPUT:
 
-    #+begin_src php
+    #+begin_src perl
     IF (ICALL.EQ.4) WT=70+70*ETA(3)
     #+end_src
     The generated code is:
@@ -1019,7 +1019,7 @@ Special rules.
     F is not set.
 
  5. Loops are permitted.  The syntax is as follows.
-    #+begin_src php
+    #+begin_src perl
     DO WHILE (condition)
      .. statements ..
     END DO
@@ -1027,7 +1027,7 @@ Special rules.
     For example, for a truncated normal distribution that
     only requires testing the eta value directly, this  code  can  be
     used:
-    #+begin_src php
+    #+begin_src perl
     $PK
      ...
     DO WHILE (ETA(1).GT.5)
@@ -1035,7 +1035,7 @@ Special rules.
     ENDDO
     #+end_src
     Another example:
-    #+begin_src php
+    #+begin_src perl
     IF (ICALL.EQ.4.AND.NEWIND.NE.2) THEN
       DO WHILE (ETA(1).GT..5.OR.ETA(1).LT.-.5)
         CALL SIMETA(ETA)
@@ -1048,7 +1048,7 @@ Special rules.
     previous  automatic  call to SIMETA, ETA(1) requires no
     initialization, but that R in the next example does.
 
-    #+begin_src php
+    #+begin_src perl
     IF (ICALL.EQ.4.AND.NEWIND.NE.2) THEN
       R=1
       DO WHILE (R.GT..5.OR.R.LT.-.5)
@@ -1061,7 +1061,7 @@ Special rules.
     equal-likely  probabilities  can  be  generated from a random
     number R, uniformly distributed between 0 and 1.  In this example,
     the categorical variable BIN takes values 1 through 5.
-    #+begin_src php
+    #+begin_src perl
     IF (ICALL.EQ.4) THEN
       CALL RANDOM(2,R)
       BIN=INT(R*5)+1
@@ -1074,7 +1074,7 @@ Special rules.
     greatest integer not exceeding x.  The effect of this simulation
     code  is to perform the transformation:
 
-    #+begin_src php
+    #+begin_src perl
     BIN=1 if R < .2
     BIN=2 if R < .4 and R >= .2
     BIN=3 if R < .6 and R >= .4
@@ -1087,7 +1087,7 @@ Special rules.
     is desired that the simulation be  immediately  terminated, then
     use an EXIT 2 code:
 
-    #+begin_src php
+    #+begin_src perl
     IF(ICALL==4.and.IPRED<0.1 .and. TIME>20.0) EXIT 2
     #+end_src
 
@@ -1153,7 +1153,7 @@ Special rules.
 
 ** Expectation
 Usage:
-#+begin_src php
+#+begin_src perl
  $ERROR
  IF (ICALL.EQ.5) THEN
   ... expectation block ...
@@ -1181,7 +1181,7 @@ In this example, the displayed value of  PRED  with  a  record  having
 MRG_=1  is  the  expectation of the 0-1 variable taking the value 1 if
 and only if F > 10.
 
-#+begin_src php
+#+begin_src perl
   IF (ICALL.EQ.5) THEN
    Y=0
    IF (F.GT.10) Y=1
@@ -1194,7 +1194,7 @@ Special rules:
 1. No eta derivatives are computed in an expectation block.
 
 2. Calls  to  certain  NONMEM  utility  routines are permitted in an expectation block:
-   #+begin_src php
+   #+begin_src perl
    CALL RANDOM(n,R)
    #+end_src
    where  n is an integer  1-10.   If  CALL  RANDOM  is  present,  R
@@ -1210,7 +1210,7 @@ Special rules:
    PRED (PK, ERROR) exits.
 
 4. Loops are permitted in an expectation block.  The  syntax  is  as follows.
-   #+begin_src php
+   #+begin_src perl
       DO WHILE (condition)
        .. statements ..
       END DO

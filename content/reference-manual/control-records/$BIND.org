@@ -3,8 +3,8 @@
 
 * $BIND
 Define data values used by $PK, $DES, and $AES.
-#+begin_src php
-; Usage
+#+begin_src perl
+;# Usage
 $BIND  value ...
 #+end_src
 
@@ -83,38 +83,33 @@ Let t be a time at which an additional or lagged dose enters the  system.   If t
  The event time on the next event record will exceed time t.
 
 ** OPTIONS
-
- The positions of the values correspond to the positions of data  items
+The positions of the values correspond to the positions of data  items
  in the $INPUT record in a 1-to-1 manner.  Each value is one of:
-   DOSE (Use the value from the dose record.)
-   NEXT (Use the value from the next event record.)
-   LAST (Use the value from the last event record.)
-   SKIP (Ignore this data item.)
-   DROP (Ignore this data item.)
-   -   (Default.)
+   | DOSE | Use the value from the dose record.       |
+   | NEXT | Use the value from the next event record. |
+   | LAST | Use the value from the last event record. |
+   | SKIP | Ignore this data item.                    |
+   | DROP | Ignore this data item.                    |
 
- For  user  (concomitant)  data  items,  the default is NEXT but any of
- DOSE, NEXT, LAST may be specified.
+For  user  (concomitant)  data  items,  the default is NEXT but any of DOSE, NEXT, LAST may be specified.
 
- For the PREDPP data item TIME, the default is NEXT.  Only  -  or  NEXT
- may be specified.
+For the PREDPP data item TIME, the default is NEXT.  Only "--"  or  NEXT may be specified.
 
- For  all other PREDPP or NONMEM data items, the default is DOSE.  Only
-  -  or DOSE may be specified.
+For  all other PREDPP or NONMEM data items, the default is DOSE.  Only "--"  or DOSE may be specified.
 
- Option DROP in the $BIND record is optional.  It  is  ignored  by  NMTRAN,  but helps the user maintain a 1-to-1 relationship between positions in $BIND and positions in $INPUT.
+Option DROP in the $BIND record is optional.  It  is  ignored  by  NMTRAN,  but helps the user maintain a 1-to-1 relationship between positions in $BIND and positions in $INPUT.
 
- A $BIND record with all defaults specified, such as
- #+begin_src php
- $BIND - - - - - - -
- #+end_src
- has the same effect as if no $BIND record were present.
+A $BIND record with all defaults specified, such as
+#+begin_src perl
+$BIND - - - - - - -
+#+end_src
+has the same effect as if no $BIND record were present.
 
- #+begin_src php
-   $INPUT ID TIME DATE=DROP AMT DV WGT  PREP  X   HGT
-   $BIND   -   -    DROP     -   - NEXT DOSE LAST  -
- #+end_src
-     ID, AMT, DV  have the values from the initiating dose record.
+#+begin_src perl
+ $INPUT ID TIME DATE=DROP AMT DV WGT  PREP  X   HGT
+ $BIND   -   -    DROP     -   - NEXT DOSE LAST  -
+#+end_src
+ID, AMT, DV  have the values from the initiating dose record.
      TIME has the value from the next event record.
      WGT and HGT have values from the next event record.
      PREP has the value from the initiating dose record.
@@ -122,79 +117,78 @@ Let t be a time at which an additional or lagged dose enters the  system.   If t
      the dose record if there is no other event record between the dose
      record and the next event record.
 
- $INPUT and $BIND records can be interleaved to help maintain a  visual
- relationship. The above example could have been coded:
+$INPUT and $BIND records can be interleaved to help maintain a  visual relationship. The above example could have been coded:
 
- #+begin_src php
+#+begin_src perl
    $INPUT ID TIME DATE=DROP
    $BIND   -   -    DROP
    $INPUT AMT DV  WGT PREP X    HGT
    $BIND  -   -  NEXT DOSE LAST  -
- #+end_src
+#+end_src
 
- $BIND  may not specify a position beyond the last position defined via
- $INPUT.  It may specify fewer positions, in which case defaults  apply
- to the remaining data items.
+$BIND  may not specify a position beyond the last position defined via $INPUT.  It may specify fewer positions, in which case defaults  apply to the remaining data items.
 
- Changes  to  $BIND, like changes to $INPUT, cause changes to generated
- code.  Thus, an existing NONMEM executable cannot be re-used when  the
- $BIND and/or $INPUT records are changed.
+Changes  to  $BIND, like changes to $INPUT, cause changes to generated
+code.  Thus, an existing NONMEM executable cannot be re-used when  the
+$BIND and/or $INPUT records are changed.
 
- The $BIND record only applies under the following circumstances:
+The $BIND record only applies under the following circumstances:
+1. There exists a dose that is either one or both of the two following types of doses:
+      - An  additional  dose,  subsequent  to  the  initiating dose
+        (ADDL>0, II>0 in the dose event record).  Such a dose enters
+        the system at the "additional dose time."
+      - A lagged dose.  (with the corresponding dose  event record, PK
+        specifies ALAGi>0, where i is the index of the dose
+        compartment).  Such a dose enters the  system  at  the
+        "lagged dose time."
+2. The  PK  subroutine  computes parameters that depend on values in
+   the data record which are not constant for the individual,  i.e.,
+   parameters depend on time-varying data items.
 
- (1)  There exists a dose that is either one or both of the two following types of doses:
-
-      a)   An  additional  dose,  subsequent  to  the  initiating  dose
-           (ADDL>0, II>0 in the dose event record).  Such a dose enters
-           the system at the "additional dose time."
-
-      b)   A lagged dose.  (with the corresponding dose  event  record,
-           PK  specifies ALAGi>0, where i is the index of the dose compartment).  Such a dose enters the  system  at  the  "lagged
-           dose time."
-
- (2)  The  PK  subroutine  computes parameters that depend on values in
-      the data record which are not constant for the individual,  i.e.,
-      parameters depend on time-varying data items.
-
- (3)  The PK subroutine is called when the dose enters the system.
-      That  is, $PK contains the pseudo-statement CALLFL=-2, requesting
-      that the PK routine be called to compute values of the PK parameters at additional and lagged dose times.  When $PK does not contain this pseudo-statement, there is no  such  call,  and  at  an
-      additional or lagged dose time, the PK parameters have those values computed with the next event record.
+3. The PK subroutine is called when the dose enters the system. That
+   is, $PK contains the pseudo-statement CALLFL=-2, requesting that
+   the PK routine be called to compute values of the PK parameters at
+   additional and lagged dose times.  When $PK does not contain this
+   pseudo-statement, there is no  such  call,  and  at  an additional
+   or lagged dose time, the PK parameters have those values computed
+   with the next event record.
 
 When the $PK code is implemented with an event  record,  the  variable
- DOSTIM  is  0.  When it is implemented at an additional or lagged dose
- time, the value of this variable is the time in question.  By default,
- data items used in abbreviated code have values from either the initiating dose record (DOSREC) or the next event record (EVTREC),  according to this rule:
+DOSTIM  is  0.  When it is implemented at an additional or lagged dose
+time, the value of this variable is the time in question.  By default,
+data items used in abbreviated code have values from either the
+initiating dose record (DOSREC) or the next event record (EVTREC),
+according to this rule:
 
-NONMEM  data items and PREDPP data items (other than TIME) have values
- from the original dose event record (DOSREC).  These are:
- #+begin_src f90
- DV MDV ID L2 MRG_ RAW_ REPL_ EVID AMT RATE SS II CMT  PCMT  CALL  CONT
- ADDL DATE DAT1 DAT2 DAT3
- #+end_src
- TIME  and  all  user-defined  data items have the values from the next
- event record (EVTREC).  This default can be overridden using the $BIND
- record.
+- NONMEM  data items and PREDPP data items (other than TIME) have
+  values from the original dose event record (DOSREC).  These are:
+  #+begin_src f90
+  DV MDV ID L2 MRG_ RAW_ REPL_ EVID AMT RATE SS II CMT  PCMT  CALL  CONT
+  ADDL DATE DAT1 DAT2 DAT3
+  #+end_src
+- TIME  and  all  user-defined  data items have the values from the
+  next event record (EVTREC).  This default can be overridden using
+  the $BIND record.
 
-EXAMPLE:
+** EXAMPLE
 The  $BIND  record  is  a  convenience; it does nothing that cannot be
- accomplished with abbreviated code.  Suppose X is a user-defined  data
- item.  The following three fragments of code create a variable XB with
- the same values at calls with additional and lagged doses that X would
- have if there were a $BIND record specifying the following for X.
+accomplished with abbreviated code.  Suppose X is a user-defined  data
+item.  The following three fragments of code create a variable XB with
+the same values at calls with additional and lagged doses that X would
+have if there were a $BIND record specifying the following for X.
 
 #+begin_src f90
- DOSE:
+;! DOSE:
    IF (DOSTIM.EQ.0) THEN
    XB=X
    ELSE
    XB=DOSREC(X)
    ENDIF
 
- NEXT:
+;! NEXT:
    XB=X
 
- LAST:
+;! LAST:
    IF (DOSTIM.EQ.0) THEN
    XB=X
    ENDIF
