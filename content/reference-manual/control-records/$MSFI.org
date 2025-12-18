@@ -5,22 +5,15 @@
 
 Gives the name of an input Model Specification File.
 
-** USAGE
-
 #+begin_src perl
  $MSFI   filename [NORESCALE|RESCALE] [NPOPETAS[=n]]
          [ONLYREAD]  [NOMSFTEST|MSFTEST]
          [VERSION=n]
          [NEW]
-#+end_src
 
-** EXAMPLE
-#+begin_src perl
+;# Example
  $MSFI   MSF13
 #+end_src
-
-** DISCUSSION
- This record gives the name of an input Model Specification File.
 
 ** OPTIONS
 
@@ -33,21 +26,20 @@ Gives the name of an input Model Specification File.
       any option of the $MSFI record, it must be  enclosed  in  quotes.
       Filename may contain at most 71 characters.
 
-*** NORESCALE
-      If  a  search is continued, it is continued just as it would have
-      been in the previous run.  This option has no effect if the Esti-
-      mation Step is not implemented or if the step is implemented, but
-      using different options on the $ESTIMATION record from those used
-      with the previous run.  This is the default option.
+*** NORESCALE | RESCALE
+NORESCALE: if  a  search is continued, it is continued just as it
+would have been in the previous run.  This option has no effect if the
+Estimation Step is not implemented or if the step is implemented, but
+using different options on the $ESTIMATION record from those used with
+the previous run.  This is the default option.
 
-*** RESCALE
-      The  search is to be restarted with initial estimates taken to be
-      the final estimates from the previous run, so that a UCP value of
-      0.1  now  corresponds  to a final estimate from the previous run.
-      This option may be used only if the search with the previous  run
-      terminated  successfully and all the options used on the $ESTIMA-
-      TION record coincide  with  those  used  with  the  previous  run
-      (except the MAXEVAL option).
+RESCALE: the  search is to be restarted with initial estimates taken
+to be the final estimates from the previous run, so that a UCP value
+of 0.1  now  corresponds  to a final estimate from the previous run.
+This option may be used only if the search with the previous  run
+terminated  successfully and all the options used on the $ESTIMATION
+record coincide  with  those  used  with  the  previous  run (except
+the MAXEVAL option).
 
 *** NPOPETAS[=n]
       If  the  data  are  to  be  understood to be population data, the
@@ -59,6 +51,7 @@ Gives the name of an input Model Specification File.
       are  used  in  the  $PK  abbreviated code.  If the data are to be
       understood to be single-subject data, the option  NPOPETAS=0  may
       be needed.
+
       May also be coded POPETAS.
 
 *** ONLYREAD
@@ -68,57 +61,59 @@ Gives the name of an input Model Specification File.
       appear in a problem specification containing a $MSFI record  with
       this option.
 
- When  the  $MSFI  record  is  used in a problem specification, $THETA,
+When  the  $MSFI  record  is  used in a problem specification, $THETA,
  $OMEGA and $SIGMA records should not appear in that specification.  It
  is  permissible  for  the  data  file to differ from the original data
  file, but usually this is not done.
 
-*** MSFTEST
-      Prevents an MSF file from being utilized in a subsequent  control
+*** MSFTEST | NOMSFTEST
+MSFTEST: prevents an MSF file from being utilized in a subsequent  control
       stream  file  or  problem  if  there  were  errors.   This is the
       default.
 
-*** NOMSFTEST
-      Sometimes the MSFI error check is too strict.  This  occurs  par-
-      ticularly  when  using classical NONMEM methods.  To turn of MSFI
-      error checking, use NOMSFTEST.
+NOMSFTEST: sometimes the MSFI error check is too strict.  This  occurs  particularly  when  using classical NONMEM methods.  To turn of MSFI error checking, use NOMSFTEST.
 
 *** VERSION[=n]
       Read in MSF files from  previous  versions.  With  NONMEM  7.5.0,
       choices are:
-      $MSFI myfile.msf VERSION=7.4.0
-      $MSFI myfile.msf VERSION=7.3.0
-      $MSFI myfile.msf VERSION=7.2.0
-      $MSFI myfile.msf VERSION=7.1.2
-      $MSFI myfile.msf VERSION=7.1.0
-      $MSFI myfile.msf VERSION=6.2
-      $MSFI myfile.msf VERSION=6.1
+  - $MSFI myfile.msf VERSION=7.4.0
+  - $MSFI myfile.msf VERSION=7.3.0
+  - $MSFI myfile.msf VERSION=7.2.0
+  - $MSFI myfile.msf VERSION=7.1.2
+  - $MSFI myfile.msf VERSION=7.1.0
+  - $MSFI myfile.msf VERSION=6.2
+  - $MSFI myfile.msf VERSION=6.1
 
-*** NEW  When  the problem that created the MSF file has successfully com-
-      pleted, calling for a resumed or new estimation is prevented when
+*** NEW
+When  the problem that created the MSF file has successfully completed, calling for a resumed or new estimation is prevented when
       the  method is FO/FOCE/Laplace. To allow analysis to continue, or
       to allow an analysis on a new data set, resuming from  the  final
       parameters  of the MSF file, use the option NEW: $MSFI myfilename
       NEW.
 
- With NONMEM 7.3 and later, when MSF or MSFO option is used to  specify
- an MSFO file in the $EST record e.g.,
+With NONMEM 7.3 and later, when MSF or MSFO option is used to  specify
+an MSFO file in the $EST record e.g.,
+
+#+begin_src perl
  $EST ... MSFO=msfroot.msf
- then  in  addition  to  the  main  MSF  file  msfroot.msf,  file  msf-
- root_ETAS.msf containing individual etas will also  be  produced,  and
- provide additional information when a $MSFI record is used in a subse-
- quent problem or control stream.  This is referred to  as  an  "extra"
- msf  file.   If  the  Covariance  Step is also implemented, files msf-
- root_RMAT.msf and msfroot_SMAT.msf containing intermediate information
- on  the R matrix and S matrix will also be produced.  These files pro-
- vide information when a $MSFI record along  with  a  $COV  ...  RESUME
- record is used in a subsequent problem or control stream.
+#+end_src
+then  in  addition  to  the  main  MSF  file  msfroot.msf,  file
+msfroot_ETAS.msf containing individual etas will also  be  produced,
+and provide additional information when a $MSFI record is used in a
+subsequent problem or control stream.  This is referred to  as  an
+"extra" msf  file.   If  the  Covariance  Step is also implemented,
+files msfroot_RMAT.msf and msfroot_SMAT.msf containing intermediate
+information on  the R matrix and S matrix will also be produced.
+These files provide information when a $MSFI record along  with  a
+$COV  ...  RESUME record is used in a subsequent problem or control
+stream.
 
- The use of an extension, e.g., .msf, is optional.  If the _ETA file is
- not present, NONMEM issues a warning:
+The use of an extension, e.g., .msf, is optional.  If the _ETA file is
+not present, NONMEM issues a warning:
+#+begin_src txt
  WARNING: EXTRA MSF FILE COULD NOT BE OPENED: c5msf2x_ETAS
-
- There is no warning if _SMAT and/or _RMAT are not present.
+#+end_src
+There is no warning if _SMAT and/or _RMAT are not present.
 
 ** REFERENCES
 Guide IV, section III.B.12

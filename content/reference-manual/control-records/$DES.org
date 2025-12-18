@@ -1,34 +1,27 @@
 #+title: $DES
 {{< katex >}}{{< /katex >}}
 
-
 * $DES
  Marks the beginning of abbreviated code for the DES routine
-
-
-
-** USAGE
-
 #+begin_src perl
- $DES
+$DES
  abbreviated code
-#+end_src
-** EXAMPLE
-Suppose  differential  equations were used for ADVAN2, rather than the analytic solution.  The $DES block would be as follows:
-#+begin_src perl
+
+;# Example: ODEs for ADVAN2
 $DES
 DADT(1)=-P(3)*A(1)
 DADT(2)=P(3)*A(1)-P(1)*A(2)
 #+end_src
+
 ** DISCUSSION
 The $DES record is used to compute the right-hand-side of differential equations.  It is used
 with  PREDPP's  general  non-linear  models  (ADVAN6,  ADVAN8, ADVAN9,
 ADVAN13, ADVAN14, ADVAN15, ADVAN16, ADVAN17,ADVAN18).
 See @@html:<a href="/docs/reference-manual/abbr/">abbreviated code</a>@@ for general rules for abbreviated code.  Specific rules follow.
 
-*** ASSIGNMENT AND CONDITIONAL STATEMENTS
+** ASSIGNMENT AND CONDITIONAL STATEMENTS
 
-Left-hand quantities in assignment statements:
+*** Left-hand quantities in assignment statements:
 
    - DADT(1),  DADT(2),  ...   (Required.  Derivative of each
      compartment amount with respect to time.) It is important to note
@@ -41,7 +34,7 @@ Left-hand quantities in assignment statements:
 
    - DES-defined (i.e., PRED-defined) items.
 
-Right-hand quantities in assignment statement and in conditions:
+*** Right-hand quantities in assignment statement and in conditions:
 
    - A(1),  A(2), ...   (Current compartment amounts; may be random vari- ables.)
 
@@ -63,18 +56,21 @@ Right-hand quantities in assignment statement and in conditions:
 
    - THETA(n).
 
-   - Fortran  functions  that  are  continuous, such as SIN and COS.
-     Functions that introduce  a discontinuity, such as INT, MOD, and
-     ABS, should not be used. Instead, use model event times MTIME in the $PK  block,
-     and  either  set  flag variables  in $PK that can be tested in
-     $DES, or use MPAST in the $DES block.  See Appendix 3 of  Guide
-     VI  PREDPP.  Several  examples  are available for the use of
-     MTIME with $DES. (See mtime, model time examples). (See Examples
-     Using MTIME to Model Periodic Discontinuities in $DES). See
-     step_circexa.ctl in the NONMEM examples directory. See
-     idr_circexa.ctl in the NONMEM examples directory.
+Fortran  functions  that  are  continuous, such as SIN and COS.
+Functions that introduce  a discontinuity, such as INT, MOD, and ABS,
+should not be used. Instead, use model event times MTIME in the $PK
+block, and  either  set  flag variables  in $PK that can be tested in
+$DES, or use MPAST in the $DES block.  See Appendix 3 of  Guide VI
+PREDPP.  Several  examples  are available for the use of MTIME with
+$DES. (See mtime, model time examples). (See Examples Using MTIME to
+Model Periodic Discontinuities in $DES).
 
-   - Global Variables in Modules (See Variables_in_Modules)
+See step_circexa.ctl in the NONMEM examples directory.
+
+See idr_circexa.ctl in the NONMEM examples directory.
+
+*** Global Variables in Modules.
+Certain variables in FORTRAN Modules can be used. The following are of particular interest.
      + DOSTIM: DOSTIM  is  the time of a lagged dose or additional
        dose to which the system is being advanced.  Abbreviated code
        in $DES may test  DOSTIM. It  may  use DOSTIM on the right,
@@ -129,9 +125,7 @@ displayed values are the final value of T.  Global variable  ISFINL
 is  set  by PREDPP  to  1  on  this  final call to DES.  ISFINL can be
 tested on a WRITE statement if such statements are used in DES.
 
-(See des).
+(See des, advan6, advan8, advan9)
 
-** REFERENCES
-Guide IV, section V.C.7
 ** REFERENCES
 Guide VI, section VI.C

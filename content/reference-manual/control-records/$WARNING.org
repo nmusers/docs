@@ -2,23 +2,17 @@
 {{< katex >}}{{< /katex >}}
 
 * $WARNINGS
-  Control  Display  of  NM-TRAN Warning, Data Warning and Data
+Control  Display  of  NM-TRAN Warning, Data Warning and Data
  Error messages.
-
-
-
-** USAGE
 
 #+begin_src perl
  $WARNINGS  [NONE] [n] [RESET | NORESET ]
             [WARNINGMAXIMUM= [ NONE | n | (list)] ]
             [DATAMAXIMUM= [ NONE | n | (list)] ]
             [ERRORMAXIMUM=n ]
-#+end_src
 
-** EXAMPLE
-#+begin_src perl
- $WARNING     WMAX=1,EMAX=9999
+;# EXAMPLE
+ $WARNING WMAX=1,EMAX=9999
 #+end_src
 
 ** DISCUSSION
@@ -31,18 +25,20 @@
 
 ** OPTIONS
 
-*** NONE Suppress all warning messages.
+*** NONE | n
+NONE: suppress all warning messages.
 
-*** n    Sets  WARNINGMAXIMUM=n, ERRORMAXIMUM=n, DATAMAXIMUM=n.  May be 0,
-      in which case it is the same as NONE.
+n: sets WARNINGMAXIMUM=n, ERRORMAXIMUM=n, DATAMAXIMUM=n. Setting to 0 is equivalent to NONE.
 
-*** LIST Print a list of all possible warning messages.  When this  option
-      is  present,  the  control stream must consist only of the single
-      record:
-       $WARNING LIST
+*** LIST
+Print a list of all possible warning messages.  When this  option is
+present,  the  control stream must consist only of the single record:
+#+begin_src perl
+  $WARNING LIST
+#+end_src
 
 *** WARNINGMAXIMUM
-      Refers to general (non-data) warning messages.  May also be coded
+Refers to general (non-data) warning messages.  May also be coded
       WARNMAXIMUM  and  shorter  substrings,  e.g.,  WMAX,   WARN.  May
       appear more than once, with cumulative effect.
 
@@ -62,8 +58,10 @@
            Sets the maximum number of messages  for  the  ith  and  all
            higher-numbered messages to zero.
 
-      Example:
+Example:
+      #+begin_src perl
       $WARNING     WMAX=1
+      #+end_src
       Sets the maximum for all non-data messages to 1.
 
 *** DATAMAXIMUM
@@ -76,27 +74,23 @@
       Refers to data error messages.  It can also be  coded  ERRMAXIMUM
       or  EMAXIMUM, and shorter strings, e.g., EMAX.  Each type of data
       error message will be displayed no more than n times (n>=0).  The
-      default  is  20.   Data  error messages can never be totally sup-
-      pressed.  With n=0 and n=1, NM-TRAN displays the first data error
+      default  is  20.   Data  error messages can never be totally suppressed.  With n=0 and n=1, NM-TRAN displays the first data error
       message and then terminates.
 
       Example:
+      #+begin_src perl
        $WARNING EMAX=99999
+      #+end_src
       Sets  the maximum number of data error messages displayed from 20
       to a much higher value, so that NM-TRAN will not terminate  until
       all data error conditions have been identified.
 
-*** RESET
-      All counts reset to 0 with each new problem. This is the default.
+*** RESET | NORESET
+RESET: all counts reset to 0 with each new problem. This is the default.
 
-*** NORESET
-      Counts  of  how many times a given message has been displayed are
+NORESET: counts  of  how many times a given message has been displayed are
       accumulated over problems.  (A new $WARNING record always  resets
       all counters, but they will not be automatically reset again with
       subsequent problems.)
 
- A $WARNING record with no options re-establishes  all  default  condi-
- tions as if no $WARNING records had been present.
-
-** REFERENCES
-None.
+A $WARNING record with no options re-establishes  all  default  conditions as if no $WARNING records had been present.

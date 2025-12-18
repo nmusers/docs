@@ -23,25 +23,22 @@
 This  record  specifies  the data set to be used.  It is required with
 the first problem specification.  It must precede  any  other  NM-TRAN
 control  record  that refers to specific data item types.  May also be
-coded $INFILE. Optional with the second or  subsequent  problem
-specifications. If the $DATA record is missing from the problem specification,
-the problem uses the same NONMEM data set as that used in the previous
-problem.  With the previous problem the user might have modified data items
+coded $INFILE.
+
+It optional with the second or subsequent problems.
+If omitted, NONMEM re-uses the data set from the previous problem.
+Note that with the previous problem the user might have modified data items
 from those found in the NONMEM data set at the beginning of that problem
 (e.g. the modification may have occurred in the
 simulation step, or in the initialization/finalization
-step - see Guide II, section D.2.2, Guide VI, section VI.A),
+step),
 and then the data set used in the current problem (NONMEM's internal
 copy of the data set) contains the modified
-data items.  Using an asterisk in the $DATA record, in place of the file
-name, has the same effect as omitting the $DATA record.  However, when
-one wants to use the =CHECKOUT= option, as well as use the NONMEM
-data set from the previous problem, the asterisk must be used.
-In this case no other options should be used.
+data items.
 
 ** OPTIONS
 
-*** filename
+*** filename | *
 Name  of  the  file  containing  the data set.  Must be the first
 option.  If it contains commas, semicolons, or parentheses,  then it
 must  be  surrounded  by  single quotes ' or double quotes ". Filename
@@ -70,8 +67,7 @@ DROP cannot be used, and the WIDE and NULL options may not be used.
 If a format is omitted, the NONMEM records can still be read, and a format
 specification which is appropriate for reading
 the NONMEM data records will be generated.
-In this case a NONMEM data set is found in FDATA (see Guide IV section II.B).
-
+In this case a NONMEM data set is found in @@html:<a href="/docs/reference-manual/files/#nmtran_output">file FDATA.</a>@@
 
 *** RECORDS=n1
 The number of records to be read from the NM-TRAN data set.  Comments are not counted.   If  NM-TRAN  does  not  drop  any
@@ -112,7 +108,7 @@ $DATA records may also include a format specification, or all of them must
 include the same format specification.
 
 *** LRECL=n2
-only needed when the format is omitted, and when either (i)
+Only needed when the format is omitted, and when either (i)
 the operating system (e.g. IBM/CMS) raises
 a fatal error when a FORTRAN program tries to read more characters from
 a logical record than the number
@@ -122,23 +118,15 @@ CRAY/CTSS).
 The number n2 is the number of characters in the NONMEM data
 records.
 
-*** IGNORE=c1
-      [Note: The following two options, IGNORE  and  ACCEPT  allow  the
-      user  to drop records from the NM-TRAN data set prior to the run.
-      With NONMEM 7.5, it is also possible to  drop  records  from  the
-      NONMEM  data  set  using abbreviated code, which is more flexible
-      than the criteria that can be specified in the $DATA record.
-      See PRED_IGNORE_DATA, below.]
-
+*** IGNORE=c1 [fn:1]
       Specifies that any data record having the character c1 in  column
       1  should be ignored, i.e., these records are not included in the
       NONMEM data set.  This allows comment records to be  included  in
       the  NM-TRAN  data set.  In general, records having the character
       c1 in column 1 will be called "comment records".
       Also permitted: IGNORE='c' or IGNORE="c",  where  c  may  be  any
-      character  except  space.   IGNORE=# is the default.  That is, in
-      the absence of IGNORE option, any record whose first character is
-      # is treated as a comment record.
+      character  except  space.  Default: "#".  Therefore when IGNORE
+      is omitted, records beginning with "#" is treated as a comment record.
 
       IGNORE=@  signifies  that  any  data  record having an alphabetic
       character or @ as its first non-blank character (not just in col-
@@ -174,7 +162,9 @@ records.
       file will be real values (0.0000E+00, 1.0000E+00, ...) in the ta-
       ble file.  A comparison for equality or inequality should now  be
       for the real value. E.g.
+      #+begin_src perl
       IGNORE=(OCC==1.0000E+00).
+      #+end_src
       With NONMEM 7 the default format for the table file is PE11.4, as
       in the examples above.  The FORMAT option of $TABLE may  be  used
       to  change  this and the values used in a subsequent  IGNORE will
@@ -200,8 +190,10 @@ records.
       of the DROP or SKIP synonym on the $INPUT record,  after  records
       are  dropped  due  to  a  condition  based on the data item type.
       E.g.,
+      #+begin_src perl
         $INPUT ... GEN=SKIP ...
         $DATA file IGNORE=(GEN='M')
+      #+end_src
       Records having GEN equal to 'M' will be dropped, and the GEN data
       item  type  will  then  be  omitted  from the NONMEM data set.  A
       dropped data item may be any alphanumeric string (without a  data
@@ -211,17 +203,20 @@ records.
       least one of these conditions will be dropped.   In  effect,  the
       conditions  for  dropping  a  record are connected by the implied
       conjunction ".OR.".  E.g.
+      #+begin_src f90
         IGNORE=(GEN.EQ.1,AGE.GT.60).
+      #+end_src
       Records having GEN equal to 1 or AGE greater than 60 are dropped.
       All others are accepted.
 
 *** ACCEPT=(list)
       The  ACCEPT  list  option is identical to the IGNORE list option,
       except that it specifies conditions for  acceptance  of  records.
-      An ACCEPT list cannot be used together with an IGNORE list.  How-
-      ever, it may be used with IGNORE=c, where c is a character.
+      An ACCEPT list cannot be used together with an IGNORE list.  However, it may be used with IGNORE=c, where c is a character.
       E.g.
+      #+begin_src f90
         ACCEPT=(GEN.EQ.1,AGE.GT.60).
+      #+end_src
       Records having GEN  equal  to  1  or  AGE  greater  than  60  are
       accepted.  All others are dropped.
 
@@ -230,17 +225,18 @@ records.
       by  using  an  ACCEPT  list with the negations of the conditions.
       For example, suppose that records to be ignored are those  having
       GEN=1 .AND. AGE > 60.  This may be done as follows:
+      #+begin_src f90
       ACCEPT=(GEN.NE.1,AGE.LE.60)
+      #+end_src
 
 *** PRED_IGNORE_DATA (NM75)
-Data records  may  be  dropped  using  by PRED or PREDPP using the
-PRED_IGNORE_DATA  block  of  abbreviated  code. See Chapter IV.E.6.
 This option informs  NONMEM that a PRED_IGNORE_DATA pass through the
 data set is  required.    If   the   abbreviated   code   uses
 variables PRED_IGNORE_DATA  or  PRED_IGNORE_DATA_TEST,  this option is
 supplied.  The  explicit  option  is  needed  if  the  use of   the
 PRED_IGNORE_DATA  variables  occurs  in  user-written or verbatim
 code, so that NMTRAN is unaware of it.
+
 (See Guide Introduction_7 "PRED_IGNORE_DATA Feature (NM75)")
 
 
@@ -250,8 +246,8 @@ replaced in the NONMEM data  set  by  the  character  c2.   E.g.,
 NULL=0. Null data items consist of a single dot (.) or consecutive
 commas or consecutive tab characters.  c2 may be  any  character
 except space (" ") or semicolon (";"). Also  permitted: NULL='c' or
-NULL="c", where c may be any charac- ter. If this option is omitted,
-NM-TRAN  replaces  each  null  with  a space. The default is a blank.
+NULL="c", where c may be any charac- ter. If omitted,
+NM-TRAN replaces  each  null  with  a space. Default: null/blank.
 
 *** NOWIDE | WIDE
 NOWIDE requests  that  NM-TRAN  attempt  to  limit FDATA to
@@ -271,7 +267,7 @@ problem specification of the NONMEM control stream, or on a $DATA record
 appearing in a subsequent problem specification when this record contains a
 file name different from that contained on the $DATA record of the prior
 problem specification.  In these cases the file is automatically rewound.
-The =REWIND= and =NOREWIND= options are significant only when there are
+These options are relevant only when there are
 multiple problem specifications in the NONMEM control stream, and when the
 $DATA records appearing in two consecutive problem specifications, corresponding
 to two problems A and B, contain the
@@ -314,8 +310,7 @@ is used, the replicated form of the data will appear in FDATA.csv.
 
 *** NOOPEN
       NM-TRAN will not open the named data file.  This permits the data
-      file to be created by one problem and used in a subsequent  prob-
-      lem  of the same run.  May not be used with options IGNORE, DROP,
+      file to be created by one problem and used in a subsequent  problem  of the same run.  May not be used with options IGNORE, DROP,
       or when data items ID, MDV, or EVID must be generated by NM-TRAN.
       With  NOOPEN,  a  format  specification is required.  No day-time
       translation takes place.
@@ -327,44 +322,49 @@ is used, the replicated form of the data will appear in FDATA.csv.
       One or two digit years <= LAST20 are assumed to be in the 2000's.
       E.g,.  suppose LAST20=50. Then two digit years are interpreted as
       follows:
+      #+begin_src f90
        00-50 = 2000-2050
        51-99 = 1951-1999
+      #+end_src
       LAST20=-1 can be used when two digit years span  the  year  2051.
       All  two  digit  years will be assumed to be in the same century.
-      If year is recorded with four digits, it is always processed cor-
-      rectly and the value of LAST20 is of no consequence.
+      If year is recorded with four digits, it is always processed correctly and the value of LAST20 is of no consequence.
 
 *** TRANSLATE=(list)
       "list"  describes modifications to be made to the contents of the
       data file.  It may contain one of:
+      #+begin_src f90
       TIME/F, TIME/F/D
+      #+end_src
       and/or one of
+      #+begin_src f90
       II/F, II/F/D
+      #+end_src
 
       F ("factor") may be an integer or a real value.  If F is  a  real
       number,  the  translated value in FDATA will have the same number
       of digits after the decimal point.  If F is an integer and  D  is
-      omitted, there will be 2 digits.  Alternately, the number of dig-
-      its may be specified explicitly by D ("digits").  If D is a  real
+      omitted, there will be 2 digits.  Alternately, the number of digits may be specified explicitly by D ("digits").  If D is a  real
       number,  it  is truncated to integer.  If D is specified as 0, it
-      defaults to 2.  The maximum value of D is 12.  The number of dig-
-      its that may be requested in F is limited by the precision of the
+      defaults to 2.  The maximum value of D is 12.  The number of digits that may be requested in F is limited by the precision of the
       computer.
 
       For example, either of the following can be used to request  val-
       ues of TIME in FDATA that have 4 digits to the right of the deci-
       mal point:
+      #+begin_src f90
       TIME/1.0000
       TIME/1/4
-
+      #+end_src
       Another example is
+      #+begin_src f90
       II/0.01/6
+      #+end_src
       which divides II values by 0.01, and writes 6 digits to the right
       of the decimal point.
 
       If F is specified as "24" (or 24.0..), the options involving TIME
-      (II) can be used to convert the units of  time  (of  the  steady-
-      state  interval)  from hours to days.  The TIME (II) data item is
+      (II) can be used to convert the units of  time  (of  the  steady-state  interval)  from hours to days.  The TIME (II) data item is
       first processed as if the option  were  not  present.   Then  the
       resulting value is divided by F.
 
@@ -374,42 +374,38 @@ is used, the replicated form of the data will appear in FDATA.csv.
       whether or not ":" appears in any II data value.
 
 *** BLANKOK
-      Specifies that blank lines are permitted in the NM-TRAN data set.
-      With all versions prior to NONMEM VI 2.0 a blank line was permit-
-      ted, and was copied to the NONMEM data set. A warning message was
-      issued.  With later versions, NM-TRAN stops with an error message
-      when there is a blank line  in  the  NM-TRAN  data  set.   Option
-
-      BLANKOK  restores  the  previous behavior.  There is no abbrevia-
-      tion. BLANKOK must be coded in full.
+Specifies that blank lines are permitted in the NM-TRAN data set. With
+all versions prior to NONMEM VI 2.0 a blank line was permit- ted, and
+was copied to the NONMEM data set. A warning message was issued.  With
+later versions, NM-TRAN stops with an error message when there is a
+blank line  in  the  NM-TRAN  data  set.   Option BLANKOK  restores
+the  previous behavior.  There is no abbreviation. BLANKOK must be
+coded in full.
 
 *** MISDAT=r (NM74)
       A numerical value indicating a missing data  value  in  the  data
       set,  which  is  displayed on $TABLE table outputs, but is safely
       interpreted as 0 by other steps of NONMEM. May be used up  to  20
       times.
-      Example: $DATA mydatafile MISDAT=1.0E-99 MISDAT=1.0E-102.
+      Example:
+      #+begin_src perl
+      $DATA mydatafile MISDAT=1.0E-99 MISDAT=1.0E-102.
+      #+end_src
 
 *** REPL=n (NM75)
       When  the REPL=n option of $DATA is coded, the NONMEM data set is
       considered to be a template data set.  NONMEM  itself  replicates
       the template data set n times at the start of the problem to cre-
-      ate an expanded NONMEM data set.
-      (Note that the NONMEM data set is typically the file FDATA gener-
-      ated  by  NM-TRAN.  If there is nothing for NM-TRAN to change and
-      the format is supplied on the $DATA record, the file named on the
-      $DATA  record  is  the  NONMEM data set.  See NONMEM Users Guide,
-      Part IV.)
+      ate an expanded NONMEM data set [fn:2].
+
       The REPL option may be used with the REPL_ data  item.   If  both
-      are  used  the REPL_ data item applies first, and the REPL option
-      applies second.
-      See REPL_ data item.
+      are  used  the @@html:<a href="/docs/reference-manual/data/#REPL_">REPL_ data item</a>@@ applies first, and the REPL option applies second.
+
       The REPL option and REPL_ data item are meant  to  be  used  with
       $SIMULATION or $DESIGN.
-      For  important  information,  see  Guide  Introduction_7  Section
-      "$DATA REPL".
-      (See Guide Introduction_7 "Extension to $DATA  IGNORE=st  filter-
-      ing")
+      For  important  information,  see  Guide  Introduction_7  Section "$DATA REPL".
+
+      (See Guide Introduction_7 "Extension to $DATA  IGNORE=st  filtering")
 
 *** NOFDATACSV (NM760)
       An  additional  file, FDATA.csv is produced that outputs the con-
@@ -435,13 +431,17 @@ is used, the replicated form of the data will appear in FDATA.csv.
 
  Note: The character ":" in TIME or II  data  items  requests  day-time
  translation  of  TIME  or  II  values. These values must have the form
- hh:mm (i.e., hours:minutes).  With NONMEM 7.3, values  may  also  have
- the form hh:mm:ss (i.e., hours:minutes:seconds).
- (See Guide IV, section II.C.2)
+ hh:mm or hh:mm:ss (NM73).
 
 ** REFERENCES
 See Guide Introduction_7 "$DATA NOFDATACSV (NM752)"
-See Introduction to NONMEM 7 and Guide VIII
 
-** REFERENCES
-Guide V, section 6.4
+[fn:1] The two options, IGNORE  and  ACCEPT  allow  the user  to drop
+records from the NM-TRAN data set prior to the run. With NONMEM 7.5,
+it is also possible to  drop  records  from  the NONMEM  data  set
+using abbreviated code, which is more flexible than the criteria that
+can be specified in the $DATA record. See PRED_IGNORE_DATA.
+[fn:2] Note that the NONMEM data set is typically the file FDATA gener-
+      ated  by  NM-TRAN.  If there is nothing for NM-TRAN to change and
+      the format is supplied on the $DATA record, the file named on the
+      $DATA  record  is  the  NONMEM data set.

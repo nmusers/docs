@@ -2,18 +2,13 @@
 {{< katex >}}{{< /katex >}}
 
 * $MODEL
- Specifies the MODEL subroutine of PREDPP.
-** USAGE
-
+Specifies the MODEL subroutine of PREDPP.
 #+begin_src perl
  $MODEL   [NCOMPARTMENTS=n1] [NEQUILIBRIUM=n2] [NPARAMETERS=n3]
           [COMPARTMENT=([name] [attribute1] [attribute2] ...)] ...
           [LINK compnamea [TO|AND] compnameb BY k [l]] ...
           [I_SS=n]
-#+end_src
-
-** EXAMPLE
-#+begin_src perl
+;# EXAMPLE
  $MODEL   NPARAMETERS=3
           COMP=(DEPOT DEFDOSE INITIALOFF) COMP=(CENTRAL DEFOBS NOOFF)
 #+end_src
@@ -23,7 +18,6 @@ Required with a general ADVAN (ADVAN5,6,7,8,9,13,14,15,16,17,18). It
 is only required for the first problem specification. It applies for
 all problem specifications in the control stream, and it must not
 appear with a problem specification other than the first.
-
 
 ** OPTIONS
 
@@ -52,9 +46,12 @@ recognized in the abbreviated code. In the case of a general nonlinear
 model and TRANS1, the number of basic parameters is the the largest
 subscript used with the P array in PK code, or the number of variables
 defined in PK abbreviated code and used in DES and/or AES abbreviated
-codes, whichever is greater. See next section C.5.
+codes, whichever is greater.
 
-*** COMPARTMENT= ([name] [attribute1] ...)
+*** COMPARTMENT
+#+begin_src perl
+COMPARTMENT= ([name] [attribute1] ...)
+#+end_src
 Each  COMPARTMENT  option defines a single compartment.  Compartments
 are numbered in the order in which they are  defined.  The name
 option gives the name for the compartment.  The name option may not be
@@ -62,8 +59,8 @@ one of the compartment attributes below, unless it  is enclosed in
 quotes (' or "). If  the  name  option  is not used, then the
 compartment is named "COMPn," where n is the compartment number.
 
-Attributes are chosen from the following list.
-
+Attributes are chosen from the following list. When not given, its
+opposite is the default.
 - INITIALOFF: Compartment is initially off.
 - NOOFF: Compartment may not be turned on or off.
 - NODOSE: Compartment may not receive a dose.
@@ -115,7 +112,7 @@ LINK A AND B BY k l
 #+end_src
 indicates a two-way distribution with rate constant k (A to B) and l (B to A).
 
-*** I_SS= n
+*** I_SS=n
 I_SS  may  be  used  with  the general non-linear models (ADVAN6,
       ADVAN8, ADVAN9, ADVAN13, ADVAN14, ADVAN15 ) to request  the  initial state feature of PREDPP.  Values of n are
   - I_SS=0: No initial state state (the default)
@@ -125,11 +122,11 @@ I_SS  may  be  used  with  the general non-linear models (ADVAN6,
 
 (See Initial Steady State: I_SS,ISSMOD).
 
-*** RECORD ORDER:
+** RECORD ORDER
  Follows $SUBROUTINES
  Precedes $PK (if present)
 
-*** SYMBOLIC LABEL SUBSTITUTIONS OF MODEL COMPARTMENTS  (NM75)
+** SYMBOLIC LABEL SUBSTITUTIONS OF MODEL COMPARTMENTS  (NM75)
 Compartment names defined in $MODEL are  automatically  available  for
 substitution  in  abbreviated code.  This is referred to as "implicit"
 compartment name substitution.  It is  an  alternative  to  "explicit"
