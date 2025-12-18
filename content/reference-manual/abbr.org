@@ -8,11 +8,11 @@ weight: 12
 
 * Abbreviated code
 
-Abbreviated  code  is  Fortran-like language within an NM-TRAN control
+Abbreviated  code  follows a subset of Fortran language syntax within an NM-TRAN control
 stream that is used to specify a model.  The $PRED, $PK, $ERROR, $DES,
 $AES, $AESINITIAL, $TOL, $MIX, and $INFN records each initiates a
 block of abbreviated code.  Such a block ends with either  the
-appearance  of another  record(beginning with a "$"), or end of the
+appearance  of another  record (beginning with a "$"), or end of the
 control stream. The code blocks in NONMEM 7.2+ versions are case-insensitive.
 
 ** Comments
@@ -31,6 +31,9 @@ NONMEM.  With NONMEM 7 a user-defined  variable  name  consists  of
 with a letter.  (The length 20 is specified by constant SD in SIZES)
 (See SIZES).
 
+User-define variables are used as the left-hand quantities in
+assignment (see below).
+
 All variables  are  all of double precision floating point type.
 
 ** Assignment
@@ -40,18 +43,25 @@ expression =B= in order to define a user-defined variable =A=.
 Permissible right-hand quantities =B= are expressions consisting of :
   - previously  defined  quantities,  including  declared variables
     that have also been used on the left side of an assignment
-    statement. (See $abbreviated);
-  - constants, e.g 1, 1.1, 3E+1 3E1, 3E01, 3E-1 3E-01, 3D+1, 3D1,  3D01, 3D-1 3D-01;
+    statement. (See $ABBREVIATED);
+  - constants [fn:4], e.g. 1, 1.1, 3E+1, 3E1, 3E01, 3E-1 3E-01, 3D+1, 3D1, 3D01, 3D-1, 3D-01;
   - THETA,  OMEGA  and  SIGMA elements, e.g. THETA(1), OMEGA(2,2).
     When the two subscripts for an OMEGA or SIGMA element are the
     same,  only one subscript is needed, e.g. OMEGA(2);
   - data items defined in the $INPUT record variables;
-  - ETA(n), EPS(n), ERR(n), which are understood to have mean 0 and
-    variances and covariances given by elements of the  OMEGA  and
-    SIGMA arrays.
+  - ETA(n), EPS(n), ERR(n), assummed with mean 0 and
+    covariances matrix specifed accordingly by OMEGA and
+    SIGMA. Except in certain blocks of abbreviated code  (i.e.
+    a  simulation block,   an   initialization   block,  a
+    finalization  block,  or  a pred_ignore_data block), the variables
+    are considered to be (the base) random
+    variables, and quantities defined in terms of these variables
+    (directly or indirectly) are  themselves random
+    variables.  NM-TRAN sets up computations for derivatives of random
+    variables with  respect  to  the  base  random variables.
   - operators =+= (add), =-= (substract,) =*= (multiply), =/=
     (divide), =**= (exponentiate);
-  - parentheses (). Parentheses  may  be  nested in the right-hand side of an assignment statement. Except in certain blocks of  abbreviated  code  (i.e.  a  simulation block,   an   initialization   block,  a  finalization  block  or  a pred_ignore_data block), the variables ETA(n),  EPS(n),  ERR(n)  are considered to be (the base) random variables, and quantities defined in terms of these variables (directly or indirectly) are  themselves considered to be random variables.  NM-TRAN sets up computations for derivatives of random variables with  respect  to  the  base  random variables.
+  - parentheses (), may  be  nested.
   - built-in  functions:  LOG (natural log), LOG10, EXP, SQRT, SIN, COS,
    ABS, TAN, ASIN, ACOS, ATAN, INT, MIN, MAX, MOD;
   - NONMEM functions: PHI, GAMLN.
@@ -74,176 +84,182 @@ computations of DADT (differential equations; with ADVAN 6, 8, 9,
 13, 14,  15,  16, 17, 18), then the funcions should be used
 instead in the PK routine, and model event time (MTIME)
 parameters be used to set flags for DES.
-     (See Model Time examples)
-     (See Cirdadian example)
-   abbreviated functions (see below)
-   subscripted variables (see below)
 
-With previous versions of NONMEM, constants are limited to 12
-characters.  With NONMEM 7 a constant may be up to 30 characters.
-(The length is specified by constant SCO in SIZES)
+See below "functions" and "subscripted variables".
 
-Left-hand quantities VECTRA(n), VECTRB(n), VECTRC(n) may be defined,
-and these become elements of  pre-defined  vectors  VECTRA,  VECTRB,
-VECTRC.   If  VECTRA, VECTRB, VECTRC is defined without a subscript,
-it is understood to be a simple variable.  A subscript  must  be  an
-integer constant, or a character string that is replaced by an integer
-constant using the $ABBR REPLACE feature.  Whereas  once  it  is
-defined,  a vector element may be used as a right-hand quantity - in
-the same way as any previously defined variable -  the vector itself
-may be used only as an argument to an abbreviated function.
+(See Model Time examples)
 
-   (See VECTORS and ABBREVIATED FUNCTIONS, below.)
+(See Cirdadian example)
 
-   Values may be assigned to certain special variables: RPTO, RPTON and
-   PRDFL - with the repetition feature
-   (See Repetition Variables);
-   SKIP_ (but only in a finalization block)  -  with  superproblems  or
-   subproblems
-   (See SKIP).
+Left-hand quantities =A= can be:
 
-   Variables,  constants,  and  functions  are  all of double precision
-   floating point type.
-
-   Except  in  certain  blocks  of  abbreviated code (i.e. a simulation
-   block, an initialization block, or a finalization block), a label in
-   an  $INPUT record may not appear on the left in an assignment state-
-   ment.
-
-   There is a reserved storage area of module NMPRD4, and when defining
-   the  kth  variable  in  this  area,  it may be referenced as COM(k).
-   Then, even if the variable is defined in terms of random  variables,
-   it is not regarded as being a random variable; derivatives of COM(k)
-   with respect to the base random variables are not computed.
-
- The general rules are:
-    One statement of abbreviated per line, starting anywhere on the line.
-    No statement numbers (unlike with FORTRAN).
-    Comments may be included on any line after the
-    No statement types other than assignment,
-    IF, THEN, ELSE, ELSEIF, ENDIF, DO WHILE,
-    ENDDO, CALL, WRITE, PRINT, RETURN, OPEN, CLOSE, REWIND.
-    (e.g., no GOTO, READ, FORMAT.)
+- VECTRA(n), VECTRB(n), VECTRC(n): they become elements of
+  pre-defined  vectors  VECTRA,  VECTRB, VECTRC.   If  VECTRA, VECTRB,
+  VECTRC is defined without a subscript, it is understood to be a
+  simple variable.  A subscript  must  be  an integer constant, or a
+  character string that is replaced by an integer constant using the
+  $ABBR REPLACE feature.  Whereas  once  it  is defined,  a vector
+  element may be used as a right-hand quantity -- in the same way as
+  any previously defined variable -- the vector itself may be used
+  only as an argument to an abbreviated function. (See VECTORS and
+  ABBREVIATED FUNCTIONS, below.)
+- Certain special variables: RPTO, RPTON and PRDFL - with the
+  repetition feature (See Repetition Variables); SKIP_ (but only in a
+  finalization block)  -  with  superproblems  or subproblems (See
+  SKIP).
+- =COM()= elements. (=COM= is a storage array  in module NMPRD4.
+   Even if assigned with a random variables,
+   NONMEM does not compute derivatives of =COM()= elements
+   with respect to the base random variables).
+- User-defined variables.
 
 
-    A special statement type, EXIT, is permitted.
+Variables,  constants,  and  functions  are  all of double precision floating point type.
 
-** =IF=
-   Conditional statements have one of two forms:
+Except  in  certain  blocks  of  abbreviated code (i.e. a simulation block, an initialization block, or a finalization block), a label in an  $INPUT record may not appear on the left in an assignment statement.
 
-   #+begin_src f90
-       IF (condition) assignment statement
-   #+end_src
-   or
-   #+begin_src f90
-       IF (condition) THEN
-          abbreviated code ...
-       ELSEIF (condition) THEN
-          abbreviated code ...
-       ELSE
-          abbreviated code ...
-       ENDIF
-   #+end_src
 
-   See below for a restriction on ELSEIF.
-   Conditions may include the operators .EQ., .NE., .LE.,  .GE.,  .LT.,
-   .GT.,  .AND., and .OR..  The arthmetic operators may be coded as ==,
-   /=, <=, >=, <, and >, respectively.  They  may  include  expressions
-   that  can  be  used  as right-hand quantities with assignment state-
-   ments.  They may not include parentheses except in such expressions.
-   Valid:   IF (Q.EQ.(R+C)/D) ...
-   Invalid:  IF (Q.EQ.R.AND.(C.GT.D.OR.E.EQ.F)) ...
+** Loop
+#+begin_src f90
+  DO WHILE( condition )
+  ...
+  ENDDO
+#+end_src
+With NONMEM 7, =DO-WHILE= may be used  in  all  blocks  of  abbreviated
+code.   =DO-WHILE=  marks the beginning of a set of statements that are
+executed repeatedly until the condition becomes false. The non-FORTRAN
+syntax DO WHILE(DATA)  is  permitted  in  $PRED  initialization  and
+finalization blocks, and in the $INFN record. (See
+Initialization-Finalization block).
 
-   With $PRED, $PK, and $ERROR records, a condition may test the  ICALL
-   argument.   However,  if  the test is IF (ICALL.EQ.2), then ELSE may
-   not be used.  Special rules apply.  For  more  detail,  see  SPECIAL
-   STATEMENTS (below), and help entries for these records.
+** Conditional
+Conditional statements have one of two forms:
 
-   A condition may also test certain variables defined in modules
-   (See Variables_in_modules, NONMEM_modules, PREDPP_modules).
+#+begin_src f90
+    IF (condition) assignment statement
+#+end_src
+or
+#+begin_src f90
+    IF (condition) THEN
+       abbreviated code ...
+    ELSEIF (condition) THEN
+       abbreviated code ...
+    ELSE
+       abbreviated code ...
+    ENDIF
+#+end_src
 
-   Abbreviated code in a particular THEN or ELSE clause may not contain
-   multiple definitions of the same random variable.  The code below is
-   invalid:
-      IF (condition) THEN
-      X=...an expression involving a random variable
-      X= ....
-      ENDIF
+See below for a restriction on ELSEIF.
 
-   Random variables cannot be defined within nested conditionals, i.e.,
-   within a conditional structure beginning with an IF  and  containing
-   another  IF.   The  use  of  ELSEIF ... THEN implies a nested condi-
-   tional.
+Conditions may include the operators .EQ., .NE., .LE.,  .GE.,  .LT.,
+.GT.,  .AND., and .OR..  The arthmetic operators may be coded as ==,
+/=, <=, >=, <, and >, respectively.  They  may  include  expressions
+that  can  be  used  as right-hand quantities with assignment
+statements.  They may not include parentheses except in such
+expressions.
+#+begin_src f90
+  ;! Valid:
+  IF (Q.EQ.(R+C)/D) ...
 
-   A special rule applies when random variables are defined via  condi-
-   tional  statements.  If a random variable is multiply defined within
-   a series of IF ... THEN structures, but all  conditions  are  false,
-   then  the  value  of the random variable is set to zero.  If an ELSE
-   appears, then not all conditions are false.
-   Consider two cases in which the following statements  are  the  only
-   ones defining TVK and K, respectively:
-      IF (WT.GT.0) TVK=THETA(1)*WT
-   If  the  condition is false, the non-random variable TVK retains the
-   value set with the previous data record.
-      IF (WT.GT.0) K=THETA(1)*WT*EXP(ETA(1))
-   If the condition is false, the value of the random variable K is set
-   to zero.
-   NM-TRAN prints a warning message when it detects such code.
+  ;!Invalid
+  IF (Q.EQ.R.AND.(C.GT.D.OR.E.EQ.F)) ...
+#+end_src
 
-   In  $PK, $ERROR, and $PRED records, recursion code may be used in an
-   explicit manner, as in this example:
+With $PRED, $PK, and $ERROR records, a condition may test the  ICALL
+argument.   However,  if  the test is IF (ICALL.EQ.2), then ELSE may
+not be used.  Special rules apply.  For  more  detail,  see  SPECIAL
+STATEMENTS (below), and help entries for these records.
 
-      IF (WT.GT.0) THEN
-        K=THETA(1)*WT*EXP(ETA(1))
-      ELSE
-        K=K
-      ENDIF
+A condition may also test certain variables defined in modules
+(See Variables_in_modules, NONMEM_modules, PREDPP_modules).
 
-   If the condition is false, K retains its value set with the previous
-   data record.
+Abbreviated code in a particular THEN or ELSE clause may not contain
+multiple definitions of the same random variable.  The code below is
+invalid:
 
-   Recursion  code  can  be  used in $PRED, $PK, and $ERROR records for
-   other purposes as well.  The following two fragments of code  illus-
-   trate how one can use abbreviated code to implement recursive kinet-
-   ics in $PRED.  The first example works with a single bolus dose  and
-   the second example works with single or multiple bolus doses.  Simi-
-   lar code can be used in $PK and $ERROR.
+#+begin_src f90
+  IF (condition) THEN
+  X=...an expression involving a random variable
+  X= ....
+  ENDIF
+#+end_src
 
-      K=THETA(1)*EXP(ETA(1))
-      IF (TIME.EQ.0) THEN
-        OLDA=AMT
-        T=TIME
-      ENDIF
-      A=OLDA*EXP(-K*(TIME-T))
-      OLDA=A
-      T=TIME
+Random variables cannot be defined within nested conditionals, i.e.,
+within a conditional structure beginning with an IF  and  containing
+another  IF.   The  use  of  ELSEIF ... THEN implies a nested condi-
+tional.
 
-      K=THETA(1)*EXP(ETA(1))
-      IF (TIME.EQ.0) THEN
-        A=AMT
-        T=TIME
-      ELSE
-        A=A*EXP(-K*(TIME-T))+AMT
-      ENDIF
-      T=TIME
+A special rule applies when random variables are defined via
+conditional  statements.  If a random variable is multiply defined
+within a series of IF ... THEN structures, but all  conditions  are
+false, then  the  value  of the random variable is set to zero.  If an
+ELSE appears, then not all conditions are false. Consider two cases in
+which the following statements  are  the  only ones defining TVK and
+K, respectively:
+#+begin_src f90
+  IF (WT.GT.0) TVK=THETA(1)*WT
+#+end_src
+If  the  condition is false, the non-random variable TVK retains the value set with the previous data record.
+#+begin_src f90
+  IF (WT.GT.0) K=THETA(1)*WT*EXP(ETA(1))
+#+end_src
+If the condition is false, the value of the random variable K is set
+to zero. NM-TRAN prints a warning message when it detects such code.
 
-   The above forms of recursion work for recursion from one data record
+In  $PK, $ERROR, and $PRED records, recursion code may be used in an explicit manner, as in this example:
+
+#+begin_src f90
+  IF (WT.GT.0) THEN
+    K=THETA(1)*WT*EXP(ETA(1))
+  ELSE
+    K=K
+  ENDIF
+#+end_src
+If the condition is false, =K= retains its value set with the previous
+data record. Recursion  code  can  be  used in $PRED, $PK, and $ERROR
+records for other purposes as well.  The following two fragments of
+code  illustrate how one can use abbreviated code to implement
+recursive kinetics in $PRED.  The first example works with a single
+bolus dose  and the second example works with single or multiple bolus
+doses.  Similar code can be used in $PK and $ERROR.
+#+begin_src f90
+  K=THETA(1)*EXP(ETA(1))
+  IF (TIME.EQ.0) THEN
+    OLDA=AMT
+    T=TIME
+  ENDIF
+  A=OLDA*EXP(-K*(TIME-T))
+  OLDA=A
+  T=TIME
+
+  K=THETA(1)*EXP(ETA(1))
+  IF (TIME.EQ.0) THEN
+    A=AMT
+    T=TIME
+  ELSE
+    A=A*EXP(-K*(TIME-T))+AMT
+  ENDIF
+  T=TIME
+#+end_src
+The above forms of recursion work for recursion from one data record
    to  the next ("inter-record" recursion).  It is also possible to use
-   recursion in a do-while loop ("intra-record", or  "do-while"  recur-
-   sion).
+   recursion in a do-while loop ("intra-record", or  "do-while"  recursion).
 
-   Example of a do-while recursive loop using a random variable:
+Example of a DO-WHILE recursive loop using a random variable:
 
-    TERM=THETA(1)*EXP(ETA(1))
-    SUM=0
-    DO WHILE(condition)
-    SUM=SUM+TERM
-    ...
-    ENDDO
-
-   A product loop such as
-     PROD=PROD*TERM
-   is  also  possible, as are other ways the dowhile recursive variable
+#+begin_src f90
+  TERM=THETA(1)*EXP(ETA(1))
+  SUM=0
+  DO WHILE(condition)
+  SUM=SUM+TERM
+  ...
+  ENDDO
+#+end_src
+A product loop such as
+#+begin_src f90
+  PROD=PROD*TERM
+#+end_src
+is  also  possible, as are other ways the dowhile recursive variable
    can be used, so long as the variable appears on both  sides  of  the
    equal sign within the DOWHILE loop: V= ... V ...
 
@@ -265,38 +281,37 @@ may be used only as an argument to an abbreviated function.
    message in ETEXT, which is reported in the NONMEM output report  and
    in  file  PRDERR.   With NONMEM 7.5 and later, k tells NONMEM how to
    handle EXIT statements during the Simulation Step.
+
    (See Simulation block).
+
    (See nmprd1)
 
-   The EXIT statement causes an immediate exit from the routine and, if
-   PREDPP  is being used, a subsequent immediate exit from PREDPP, with
-   a return to NONMEM.  It is typically used  in  an  IF  statement  to
-   avoid  further  computation  of  the  users  code when the values of
-   theta/eta's set by NONMEM are inappropriate  or  would  lead  to  an
-   arithmetic  exception.   If such an exit occurs during a Covariance,
-   Table or Scatterplot Step, or  during  computation  of  the  initial
-   value  of  the  objective  function, NONMEM will abort.  If the exit
-   occurs during an Estimation  or  Initial  Estimates  Step,  NONMEM's
-   action depends on the error return code value:
+The EXIT statement causes an immediate exit from the routine and, if
+PREDPP  is being used, a subsequent immediate exit from PREDPP, with a
+return to NONMEM.  It is typically used  in  an  IF  statement  to
+avoid  further  computation  of  the  users  code when the values of
+theta/eta's set by NONMEM are inappropriate  or  would  lead  to  an
+arithmetic  exception.   If such an exit occurs during a Covariance,
+Table or Scatterplot Step, or  during  computation  of  the  initial
+value  of  the  objective  function, NONMEM will abort.  If the exit
+occurs during an Estimation  or  Initial  Estimates  Step,  NONMEM's
+action depends on the error return code value:
 
-     n=1
-     Suppose  first  that  a  search  for  eta is not underway.  Then a
-     search for theta is underway, and when a search  is  underway  for
-     theta,  the following happens: If the NOABORT option is used, NON-
-     MEM will try to continue using different values  for  theta  (i.e.
-     "theta-recovery");  otherwise,  NONMEM  aborts.  If theta-recovery
-     fails, NONMEM aborts.
-     Next, suppose a search for eta is underway.  NONMEM  will  try  to
-     continue  using  different  values  for eta (i.e. "eta-recovery").
-     Suppose eta-recovery fails.  If a search for  theta  is  not  also
-     underway, NONMEM aborts.  Otherwise, the above procedure regarding
-     theta-recovery applies.
-     (See Guide VI, section III.K)
+  - n=1. Suppose  first  that  a  search  for  eta is not underway.
+    Then a search for theta is underway, and when a search  is
+    underway  for theta,  the following happens: If the NOABORT option
+    is used, NONMEM will try to continue using different values  for
+    theta  (i.e. "theta-recovery");  otherwise,  NONMEM  aborts.  If
+    theta-recovery fails, NONMEM aborts. Next, suppose a search for
+    eta is underway.  NONMEM  will  try  to continue  using  different
+    values  for eta (i.e. "eta-recovery"). Suppose eta-recovery fails.
+    If a search for  theta  is  not  also underway, NONMEM aborts.
+    Otherwise, the above procedure regarding theta-recovery applies.
+    (See Guide VI, section III.K)
 
-     n=2
-     NONMEM aborts immediately.
+  - n=2. NONMEM aborts immediately.
 
-   If NONMEM aborts, and k>0, a user message such as the  following  is
+If NONMEM aborts, and k>0, a user message such as the  following  is
    printed in the output:
    "PK SUBROUTINE: USER ERROR CODE = k"
    This  message  is  intended  to help the user distinguish which EXIT
@@ -430,81 +445,52 @@ spaces, and may contain at most 71 characters.
  files to units), see the Language Reference Manual and the Users
  Guide for your compiler.
 
-** =DO WHILE=
-#+begin_src f90
-DO WHILE( condition )
-#+end_src
-With NONMEM 7, DOWHILE may be used  in  all  blocks  of  abbreviated
-code.   DOWHILE  marks the beginning of a set of statements that are
-executed repeatedly until the condition is false.  The ending of the
-set of statements is marked by the statement ENDDO.  The non-FORTRAN
-syntax DO WHILE(DATA)  is  permitted  in  $PRED  initialization  and
-finalization blocks, and in the $INFN record. (See
-Initialization-Finalization block).
-
-
-** Special statements
-Optional.   Each of these special statements is permitted in special blocks of abbreviated code.
-(See Initialization-Finalization block, Simulation block).
-(See Expectation block, Data_Average block).
-(See Data_ingnore block).
-
-*** =PASS=
+** =PASS=
 #+begin_src f90
 CALL PASS(MODE)
 #+end_src
-must be coded exactly as shown.  May be used only in $PRED
+may be used only in $PRED
 initialization-finalization blocks, and in $INFN records.  If present,
 MODE becomes a reserved variable with type INTEGER, and may not  be
 used outside the block(s).
 
-*** =SUPP=
+** =SUPP=
 #+begin_src f90
 CALL SUPP(ie,ic)
 #+end_src
-must be coded as shown, with constant integer values 0 or 1 in place
-of ie and ic.  A value 1 for ie  (ic)  suppresses  output  from  the
-Estimation  (Covariance) step.  A value 0 does not suppress the output
+=ie= and =ic= are of integer values 0 or 1.  Value 1 of =ie= / =ic=  suppresses  output  from  the
+Estimation/Covariance step.  A value 0 does not suppress the output
 from the step.  May be used only in $PRED  initialization-finalization
-blocks, and in $INFN records.  The ie (ic) value remains in force
+blocks, and in $INFN records.  The =ie= / =ic= value remains in effect
 until changed by a call to SUPP.
 
-*** =RANDOM=
+** =RANDOM=
 #+begin_src f90
 CALL RANDOM(n,R)
 #+end_src
-must be coded as shown, with a constant integer value 1-10 in  place
-of  n.  The value is the number of the random source.  R is a random
-number from this source.  May be used only in Simulation and
+=n=: integer 1-10.  It is the number of the random source. =R=: a
+random number from this source.  May be used only in Simulation and
 Expectation  blocks.  If present, R becomes a reserved variable with
 type REAL, and may not be used outside the block(s).
 
-*** =SIMETA=
+** =SIMETA=, =SIMEPS=
 #+begin_src f90
 CALL SIMETA(ETA)
-#+end_src
-must be coded exactly as shown.  May  only  be  used  in  Simulation
-blocks.   Note  that  NM-TRAN  itself provides the minimum necessary
-call to SIMETA.  This statement is used in abbreviated code only  to
-obtain  a different value of ETA, e.g., so that the eta distribution
-may be truncated:
-#+begin_src f90
-    DO WHILE (ETA(1).GT.5)
-       CALL SIMETA(ETA)
-    ENDDO
-#+end_src
 
-*** =SIMEPS=
-#+begin_src f90
 CALL SIMEPS(EPS)
 #+end_src
-Must be coded exactly as shown.  May  only  be  used  in  Simulation
-blocks.   Note  that  NM-TRAN provides the minimum necessary call to
-SIMEPS.  This statement is used in abbreviated code only to obtain a
-different  value of EPS, e.g., so that the distribution may be
-truncated (see SIMETA above).
+May  only  be  used  in  Simulation
+blocks.   Note  that  NM-TRAN  itself provides the minimum necessary
+call to SIMETA/SIMEPS.  This statement is used in abbreviated code only  to
+obtain  a different value of ETA/EPS, e.g., so that the ETA distribution
+may be truncated:
+#+begin_src f90
+  DO WHILE (ETA(1).GT.5)
+     CALL SIMETA(ETA)
+  ENDDO
+#+end_src
 
-*** =RETURN=
+** =RETURN=
 #+begin_src f90
    RETURN
 #+end_src
@@ -512,17 +498,23 @@ may  be  used in all special blocks.  RETURN statements must be used
 with caution because they by-pass certain normal  final  actions  of
 the routine.
 
-*** =PRED_IGNORE_DATA= block
-Another  kind  of special block is the pred_ignore_data block, which may be part of $PRED,$PK, or $INFN blocks.   It  uses  the  reserved variables  PRED_IGNORE_DATA_TEST  and  PRED_IGNORE_DATA.  By setting values of PRED_IGNORE_DATA=1 for certain  data  records,  it  causes these records to be dropped from the NONMEM data set.  Ordinary Fortran syntax is used in such blocks.
-   (See PRED_IGNORE_DATA block)
-   (See Guide Introduction_7 "Extension to $DATA IGNORE=st filtering")
+** =PRED_IGNORE_DATA= block
+Another  kind  of special block is the pred_ignore_data block, which
+may be part of $PRED,$PK, or $INFN blocks.   It  uses  the  reserved
+variables  PRED_IGNORE_DATA_TEST  and  PRED_IGNORE_DATA.  By setting
+values of PRED_IGNORE_DATA=1 for certain  data  records,  it  causes
+these records to be dropped from the NONMEM data set.  Ordinary
+Fortran syntax is used in such blocks.
+
+(See PRED_IGNORE_DATA block)
+
+(See Guide Introduction_7 "Extension to $DATA IGNORE=st filtering")
 
 ** Vectors
 The $ABBR FUNCTION and $ABBR  VECTOR  feature  allows  the  user  to
 declare the names of user-defined functions and  the names and sizes
 of user-defined argument vectors.  Restrictions such as  the  number
-of  user functions, the number of elements in a vector, and the num-
-ber of times a given function may appear  in  abbreviated  code  are
+of  user functions, the number of elements in a vector, and the number of times a given function may appear  in  abbreviated  code  are
 more flexible and may be modified by the user.
 
 Reserved variable names VECTRA, VECTRB, VECTRC, etc. may be used for
@@ -533,23 +525,21 @@ basic PK parameter.
 
 ** Functions
 User-defined function's names must be of form =FUNCx=, with =x=
-being =A=, =B=, ... etc. [fn:3] [fn:4] [fn:5]
+being =A=, =B=, ... etc. [fn:3]
  #+begin_src f90
    FUNCTION FUNCA(X,X1,X2)
    DOUBLE PRECISION X,X1,X2,FUNCA
-   DIMENSION X(9),X1(9),X2(9,9)    ! The constant "9" must be used exactly as shown.
+   DIMENSION X(9),X1(9),X2(9,9)    ! dimension must be 9.
    ...
  #+end_src
 
 In abbreviated code, the function is referenced with a single
 argument, either a (scalar) expression  or a vector.  Certain reserved
-names such as VECTRA, VECTRB, etc.  may be used in the abbreviated
-code, but the name of the argument is  not  in the  code defining the
-function.  (See abbreviated code).  In the code defining the function,
-the function has three arguments.
+names such as VECTRA, VECTRB, etc.  may be used in the function
+definition, but they are not passed to the function as arguments. The
+function returns =FUNCx= and has three arguments:
 
   - =X=:  input argument (can be a vector).
-  - =FUNCx=: function return.
   - =X1=:  =X1(n)= is  the  first-partial  derivative  of  the  function  with
       respect to the nth element of =X=, =X(n)=.
       If  the  value  of =X(n)= is not value of a random variable, =X1(n)= need not be set.
@@ -572,13 +562,15 @@ the function has three arguments.
  $SUBROUTINES ... OTHER=funcfile
  #+end_src
 
-If the abbreviated code uses one of these reserved function names, but the  user  does  not  supply the code via $SUBR OTHER, the NONMEM executable will be created, but there will be an  error  message  in  the
- NONMEM report file such as:
+If the abbreviated code uses one of these reserved function names, but
+ the  user  does  not  supply the code via $SUBR OTHER, the NONMEM
+ executable will be created with an  error  message  in  the
+ report file such as:
  #+begin_src txt
  FUNCA WAS CALLED, BUT NO CODE WAS SUPPLIED.
  #+end_src
 
- (See Abbreviated function example).
+(See Abbreviated function example).
 
 In NONMEM v7.4+, the  $ABBR  FUNCTION  allows the user to declare the
 name of the function, the name of the vector of input arguments (which
@@ -591,8 +583,7 @@ arguments.
  $ABBR FUNCTION function_name(input_vector_name,dimension,usage)
 #+end_src
 
- (See $ABBREVIATED).
- (See VECTORS and ABBREVIATED FUNCTIONS)
+(See $ABBREVIATED).
 
 The function should be coded as follows:
 
@@ -628,23 +619,16 @@ function).
 
 ** Pseudo assignment
 
-   Pseudo-assignment  statements  are optional and provide certain spe-
-   cial instructions.  If present, they must appear (in any  order)  at
-   the beginning of a record, before the rest of the essential abbrevi-
-   ated code comprising that record.  They may be enclosed in parenthe-
-   ses, but two or more pseudo-assignment statements enclosed by paren-
-   theses must be separated by a semicolon ";".  The following  pseudo-
-   statement may be used in all records except $MIX.
+   Pseudo-assignment  statements  are optional and provide certain special instructions.  If present, they must appear (in any  order)  at
+   the beginning of a record, before the rest of the essential abbreviated code comprising that record.  They may be enclosed in parentheses, but two or more pseudo-assignment statements enclosed by parentheses must be separated by a semicolon ";".  The following  pseudostatement may be used in all records except $MIX.
 
    COMRES=-1  :  All  quantities  defined in abbreviated code are to be
    stored locally; they are not to be stored  in  the  (global)  MODULE
    NMPRD4.
    (Variables  in  MODULE  NMPRD4 can be used for communication between
-   various user-routines, and can be displayed in tables  and  scatter-
-   plots.)
+   various user-routines, and can be displayed in tables  and  scatterplots.)
 
-   See  the  entries for specific records for information about pseudo-
-   assignment statements special to those records.
+   See  the  entries for specific records for information about pseudo-assignment statements special to those records.
 
 ** Reserved variables
 Entries for $PRED, $PK,  $ERROR,  $DES,
@@ -1027,12 +1011,10 @@ are stored as floating point variables in generated and library
 routines.
 
 [fn:3] With NONMEM VI 2.0, reserved function names are FUNCA  through
-FUNCC. reserved names for vectors are VECTRA through VECTRC.
-
-[fn:4] With NONMEM 7.3, reserved function names are FUNCA through FUNCI.
-
-[fn:5] With  NONMEM  7.4,  reserved  function  names are FUNCA through
-FUNCZ. Reserved names for vectors are VECTRA through VECTRZ. Extended
+FUNCC. reserved names for vectors are VECTRA through VECTRC; With
+NONMEM 7.3, reserved function names are FUNCA through FUNCI; With
+NONMEM  7.4,  reserved  function  names are FUNCA through FUNCZ.
+Reserved names for vectors are VECTRA through VECTRZ. Extended
 reserved names are also recognized. These are FUNCxy and FUNCxyz,
 where each of x, y, z  stands  for  an  alphabetic character  A-Z,
 e.g.,  FUNCAB  or FUNCABC.  Similar extended reserved names for
@@ -1041,7 +1023,11 @@ abbreviated code uses one of these extended  reserved  function names,
 but the user does not supply the code via $SUBR OTHER, the NONMEM
 executable cannot be created, and there will be an  error  message
 from the Fortran compiler such as:
- #+begin_src txt
- Undefined Symbols
- _funcaaa_
- #+end_src
+#+begin_src txt
+Undefined Symbols
+_funcaaa_
+#+end_src
+
+[fn:4] In NONMEM v7+ a constant may be up to 30 characters
+(The length is specified by constant SCO in SIZES). Previous versions limit constants to 12
+characters.

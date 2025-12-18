@@ -30,6 +30,48 @@ REFERENCES: (CRIT) Guide II, section C.6
 
 REFERENCES: (INFN) Guide VI, section VI.A , Figure 37
 
+** ICALL
+ICALL is  an  argument  passed by NONMEM to user-supplied
+subroutines CCONTR, CONTR, CRIT, PRED, PRIOR and MIX. It is also
+selectively passed to PK,  ERROR,  and  INFN. It can  be  used  in
+$PK, $ERROR, and $PRED abbreviated code.  The discussion below
+describes the values of ICALL as seen by PRED.
+
+- ICALL=-1: the routine has been called for the PRED_IGNORE_DATA
+  feature of  NONMEM  7.5.   One  call per data record, at the start
+  of the run. These  calls  occur  only   if   abbreviated   code
+  uses   variables PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if
+  the PRED_IGNORE_DATA option of $DATA is used.  Otherwise, there are
+  no calls to  PRED  with ICALL=-1.
+
+- ICALL=0:  the routine has been called for initialization at the
+  beginning of the NONMEM run; one such call per run.
+
+- ICALL=1: the routine has been called for initialization at the
+  beginning of a NONMEM problem; one such call per problem.
+
+- ICALL=2:  the routine has been called for a prediction. Multiple
+  calls occur.
+
+- ICALL=3: the routine has been called for finalization at the end of
+  a NONMEM problem; one such call per problem.
+
+- ICALL=4:  the routine has been called during the Simulation Step;
+  multiple calls occur, as with ICALL=2.
+
+- ICALL=5: the routine has been called when expectations are being
+  computed; multiple calls occur.
+
+- ICALL=6:  the routine has been called when raw data averages are
+  being computed; multiple calls occur.
+
+- Note: Some subroutines are called with only a subset of  the  possible values of ICALL.
+
+- REFERENCES: Guide  I, section C,4.2; Guide IV, section IV.D ,
+  IV.E.1; Guide VI, section III.C , IV.B.1
+
+
+
 ** CONTR
 USAGE:
 #+begin_src f90
@@ -279,16 +321,14 @@ Output argument:
       The derivative of g(k) with respect to T.
 
 Also see variables in NONMEM modules, NONMEM-PRED modules, and  PREDPP
- modules.
- (See variables in modules)
- In particular,
- (See DES AES: ICALL,IDEFD,IDEFA)
+ modules, particular
+ @@html:<a href="/docs/reference-manual/api/variables/#des-aes-icall">DES AES: ICALL,IDEFD,IDEFA</a>@@.
 
  REFERENCES: Guide IV, section V.C.8 , V.C.9
  REFERENCES: Guide VI, section VI.E
 
 
-**  DES
+** DES
 For  use  with ADVAN 6,8,9,13,14,15,16,17,18, called by PREDPP to evaluate right-sides of differential equations.
 #+begin_src f90
  USAGE:
@@ -301,51 +341,57 @@ For  use  with ADVAN 6,8,9,13,14,15,16,17,18, called by PREDPP to evaluate right
 #+end_src
 Input argument:
 
-- A(n) The amount in the nth compartment at time T.
+  - A(n) The amount in the nth compartment at time T.
 
-- P(n) The value of the nth PK parameter.
+  - P(n) The value of the nth PK parameter.
 
-- T:    Time. T takes values continuously over an integration interval.
+  - T:    Time. T takes values continuously over an integration interval.
 
 Output argument:
 
-- DADT(n)
-      The derivative with respect to T of the nth compartment's amount.
-      It is important to note that PREDPP itself adds in the rates  for
-      any infusions that may be active.
+  - DADT(n)
+        The derivative with respect to T of the nth compartment's amount.
+        It is important to note that PREDPP itself adds in the rates  for
+        any infusions that may be active.
 
-      It  is  possible to introduce drug into a compartment by explicit
-      terms in a differential equation,  rather  than  by  PREDPP  dose
-      event records.  Drug introduced in this manner is not included by
-      PREDPP in the computation of the  output  compartment.   Specifi-
-      cally,  the amount in the output compartment may be thought of as
-      being calculated by summing all relevant  doses  from  the  INPUT
-      file  (i.e.,  those  that precede the time of the present record,
-      accounting for bioavailability), subtracting all amounts  present
-      in  compartments other than the output compartment, and then mul-
-      tiplying the result by the output fraction parameter.
+        It  is  possible to introduce drug into a compartment by explicit
+        terms in a differential equation,  rather  than  by  PREDPP  dose
+        event records.  Drug introduced in this manner is not included by
+        PREDPP in the computation of the  output  compartment.   Specifi-
+        cally,  the amount in the output compartment may be thought of as
+        being calculated by summing all relevant  doses  from  the  INPUT
+        file  (i.e.,  those  that precede the time of the present record,
+        accounting for bioavailability), subtracting all amounts  present
+        in  compartments other than the output compartment, and then mul-
+        tiplying the result by the output fraction parameter.
 
-      For example, suppose differential equations were used for ADVAN2,
-      rather than the analytic solution.  They would be:
-      DADT(1)=-P(3)*A(1)
-      DADT(2)= P(3)*A(1)-P(1)*A(2)
+        For example, suppose differential equations were used for ADVAN2,
+        rather than the analytic solution.  They would be:
+        #+begin_src f90
+        DADT(1)=-P(3)*A(1)
+        DADT(2)= P(3)*A(1)-P(1)*A(2)
+        #+end_src
 
-- DA(n,j)
-      The  derivative  of  DADT(n) with respect to A(j). Continuing the
-      above example,
-      DA(1,1)=-P(3)
-      DA(2,1)= P(3)
-      DA(2,2)=-P(1)
+  - DA(n,j)
+        The  derivative  of  DADT(n) with respect to A(j). Continuing the
+        above example,
+        #+begin_src f90
+        DA(1,1)=-P(3)
+        DA(2,1)= P(3)
+        DA(2,2)=-P(1)
+        #+end_src
 
-- DP(n,j)
-      The derivative of DADT(n) with respect to  P(j).  Continuing  the
-      above example,
-      DP(1,3)=-A(1)
-      DP(2,3)= A(1)
-      DP(2,1)=-A(2)
+  - DP(n,j)
+        The derivative of DADT(n) with respect to  P(j).  Continuing  the
+        above example,
+        #+begin_src f90
+        DP(1,3)=-A(1)
+        DP(2,3)= A(1)
+        DP(2,1)=-A(2)
+        #+end_src
 
-- DT(n)
-      The derivative of DADT(n) with respect to T.
+  - DT(n)
+        The derivative of DADT(n) with respect to T.
 
 The  format  of arrays DA, DP, DT described above is called "full
 format".  Alternately, compact format may be used  (See prdde1).   It
@@ -353,9 +399,9 @@ is the  default format for these arrays.  A description of compact
 format is beyond the scope of this document, but is described in  the
 NONMEM 7.4 version of Guide VI, Appendix IV. Compact Arrays in DES.
 
-See variables in NONMEM modules, NONMEM-PRED modules, and PREDPP modules.
- (See variables in modules)
-In particular, (See DES AES: ICALL,IDEFD,IDEFA)
+Also see variables in NONMEM modules, NONMEM-PRED modules, and  PREDPP
+ modules, particular
+ @@html:<a href="/docs/reference-manual/api/variables/#des-aes-icall">DES AES: ICALL,IDEFD,IDEFA</a>@@.
 
  REFERENCES: Guide IV, section V.C.7
 
@@ -549,7 +595,6 @@ finalization computations.  The version distributed with PREDPP  is  a
 "stub"  or  "dummy" routine that does nothing. It may be replaced by a
 user-written code.
 
-
 Input/Output argument:
 
 - ICALL
@@ -580,11 +625,11 @@ Input/Output argument:
 INPUT ARGUMENTS:
 
 - DATREC
-       DATREC CONTAINS THE FIRST DATA RECORD  OF  THE  CURRENT  PROBLEM.
-       (AT  ICALL=0,  THE  CURRENT PROBLEM IS THE FIRST PROBLEM.)  USING
-       PASS (SEE BELOW), THE CONTENTS OF DATREC ARE  REPLACED  BY  OTHER
-       DATA  RECORDS  FOR  THE CURRENT PROBLEM, ALLOWING ALL THESE OTHER
-       RECORDS TO BE READ AND EVEN MODIFIED.
+       DATREC contains the first data record  of  the  current  problem.
+       (at  icall=0,  the  current problem is the first problem.)  using
+       pass (see below), the contents of datrec are  replaced  by  other
+       data  records  for  the current problem, allowing all these other
+       records to be read and even modified.
 
 - THETA
        The NONMEM THETA vector.
@@ -848,25 +893,24 @@ Output argument:
 
 - IDEF: stores values only when ICALL=1. Values may be stored in the following elements:
   + IDEF(1,1)=-9  (required)
-  + IDEF(1,2) is the call limiting element (compare $PK's CALLFL).
-  Values are:
-    + -2:  call  with every event record and at additional and lagged dose times.
-    + -1: call with every event record (default)
-    +  0: call with first event record and new TIME values
-    +  1: call once per individual record
+  + IDEF(1,2) is the call limiting element (compare $PK's CALLFL). Values are:
+    - -2:  call  with every event record and at additional and lagged dose times.
+    - -1: call with every event record (default)
+    -  0: call with first event record and new TIME values
+    -  1: call once per individual record
+    Compartment initialization may be performed by routine PK.
 
-  Compartment initialization may be performed by routine PK.
-
-  An initial steady state may be requested by routine PK;
+    An initial steady state may be requested by routine PK;
       (See Initial Steady State: I_SS,ISSMOD)
       (See i_ss, initial_condition).
-      The value in IDEF(1,3) describes whether PK performs  compartment
+
+  + IDEF(1,3) describes whether PK performs  compartment
       initialization,  i.e.,  whether or not PK initializes elements of
       the initial state vector A_0(n).  Values are:
-        -1: PK may initialize A_0.
-         0: PK does not initialize A_0.
-         1: PK does initialize A_0.
-      The default used by PREDPP is IDEF(1,3)=-1.  However,  when  com-
+    - -1: PK may initialize A_0.
+    -  0: PK does not initialize A_0.
+    -  1: PK does initialize A_0.
+    The default used by PREDPP is IDEF(1,3)=-1.  However,  when  com-
       partment  initialization is not implemented, then if IDEF(1,3) is
       set to  0,  PREDPP  can  avoid  some  time-consuming  processing.
       Indeed,  when  $PK  abbreviated or verbatim code is supplied, and
@@ -876,13 +920,14 @@ Output argument:
 
       Compartment amounts may be used by routine PK;
       (See State Vector: A).
-      The value in IDEF(1,4) describes whether PK uses  derivatives  of
+
+  + IDEF(1,4) describes whether PK uses  derivatives  of
       compartment amounts (e.g. compartment amounts themselves are used
       as random variables in arithmetic statements in PK).  Values are:
-        -1: PK may use derivatives of compartment amounts.
-         0: PK does not use derivatives of compartment amounts.
-         1: PK uses derivatives of compartment amounts.
-      The default used by PREDPP is IDEF(1,4)=-1.  However, when deriv-
+    - -1: PK may use derivatives of compartment amounts.
+    -  0: PK does not use derivatives of compartment amounts.
+    -  1: PK uses derivatives of compartment amounts.
+    The default used by PREDPP is IDEF(1,4)=-1.  However, when deriv-
       atives  of compartment amounts are not used, then if IDEF(1,4) is
       set to  0,  PREDPP  can  avoid  some  time-consuming  processing.
       Indeed,  when  $PK  abbreviated or verbatim code is supplied, and
@@ -890,32 +935,28 @@ Output argument:
       metic  statement)  in  the abbreviated code (or to derivatives of
       A(n) in the verbatim code), then NM-TRAN sets IDEF(1,4)=0.
 
-      Remaining elements contain row numbers in GG:
-      IDEF(2,1): row number of F0 (output fraction)
-      IDEF(2,2): row number of XSCALE (Time Scale)
-      IDEF(2,3): row number of lowest-numbered MTIME
-      IDEF(2,4): row number of highest-numbered MTIME
-      IDEF(3,n): row number of Sn (Scale for comp. n) (thru n+1 output)
-      IDEF(4,n): row number of Fn (bioavailability fraction for comp. n)
-      IDEF(5,n): row number of Rn (modeled rate for comp. n)
-      IDEF(6,n): row number of Dn (modeled duration for comp. n)
-      IDEF(7,n): row number of ALAGn (absorption lag for comp. n)
+  + Remaining elements contain row numbers in GG:
+    - IDEF(2,1): row number of F0 (output fraction)
+    - IDEF(2,2): row number of XSCALE (Time Scale)
+    - IDEF(2,3): row number of lowest-numbered MTIME
+    - IDEF(2,4): row number of highest-numbered MTIME
+    - IDEF(3,n): row number of Sn (Scale for comp. n) (thru n+1 output)
+    - IDEF(4,n): row number of Fn (bioavailability fraction for comp. n)
+    - IDEF(5,n): row number of Rn (modeled rate for comp. n)
+    - IDEF(6,n): row number of Dn (modeled duration for comp. n)
+    - IDEF(7,n): row number of ALAGn (absorption lag for comp. n)
 
 - GG  The array of PK parameters and their eta derivatives.  The  maxi-
       mum  number  of rows in GG is given by IRGG, which is the same as
       constant PG found in file SIZES (See sizes).
-      At ICALL = 2:
-      GG(k,1,1) contains the value of the kth parameter.
-      GG(k,i+1,1) contains its derivative with respect to the ith eta.
-      GG(k,i+1,j+1) contains its second derivative with respect to  the
-      ith eta and the jth eta (lower-triangular; j=1, ..., i).  (Second
-      derivatives are only needed  with  estimation  by  the  Laplacian
-      method.)
-      At ICALL = 4:
-      GG(k,1,1)  contains  the  individual-specific  value  of  the kth
-      parameter.  Other columns of GG need not be computed.
+  + At ICALL = 2:
+     - GG(k,1,1) contains the value of the kth parameter.
+     - GG(k,i+1,1) contains its derivative with respect to the ith eta.
+     - GG(k,i+1,j+1) contains its second derivative with respect to  the ith eta and the jth eta (lower-triangular; j=1, ..., i).  (Second derivatives are only needed  with  estimation  by  the  Laplacian method.)
+  + At ICALL = 4:
+      GG(k,1,1)  contains  the  individual-specific  value  of  the kth parameter.  Other columns of GG need not be computed.
 
- Also see variables in NONMEM modules, NONMEM-PRED modules, and  PREDPP
+Also see variables in NONMEM modules, NONMEM-PRED modules, and  PREDPP
  modules.
  (See variables in modules)
 
@@ -961,17 +1002,14 @@ Input argument:
     PRED_IGNORE_DATA option of $DATA is used.  Otherwise, there are no
     calls to  PRED  with ICALL=-1.
 
-
   + ICALL=0:  PRED  has  been  called  for  initialization purposes at
     the beginning of the NONMEM run; one such call per run.   DATREC
     contains the  first  data  record.  THETA contains the initial
     estimates.  PRED need not compute F, G, or H.
 
-
   + ICALL=1: PRED has been  called  for  initialization  purposes  at
     the beginning  of a NONMEM problem; one such call per problem.
     Otherwise, identical to ICALL=0.
-
 
   + ICALL=2: For the data record contained in DATREC, PRED has been
     called for  the  purpose  of computing F, the value of the
@@ -981,14 +1019,12 @@ Input argument:
     compute F.   With  conditional  estimation, to obtain ETA values,
     PRED should call GETETA.
 
-
-   + ICALL=3:  PRED has been called for finalization purposes at the
+  + ICALL=3:  PRED has been called for finalization purposes at the
      end of a NONMEM problem; one such call per (sub)problem.  DATEC
      contains  the first  data  record.   THETA contains the final
      estimates.  Otherwise, identical to ICALL=0.
 
-
-   + ICALL=4: For the data record contained in DATREC, PRED has been
+  + ICALL=4: For the data record contained in DATREC, PRED has been
      called during the Simulation Step for the purpose of computing a
      value of the dependent variable and, possibly,  values  of
      independent  variables, appropriate  for  the record.  PRED
@@ -997,8 +1033,7 @@ Input argument:
      used  to compute F.  PRED should call SIMETA (and SIMEPS) to
      obtain simulated values of ETA (and EPS).
 
-
-    + ICALL=5: For the data record contained in DATREC, PRED has been
+  + ICALL=5: For the data record contained in DATREC, PRED has been
       called for the purpose of computing the expectation of the PRED
       item and possibly, the expectations of other PRED-defined items,
       appropriate  for the  record.  Such a call occurs when the
@@ -1011,7 +1046,8 @@ Input argument:
       contains  the final  estimates.  The expectations in question
       are over possible values of ETA, and to obtain ETA values, PRED
       should call GETETA.
-    + ICALL=6:  PRED has been called for the purpose of  computing
+
+  + ICALL=6:  PRED has been called for the purpose of  computing
       the  raw data average of the DV data items and, possibly, the
       raw data averages of PRED-defined items.  Such a call occurs
       when the raw-data data item (RAW_)  is defined in the data set

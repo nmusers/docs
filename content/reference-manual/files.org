@@ -204,44 +204,363 @@ and Guide I, section B.2.
  |#OBJN (NM73) | Indicates that following it, on the same line, is the nonparamet- ric objective function value.|
  |#CPUT (NM73) | Total CPU time.  It is an accurate representation of the computer usage, whether single or parallel process.  The same problem when run singly or in parallel will report a similar cpu  time.   This is  in  contrast with elapsed time, which is improved with parallelization.|
 
- With NONMEM 7, raw and additional output files are generated  to  capture parts of the report file.
+** Raw output file
+ With  NONMEM 7, a NONMEM run produces several additional output
+ files. These provide a more efficient way  of  way  of  extracting
+ numerical results  from  the  analysis  than  by  obtaining them from
+ the NONMEM report file.
 
- The raw output file is called root.ext, or named by the FILE option of the $ESTIMATION record. (See raw_output_file).
+ Names of the files start with "root", where root is the root name
+ (not including  extension)  of the NM-TRAN control stream file given
+ at the nmfe7 command line, or root="nmbayes" if the control stream
+ file  name is  not passed as an argument to the NONMEM executable.
+ E.g., in this example the root is myexample.
+  #+begin_src sh
+ nmfe7 myexample.ctl myexample.res
+ #+end_src
+ The raw output file ("root.ext") will be named myexample.ext
 
- The additional output files capture portions of the report file. (See
- additional_output_file). They are listed in the same order as in
- additional_output_fil.
+ A different name for this file may be specified using  the
+ FILE=filename  option of the $ESTIMATION record.  This filename is
+ used for all subsequent problems, until a new FILE=filename option is
+ coded.   The raw output file is only generated if the $ESTIMATION
+ record is present and accumulates information from each Estimation
+ step.
 
-| root.phi                          |
-| root.iph (NM75)                   |
-| root.phm (NM72)                   |
-| root.shk (NM72)                   |
-| root.shm (NM73)                   |
-| root.grd (NM72)                   |
-| root.xml (NM72)                   |
-| root.cov                          |
-| root.clt (NM74)                   |
-| root.cor                          |
-| root.coi                          |
-| root.cnv (NM72)                   |
-| root.smt (NM72)                   |
-| root.rmt (NM72)                   |
-| root.imp (NM73)                   |
-| root.npd (NM73)                   |
-| root.npe (NM73)                   |
-| root.npi (NM73)                   |
-| root.npl (NM74)                   |
-| root.fgh (NM73)                   |
-| root.agh (NM73)                   |
-| root.vpd (NM74)                   |
-| root.ets (NM74)                   |
-| root.bfm (NM75)                   |
-| root.cpu (NM73)                   |
-| msfroot_ETAS                      |
-| msfroot_RMAT, msfroot_SMAT (NM73) |
+ The first two lines of each file is the same.  First is a header  line that begins with the word TABLE, such as:
+
+ #+begin_src txt
+ TABLE NO.     n:
+ #+end_src
+
+ These  tables  are  not  related  to  the  ones produced by the
+ $TABLE record.  The value of n is incremented each time the
+ Estimation  Step is  implemented,  i.e.,  once per $ESTIM record,
+ when MAXEVAL is not 0 and $EST is not omitted.  The $EST records may
+ be in the same problem, or  in  subsequent  problems.  If $COV is
+ present in a problem without $EST (e.g., when $MSFI is used), then n
+ is also incremented.
+
+ Next on the header line is the analysis text (same  as  given  on
+ the #METH: line in the report file), e.g., "First Order".
+
+ In  the  raw  output  file,  the analysis text is followed by the goal function text (same as given on the #OBJT: line in the  report  file), e.g.,
+ #+begin_src txt
+ Goal Function=MINIMUM VALUE OF OBJECTIVE FUNCTION
+ #+end_src
+ At the end of the header line is:
+ #+begin_src txt
+ Problem=1 Subproblem=0 Superproblem1=0 Iteration1=0
+           Superproblem2=0 Iteration2=0
+ #+end_src
+
+ The  values  of Problem, Subproblem, Superproblem1, Iteration1,
+Superproblem2, Iteration2 are the same values as would be found in the
+following variables in modules during the run:
+#+begin_src txt
+IPROB IREP S1NUM S1IT  S2NUM S2IT
+#+end_src
+ (See Problem_Iteration_Counters).
+
+ The second line of the raw output file contains the column headers for the table, all on one line.
+
+ Options NOTITLE and NOLABEL and FORMAT of the $ESTIMATION  record  can be  used  to  supress the first and/or second lines, and to modify the format of the values in the table.  They apply to raw  and  additional output  files,  but only for the current Estimation Step.  The options must be re-specified with each $EST record.
+
+ Values of the Parameters and of the  objective function are printed to the raw output file every PRINT iterations.  The default order is: ITERATION  THETA,  SIGMA,  OMEGA, OBJ (Objective function).  Values of Sigma and Omega  are in the original parameterization, as in the  file INTER.   The  option  ORDER  of  the $ESTIMATION record may be used to change the order of THETA, SIGMA, and OMEGA.
+ (See order_option).
+
+ The iteration number, which is the first value in every line, is
+ typically  positive,  but  also may be negative under the following
+ conditions:
+
+      - The burn-in iterations of the MCMC Bayesian analysis are given
+        negative values, starting at -NBURN, the number of burn-in
+        iterations requested by the user.   These  are  followed  by
+        positive iterations of the stationary phase.
+
+      - The stochastic iterations of the SAEM analysis are given
+        negative values.  These are followed by positive  iterations
+        of  the accumulation phase.
+
+      - Iteration  -1000000000  (negative one billion) identifies the
+        line that contains the final result (thetas, omegas, and
+        sigmas, and  objective  function)  of the particular analysis.
+        These are the value in the NONMEM  output  file  that  are
+        labelled  FINAL PARAMETER ESTIMATE.  The order is theta,
+        sigma, omega.
+
+      - Iteration  -1000000001  identifies the line that contains the
+        standard errors of the final population  parameters.   These
+        are the  value  in  the NONMEM output file that are labelled
+        STANDARD ERROR OF ESTIMATE.  The order is theta, sigma, omega.
+        This  line is  present  if  the  Covariance  Step  is
+        successful,  or  with METHOD=BAYES.
+
+      - Iteration -1000000002 identifies the line  that  contains  the
+        eigenvalues  of  the  correlation  matrix of the variances of
+        the final parameters.
+
+      - Iteration -1000000003 identifies the line  that  contains
+        thet condition  number  , lowest, highest, Eigenvalues of the
+        correlation matrix of the variances of the final parameters.
+
+      - Iteration -1000000004 identifies the line  that  contains  the
+        OMEGA and SIGMA elements in standard deviation/correlation
+        format.
+
+      - Iteration  -1000000005  identifies the line that contains the
+        standard errors to the OMEGA and SIGMA elements in standard
+        deviation/correlation format.
+
+      - Iteration -1000000006 identifies the line that indicates 1 if parameter was fixed in estimation, 0 otherwise.
+
+      - Iteration -1000000007 lists termination status  (first  item) followed by termination codes.
+        In nm73, termination status catalogs the error status. For
+        traditional analyses, an error number is listed. If negative,
+        the analysis was user-interrupted. For EM/Bayes analysis, error numbers map as follows:
+           + 0,4: optimization was completed
+           + 1,5: optimization not completed (ran out of iterations)
+           + 2,6: optimization was not tested for convergence
+           + 3,7: optimization was not tested  for  convergence  and  was user interrupted
+           + 8,12:  objective  function  is  infinite  or  all individual objective fuctions are zero. problem ended
+           + 16,20: All individual objective fuctions are  zero.  problem ended
+           + 4,5,6,7,12,20: reduced stochastic/stationary portion was not completed prior to user interrupt
+
+      - Iteration -1000000008 lists the  partial  derivative  of  the likelihood  (-1/2OFV)  with  respect to each estimated parameter. This may be useful for using tests like the  Lagrange  multiplier test.
+
+      See the description of root.xml in Guide INTRODUCTION TO NONMEM 7 for versions 7.4 and higher.
+
+A file simliar to the raw output file is root.cnv.  This file contains convergence information for the Monte Carlo/EM methods, if CTYPE>0:
+
+      - Iteration  -2000000000  identifies the line that contains the
+        mean of last CITER values (mean objective  function  is  that
+        of second to last CITER values)
+
+      - Iteration  -2000000001  identifies the line that contains the
+        standard deviation of last CITER values (for objective
+        function, STD of second to last CITER values)
 
 
- REFERENCES: Guide Introduction_7
+      - Iteration  -2000000002  identifies the line that contains the
+        linear regression p-value of last CITER values against
+        iteration number.  (for objective function, p-value of second
+        to last CITER values)
+
+
+      - Iteration -2000000003 identifies the line  that  contains  the
+        Alpha used to assess statistical significance (p-value<alpha)
+
+      Please note the following: The Sigma values are in their Cholesky
+      format, as this is the form in which convergence of these  values
+      are  tested.  The Alpha are those based on ones actually used for
+      convergence test of that parameter, or which would have been used
+      on that parameter if CTYPE were of proper type.  The alpha may be
+      bonferoni corrected because of multiple comparisons, depending on
+      number  of parameters that were tested or would have been tested.
+      Objective function alphas are not bonferoni corrected.
+
+      For importance sampling and  iterative  two  stage,  the  average
+      objective  function listed in root.cnv could be used as an alter-
+      native to the  final  objective  function  for  likelihood  ratio
+      tests.
+
+REFERENCES: Guide Introduction_7
+
+** Additional output files
+  - root.ext
+      Always.  (See above "raw output file").
+
+  - root.phi
+      Always.   Individual phi parameters (phi(i)=mu(i)+eta(i), for ith
+      parameter), and their variances phc(,).  For  parameters  not  MU
+      referenced  phi(i)=eta(i).  When  a classical method is performed
+      (FOCE, Laplace), then mode of posterior eta(i) are  printed  out,
+      along  with  their Fisher information (first order expected value
+      for FOCE, second order for Laplace)  assessed  variances  etc(,).
+      For ITS, these parameters are the modes of the posterior density,
+      with first-order approximated expected variances (or second order
+      variances  if  $EST METHOD=ITS LAPLCE is used).  For IMP, IMPMAP,
+      SAEM methods, they are the Monte Carlo evaluated conditional mean
+      parameters  and  variances  of the parameters under the posterior
+      density.  For MCMC Bayesian, they are random  single  samples  of
+      phi(),  as of the last position. Their variances are zero.  Individual objective function values (obji) are also produced.  As of
+      NONMEM 7.4, if $EST PHITYPE=1 is specified, then conditional mean
+      etas are reported in the phi table. regardless  of  the  analysis
+      method.
+
+  - root.iph (NM75)
+      As of nm75, samples of phi/eta are collected at each BAYES iteration, and summarized to provide conditional mean phi and phc() in
+      the  root.phi table, as described above. By default, the individual phi values from each iteration are not  stored.  However,  if
+      you set
+      $EST ... BAYES_PHI_STORE=1
+      then  phi and eta values from each BAYES iteration will be stored
+      in root.iph. For non-mixture problems, only records of SUBP=0 are
+      recorded,  as  there are no sub-population divisions. For mixture
+      problems, the SUBP=0 records contain the composite phis and  etas
+      (the  average  of these across all non-negative iterations are in
+      the root.phi table), and the SUBP>0 records contain the phis  and
+      etas  appropriate  to  each  sub-population  SUBP (the average of
+      these across all non- negative iterations are in the root.phm table).  The  root.iph file can become quite large, so it should be
+      used only on the final analysis.
+
+  - root.phm (NM72)
+      Individual phi/eta/obji parameters per sub-population.  This file
+      is  only  produced  in  $MIXTURE  problems.  As of nm75, for MCMC
+      Baysian analysis, the items listed in this table consist  of  the
+      average  values  among  all  the iterations during the stationary
+      distribution phase. Before nm75, the values consisted  of  values
+      from the last MCMC iteration.
+
+  - root.shk (NM72)
+      This  file presents composite eta shrinkage and epsilon shrinkage
+      information, the same as given in the NONMEM report file  between
+      the  #TERM:  and #TERE: tags, but in rows/column format, and with
+      adjustable formatting.
+      (See shrinkage).
+
+  - root.shm (NM73)
+      This file is a shrinkage map describing which etas were  included
+      or excluded in the eta shrinkage assessment.  (See shrinkage).
+
+  - root.grd (NM72)
+      Gradient values for classical NONMEM methods.  Always.
+
+  - root.xml (NM72)
+      An  XML markup version of the contents of the NONMEM report file.
+      The rules by which it is constructed are given in output.xsd  and
+      output.dtd.
+
+  - root.cov
+      Full  variance-covariance  error  matrix  of  thetas, sigmas, and
+      omegas.  Same as "COVARIANCE MATRIX OF ESTIMATE"  in  the  NONMEM
+      report  except  that  it  is full (NONMEM displays only the lower
+      triangle), elements that are fixed or not estimated are displayed
+      as  0  (NONMEM  displays  them  as .....), and, when the data are
+      individual, sigma is displayed as  0  (NONMEM  does  not  display
+      sigma  at  all.)   Only  generated  if  the $COVARIANCE record is
+      present.
+      (See covariance matrix of estimate).
+      (See Covariance_Output_files).
+      (See order_option).
+
+  - root.clt (NM74)
+      The lower-triangular portion of the  variance-covariance  of  the
+      parameter  estimates  reported  in root.cov. This is provided for
+      easier pasting of the information as theta priors  for  a  subsequent  analysis.   Only  generated  if  the $COVARIANCE record is
+      present.
+
+  - root.cor
+      Full correlation matrix of thetas, sigmas, and omegas.   Same  as
+      "CORRELATION   MATRIX  OF  ESTIMATE",  except  as  described  for
+      root.cov.
+      (See correlation matrix of estimate).
+
+  - root.coi
+      Full inverse covariance matrix (Fischer information  matrix)  for
+      thetas,  sigmas,  and omegas.  Same as "INVERSE COVARIANCE MATRIX
+      OF ESTIMATE" except as described for root.cov.
+
+  - root.cnv (NM72)
+      Convergence  information  for  the  Monte  Carlo/EM  methods,  if
+      CTYPE>0.
+      (See raw_output_file).
+
+  - root.smt (NM72)
+      Contains the S matrix, if  $COV step failed.
+
+  - root.rmt (NM72)
+      Contains the R matrix, if  $COV step failed.
+
+  - root.imp (NM73)
+      Produced if the user selects importance sampling with option IACCEPT=0.0.  Contains the final IACCEPT and DF values  that  NONMEM
+      selected for each subject.
+
+  - root.npd (NM73)
+      For  NONPARAMETRIC method.  Each row contains information about a
+      support point.
+
+  - root.npe (NM73)
+      For NONPARAMETRIC method.  The expected value etas  and  expected
+      value  eta  covariances (ETC) are listed for each problem or subproblem.
+
+  - root.npi (NM73)
+      For  NONPARAMETRIC  method.   The  individual  probabilities  are
+      listed.  Each row contains information about a support point.
+
+  - root.npl (NM74)
+      For  NONPARAMETRIC  method.  The individual data likelihoods (not
+      including the parameter density) are listed in this file.
+
+  - root.fgh (NM73)
+      This file is produced  if  the  user  selects  $EST  NUMDER=1  or
+      NUMDER=3.   The  file lists the numerically evaluated derivatives
+      of Y with respect to eta, where
+
+      F=Y (the prediction)
+      G(I,1)=partial Y with respect to eta(i))
+      G(I,J+1)=Second derivatives of Y with respect to eta(i),eta(j)
+      H(I,1)=partial Y with respect to eps(i)
+      H(i,j+1)=partial Y with respect to eps(i),eta(j)
+
+      The values are those used in the Estimation Step.   Values  of  F
+      are  computed  by PRED with eta=0 if METHOD=0 is used;  otherwise
+      they are computed with non-zero etas: the Conditional (CPE) etas,
+      empirical  bayes  estimates  (EBE), mode a posteriori (MAP) estimates) or conditional mean  etas,  depending  on  the  Estimation
+      Method.   Values  of  G are computed by NONMEM via finite differences using these values of F and eta.  Values of H are  computed
+      by  NONMEM  with  the  same values of F and eta if INTERACTION is
+      specified; otherwise, they are computed with eta=0.
+
+  - root.agh (NM73)
+      This file is produced  if  the  user  selects  $EST  NUMDER=2  or
+      NUMDER=3.   The file lists the analytically evaluated derivatives
+      of Y with respect to eta.  The format and order is  the  same  as
+      file  root.fgh.  The values are those returned by subroutine PRED
+      in arguments F, G, and H.  These are 0 if not computed  by  PRED.
+      (E.g.  second  derivatves  are  not  computed analytically with a
+      method other than  LAPLACIAN.)   Values  in  root.agh  correspond
+      exactly  to  those  in  root.fgh.  That is, values of F and G are
+      from calls to PRED with eta=0 or with non-zero etas, as described
+      above.   Values  of H are from calls to PRED with the same values
+      of eta if INTERACTION is  specified;  otherwise,  they  are  from
+      calls to PRED with eta=0, regardless of the Estimation method.
+
+  - root.vpd (NM74)
+      This file is produced if the $TABLE file option VARCALC=1 or VARCALC=2 is used.  It is the full variances- covariances among  all
+      user-defined  and  PREDPP  parameters.   The FORMAT used for this
+      file is that defined in the $EST record.
+
+  - root.ets (NM74)
+      As of NM74, one can obtain random samples of individual etas, and
+      uses  these  for  covariate  and  model diagnostics.  $EST option
+      ETASAMPLES=1 causes individual ISAMPLE  random  eta  samples  per
+      subject,  to  be written to  root.ets, where root is the root name
+      of the control stream file.
+      See "Stochastic  Approximation  Expectation  Maximization  (SAEM)
+      Method" in Guide Introduction_7.
+
+  - root.bfm (NM75)
+      When  OFVTYPE=8  during  optimal  design  ($DESIGN OFVTYPE=8) the
+      progress of average  individual  conditional  variances  (average
+      empirical  Bayes  conditional variance) are shown in the root.bfm
+      file (where root is name of control stream file), and  the  final
+      one on the -1000000000 line, during an optimization. The RAW file
+      (by default named root.ext) which shows only  the  starting,  and
+      final  values of the standard errors of population parameters, as
+      extra information.
+
+  - root.cpu (NM73)
+      The cpu time in seconds is reported in this file.  It is an accurate representation of the computer usage, whether single or parallel process.  The same problem when run singly or  in  parallel
+      will report a similar cpu time.  This is in contrast with elapsed
+      time, which is improved with parallelization.
+
+ With NONMEM 7.3 and higher, the $THETAI and  $THETAR  records  may  be
+ used  to transform initial and final estimates of THETA, respectively.
+ This will affect values in the .ext, .cov, etc. files
+ (See $thetai, $thetar)
+
+REFERENCES: Guide Introduction_7
+
+
 ** Output quantities
 *** PRED-defined items
 PRED-defined items, including PK-defined and ERROR-defined items can
@@ -270,7 +589,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
  |-----------------------------------+---------+----------------------+----------------------|
  | $SIMULATION                       | initial | 0                    | typical              |
  |-----------------------------------+---------+----------------------+----------------------|
- | $SIMULATION  ... ONLYSIM          | initial | simulated*           | simulated            |
+ | $SIMULATION  ... ONLYSIM          | initial | simulated [fn:1]      | simulated            |
  |-----------------------------------+---------+----------------------+----------------------|
  | $NONPARAMETRIC ETAS               | final   | nonparametric (CNPE) | nonparametric (CNPE) |
  |-----------------------------------+---------+----------------------+----------------------|
@@ -946,13 +1265,87 @@ ETABAR (\(\bar{\eta}\)) is output when a conditional population estimation  meth
   P VAL.:         9.1763E-01  9.8175E-01  9.8946E-01
 #+end_src
 The  ith  number  listed  after "ETABAR" is the sample average (across
-individuals) of the conditional estimates of the ith ETA, and the  ith
+individuals) of the conditional estimates of the ith eta, and the  ith
 number  listed  after  "SE"  is  the  standard error for this average.
-The population average of the the conditional estimates  is
-approximately zero, thus ETABARs from a well-specified model are
-approximately 0. This can be assessed by the provided P-value.
+Under the assumed model, the population average of the the conditional
+estimates  is approximately zero.  If the model is well-specified, the
+sample average should be near 0. (but see below for a mixture  model).
+The  P-value helps one assess whether the sample average is "far"
+from 0.  A value under 0.05, for example, indicates such an average
+(notice the value 0.32E-02).
 
- REFERENCES: Guide VII, section II.A , III.D
+With  a  mixture  model, the ith eta is understood to have a different
+distribution for each subpopulation of the mixture.  Accordingly,
+different  instances of the above output will appear, one for each of
+the different subpopulations.  Using a standard Bayesian-type
+computation, each  individual is classified into one of the
+subpopulations, and the conditional estimate of the ith eta under the
+model for this  subpopulation is used in the sample average for that
+subpopulation.  If under the mth submodel, the ith eta does not
+influence  the  data  from  any individual,  but it does influence the
+data from some individual under some other submodel, then the sample
+average for the ith eta  for  the mth  submodel  will  be 0.  If the
+ith eta does not influence the data from any individual under any
+model, then the sample average  for  the ith  eta for the mth submodel
+will usually be 0, but it will not be if (i) the ith eta is correlated
+with an eta that influences  some  individual's  data  under  the  mth
+submodel, and (ii) that individual is classified to be in the mth
+subpopulation.
+
+
+The population average of the conditional estimates is  only
+approximately  zero  because a conditional estimate is a (Bayesian)
+posterior mode, and not a posterior expectation.  However with a
+mixture  model, with  the  estimate for a given individual, the
+posterior distribution is that for the subpopulation into which the
+individual is classified, and due to possible missclassification the
+expectation of the estimate may be even "further from" zero than with
+a  nonmixture  model.   For this  reason  too,  the  centered FOCE
+method may not work well with a mixture model.
+
+
+With a mixture model, or with a nonmixture model, one may implement  a
+second  Estimation  Step  (in a subsequent problem), and then a second
+ETABAR estimate (EB2) can be obtained, with  which  the  first  ETABAR
+estimate  (EB1)  can be compared.  If the data-analytic model is
+wellspecified, the two estimates should represent nearly  the  same
+quantity.   Using  an option on the $ESTIMATION record, the second
+P-value assesses the magnitude of the difference between EB1 and EB2,
+and a Pvalue  under  0.05  would  suggest that the data-analytic model
+is not well-specifed.  To obtain EB2, a data set is simulated under
+the  fitted  model, and EB2 is obtained using this data set.  Both EB1
+and EB2 are (univariate) measures of central tendency of the
+distribution  of interindividual  "residuals", i.e. the distribution
+of the conditional estimates of the etas.  In both cases the
+residuals  are  defined  in terms  of  the  data-analytic model.  But
+for EB1, the distribution is governed by the true (unknown) model, and
+for EB2, the distribution is governed by the fitted  model.  If the
+two models are "close", EB1 and EB2 will be close.  The conditional
+estimates of  the  etas  from  the simulated  data  should be based on
+the population parameter estimates from these data.  It may cost
+considerable CPU  time  to  obtain  this second  set of parameter
+estimates, and so it may not always be feasible to compute EB2.
+
+
+One proceeds by constructing a problem specification that
+1. includes the same $INPUT record as was used with a previous  problem wherein EB1 was obtained;
+2. includes  an  $MSFI  record specifying a model specification file from that previous problem, so that in particular, EB1 is available;
+3. includes a $SIMULATION record with the option TRUE=FINAL, so  that a  data  set will be simulated using the final parameter estimate from that previous problem;
+4. includes a $ESTIMATION record with  the  option  ETABARCHECK  (and
+   either the option METHOD=COND or METHOD=HYBRID).
+
+A  data  set  will  be  simulated, and EB2 will be obtained.  With the
+ ETABARCHECK option, the P-value for the  difference  EB2-EB1  will  be
+ computed.   Otherwise,  if  the  model  is  a nonmixture model, EB1 is
+ ignored, and the P-value will be simply that for EB2, and if the model
+ is a mixture model, no P-value will be output (only the standard error
+ for EB2 will be  output).   The  numbers  of  data  and/or  individual
+ records in the simulated data set may differ from those for the previous problem; so if desired, this data set can be much larger than  the
+ real data set.
+
+REFERENCES: Guide VII Section II.A, III.D
+
+REFERENCES: Guide VII, section II.A , III.D
 *** Final estimate
 NONMEM output always include FINAL PARAMETER ESTIMATE. When the
 Estimation Step was not run, then output  are  the initial parameter
@@ -985,8 +1378,7 @@ step is not run.
 
 (See initial parameter estimate).
 
-With NONMEM 7.3 and higher, the $THETAR record may be used  to  trans-
-form  final  estimates of THETA before they are reported in the NONMEM
+With NONMEM 7.3 and higher, the $THETAR record may be used  to  transform  final  estimates of THETA before they are reported in the NONMEM
 output.
 
 (See $thetar).
@@ -1156,169 +1548,6 @@ Shrinkage are output between #TERM and #TERE entries.
 
 REFERENCES: Guide Introduction_7
 
-** Raw output file
- With  NONMEM 7, a NONMEM run produces several additional output
- files. These provide a more efficient way  of  way  of  extracting
- numerical results  from  the  analysis  than  by  obtaining them from
- the NONMEM report file.
-
- (See additional_output_file).
-
- Names of the files start with "root", where root is the root name
- (not including  extension)  of the NM-TRAN control stream file given
- at the nmfe7 command line, or root="nmbayes" if the control stream
- file  name is  not passed as an argument to the NONMEM executable.
- E.g., in this example the root is myexample.
-  #+begin_src sh
- nmfe7 myexample.ctl myexample.res
- #+end_src
- The raw output file ("root.ext") will be named myexample.ext
-
- A different name for this file may be specified using  the
- FILE=filename  option of the $ESTIMATION record.  This filename is
- used for all subsequent problems, until a new FILE=filename option is
- coded.   The raw output file is only generated if the $ESTIMATION
- record is present and accumulates information from each Estimation
- step.
-
- The first two lines of each file is the same.  First is a header  line that begins with the word TABLE, such as:
-
- #+begin_src txt
- TABLE NO.     n:
- #+end_src
-
- These  tables  are  not  related  to  the  ones produced by the
- $TABLE record.  The value of n is incremented each time the
- Estimation  Step is  implemented,  i.e.,  once per $ESTIM record,
- when MAXEVAL is not 0 and $EST is not omitted.  The $EST records may
- be in the same problem, or  in  subsequent  problems.  If $COV is
- present in a problem without $EST (e.g., when $MSFI is used), then n
- is also incremented.
-
- Next on the header line is the analysis text (same  as  given  on
- the #METH: line in the report file), e.g., "First Order".
-
- In  the  raw  output  file,  the analysis text is followed by the goal function text (same as given on the #OBJT: line in the  report  file), e.g.,
- #+begin_src txt
- Goal Function=MINIMUM VALUE OF OBJECTIVE FUNCTION
- #+end_src
- At the end of the header line is:
- #+begin_src txt
- Problem=1 Subproblem=0 Superproblem1=0 Iteration1=0
-           Superproblem2=0 Iteration2=0
- #+end_src
-
- The  values  of Problem, Subproblem, Superproblem1, Iteration1,
-Superproblem2, Iteration2 are the same values as would be found in the
-following variables in modules during the run:
-#+begin_src txt
-IPROB IREP S1NUM S1IT  S2NUM S2IT
-#+end_src
- (See Problem_Iteration_Counters).
-
- The second line of the raw output file contains the column headers for the table, all on one line.
-
- Options NOTITLE and NOLABEL and FORMAT of the $ESTIMATION  record  can be  used  to  supress the first and/or second lines, and to modify the format of the values in the table.  They apply to raw  and  additional output  files,  but only for the current Estimation Step.  The options must be re-specified with each $EST record.
-
- Values of the Parameters and of the  objective function are printed to the raw output file every PRINT iterations.  The default order is: ITERATION  THETA,  SIGMA,  OMEGA, OBJ (Objective function).  Values of Sigma and Omega  are in the original parameterization, as in the  file INTER.   The  option  ORDER  of  the $ESTIMATION record may be used to change the order of THETA, SIGMA, and OMEGA.
- (See order_option).
-
- The iteration number, which is the first value in every line, is
- typically  positive,  but  also may be negative under the following
- conditions:
-
-      - The burn-in iterations of the MCMC Bayesian analysis are given
-        negative values, starting at -NBURN, the number of burn-in
-        iterations requested by the user.   These  are  followed  by
-        positive iterations of the stationary phase.
-
-      - The stochastic iterations of the SAEM analysis are given
-        negative values.  These are followed by positive  iterations
-        of  the accumulation phase.
-
-      - Iteration  -1000000000  (negative one billion) identifies the
-        line that contains the final result (thetas, omegas, and
-        sigmas, and  objective  function)  of the particular analysis.
-        These are the value in the NONMEM  output  file  that  are
-        labelled  FINAL PARAMETER ESTIMATE.  The order is theta,
-        sigma, omega.
-
-      - Iteration  -1000000001  identifies the line that contains the
-        standard errors of the final population  parameters.   These
-        are the  value  in  the NONMEM output file that are labelled
-        STANDARD ERROR OF ESTIMATE.  The order is theta, sigma, omega.
-        This  line is  present  if  the  Covariance  Step  is
-        successful,  or  with METHOD=BAYES.
-
-      - Iteration -1000000002 identifies the line  that  contains  the
-        eigenvalues  of  the  correlation  matrix of the variances of
-        the final parameters.
-
-      - Iteration -1000000003 identifies the line  that  contains
-        thet condition  number  , lowest, highest, Eigenvalues of the
-        correlation matrix of the variances of the final parameters.
-
-      - Iteration -1000000004 identifies the line  that  contains  the
-        OMEGA and SIGMA elements in standard deviation/correlation
-        format.
-
-      - Iteration  -1000000005  identifies the line that contains the
-        standard errors to the OMEGA and SIGMA elements in standard
-        deviation/correlation format.
-
-      - Iteration -1000000006 identifies the line that indicates 1 if parameter was fixed in estimation, 0 otherwise.
-
-      - Iteration -1000000007 lists termination status  (first  item) followed by termination codes.
-        In nm73, termination status catalogs the error status. For
-        traditional analyses, an error number is listed. If negative,
-        the analysis was user-interrupted. For EM/Bayes analysis, error numbers map as follows:
-           + 0,4: optimization was completed
-           + 1,5: optimization not completed (ran out of iterations)
-           + 2,6: optimization was not tested for convergence
-           + 3,7: optimization was not tested  for  convergence  and  was user interrupted
-           + 8,12:  objective  function  is  infinite  or  all individual objective fuctions are zero. problem ended
-           + 16,20: All individual objective fuctions are  zero.  problem ended
-           + 4,5,6,7,12,20: reduced stochastic/stationary portion was not completed prior to user interrupt
-
-      - Iteration -1000000008 lists the  partial  derivative  of  the likelihood  (-1/2OFV)  with  respect to each estimated parameter. This may be useful for using tests like the  Lagrange  multiplier test.
-
-      See the description of root.xml in Guide INTRODUCTION TO NONMEM 7 for versions 7.4 and higher.
-
-A file simliar to the raw output file is root.cnv.  This file contains convergence information for the Monte Carlo/EM methods, if CTYPE>0:
-
-      - Iteration  -2000000000  identifies the line that contains the
-        mean of last CITER values (mean objective  function  is  that
-        of second to last CITER values)
-
-      - Iteration  -2000000001  identifies the line that contains the
-        standard deviation of last CITER values (for objective
-        function, STD of second to last CITER values)
-
-
-      - Iteration  -2000000002  identifies the line that contains the
-        linear regression p-value of last CITER values against
-        iteration number.  (for objective function, p-value of second
-        to last CITER values)
-
-
-      - Iteration -2000000003 identifies the line  that  contains  the
-        Alpha used to assess statistical significance (p-value<alpha)
-
-      Please note the following: The Sigma values are in their Cholesky
-      format, as this is the form in which convergence of these  values
-      are  tested.  The Alpha are those based on ones actually used for
-      convergence test of that parameter, or which would have been used
-      on that parameter if CTYPE were of proper type.  The alpha may be
-      bonferoni corrected because of multiple comparisons, depending on
-      number  of parameters that were tested or would have been tested.
-      Objective function alphas are not bonferoni corrected.
-
-      For importance sampling and  iterative  two  stage,  the  average
-      objective  function listed in root.cnv could be used as an alter-
-      native to the  final  objective  function  for  likelihood  ratio
-      tests.
-
- REFERENCES: Guide Introduction_7
 
 ** Model specification file (MSF)
 A Model Specification File (MSF) is an output file from NONMEM that
@@ -1372,9 +1601,179 @@ For an example see the fragment of the control stream for the first run below.  
 
  REFERENCES: Guide IV, section III.B.12
 
+** Error messages
+This  is  not  a  complete list.  It includes only commonly seen error messages.
+
+*** Errors in the control stream
+#+begin_src txt
+ FILE RECORD MISSING
+#+end_src
+There is something wrong with the NONMEM control file.   Probably it
+is  an  NM-TRAN control file (starting with $PROBLEM), rather than the
+FCON file produced by NM-TRAN.
+
+#+begin_src txt
+ TOT. NO. OF OBSERVATIONS IN INDIVIDUAL REC NO.    1 (IN INDIVIDUAL REC
+ ORDERING) EXCEEDS  50
+  SEE INSTALLATION GUIDE
+#+end_src
+There are too many observation records in some individual record. To
+increase the limit beyond 50, NONMEM must be recompiled. See Guide
+III, Section 2.7.
+
+#+begin_src txt
+ INITIAL ESTIMATE OF OMEGA HAS A NONZERO BLOCK WHICH IS NUMERICALLY NOT
+ POSITIVE DEFINITE
+#+end_src
+Possible cause: initial estimates of the variance and  covariance
+terms in a block of OMEGA are not appropriate.  Try other initial
+estimates.  (Hint: it helps of the covariance estimates are small
+relative to the variance estimates.)
+
+#+begin_src txt
+ USER  CCONTR ROUTINE NOT USED, BUT THERE ARE NO EPSILONS, AND ETAS ARE
+ TO BE ESTIMATED
+#+end_src
+This can happen when POSTHOC etas are requested, but the data are
+single-subject  data.   The  user  may  have included the POSTHOC
+option in error.
+
+#+begin_src txt
+ UNABLE TO OBTAIN A SATISFACTORY INITIAL ESTIMATE  OF  VARIANCE-COVARI-
+ ANCE COMPONENTS
+ BLOCKS IN BLOCK SET 2 OF OMEGA ARE NUMERICALLY NOT POSITIVE DEFINITE
+#+end_src
+This  message  is from the Initial Estimates Step.  It identifies
+certain parameters whose initial estimates could not be obtained.
+
+*** Error in NONMEM tasks
+
+#+begin_src txt
+ NUMBER OF CALLS TO SIMETA EXCEEDS NO. OF DATA RECORDS  FOR  INDIVIDUAL
+ 1 (IN INDIVIDUAL RECORD ORDERING)
+#+end_src
+During  the  Simulation  Step,  an  excessive  number of calls to
+SIMETA have occurred.   It  may  be  that  the  users's  PRED  is
+attempting  to  obtain ETA from a truncated distribution but, due to
+some error, is rejecting all or virtually all values.  (Possibly, the
+NEW option was omitted from the random source.)
+
+Some  messages  are preceded by lines such as the following that
+identify the NONMEM routine that has detected the error:
+
+#+begin_src txt
+ PROGRAM TERMINATED BY OBJ
+ PROGRAM TERMINATED BY OBJ, ERROR IN CELS
+ PROGRAM TERMINATED BY OBJ, ERROR IN ELS
+ PROGRAM TERMINATED BY PRRES, ERROR IN ELS
+ PROGRAM TERMINATED BY FNLETA
+#+end_src
+  - OBJ computes the objective function;
+  - ELS computes Extended Least-Squares contribution to the objective function from the data from a single individual ("L1") record.
+  - CELS  computes  the conditional contribution to the ELS objective function;
+  - PRRES prints final results.
+  - FNLETA computes subject-specific (posthoc) eta values.
+
+#+begin_src txt
+WITH INDIVIDUAL    1 (IN INDIVIDUAL RECORD ORDERING)
+#+end_src
+A line such as this identifies the record.
+
+Here are some commonly seen error messages.
+#+begin_src txt
+ INTRAINDIVIDUAL VARIANCE OF DATA FROM OBS RECORD  1 ESTIMATED TO BE 0
+ VAR-COV OF DATA FROM INDIVIDUAL RECORD ESTIMATED TO BE  SINGULAR
+#+end_src
+A possible cause is the use of a  proportional   intra-individual
+      error  model  while  some predicted  values  for  actual observa-
+      tions are zero or close to zero.  (For example, if the first dose
+      is  an  infusion  and  there is  a  "base- line"  observation  at
+      the start of the infusion, the predicted level will be zero.)
+
+#+begin_src
+ MINIMIZATION TERMINATED DUE TO PROXIMITY OF NEXT ITERATION EST.  TO  A
+ VALUE AT WHICH THE OBJ. FUNC. IS INFINITE
+#+end_src
+NONMEM THETA-recovery has failed.
+
+#+begin_src
+ OCCURS DURING SEARCH FOR ETA AT A NONZERO VALUE OF ETA
+#+end_src
+An  error  occurred  while NONMEM was obtaining conditional estimates of ETA.
+
+*** Errors in PREDPP
+As of NONMEM 7, A differential equation solver  has  been  introduced,
+called  LSODA, and is accessed using ADVAN=13 or ADVAN13.  The code to
+the differential equation solver is  found  in  source\LSODA.f90.   On
+occasion,  coded  errors  will be displayed if the algorithm is having
+trouble integrating  the  equations.   These  errors  may  usually  be
+ignored,  unless the error shows up frequently, and ultimately results
+in failure for the problem to complete.   Typically the remedy  is  to
+increase  or decrease TOL, but for those who desire to understand what
+the error codes mean, there are well documented comments on  these  at
+the beginning of LSODA.f90.  They are printed here for convenience:
+#+begin_src txt
+  STATE=An index used for input and output to specify the the state of the calculation.
+
+  On input,the values of istate are as follows.
+  1  Means this is the first call for the problem (initializations will be done).
+     See note below.
+  2  Means this is not the first call,and the calculation is to continue
+     normally, with no change in any input parameters except possibly TOUT
+     and ITASK. (If ITOL,RTOL,and/or ATOL are changed between calls with
+     ISTATE=2,the new values will be used but not tested for legality.)
+  3  Means this is not the first call,and the calculation is to continue
+     normally,but with a change in input parameters other than TOUT and ITASK.
+     changes are allowed in NEQ,ITOL,RTOL,ATOL,IOPT,LRW,LIW,JT,ML,MU and any
+     optional inputs except H0,MXORDN,AND MXORDS.
+     (see IWORK description for ML and MU.)
+  Note: A preliminary call with TOUT=T is not counted as a first call here,as
+  no initialization or checking of input is done. (Such a call is sometimes
+  useful for the purpose of outputting the initial conditions.) Thus the first
+  call for which TOUT /= T requires ISTATE=1 on input.
+
+  On output,istate has the following values and meanings.
+   1  Means nothing was done; TOUT=T and ISTATE=1 on input.
+   2  Means the integration was performed successfully.
+  -1  Means an excessive amount of work (more than MXSTEP steps) was done on
+      this call,before completing the requested task,but the integration was
+      otherwise successful as far as T. (MXSTEP is an optional input and is
+      normally 500.) TO continue,the user may simply reset ISTATE to a value > 1
+      and call again (the excess work step counter will be reset to 0).
+      In addition,the user may increase MXSTEP to avoid this error return
+      (see below on optional inputs).
+  -2  Means too much accuracy was requested for the precision of the machine
+      being used. This was detected before completing the requested task,but
+      the integration was successful as far as T. To continue,the tolerance
+      parameters must be reset,and ISTATE must be set to 3. The optional output
+      TOLSF may be used for this purpose. (Note: If this condition is detected
+      before taking any steps,then an illegal input return (ISTATE=-3) occurs
+      instead.)
+  -3  Means illegal input was detected,before taking any integration steps.
+      See written message for details.
+      Note: If the solver detects an infinite loop of calls to the solver with
+      illegal input,it will cause the run to stop.
+  -4  Means there were repeated error test failures on one attempted step,before
+      completing the requested task,but the integration was successful as far as T.
+      The problem may have a singularity,or the input may be inappropriate.
+  -5  Means there were repeated convergence test failures on one attempted step,
+      before completing the requested task,but the integration was successful as
+      far as T. This may be caused by an inaccurate jacobian matrix, if one is
+      being used.
+  -6  Means EWT(I) became zero for some I during the integration. Pure relative
+      error control (ATOL(I)=0.0) was requested on a variable which has now
+      vanished. The integration was successful as far as T.
+  -7  Means the length of RWORK and/or IWORK was too small to proceed,but the
+      integration was successful as far as T. This happens when DLSODA chooses
+      to switch methods but LRW and/or LIw is too small for the new method.
+
+  Note: Since the normal output value of ISTATE is 2, it does not need to be
+  reset for normal continuation. Also,since a negative input value of ISTATE
+  will be regarded as illegal, a negative output value requires the user to
+  change it, and possibly other inputs,before calling the solver again.
+#+end_src
 
 
-
-[fn:9] May be continued. The record name is not repeated on continuations.
-
-[fn:11]
+[fn:1] Displayed etas are the simulated etas if the simulated etas are
+stored in common NMPRD7. This is the case when NM-TRAN is used. If
+they are not stored in NMPRD7, displayed etas are all 0.
