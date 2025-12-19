@@ -278,14 +278,15 @@ When CONSTRAIN>=4, simulated annealing is also performed on diag-
 
 Simulated annealing is performed by subroutine CONSTRAINT.
 
-The  $ANNEAL  record facilitates EM search methods for this additional annealing technique.  The subroutine CONSTRAINT  may  also
-      be  used to provide any kind of constraint pattern on any parameters.
+The  @@html:<a href="/docs/reference-manual/control-records/anneal/">$ANNEAL</a>@@
+record facilitates EM search methods for this additional annealing
+technique.  The subroutine CONSTRAINT  may  also be  used to provide
+any kind of constraint pattern on any parameters.
 
-      (See $ANNEAL).
 
 The user may modify the subroutine CONSTRAINT that  performs  the simulated annealing algorithm.
 
-      (See additional_output_files, raw_output_file).
+(See @@html:<a href="/docs/reference-manual/files/#addi-output">additional output files</a>@@, @@html:<a href="/docs/reference-manual/files/#raw-output">raw_output_file</a>@@).
 
 *** CTYPE=[0|1|2|3|4]
 CTYPE is used to define the termination test to be applied to the
@@ -400,18 +401,9 @@ MAXEVAL=0, then set EVALSHRINK=1 on the $EST record.
 
 
 *** FILE=filename
-      Name for the raw output file.  Parameter estimates and  objective
-      function  value will be printed to this file every printed itera-
-      tion as indicated by the PRINT option.  Default: root.ext,  where
-      root  is  the  name of the control file (not including any exten-
-      sion; "nmbayes" if the name is not specified on the nmfe  command
-      line).   Note  that  the names of additional output files are not
-      affected by this option.  Additional output files have extensions
-      .ext,  .phi, .phm, .shk, .shm .grd, .xml, .cov, .cor, .coi, .cnv,
-      .smt, .rmt, .imp, .npd, .npe, .npi, .fgh, .clt, .vpd, .vpt, .ets,
-      .vpt, .bfm, .iph They always have the name of the control file or
-      "nmbayes" for root.
-      (See additional_output_files, raw_output_file).
+      Name for the @@html:<a href="/docs/reference-manual/files/#raw-output">raw output file</a>@@.  Parameter estimates and  objective
+      function  value will be printed to this file every printed iteration as indicated by the PRINT option.  Default: root.ext,  where root  is  the  name of the control file (not including any extension; "nmbayes" if the name is not specified on the nmfe  command line).   Note  that  the names of @@html:<a href="/docs/reference-manual/files/#addi-output">additional output files</a>@@ are not
+      affected by this option.
 
 *** FNLETA=n (NM72)
       For a thorough discussion:
@@ -446,8 +438,8 @@ MAXEVAL=0, then set EVALSHRINK=1 on the $EST record.
       Format  for  the raw output file and all additional output files.
       s defines the delimiter [,|s(pace)|t(ab)] followed by  a  Fortran
       format   specification.   The  default  is  s1PE12.5.   For  more
-      details, see the format help item:
-      (See format).
+      details, see the @@html:<a href="/docs/reference-manual/control-records/#format-ref">format help</a>@@.
+
       May also be coded DELIM.
 
 *** DELIM=s
@@ -521,7 +513,9 @@ The default  values  are: GRID=(3,1,.6,.9).
 *** IACCEPT=[x|0]
 The function of IACCEPT depends on the method.
 
-- SAEM and BAYES: the scaling of OMEGA  is  adjusted  so  that  samples  are accepted x fraction of the time.  See ISAMPLE_M2. Default is 0.4.
+- SAEM and BAYES: the scaling of OMEGA  is  adjusted  so  that samples
+  are accepted x fraction of the time.  See ISAMPLE_M2 option. Default
+  is 0.4.
 
 - Importance sampling (IMP INTERACTION): expand proposal (sampling) density variance relative to conditional density  so  that on  average conditional density/proposal density=IACCEPT (default 0.4).  For very sparse data or highly non-linear posterior densities (such as with categorical data), you may want to decrease to 0.1 to 0.3.
 
@@ -551,7 +545,7 @@ with non-EM and non-Bayes methods.
 *** ISAMPEND=n (NM73)
       For SAEM, if ISAMPEND is specified  as  an  upper  integer  value
       (usually  10),  then  NONMEM will perform a ISAMPLE preprocess to
-      determine the best ISAMPLE value. See also STDOBJ.
+      determine the best ISAMPLE value. See also STDOBJ below.
 
 *** ISAMPLE=n
       When used with the IMP or IMPMAP methods n is the number of  ran-
@@ -619,7 +613,13 @@ with non-EM and non-Bayes methods.
       ANCE record.
 
 *** LAPLACIAN | NOLAPLACIAN
-LAPLACIAN: use the  Laplacian  method,  in  which  second  derivatives  with respect  to  eta  are  used.   Laplacian  may  not  be  used with METHOD=0.  It may be used with the  EM/Monte  Carlo  methods,  in which  case  the Laplacian option will be properly utilized, such as during MAP estimation used during IMP,  IMPMAP,  and  ITS,  or ignored, such as during SAEM or BAYES. Cannot  be  used  with  $ABBREVIATED  DERIV2=NO  unless NUMERICAL option is also specified.
+LAPLACIAN: use the  Laplacian  method,  in  which  second  derivatives
+with respect  to  eta  are  used.   Laplacian  may  not  be  used with
+METHOD=0.  It may be used with the  EM/Monte  Carlo  methods,  in
+which  case  the Laplacian option will be properly utilized, such as
+during MAP estimation used during IMP,  IMPMAP,  and  ITS,  or
+ignored, such as during SAEM or BAYES. Cannot  be  used  with
+$ABBREVIATED @@html:<a href="/docs/reference-manual/control-records/abbrev/#abbr-DERIV2">DERIV2=NO</a>@@  unless NUMERICAL option is also specified.
 
 NOLAPLACIAN: do not use the Laplacian method.  This is the default.
 
@@ -837,30 +837,18 @@ methods are referred  to  as  EM  (Expectation-Maximization) Methods.
       may be used.
 
 *** MSFO=filename
-      A  Model  Specification  File  is output to a file with the given
-      filename.  Filename may not contain embedded spaces.  If filename
-      contains commas, semicolons, or parentheses, then it must be surrounded by quotes (' or ").   Filename  may  also  contain  equal
-      signs  if it is enclosed in quotes.  Filename may contain at most
-      71 characters.  If filename is the same  as  any  option  of  the
-      $ESTIMATION  record, it must be enclosed in quotes.  If the $NONPARAMETRIC record is present and also specifies the MSFO  option,
-      the filename is required on the record which appears first in the
-      control stream.  If filename is present on both, it must  be  the
-      same.   If  the  filename  is  omitted  on  the second of the two
-      records, the MSF option must be the final option on that  record.
-      Default: If the MSFO option is not used, no MSF is output.
+A  @@html:<a href="/docs/reference-manual/files/#msf">Model Specification File</a>@@  is output to a file with the given filename.  Filename may not contain embedded spaces.  If filename contains commas, semicolons, or parentheses, then it must be surrounded by quotes (' or ").   Filename  may  also  contain  equal signs  if it is enclosed in quotes.  Filename may contain at most 71 characters.  If filename is the same  as  any  option  of  the $ESTIMATION  record, it must be enclosed in quotes.  If the $NONPARAMETRIC record is present and also specifies the MSFO  option, the filename is required on the record which appears first in the control stream.  If filename is present on both, it must  be  the same.   If  the  filename  is  omitted  on  the second of the two records, the MSF option must be the final option on that  record. Default: If the MSFO option is not used, no MSF is output.
 
-      If  a  MSFO  is  output, then the iteration estimates may also be
-      seen in the original parameterization for those iterations  whose
-      summaries  appear  in intermediate printout.  These estimates may
-      be found in file INTER.
+If  a  MSFO  is  output, then the iteration estimates may also be seen
+in the original parameterization for those iterations  whose summaries
+appear  in intermediate printout.  These estimates may be found in
+file INTER.
 
-      When MAXEVAL=0 and the Covariance Step is implemented,  the  MSFO
-      option may also be used, and then a model specification file will
-      be output which will include information from the Covariance Step
-      and  from  the input model specification file concerning the earlier Estimation Step (in this case there must be an  input  model
-      specification file).
-
-      (See model_specification_file).
+When MAXEVAL=0 and the Covariance Step is implemented,  the MSFO
+option may also be used, and then a model specification file will be
+output which will include information from the Covariance Step and
+from  the input model specification file concerning the earlier
+Estimation Step (in this case there must be an input model specification file).
 
 *** MUM=[M|N|D|X]...
 Specify a  string consisting of  [M|N|D|X]'s with each letter representing a
@@ -942,10 +930,7 @@ Sometimes  gradients  are  not  properly evaluated for classical
       NOPRIOR=1 did not act on TNPRI priors.
 
 *** NOSUB=[0|1] (NM74)
-      With NOSUB=0, label substitution  will  be  performed  for  final
-      estimates  in  the NONMEM report file.  (See $ABBREVIATED).  This
-      is the default.  With NOSUB=1, label  substitution  will  not  be
-      performed.
+With NOSUB=0, label substitution  will  be  performed  for  final estimates  in  the NONMEM report file. (See @@html:<a href="/docs/reference-manual/control-records/abbrev/">$ABBREVIATED</a>@@).  This is the default.  With NOSUB=1, label  substitution  will  not  be performed.
 
 *** NOTITLE=[0|1]
       1 indicates the header for FILE will not be written, otherwise 0,
@@ -1017,10 +1002,10 @@ LAPLACIAN and INTERACTION.  Otherwise, this is the default.
       See Guide INTRODUCTION TO NONMEM 7. Default is 0
 
 *** OACCEPT=n
-      Used  only  with  the  BAYES method. n has meaning only for OMEGA
+Used  only  with  the  BAYES method. n has meaning only for OMEGA
       sampled by the Metropolis-Hastings  algorithm.   The  scaling  of
       degrees  of  freedom  is  adjusted so that samples are accepted n
-      fraction of the time. See OSAMPLE_M2=. Default is
+      fraction of the time. See OSAMPLE_M2 option. Default is
 
 *** OLKJDF=n (NM74)
       Used with NUTS  method,  OLKJDF  stands  for  Omega  LKJ  density
@@ -1033,8 +1018,7 @@ LAPLACIAN and INTERACTION.  Otherwise, this is the default.
       M-H sampled using the OSAMPLE_M1, OSAMPLE_M2, and OSAMPLE_M3 settings.
       Default is 0.
 
-      See record $OLKJDF (NM75) to specify LKJ correlation  degrees  of
-      freedom for each omega block.
+      See @@html:<a href="/docs/reference-manual/control-records/olkjdf/">$OLKJDF</a>@@ to specify LKJ correlation  degrees  of freedom for each OMEGA block.
 
 *** OLNTWOPI (NM74)
       The    objective    function    is    reported    including   the
@@ -1090,6 +1074,9 @@ option may be needed.
   - OPTMAP=2: Nelder-Mead method, which uses a secant method, rather  than relying on derivatives.
 
 *** ORDER=xxxf
+:PROPERTIES:
+:CUSTOM_ID: order-option
+:END:
 The  values of x may be T (Theta), S (Sigma), and O (Order).  The
 value of f may be U (Upper) or L (Lower).  Affects the way theta,
 omega,  and  sigma are displayed in the raw and additional output
@@ -1181,12 +1168,12 @@ REFERENCES: Guide Introduction_7.
       square root of Omega prior, and scaled with  OVARF  (see  below).
       That            is,            log(sqrt(Omega(i)))           Normal(log(sqrt(OmegaPrior(i))),1/OVARF).  If OVARF<0, then a  halft-distribution  of  degrees of ABS(OVARF) is used as the prior to
       the sqrt of OMEGA diagonal elements.  Use OVARF=-1 for the  halfCauchy distribution.
-      Default is 1.  See also $OVARF control record.
+      Default is 1.  See also @@html:<a href="/docs/reference-manual/control-records/ovarf/>$OVARF</a>@@ control record.
 
 *** PACCEPT=n
       Used  only  with the BAYES method. n has meaning only for population parameters sampled  by  the  Metropolis-Hastings  algorithm.
       The  scaling of variance is adjusted so that samples are accepted
-      n fraction of the time. See PSAMPLE_M2=. Default is 0.5.
+      n fraction of the time. See PSAMPLE_M2 option. Default is 0.5.
 
 *** PARAFILE=filename
       Name of the "parallel file" (the  parallelization  profile)  that
@@ -1201,7 +1188,7 @@ REFERENCES: Guide Introduction_7.
 *** PARAFPRINT=n (NM74)
       The print iteration intervals to the parallelization log file can
       be controlled by this option during parallelization of  the  $EST
-      step.   See also $COVARIANCE record and nmfe command.  Default is
+      step.   See also @@html:<a href="/docs/reference-manual/control-records/covar/">$COVARIANCE</a>@@ record and nmfe command.  Default is
       PARAFPRINT=1.
 
 *** PHYTYPE=n (NM74)
@@ -1394,7 +1381,7 @@ Used with METHOD=CHAIN and $CHAIN to specify how  the  sample  is selected.
       as extensions of the THETA parameters in M-H sampling methods).
       Default is 0.
 
-      See  @@html:<a href="/docs/reference-manual/control-records/slkjdf/">record $SLKJDF</a>@@ (NM75) to specify LKJ correlation degrees of freedom for each sigma block.
+      See @@html:<a href="/docs/reference-manual/control-records/slkjdf/">record $SLKJDF</a>@@ (NM75) to specify LKJ correlation degrees of freedom for each sigma block.
 
 *** SIGL=n
       n is used to calculate the step-size for finite difference derivatives  independent of the SIGDIGITS value.  If n=0 or n=100 then
@@ -1415,7 +1402,7 @@ SIGL.  Should SIGLO be used, the recommended setting would be:
   NSIG<=SIGL/3
 #+end_src
 *** SLOW | NOWSLOW | FAST
-SLOW (or SLOW=1, see option STIELTJES for SLOW=2) requests a slower method of computation.  Required
+SLOW (or SLOW=1, see option STIELTJES below for SLOW=2) requests a slower method of computation.  Required
 when either  a mixture model is used along with CENTERING, or
 NUMERICAL is used. If not present, the option is automatically
 supplied in these two cases.   For  problems  where  NONMEM  VI does
@@ -1502,23 +1489,28 @@ A  set of tentative population estimates are first obtained using
       some  integer.   Think  of ns as the number of points in a single
       quadrant of a 2-dimensional ellipse in n-space, and ns**m as  the
       number  of  points  in a orthant of m-dimensional space.  2**n is
-      the total number of orthants.  See the description to option GRID
-      above to specify grid information.
+      the total number of orthants.  See option GRID above to specify grid information.
 
 *** SVARF=x (NM74)
-      Used  with  NUTS  method  and SLKJDF option.  SVARF is the weight
-      factor to STD prior to the log sqrt SIGMA diagonal elements,  the
-      normal density of the log square root of SIGMA centered about log
-      square root of SIGMA prior, and scaled with  SVARF  (see  below).
-      That            is,            log(sqrt(Sigma(i)))           Normal(log(sqrt(SigmaPrior(i))),1/SVARF).  If SVARF<0, then a  halft-distribution  of  degrees of ABS(SVARF) is used as the prior to
-      the sqrt of SIGMA diagonal elements.  Use SVARF=-1 for the  halfCauchy distribution.
-      Default is 1.
-      See also $SVARF control record.
+Used  with  NUTS  method  and SLKJDF option.  SVARF is the weight
+factor to STD prior to the log sqrt SIGMA diagonal elements,  the
+normal density of the log square root of SIGMA centered about log
+square root of SIGMA prior, and scaled with  SVARF. That
+is,
+$$
+\log(\sqrt{\Sigma(i)} \sim \mathcal{N}(\log(\sqrt{\Sigma_{\text{Prior}}(i)}),1/\text{SVARF}).
+$$
+
+If SVARF<0, then a  halft-distribution  of  degrees of ABS(SVARF) is
+used as the prior to the square-root of SIGMA diagonal elements.  Use
+SVARF=-1 for the  halfCauchy distribution. Default is 1. See also
+@@html:<a href="/docs/reference-manual/control-records/svarf/">$SVARF control record</a>@@.
 
 *** TBLN=n (NM75)
-      Used with $EST METHOD=CHAIN and $CHAIN records to allow selecting
-      a table within a raw output file. See "Method for  creating  several  instances  for  a  problem starting at different randomized
-      initial positions" in Guide INTRODUCTION TO NONMEM 7.
+Used with $EST METHOD=CHAIN and $CHAIN records to allow selecting a
+table within a raw output file. See "Method for  creating  several
+instances  for  a  problem starting at different randomized initial
+positions" in Guide INTRODUCTION TO NONMEM 7.
 
 *** THIN=n (NM74)
       The Bayesian records retained in  the  raw  output  file  may  be
@@ -1529,20 +1521,18 @@ A  set of tentative population estimates are first obtained using
       Default is 1.
 
 *** TPU=n (NM75)
-      If TPU>0, use THETA_PRIORU routine in ..\source\THETA_PRIORU.f90.
-      You can make a copy of THETA_PRIORU.f90, modify it, call it USERPRIORT.f90, for example, then specify it  as  an  OTHER  routine:
-      $SUBR  OTHER=USERPRIORT.f90.   See also \$OLKJDF and \$SLKJDF for
-      OMEGA and SIMGA.
-      Default is 0.
+If TPU>0, use THETA_PRIORU routine in ..\source\THETA_PRIORU.f90. You
+can make a copy of THETA_PRIORU.f90, modify it, call it
+USERPRIORT.f90, for example, then specify it  as  an  OTHER routine:
+#+begin_src perl
+$SUBR  OTHER=USERPRIORT.f90
+#+end_src
+See also @@html:<a href="/docs/reference-manual/control-records/olkjdf/">$OLKJDF</a>@@ and @@html:<a href="/docs/reference-manual/control-records/slkjdf/">$SLKJDF</a>@@ for OMEGA and SIMGA, respectively. Default is 0.
 
 *** TTDF=n (NM74)
-      TTDF stands for Theta t-density degrees of freedom.  It  is  used
-      with  NUTS  method.  Default is 0.  When 0, the usual normal density prior is used as a prior density for thetas.  When TTDF>0, a
-      t-distributed  prior  is  used.   TTDF  may  be set >0 when using
-      METHOD=BAYES as well, but thetas will then be M-H  sampled  using
-      the PSAMPLE_M1, PSAMPLE_M2, and PSAMPLE_M3 settings.  TTDF may be
-      a real number.
-      See also $TTDF control record (NM75) to specify degrees of  freedom for each theta.  The value of TTDF overrides $TTDF.
+TTDF stands for Theta t-density degrees of freedom.  It  is  used with  NUTS  method.  Default is 0.  When 0, the usual normal density prior is used as a prior density for thetas.  When TTDF>0, a t-distributed  prior  is  used.   TTDF  may  be set >0 when using METHOD=BAYES as well, but thetas will then be M-H  sampled  using the PSAMPLE_M1, PSAMPLE_M2, and PSAMPLE_M3 settings.  TTDF may be a real number.
+
+See also @@html:<a href="/docs/reference-manual/control-records/ttdf/">$TTDF</a>@@ control record to specify degrees of  freedom for each theta.  The value of TTDF overrides $TTDF.
 
 *** ZERO=list
       Required  with  METHOD=HYBRID.   A list of indices for etas which

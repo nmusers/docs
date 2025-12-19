@@ -172,18 +172,6 @@ and Guide I, section B.2.
  specified by the user on the nmfe command.  Help entries  describe
  the  various sections of the report.
 
- (See DATA_SET,DATA_RECORDS,DATA_ITEMS).
-
- (See INITIAL_ESTIMATE,MONITORING_OF_SEARCH).
-
- (See MINIMUM_VALUE_OF_OBJ._FUNCTION,FINAL_PARAMETER_ESTIMATE).
-
- (See ETABAR,STANDARD_ERROR_OF_ESTIMATE).
-
- (See SHRINKAGE).
-
- (See CORRELATION_MATRIX_OF_ESTIMATE,COVARIANCE_MATRIX_OF_ESTIMATE).
-
  With  NONMEM  7,  tag labels are present in the report file to allow
  a third-party program to find the  appropriate  positions  in  the
  file without  having  to  search  for  specific words in the text.
@@ -205,6 +193,9 @@ and Guide I, section B.2.
  |#CPUT (NM73) | Total CPU time.  It is an accurate representation of the computer usage, whether single or parallel process.  The same problem when run singly or in parallel will report a similar cpu  time.   This is  in  contrast with elapsed time, which is improved with parallelization.|
 
 ** Raw output file
+:PROPERTIES:
+:CUSTOM_ID: raw-output
+:END:
  With  NONMEM 7, a NONMEM run produces several additional output
  files. These provide a more efficient way  of  way  of  extracting
  numerical results  from  the  analysis  than  by  obtaining them from
@@ -254,20 +245,20 @@ and Guide I, section B.2.
            Superproblem2=0 Iteration2=0
  #+end_src
 
- The  values  of Problem, Subproblem, Superproblem1, Iteration1,
+The  values  of Problem, Subproblem, Superproblem1, Iteration1,
 Superproblem2, Iteration2 are the same values as would be found in the
 following variables in modules during the run:
 #+begin_src txt
 IPROB IREP S1NUM S1IT  S2NUM S2IT
 #+end_src
- (See Problem_Iteration_Counters).
+(See @@html:<a href="/docs/reference-manual/api/variables/#prob-iter-count">Problem Iteration Counters</a>@@).
 
  The second line of the raw output file contains the column headers for the table, all on one line.
 
  Options NOTITLE and NOLABEL and FORMAT of the $ESTIMATION  record  can be  used  to  supress the first and/or second lines, and to modify the format of the values in the table.  They apply to raw  and  additional output  files,  but only for the current Estimation Step.  The options must be re-specified with each $EST record.
 
  Values of the Parameters and of the  objective function are printed to the raw output file every PRINT iterations.  The default order is: ITERATION  THETA,  SIGMA,  OMEGA, OBJ (Objective function).  Values of Sigma and Omega  are in the original parameterization, as in the  file INTER.   The  option  ORDER  of  the $ESTIMATION record may be used to change the order of THETA, SIGMA, and OMEGA.
- (See order_option).
+ (See @@html:<a href="/docs/reference-manual/control-records/estimation/#order-option">ORDER option</a>@@).
 
  The iteration number, which is the first value in every line, is
  typically  positive,  but  also may be negative under the following
@@ -367,196 +358,192 @@ A file simliar to the raw output file is root.cnv.  This file contains convergen
 REFERENCES: Guide Introduction_7
 
 ** Additional output files
-  - root.ext
-      Always.  (See above "raw output file").
+:PROPERTIES:
+:CUSTOM_ID: addi-output
+:END:
+To simplify notation in the rest of this section we omit "root" but
+only document according to file extension.
 
-  - root.phi
-      Always.   Individual phi parameters (phi(i)=mu(i)+eta(i), for ith
-      parameter), and their variances phc(,).  For  parameters  not  MU
-      referenced  phi(i)=eta(i).  When  a classical method is performed
-      (FOCE, Laplace), then mode of posterior eta(i) are  printed  out,
-      along  with  their Fisher information (first order expected value
-      for FOCE, second order for Laplace)  assessed  variances  etc(,).
-      For ITS, these parameters are the modes of the posterior density,
-      with first-order approximated expected variances (or second order
-      variances  if  $EST METHOD=ITS LAPLCE is used).  For IMP, IMPMAP,
-      SAEM methods, they are the Monte Carlo evaluated conditional mean
-      parameters  and  variances  of the parameters under the posterior
-      density.  For MCMC Bayesian, they are random  single  samples  of
-      phi(),  as of the last position. Their variances are zero.  Individual objective function values (obji) are also produced.  As of
-      NONMEM 7.4, if $EST PHITYPE=1 is specified, then conditional mean
-      etas are reported in the phi table. regardless  of  the  analysis
-      method.
+The the following files are always output: .ext (see above "raw output file"), .grd (NM72) (gradient values for classical methods), .cpu(cpu time in seconds, incorporating the nature of sequential and parallel runs. It is not elapsed/wall time),  and .phi,
 
-  - root.iph (NM75)
-      As of nm75, samples of phi/eta are collected at each BAYES iteration, and summarized to provide conditional mean phi and phc() in
-      the  root.phi table, as described above. By default, the individual phi values from each iteration are not  stored.  However,  if
-      you set
-      $EST ... BAYES_PHI_STORE=1
-      then  phi and eta values from each BAYES iteration will be stored
-      in root.iph. For non-mixture problems, only records of SUBP=0 are
-      recorded,  as  there are no sub-population divisions. For mixture
-      problems, the SUBP=0 records contain the composite phis and  etas
-      (the  average  of these across all non-negative iterations are in
-      the root.phi table), and the SUBP>0 records contain the phis  and
-      etas  appropriate  to  each  sub-population  SUBP (the average of
-      these across all non- negative iterations are in the root.phm table).  The  root.iph file can become quite large, so it should be
-      used only on the final analysis.
+Note that in NONMEM v7.3+, the @@html:<a href="/docs/reference-manual/control-records/thetai/">$THETAI</a>@@ and  @@html:<a href="/docs/reference-manual/control-records/thetar/">$THETAR</a>@@  records  may  be
+used  to transform initial and final estimates of THETA, respectively.
+This will affect values in the .ext, .cov, etc. files.
 
-  - root.phm (NM72)
-      Individual phi/eta/obji parameters per sub-population.  This file
-      is  only  produced  in  $MIXTURE  problems.  As of nm75, for MCMC
-      Baysian analysis, the items listed in this table consist  of  the
-      average  values  among  all  the iterations during the stationary
-      distribution phase. Before nm75, the values consisted  of  values
-      from the last MCMC iteration.
+*** .phi
+Individual \(\phi\) (PHI) parameters (recall \(\phi=\mu+\eta\)) and their variances PHC(,).
+For  parameters  not  MU referenced  PHI(i)=ETA(i), for i'th
+parameter.  When  a classical method is performed (FOCE, Laplace),
+then mode of posterior ETA(i) are  printed  out, along  with  their
+Fisher information (first order expected value for FOCE, second order
+for Laplace)  assessed  variances  ETC(,). For ITS, these parameters
+are the modes of the posterior density, with first-order approximated
+expected variances (or second order variances  if
+#+begin_src perl
+$EST METHOD=ITS LAPLCE
+#+end_src
+is used).  For IMP, IMPMAP, SAEM methods, they are the Monte Carlo
+evaluated conditional mean parameters  and  variances  of the
+parameters under the posterior density.  For MCMC Bayesian, they are
+random  single  samples  of PHI(),  as of the last position. Their
+variances are zero.  Individual objective function values (obji) are
+also produced.  As of NONMEM 7.4, if
+#+begin_src perl
+$EST PHITYPE=1
+#+end_src
+is specified, then conditional mean etas are reported in the PHI
+table. regardless  of  the  analysis method.
 
-  - root.shk (NM72)
-      This  file presents composite eta shrinkage and epsilon shrinkage
-      information, the same as given in the NONMEM report file  between
-      the  #TERM:  and #TERE: tags, but in rows/column format, and with
-      adjustable formatting.
-      (See shrinkage).
+*** .iph (NM75)
+As of nm75, samples of phi/eta are collected at each BAYES iteration,
+and summarized to provide conditional mean phi and phc() in the
+root.phi table, as described above. By default, the individual phi
+values from each iteration are not  stored.  However,  if you set
+#+begin_src perl
+  $EST ... BAYES_PHI_STORE=1
+#+end_src
+then  PHI and ETA values from each BAYES iteration will be stored in
+root.iph. For non-mixture problems, only records of SUBP=0 are
+recorded,  as  there are no sub-population divisions. For mixture
+problems, the SUBP=0 records contain the composite phis and  etas (the
+average  of these across all non-negative iterations are in the
+root.phi table), and the SUBP>0 records contain the phis  and etas
+appropriate  to  each  sub-population  SUBP (the average of these
+across all non- negative iterations are in the root.phm table).  The
+root.iph file can become quite large, so it should be used only on the
+final analysis.
 
-  - root.shm (NM73)
-      This file is a shrinkage map describing which etas were  included
-      or excluded in the eta shrinkage assessment.  (See shrinkage).
+*** .phm (NM72)
+Individual PHI/ETA/OBJi parameters per sub-population.  This file is
+only  produced  in  $MIXTURE  problems.  As of nm75, for MCMC Baysian
+analysis, the items listed in this table consist  of  the average
+values  among  all  the iterations during the stationary distribution
+phase. Before nm75, the values consisted  of  values from the last
+MCMC iteration.
 
-  - root.grd (NM72)
-      Gradient values for classical NONMEM methods.  Always.
+*** .shk, .shm
+File root.shk (NM72) presents composite eta shrinkage and epsilon shrinkage
+information, the same as given in the NONMEM report file  between the
+#TERM:  and #TERE: tags, but in rows/column format, and with
+adjustable formatting.
 
-  - root.xml (NM72)
-      An  XML markup version of the contents of the NONMEM report file.
-      The rules by which it is constructed are given in output.xsd  and
-      output.dtd.
+File root.shm (NM73) is a shrinkage map describing which ETAS were
+included or excluded in the eta shrinkage assessment.  (See
+shrinkage).
 
-  - root.cov
-      Full  variance-covariance  error  matrix  of  thetas, sigmas, and
-      omegas.  Same as "COVARIANCE MATRIX OF ESTIMATE"  in  the  NONMEM
-      report  except  that  it  is full (NONMEM displays only the lower
-      triangle), elements that are fixed or not estimated are displayed
-      as  0  (NONMEM  displays  them  as .....), and, when the data are
-      individual, sigma is displayed as  0  (NONMEM  does  not  display
-      sigma  at  all.)   Only  generated  if  the $COVARIANCE record is
-      present.
-      (See covariance matrix of estimate).
-      (See Covariance_Output_files).
-      (See order_option).
+(See shrinkage below).
 
-  - root.clt (NM74)
-      The lower-triangular portion of the  variance-covariance  of  the
+*** .xml (NM72)
+An  XML markup version of the contents of the NONMEM report file. The
+rules by which it is constructed are given in output.xsd  and
+output.dtd.
+
+*** .cov, .cor, .clt, .coi, .smt, .rmt
+Full  variance-covariance  error  matrix  of  THETAs, SIGMAs, and
+OMEGAs.  Same as "COVARIANCE MATRIX OF ESTIMATE"  in  the  NONMEM
+report  except  that  it  is full (NONMEM displays only the lower
+triangle), elements that are fixed or not estimated are displayed as
+0  (NONMEM  displays  them  as .....), and, when the data are
+individual, sigma is displayed as  0  (NONMEM  does  not  display
+sigma  at  all.)   Only  generated  if  the $COVARIANCE record is
+present. The same applies to "root.cor".
+
+"root.cor" contains full correlation matrix of THETAs, SIGMAs, and
+OMEGAs. Same  as "CORRELATION   MATRIX  OF  ESTIMATE".
+
+(See correlation matrix of estimate, covariance matrix of estimate below.)
+
+(See @@html:<a href="/docs/reference-manual/control-records/estimation/#order-option">ORDER option</a>@@).
+
+"root.clt" (NM74) contains the lower-triangular portion of the  variance-covariance  of  the
       parameter  estimates  reported  in root.cov. This is provided for
-      easier pasting of the information as theta priors  for  a  subsequent  analysis.   Only  generated  if  the $COVARIANCE record is
+      easier pasting of the information as theta priors  for  a  subsequent  analysis.   Only  generated  if  the  @@html:<a href="/docs/reference-manual/control-records/covar/">$COVARIANCE</a>@@ record is
       present.
 
-  - root.cor
-      Full correlation matrix of thetas, sigmas, and omegas.   Same  as
-      "CORRELATION   MATRIX  OF  ESTIMATE",  except  as  described  for
-      root.cov.
-      (See correlation matrix of estimate).
-
-  - root.coi
-      Full inverse covariance matrix (Fischer information  matrix)  for
+"root.coi" contains full inverse covariance matrix (Fischer information  matrix)  for
       thetas,  sigmas,  and omegas.  Same as "INVERSE COVARIANCE MATRIX
-      OF ESTIMATE" except as described for root.cov.
+      OF ESTIMATE" except as described for "root.cov".
 
-  - root.cnv (NM72)
-      Convergence  information  for  the  Monte  Carlo/EM  methods,  if
-      CTYPE>0.
-      (See raw_output_file).
+"root.smt" (NM72) contains the S matrix, if  $COV step failed.
+"root.rmt" (NM72) Contains the R matrix, if  $COV step failed.
 
-  - root.smt (NM72)
-      Contains the S matrix, if  $COV step failed.
+*** .cnv (NM72)
+Convergence  information  for  the  Monte  Carlo/EM  methods,  if CTYPE>0.
+(See raw Output File above).
 
-  - root.rmt (NM72)
-      Contains the R matrix, if  $COV step failed.
+*** .imp (NM73)
+Produced if the user selects importance sampling with option IACCEPT=0.0.  Contains the final IACCEPT and DF values  that  NONMEM selected for each subject.
 
-  - root.imp (NM73)
-      Produced if the user selects importance sampling with option IACCEPT=0.0.  Contains the final IACCEPT and DF values  that  NONMEM
-      selected for each subject.
+*** .npd, .npe, .npi, .npl
+For  NONPARAMETRIC method.  Each row of "root.npd" contains
+information about a support point. "root.npe" contains the expected
+value ETAs  and  expected value  ETA  covariances (ETC) are listed for
+each problem or subproblem. In "root.npi" (NM73) the  individual
+probabilities  are listed.  Each row contains information about a
+support point. In "root.npl" (NM74) the individual data likelihoods
+(not including the parameter density) are listed.
 
-  - root.npd (NM73)
-      For  NONPARAMETRIC method.  Each row contains information about a
-      support point.
 
-  - root.npe (NM73)
-      For NONPARAMETRIC method.  The expected value etas  and  expected
-      value  eta  covariances (ETC) are listed for each problem or subproblem.
+*** .fgh (NM73)
+This file is produced  if  the  user  selects  $EST  NUMDER=1  or
+NUMDER=3.   The  file lists the numerically evaluated derivatives of Y
+with respect to eta, where
 
-  - root.npi (NM73)
-      For  NONPARAMETRIC  method.   The  individual  probabilities  are
-      listed.  Each row contains information about a support point.
+#+begin_src
+  F        = Y the prediction
+  G(I,1)   = partial Y with respect to ETA(i)
+  G(I,J+1) = Second derivatives of Y with respect to ETA(i),ETA(j)
+  H(I,1)   = partial Y with respect to EPS(i)
+  H(i,j+1) = partial Y with respect to EPS(i),ETA(j)
+#+end_src
+The values are those used in the Estimation Step.   Values  of  F are
+computed  by PRED with eta=0 if METHOD=0 is used;  otherwise they are
+computed with non-zero etas: the Conditional (CPE) etas, empirical
+bayes  estimates  (EBE), mode a posteriori (MAP) estimates) or
+conditional mean  etas,  depending  on  the  Estimation Method.
+Values  of  G are computed by NONMEM via finite differences using
+these values of F and eta.  Values of H are  computed by  NONMEM  with
+the  same values of F and eta if INTERACTION is specified; otherwise,
+they are computed with eta=0.
 
-  - root.npl (NM74)
-      For  NONPARAMETRIC  method.  The individual data likelihoods (not
-      including the parameter density) are listed in this file.
+*** .agh (NM73)
+This file is produced  if  the  user  selects  $EST  NUMDER=2  or
+NUMDER=3.   The file lists the analytically evaluated derivatives of Y
+with respect to eta.  The format and order is  the  same  as file
+root.fgh.  The values are those returned by subroutine PRED in
+arguments F, G, and H.  These are 0 if not computed  by  PRED. (E.g.
+second  derivatves  are  not  computed analytically with a method
+other than  LAPLACIAN.)   Values  in  root.agh  correspond exactly  to
+those  in  root.fgh.  That is, values of F and G are from calls to
+PRED with ETA=0 or with non-zero etas, as described above.   Values
+of H are from calls to PRED with the same values of eta if INTERACTION
+is  specified;  otherwise,  they  are  from calls to PRED with ETA=0,
+regardless of the Estimation method.
 
-  - root.fgh (NM73)
-      This file is produced  if  the  user  selects  $EST  NUMDER=1  or
-      NUMDER=3.   The  file lists the numerically evaluated derivatives
-      of Y with respect to eta, where
+*** .vpd (NM74)
+This file is produced if the $TABLE file option VARCALC=1 or VARCALC=2
+is used.  It is the full variances-covariances among  all user-defined
+and  PREDPP  parameters.   The FORMAT used for this file is that
+defined in the $EST record.
 
-      F=Y (the prediction)
-      G(I,1)=partial Y with respect to eta(i))
-      G(I,J+1)=Second derivatives of Y with respect to eta(i),eta(j)
-      H(I,1)=partial Y with respect to eps(i)
-      H(i,j+1)=partial Y with respect to eps(i),eta(j)
+*** .ets (NM74)
+As of NM74, one can obtain random samples of individual ETAs, and uses
+these  for  covariate  and  model diagnostics.  $EST option
+ETASAMPLES=1 causes individual ISAMPLE  random  eta  samples  per
+subject,  to  be written to  root.ets, where root is the root name of
+the control stream file.
 
-      The values are those used in the Estimation Step.   Values  of  F
-      are  computed  by PRED with eta=0 if METHOD=0 is used;  otherwise
-      they are computed with non-zero etas: the Conditional (CPE) etas,
-      empirical  bayes  estimates  (EBE), mode a posteriori (MAP) estimates) or conditional mean  etas,  depending  on  the  Estimation
-      Method.   Values  of  G are computed by NONMEM via finite differences using these values of F and eta.  Values of H are  computed
-      by  NONMEM  with  the  same values of F and eta if INTERACTION is
-      specified; otherwise, they are computed with eta=0.
+See "Stochastic  Approximation  Expectation  Maximization  (SAEM) Method" in Guide Introduction_7.
 
-  - root.agh (NM73)
-      This file is produced  if  the  user  selects  $EST  NUMDER=2  or
-      NUMDER=3.   The file lists the analytically evaluated derivatives
-      of Y with respect to eta.  The format and order is  the  same  as
-      file  root.fgh.  The values are those returned by subroutine PRED
-      in arguments F, G, and H.  These are 0 if not computed  by  PRED.
-      (E.g.  second  derivatves  are  not  computed analytically with a
-      method other than  LAPLACIAN.)   Values  in  root.agh  correspond
-      exactly  to  those  in  root.fgh.  That is, values of F and G are
-      from calls to PRED with eta=0 or with non-zero etas, as described
-      above.   Values  of H are from calls to PRED with the same values
-      of eta if INTERACTION is  specified;  otherwise,  they  are  from
-      calls to PRED with eta=0, regardless of the Estimation method.
+*** .bfm (NM75)
+When  OFVTYPE=8  during  optimal  design  ($DESIGN OFVTYPE=8) the
+progress of average  individual  conditional  variances  (average
+empirical  Bayes  conditional variance) are shown in the root.bfm file
+(where root is name of control stream file), and  the  final one on
+the -1000000000 line, during an optimization. The RAW file (by default
+named root.ext) which shows only  the  starting,  and final  values of
+the standard errors of population parameters, as extra information.
 
-  - root.vpd (NM74)
-      This file is produced if the $TABLE file option VARCALC=1 or VARCALC=2 is used.  It is the full variances- covariances among  all
-      user-defined  and  PREDPP  parameters.   The FORMAT used for this
-      file is that defined in the $EST record.
-
-  - root.ets (NM74)
-      As of NM74, one can obtain random samples of individual etas, and
-      uses  these  for  covariate  and  model diagnostics.  $EST option
-      ETASAMPLES=1 causes individual ISAMPLE  random  eta  samples  per
-      subject,  to  be written to  root.ets, where root is the root name
-      of the control stream file.
-      See "Stochastic  Approximation  Expectation  Maximization  (SAEM)
-      Method" in Guide Introduction_7.
-
-  - root.bfm (NM75)
-      When  OFVTYPE=8  during  optimal  design  ($DESIGN OFVTYPE=8) the
-      progress of average  individual  conditional  variances  (average
-      empirical  Bayes  conditional variance) are shown in the root.bfm
-      file (where root is name of control stream file), and  the  final
-      one on the -1000000000 line, during an optimization. The RAW file
-      (by default named root.ext) which shows only  the  starting,  and
-      final  values of the standard errors of population parameters, as
-      extra information.
-
-  - root.cpu (NM73)
-      The cpu time in seconds is reported in this file.  It is an accurate representation of the computer usage, whether single or parallel process.  The same problem when run singly or  in  parallel
-      will report a similar cpu time.  This is in contrast with elapsed
-      time, which is improved with parallelization.
-
- With NONMEM 7.3 and higher, the $THETAI and  $THETAR  records  may  be
- used  to transform initial and final estimates of THETA, respectively.
- This will affect values in the .ext, .cov, etc. files
- (See $thetai, $thetar)
 
 REFERENCES: Guide Introduction_7
 
@@ -1548,7 +1535,10 @@ Shrinkage are output between #TERM and #TERE entries.
 REFERENCES: Guide Introduction_7
 
 
-** Model specification file (MSF)
+** Model specification file
+:PROPERTIES:
+:CUSTOM_ID: msf
+:END:
 A Model Specification File (MSF) is an output file from NONMEM that
 stores Estimation and Covariance-step results, including initial,
 intermediate, and final parameter estimates and search information. It
