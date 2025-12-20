@@ -209,11 +209,10 @@ Use only:
  $TABLE ID G11 G21 G31 H11 H21
   IPRED MDV NOPRINT ONEHEADER FILE=cwtab1
 #+end_src
-      (See Displayed PRED-Defined Items).
+(See @@html:<a href="/docs/reference-manual/files/#output-pred-defined-items">output PRED-Defined Items</a>@@).
 
-      When tables are printed, the maximum number of  labels  permitted
-      in  list1  is  8;  otherwise,  it  is PDT.  (But see the NOAPPEND
-      option.)
+When tables are printed, the maximum number of  labels  permitted in
+list1  is  8;  otherwise,  it  is PDT.  (But see the NOAPPEND option.)
 
 *** list2
       A list comprised of one or more labels from list1.  The  rows  of
@@ -285,7 +284,10 @@ Use only:
     + 1: Owen type scrambling
     + 2: Faure-Tezuka type scrambling
     + 3: Owen plus Faure-Tezuka type scrambling.
-See  the  description  of  RANMETHOD for $ESTIM.  Among the Sobol
+
+See  $ESTIM  @@html:<a href="/docs/reference-manual/control-records/estimation/#estm-ranmethod">RANMETHOD option</a>@@.
+
+Among the Sobol
       sequence methods, the S2 method  appears  to  provide  the  least
       biased  random samples, that is nearly uniform distribution, with
       good mixing in multi-dimensional spaces.
@@ -300,13 +302,10 @@ See  the  description  of  RANMETHOD for $ESTIM.  Among the Sobol
       NOAPPEND, FORMAT, VARCALC  apply to the individual $TABLE record.
       They must be specified for each table to which they apply.
 
-*** PRINT
-      A  printed  table  appears  in  the  NONMEM  output.  This is the
-      default.
+*** PRINT | NOPRINT
+PRINT: a  printed  table  appears  in  the  NONMEM  output.  This is the default.
 
-*** NOPRINT
-      No printed table appears in the NONMEM output.
-
+NOPRINT: no printed table appears in the NONMEM output.
 *** FILE=filename
 The table is written to the given file in character  form,  e.g.,
 ASCII  or  EBCDIC,  according to the hardware platform.  Filename may
@@ -319,13 +318,10 @@ enclosed in quotes.  Filename can differ between $TABLE records.
 Default: No table file is output. Required with NOPRINT.
 
 
-*** NOHEADER
-      Used only with the FILE option.  No header lines are included  in
-      the table file.
+*** NOHEADER | ONEHEADER
+NOHEADER: used only with the FILE option.  No header lines are included  in the table file.
 
-*** ONEHEADER
-      Used only with the FILE option.  Only the first line of the table
-      is a header line.
+ONEHEADER: used only with the FILE option.  Only the first line of the table is a header line.
 
 *** ONEHEADERALL (NM74)
       Used only with the FILE option and FORWARD.  Only the first  line
@@ -342,47 +338,50 @@ Default: No table file is output. Required with NOPRINT.
       the beginning of each table.  NOLABEL NOTITLE  is  equivalent  to
       NOHEADER.
 
-*** FIRSTONLY
-      Only information corresponding to the first data record from each
-      individual record appears  in  the  table.   May  also  be  coded
-      FIRSTRECORDONLY or FIRSTRECONLY.
+*** FIRSTONLY | LASTONLY | FIRSTLASTONLY
+FIRSTONLY: only information corresponding to the first data record
+from each individual record appears  in  the  table.   May  also  be
+coded FIRSTRECORDONLY or FIRSTRECONLY.
 
-*** LASTONLY
-      Only  information corresponding to the last data record from each
-      individual record appears in the table.  May also be  coded  LASTRECORDONLY or LASTRECONLY.
+LASTONLY: only  information corresponding to the last data record from
+each individual record appears in the table.  May also be  coded
+LASTRECORDONLY or LASTRECONLY.
 
-*** FIRSTLASTONLY
-      Only  information corresponding to the first and last data record
-      from each individual record appears in the table.
+FIRSTLASTONLY: only  information corresponding to the first and last
+data record from each individual record appears in the table.
 
-*** NOFORWARD
-      Used only with the FILE option.  When the table  file  is  opened
-      during a given (sub)problem, it is positioned at the start of the
-      file.   This is the default.  However, when  there  are  multiple
-      $TABLE  records within the same problem and having the same filename, the situation is a little more complicated;  see  the  text
-      describing the FORWARD option.
+*** FORWARD | NOFORWARD
+FORWARD: Used only with the FILE option.  When a table file is opened
+during a given (sub)problem, it is forwarded to the end of the file.
+This  allows a table file to accumulate tables from multiple
+subproblems and superproblems.  Moreover, if in the same  (sub)problem
+the  $TABLE record is followed by a contiguous succession of
+additional $TABLE records having the same filename as  the  given
+record,  then  even  though  some of these additional records may have
+the NOFORWARD option, or have neither the NOFORWARD nor  the FORWARD
+options,  the  FORWARD  option will apply to each of the records in
+the succession.
 
-*** FORWARD
-      Used only with the FILE option.  When a table file is opened during a given (sub)problem, it is forwarded to the end of the file.
-      This  allows a table file to accumulate tables from multiple subproblems and superproblems.  Moreover, if in the same  (sub)problem  the  $TABLE record is followed by a contiguous succession of
-      additional $TABLE records having the same filename as  the  given
-      record,  then  even  though  some of these additional records may
-      have the NOFORWARD option, or have neither the NOFORWARD nor  the
-      FORWARD  options,  the  FORWARD  option will apply to each of the
-      records in the succession.
+NOFORWARD: used only with the FILE option.  When the table  file  is
+opened during a given (sub)problem, it is positioned at the start of
+the file.   This is the default.  However, when  there  are  multiple
+$TABLE  records within the same problem and having the same filename,
+the situation is a little more complicated;
 
-*** APPEND
-      Items DV, PRED, RES, WRES appear automatically as the last 4 columns of the table.  This is the default.
+*** APPEND | NOAPPEND
+APPEND: items DV, PRED, RES, WRES appear automatically as the last 4
+columns of the table.  This is the default.
 
-*** NOAPPEND
-      Requests that items DV, PRED, RES, WRES not appear automatically.
-      When this is specified, the number of labels  (i.e.,  user-chosen
-      item  types)  that  may appear in the table can be as large as 12
-      (rather than 8) for a  printed  table,  and  as  large  as  PDT=4
-      (rather  than  PDT) for a table file.  If items PRED, RES, and/or
-      WRES are explicitly coded in list1, then they appear in  the  table, exactly as listed.  (Previously to NONMEM VI 2.0, they could
-      be included in the list, but were suppressed from the portion  of
-      the table described by list1 in favor of the automatically-generated items.)
+NOAPPEND: requests that items DV, PRED, RES, WRES not appear
+automatically. When this is specified, the number of labels  (i.e.,
+user-chosen item  types)  that  may appear in the table can be as
+large as 12 (rather than 8) for a  printed  table,  and  as  large  as
+PDT=4 (rather  than  PDT) for a table file.  If items PRED, RES,
+and/or WRES are explicitly coded in list1, then they appear in  the
+table, exactly as listed.  (Previously to NONMEM VI 2.0, they could be
+included in the list, but were suppressed from the portion  of the
+table described by list1 in favor of the automatically-generated
+items.)
 
 *** FORMAT=s
       This option defines the delimiter and  number  format  for  table
