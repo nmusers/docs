@@ -428,8 +428,7 @@ information, the same as given in the NONMEM report file  between the
 adjustable formatting.
 
 File root.shm (NM73) is a shrinkage map describing which ETAS were
-included or excluded in the eta shrinkage assessment.  (See
-shrinkage).
+included or excluded in the eta shrinkage assessment.  (See shrinkage below).
 
 (See shrinkage below).
 
@@ -608,14 +607,14 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
   THE FOLLOWING LABELS ARE EQUIVALENT
   Subsequent  lines  show the relationship of such items for the current
   Estimation method.
-  (See $table, $scatter).
+  (See $TABLE, $SCATTER).
   (See PRED,RES,WRES).
   See INTRODUCTION TO NONMEM 7, $TABLE: Additional Statistical  Diagnostics, Associated Parameters, and Output Format
   #+end_src
 
 - Suppose that marginal items appear.  If this item is 1 or 2 on a
   given record, the values of PRED  and  any  PRED-defined  displayed
-  item  D (assuming  D  is  not  in the SAVE region (See comsav)
+  item  D (assuming  D  is  not  in the SAVE region (See @@html:<a href="/docs/reference-manual/api/variables/#comres-comsav">COMSAV</a>@@)
   associated with this record) are determined as follows:
 
   + If the Simulation Step is implemented, and ONLYSIMULATION is
@@ -636,16 +635,11 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
 
 - Suppose  that  the  raw-data  items  appear.   If this is 1 on a
   given record, the values of the DV, RES, and any PRED-defined
-  displayed item D  (assuming D is in the SAVE region (See comsav)
-  associated with this record) are determined as follows: the data
-  record serves as a template record.  The DV item  appearing in  a
-  table or scatterplot is the raw-data-average of the values of DV in
-  observation records matching the  template  record.   The  RES item
-  is  the  difference between the PRED item and this average.  A
-  PRED-defined item D is the average of the values of D obtained  with
+  displayed item D  (assuming D is in the SAVE region (See @@html:<a href="/docs/reference-manual/api/variables/#comres-comsav">COMSAV</a>@@) associated with this record) are determined as follows: the data record serves as a template record.  The DV item  appearing in  a table or scatterplot is the raw-data-average of the values of DV in observation records matching the  template  record.   The  RES item is  the  difference between the PRED item and this average.  A PRED-defined item D is the average of the values of D obtained  with
   observation records matching the template.
 
-(See mrg, raw, template).
+  (See @@html:<a href="/docs/reference-manual/data/#mrg">MRG@@,
+  @@html:<a href="/docs/reference-manual/data/#data-raw_">RAW</a>@@, template).
 
 - Example 1: output typical and conditional values using different variables.
   #+begin_src perl
@@ -840,8 +834,6 @@ Summary of data used in the analysis is listed, e.g.
 In FORTRAN terms, the summary shows file I/O unit,  the REWIND
 (necessary only with multiple runs using the data).
 
-(See data record, data item).
-
 REFERENCES: Guide IV, section III.B.2
 
 *** Monitoring of search
@@ -854,8 +846,8 @@ progresses, provided the NONMEM output file may be viewed as the
 search  progresses. This report can also be viewed in a special
 (unbuffered) file.
 
-The  search  is  for  parameter  values that minimize the value of the
-OBJECTIVE FUNCTION  (See minimum value of objective function).  It
+The  search  is  for  parameter  values that minimize
+@@html:<a href="/docs/reference-manual/files/#ofv">the value of the OBJECTIVE FUNCTION</a>@@.  It
 entails the following steps.
 1. The  search  is  carried out in a different parameter space.  The
    parameters are transformed to unconstrained parameters (UCP).  In
@@ -869,7 +861,7 @@ entails the following steps.
 2. At the  current parameter estimate the GRADIENT vector (the
    vector  of  first  partial  derivatives of the objective function
    with respect to the UCP) is  computed.   An  approximate  Hessian
-   matrix  (See hessian)  is  also  computed.  An ITERATION SUMMARY,
+   matrix  (See @@html:<a href="/docs/reference-manual/files/#hessian">Hessian</a>@@)  is  also  computed.  An ITERATION SUMMARY,
    including the current parameter estimate and the gradient vector,
    may placed into the intermediate output.
 
@@ -1006,7 +998,10 @@ REFERENCES: Guide I, section C.3.5.1
 
 REFERENCES: Guide V, section 10.4.1
 
-*** Initial estimate
+*** Initial parameter estimate
+:PROPERTIES:
+:CUSTOM_ID: initial-parameter-estimate
+:END:
 Initial  estimates  of  parameters  are  required by NONMEM.  They are
 used, for example, to compute the initial value of the objective
 function  (before NONMEM begins its search for final estimates).  The
@@ -1015,7 +1010,7 @@ that NONMEM provide initial estimates.
 
 NONMEM  may  also use the final estimates from a previous run as
 initial estimates, by means of a Model Specification File. The outputs
-will be different in that case (See model specification file).
+will be different in that case (See @@html:<a href="/docs/reference-manual/files/#msf">Model Specification File</a>@@).
 
 NONMEM output reflects initial estimates provided by the user on  its
 problem summary page, such as
@@ -1070,11 +1065,14 @@ are provided by the user.
 	ETA1    1.50E+00
 #+end_src
 
-(See final parameter estimate).
+(See @@html:<a href="/docs/reference-manual/files/#final-parameter-estimate">Final Parameter Estimate</a>@@).
 
 REFERENCES:  Guide  IV,  section  III.B.9  , III.B.10 , III.B.11
 
-*** Hessian  matrix
+*** Hessian matrix
+:PROPERTIES:
+:CUSTOM_ID: hessian
+:END:
 The second derivative matrix of the objective function with respect to
 the parameters of the model are utilized in NONMEM.
 
@@ -1148,7 +1146,7 @@ The matrix is symmetric and is given in lower triangular form.  Here
 the 2x2 OMEGA matrix is constrained to be diagonal, therefore entries
 related to OM12 are not available omitted. (a compressed  form is used
 when the dimension exceeds 75x75. One can also requested this format
-manually. See $covariance).
+manually. See @@html:<a href="/docs/reference-manual/control-records/covar/">$COVARIANCE</a>@@).
 
 The estimated variance-covariance matrix is computed as
 \(R^{-1}SR^{-1}\). Here \(R\) is the Hessian matrix of the objective
@@ -1191,14 +1189,8 @@ confidence region for the complete set of population parameters.
 
 - The  Covariance   Step   will   not   be executed when the requested
   number of significant digits is greater than the reported number of
-  significant digits in the final  parameter  estimate (See sig
-  digits). When the model specification file is used as input the
-  Covariance  Step  can be run without the  Estimation step
-  (MAXEVAL=0). In that case one should ensure the requested number of
-  significant digits is less than the reported number  of significant
-  digits from the previous run.
-
- (See standard error, correlation matrix of estimate).
+  significant digits in the final  parameter  estimate (See @@html:<a href="/docs/reference-manual/control-records/estimation/#sigdigits">SIGDIGITS</a>@@). When the model specification file is used as input the
+  Covariance  Step  can be run without the  Estimation step (MAXEVAL=0). In that case one should ensure the requested number of significant digits is less than the reported number  of significant digits from the previous run.
 
  REFERENCES: Guide I, section C.3.5.2
 
@@ -1207,6 +1199,9 @@ confidence region for the complete set of population parameters.
  REFERENCES: Guide V, section 5.4 , 13.3
 
 *** Correlation matrix of estimate
+:PROPERTIES:
+:CUSTOM_ID: cor-matrix
+:END:
 The  correlation  matrix is the variance-covariance matrix in
 correlation form.  If  the  correlation between  two  parameters  is
 large (e.g., >.95), then one may conclude that a considerable portion
@@ -1215,7 +1210,7 @@ The problem can be alleviated with additional data or using  a
 simpler model with fewer parameters.
 
 
-Ouutput example:
+Output example:
 #+begin_src txt
  **************** CORRELATION MATRIX OF ESTIMATE ********************
              TH 1      TH 2      OM11      OM12      OM22      SG11
@@ -1230,7 +1225,7 @@ The matrix is symmetric and is given in lower triangular form.  Here
 the 2x2 OMEGA matrix is constrained to be diagonal, therefore entries
 related to OM12 are not available omitted. (a compressed  form is used
 when the dimension exceeds 75x75. One can also requested this format
-manually. See $covariance).
+manually. See @@html:<a href="/docs/reference-manual/control-records/covar/">$COVARIANCE</a>@@).
 
 With  NONMEM  7.2  and  higher, the diagonal elements are the standard
 error (the square root of the diagonal elements of the covariance
@@ -1338,7 +1333,10 @@ A  data  set  will  be  simulated, and EB2 will be obtained.  With the
 REFERENCES: Guide VII Section II.A, III.D
 
 REFERENCES: Guide VII, section II.A , III.D
-*** Final estimate
+*** Final parameter estimate
+:PROPERTIES:
+:CUSTOM_ID: final-parameter-estimate
+:END:
 NONMEM output always include FINAL PARAMETER ESTIMATE. When the
 Estimation Step was not run, then output  are  the initial parameter
 estimates specified for the problem.
@@ -1368,17 +1366,19 @@ With NONMEM 7.2 and higher, the correlation matrix is included.  It is
 computed  from  the  covariance  matrix, whether or not the Estimation
 step is not run.
 
-(See initial parameter estimate).
+(See @@html:<a href="/docs/reference-manual/files/#initial-parameter-estimate">initial parameter estimate</a>@@).
 
-With NONMEM 7.3 and higher, the $THETAR record may be used  to  transform  final  estimates of THETA before they are reported in the NONMEM
+With NONMEM 7.3 and higher, the @@html:<a href="/docs/reference-manual/control-records/thetar/">$THETAR</a>@@ record may be used  to  transform  final  estimates of THETA before they are reported in the NONMEM
 output.
 
-(See $thetar).
 
 REFERENCES: Guide V, section 10.5
 
 
 *** Value of the objective function
+:PROPERTIES:
+:CUSTOM_ID: ofv
+:END:
 The  NONMEM  OBJECTIVE  FUNCTION  is  a goodness of fit statistic; the
 lower the value, the better the fit.  Negative values are possible and
 have   no   special  significance.   Under  certain  assumptions,  the
@@ -1424,10 +1424,11 @@ Model Time examples
  Examples Using MTIME to Model Periodic Discontinuities in $DES
  Enterhepatic circulation examples
 
-(See mtime, model time examples).
+(See @@html:<a href="/docs/reference-manual/api/variables/#mtime">MTIME</a>@@, model time examples).
 
- (See Circadian Example: Examples Using MTIME to Model Periodic Discontinuities in $DES)
- (See Enterhepatic circulation examples).
+(See Circadian Example: Examples Using MTIME to Model Periodic Discontinuities in $DES)
+
+(See Enterhepatic circulation examples).
 
 REFERENCES: Guide I, section C.3.5.1
 
@@ -1458,10 +1459,10 @@ for these items are PRED, RES, and WRES, respectively. Synonyms may be
 specified on the $TABLE record for one or more of these labels.   With
 the  NOAPPEND  option on this record, the three items are not included
 in a table unless explicity listed on the $TABLE record.  With the use
-of the user-routine SPTWO, the values of the RES and WRES items can be
-defined differently from the values described below. (See sptwo).
+of the user-routine @@html:<a href="/docs/reference-manual/api/subroutines/#sptwo">SPTWO</a>@@, the values of the RES and WRES items can be
+defined differently from the values described below.
 
-These items may also be displayed in scatterplots. See $SCATTERPLOT.
+These items may also be displayed in @@html:<a href="/docs/reference-manual/control-records/scatter/">scatterplots</a>@@.
 
 - PRED Prediction items are the predictions computed by the PRED
   subroutine.  For population data, prediction items are  always
@@ -1498,7 +1499,7 @@ mean  value  of eta.  When the Raw-data data item (RAW_) is 1, then DV
 is a raw-data average and RES is the difference between the PRED  item
 and this average.
 
-(See displayed PRED-defined items).
+(See @@html:<a href="/docs/reference-manual/files/#output-pred-defined-items">output PRED-defined items</a>@@).
 
 
 REFERENCES: Guide I, section C.3.5.3 , C.3.5.4

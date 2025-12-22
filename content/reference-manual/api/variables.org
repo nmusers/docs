@@ -23,6 +23,9 @@ of the letters "COM".)
   referenced in abbreviated and verbatim code as COM(1), COM(2), etc.
 
 ** COMACT
+:PROPERTIES:
+:CUSTOM_ID: comact
+:END:
 In any user code.
 
 Reserved variable COMACT is set by NONMEM. It may  be  tested  in PRED
@@ -48,6 +51,9 @@ Such a pass takes place when the  control  stream  includes  this record:
 #+end_src
 
 ** COMRES, COMSAV
+:PROPERTIES:
+:CUSTOM_ID: comres-comsav
+:END:
 COMACT is set by NONMEM; COMSAV is set by PRED.
 #+begin_src f90
 USAGE:
@@ -85,15 +91,13 @@ COMSAV=n2 (option of @@html:<a href="/docs/reference-manual/control-records/abbr
       The  SAVE region has size n2 initially, but NM-TRAN may extend it
       if SAVE variables are used.  However, if n2 =-1, the SAVE  region
       is  not  to  be extended, and there is to be no SAVE region altogether.
-      (See copying_block). NM-TRAN causes the generated routines to store the value of  COMSAV at ICALL=1.
+      (See @@html:<a href="/docs/user-guide/advanced/abbr_block/#copying-block">copying block</a>@@). NM-TRAN causes the generated routines to store the value of @@html:<a href="/docs/reference-manual/api/variables/#comres-comsav">COMSAV</a>@@ at ICALL=1.
 
 COMSAV=n2 (in user written code):
       In  the absence of abbreviated code, COMSAV may be set by a userwritten PRED routine at ICALL<=1, or at COMACT=1  with  the  very
       first data record.  n2 is as described above.
 
- (See PRED-Defined Variables)
-
- (See @@html: <a href="/docs/reference-manual/abbr/">abbreviated code</a>@@, displayed_values).
+ (See @@html:<a href="/docs/reference-manual/api/variables/#pred-defined-variables">PRED-Defined Variables</a>@@, @@html: <a href="/docs/reference-manual/abbr/">abbreviated code</a>@@).
 
  REFERENCES: Guide IV, section III.B.7 , IV.E.2
  REFERENCES: Guide VI, section III.J
@@ -125,11 +129,14 @@ be used by a user-written CONTR subroutine.
 -  NOBS
       Number of observations in the individual record.
 
-DATA is used also in MIX (See data_for_mix).
+Data is used also in @@html:<a href="/docs/reference-manual/api/variables/#mix-data">MIX</a>@@.
 
 REFERENCES: Guide IV, section III.B.4
 
 ** CTLO CTUP probability: PR_CT
+:PROPERTIES:
+:CUSTOM_ID: pr-ct
+:END:
 #+begin_src f90
  USAGE:
       USE ROCM_REAL, ONLY PR_CT
@@ -143,8 +150,10 @@ When  with  a given data record, either of the limits CTLO or CTUP are
  categories  equated  with  the possible values of a potential observation, then during a copying pass (and during ICALL=5 and 6), PR_CT  is
  the  estimated probability that an observation will be of the category
  in question.
- (See CTLO, CTUP)
- (See copying_block, expectation, data_average)
+
+ (See @@html:<a href="/docs/reference-manual/api/variables/#ctlo">CTLO</a>@@, @@html:<a href="/docs/reference-manual/api/variables/#ctup">CTUP</a>@@)
+
+ (See @@html:<a href="/docs/user-guide/advanced/abbr_block/#copying-block">copying</a>@@, @@html:<a href="/docs/user-guide/advanced/abbr_block/#expectation-block">expectation</a>@@, @@html:<a href="/docs/user-guide/advanced/abbr_block/#data-average-block">data average </a>@@ blocks)
 
  If the mean and variance of the intra-individual model for a potential
  observation  are  specified, and if the limits CTLO or CTUP are set, a
@@ -176,6 +185,9 @@ used as right-hand quantities in abbreviated code for
 @@html:<a href="/docs/user-guide/advanced/abbr_block/#initialization-finalization-block">Initialization-Finalization blocks</a>@@.
 
 ** INFN-defined variables
+:PROPERTIES:
+:CUSTOM_ID: infn-defined-variables
+:END:
 #+begin_src f90
  USAGE:
       MODULE INFNP
@@ -202,7 +214,7 @@ PRINFN  is  a module for INFN-defined variables.  It contains an array
  PREDPP.  Hence the variables in the module may be initialized or modified at ICALL values 0 or 1 or 3, and will retain whatever values they
  are given.  These variables cannot be displayed in tables or  scatterplots.   If they are to be displayed, WRITE statements can be used, or
  their values can be assigned to variables that are  listed  in  module
- NMPRD4.  (See PRED-defined_variables).
+ NMPRD4.  (See @@html:<a href="/docs/reference-manual/api/variables/#pred-defined-variables">PRED-defined variables</a>@@).
 
  Variables from PRINFN can be used in a user-written code. MODULE INFNP
  must be defined as above prior to the SUBROUTINE statement.  The variables have names TLCOM(1), TLCOM(2), etc.
@@ -224,6 +236,9 @@ PRINFN  is  a module for INFN-defined variables.  It contains an array
 
 
 ** Mixture model: MIXPT
+:PROPERTIES:
+:CUSTOM_ID: mixpt
+:END:
 #+begin_src f90
  USAGE:
       USE ROCM_REAL, ONLY: MIXPT=>MIXP_RAW
@@ -251,6 +266,9 @@ record are stored in MIXPT.
 
  REFERENCES: Guide VI, section III.L.2 , Figure 6
 ** MIX: DATA
+:PROPERTIES:
+:CUSTOM_ID: mix-data
+:END:
 #+begin_src f90
  USAGE:
       USE ROCM_REAL, ONLY: DATA=>RDATA
@@ -267,7 +285,7 @@ record are stored in MIXPT.
 
 
 DATA is also used in CONTR
- (See CCONTR:_Y,DATA,N1,N2,DIM)
+(See @@html:<a href="/docs/reference-manual/api/subroutines/#ccontr">CCONTR</a>@@)
 
 REFERENCES: Guide IV, section III.B.4
 
@@ -335,6 +353,9 @@ code blocks $PK, $ERROR, $INFN and $PRED.
   right-hand quantity in abbreviated code.
 
 ** Objective function value from individual
+:PROPERTIES:
+:CUSTOM_ID: ofv-indi
+:END:
 #+begin_src f90
  USAGE:
       USE ROCM_INT, ONLY: IIDX=>IDVALX
@@ -393,10 +414,7 @@ Note: With earlier versions than NONMEM 7.3, verbatim code is needed:
  "  COM(2)=CNTID(NIREC)
 #+end_src
 
-With NONMEM 7, the additional output file root.phi contains the same information. (See additional_output_file).
-
-
-
+With NONMEM 7, the additional output file root.phi contains the same information. (See @@html:<a href="/docs/reference-manual/files/#addi-output">additional output files</a>@@).
 
 ** Pass new L2 record: NEWL2
 #+begin_src f90
@@ -427,11 +445,14 @@ and in an $INFN block in conjunction with PASS.
 #+end_src
 - NWIND
       The  NEWIND  value  at  ICALL 0, 1 and 3.  NWIND changes value in
-      conjunction with calls to PASS.  (See pred, newind).
+      conjunction with calls to PASS.  (See @@html:<a href="/docs/reference-manual/api/subroutines/#pred">PRED</a>@@, @@html:<a href="/docs/reference-manual/api/variables/#newind">NEWIND</a>@@).
 
  REFERENCES: Guide I, section C.3.5.2
 
 ** Parameter dimensions
+:PROPERTIES:
+:CUSTOM_ID: parameter-dimensions
+:END:
 #+begin_src f90
 
  USAGE:
@@ -468,6 +489,9 @@ and in an $INFN block in conjunction with PASS.
 
 
 ** PRED,RES,WRES
+:PROPERTIES:
+:CUSTOM_ID: pred-res-wres
+:END:
 #+begin_src f90
  USAGE:
       USE ROCM_REAL, ONLY:                                             &
@@ -523,7 +547,7 @@ and in an $INFN block in conjunction with PASS.
 - The  EPRED_,  ERES_, EWRES_, NPD_, NPDE_, ECWRES_ items are calculated
  by the Table Step.  When EPRED_, ERES_, EWRES_, NPD_,  NPDE_,  ECWRES_
  items are displayed, the options ESAMPLE and SEED of the $TABLE record
- are of interest.  (See $table).
+ are of interest.  (See @@html:<a href="/docs/reference-manual/control-records/table/">$TABLE</a>@@).
 
 - The PRED_,RES_,WRES_ (PRED,RES,WRES) items behave  as  they  did  with
  NONMEM  VI. Consequently, if FO or a CONDITIONAL method without INTERACTION is used, NPRED_,NRES_,NWRES_ and PRED_,RES_,WRES_  are  equivalent.   If  FO  or  a  CONDITIONAL  method  with  INTERACTION is used,
@@ -537,7 +561,7 @@ These  items  may  be used as right-hand quantities in $PRED and $INFN
 during problem finalization.  They can also be output in  table  files
 by  specifying their names (without the underscore) on a $TABLE statement.
 
- (See pred res, wres).
+ (See @@html:<a href="/docs/reference-manual/api/variables/">PRED, RES, WRES</a>@@).
 
  For other variables, see the INTRODUCTION TO NONMEM 7.
 
@@ -588,9 +612,12 @@ by  specifying their names (without the underscore) on a $TABLE statement.
 These  variables  may  be used as right-hand quantities in abbreviated
 code for @@html:<a href="/docs/user-guide/advanced/abbr_block/#initialization-finalization-block">Initialization-Finalization blocks</a>@@.
 
- (See $super).
+ (See @@html:<a href="/docs/reference-manual/control-records/super/">$SUPER</a>@@).
 
 ** Record counters
+:PROPERTIES:
+:CUSTOM_ID: record-counters
+:END:
 #+begin_src f90
  USAGE:
       USE ROCM_INT, ONLY: NIREC=>NINDREC,NDREC=>NDATINDR
@@ -681,6 +708,9 @@ accessed through =nonmem_reserved_general= file:
 
 
 ** Simulation: NREP,IREP
+:PROPERTIES:
+:CUSTOM_ID: simulation-nrep-irep
+:END:
 #+begin_src f90
  USAGE:
       USE ROCM_INT, ONLY: NREP,IREP=>NCREP
@@ -724,10 +754,12 @@ $ERROR blocks, and in a $INFN block in conjunction with PASS.
 
 Status with 2nd level superproblem takes precedence.
 
-(See $super).
+(See @@html:<a href="/docs/reference-manual/control-records/super/">$SUPER</a>@@).
 
 ** YLO YUP probability: PR_Y
-
+:PROPERTIES:
+:CUSTOM_ID: pr-y
+:END:
 #+begin_src f90
  USAGE:
       USE ROCM_REAL, ONLY: PR_Y
@@ -740,9 +772,10 @@ Status with 2nd level superproblem takes precedence.
 When with a given data record, either of the limits YLO or YUP are set
  so that during the analysis an interval is defined in which  (or  outside  of  which) an observation is conditioned to exist, then during a
  copying pass (and during ICALL=5 and 6), PR_Y is the estimated  probability that an observation will fall within (or outside) the interval.
- (See YLO YUP)
- (See copying_block, expectation)
- (See data average)
+ (See @@html:<a href="/docs/reference-manual/api/variables/">YLO, YUP</a>@@)
+
+ (See @@html:<a
+ href="/docs/user-guide/advanced/abbr_block/#copying-block">copying</a>@@, @@html:<a href="/docs/user-guide/advanced/abbr_block/#expectation-block">expectation</a>@@, @@html:<a href="/user-guide/advanced/abbr_block/#data-average-block">data average</a>@@ blocks)
 
  For  the  purpose of computing this probability, an actual observation
  need not exist in the record.  If the mean and variance of the  intraindividual model for a potential observation are specified, and if the
@@ -778,6 +811,9 @@ item, e.g. TEMPLT(1) or TEMPLT(ID).
 
 
 ** Parameters OMEGA SIGMA: CURRENT
+:PROPERTIES:
+:CUSTOM_ID: parameters-omega-sigma-current
+:END:
 #+begin_src f90
  USAGE:
       USE ROCM_REAL, ONLY: OMEGA=>VARNF
@@ -796,10 +832,10 @@ The current value of SIGMA is also located in this array as follows:
 #+end_src
 NETAS_ is described in Parameter dimensions.
 
- (See Parameter dimensions).
+ (See @@html:<a href="/docs/reference-manual/api/variables/#parameter-dimensions">Parameter dimensions</a>@@).
 
 At  run and problem initialization and at problem finalization use the variables OMEGAF and SIGMAF.
- (See Parameter values: Initial and Final).
+ (See @@html:<a href="/docs/reference-manual/api/variables/#parameter-values-init-final">Parameter values: Initial and Final</a>@@).
 
 Should not be used if an initial estimate is being computed.
 
@@ -820,6 +856,9 @@ EXAMPLE: Compute individual weighted residuals using a slope-intercept residual 
 
 
 ** Non-active ETA list for PRED
+:PROPERTIES:
+:CUSTOM_ID: non-active-eta
+:END:
 
 #+begin_src f90
  USAGE:
@@ -855,10 +894,6 @@ EXAMPLE: Compute individual weighted residuals using a slope-intercept residual 
 -  NSIG gives the minimum of the values found in the vector SIG
 
 The NSIG and SIG values should only be used with ICALL = 3.
-
-
-
-
 
 ** Partial derivative indicators
 :PROPERTIES:
@@ -921,6 +956,9 @@ The NSIG and SIG values should only be used with ICALL = 3.
  REFERENCES: Guide VI, section III.E.4 , IV.B.2
 
 ** MIXNUM, MIXEST, MIXP
+:PROPERTIES:
+:CUSTOM_ID: mixnum-mixest-mixp
+:END:
 Variables used with mixture models.
 
 USAGE:
@@ -975,9 +1013,9 @@ or consequence from the estimation set by NONMEM.
   With  the third, the index i must not exceed the value of MMX in SIZES
   (or as set by $SIZES record).
 
- (See Mixture_model:_MIXNUM,MIXEST)
- (See Mixture_model:_MIXP)
- (See mix, mixture model example).
+ (See @@html:<a href="/docs/reference-manual/api/variables/#mixnum-mixest-mixp">MIXNUM,MIXEST,MIXP</a>@@)
+
+ (See @@html:<a href="/docs/reference-manual/api/subroutines/#mix">MIX</a>@@, mixture model example).
 
  REFERENCES: Guide IV, section III.B.4 , III.B.6
  REFERENCES: Guide IV, section IV.E.1 , 4.E.2
@@ -985,6 +1023,9 @@ or consequence from the estimation set by NONMEM.
 
 
 ** Parameter values: initial and final
+:PROPERTIES:
+:CUSTOM_ID: parameter-values-init-final
+:END:
 #+begin_src f90
  USAGE:
       USE ROCM_REAL, ONLY: THETAF,OMEGAF,SIGMA,THETAFR
@@ -1026,9 +1067,12 @@ or consequence from the estimation set by NONMEM.
 
 - At ICALL = 2, the values of these variables  should not be used
   unless the value of COMACT is 1 or 2, in which case these are final
-  values. (See COMACT,COMSAV)
+  values. (See @@html:<a href="/docs/reference-manual/api/variables/#comact">COMACT</a>@@,@@html:<a href="/docs/reference-manual/api/variables/#comres-comsav">COMSAV</a>@@)
 
 ** Standard errors
+:PROPERTIES:
+:CUSTOM_ID: standard-errors
+:END:
 #+begin_src f90
  USAGE:
       USE ROCM_REAL, ONLY: SETHET=>SETH,SEOMEG=>SEOM,SESIGM=>SESIG,
@@ -1061,6 +1105,9 @@ These values should only be used with ICALL = 3.
  REFERENCES: Guide V, section 5.4.2.1
 
 ** Prior simulation: ICMAX
+:PROPERTIES:
+:CUSTOM_ID: prior-simulation-icmax
+:END:
 #+begin_src f90
  USAGE:
       USE NMPR_INT, ONLY: ICMAX=>IMAXSIM
@@ -1085,6 +1132,9 @@ attempts, they terminate with the message
   #+end_src
 
 ** Simulation: SIMEPS error code
+:PROPERTIES:
+:CUSTOM_ID: simeps-error
+:END:
 #+begin_src f90
  USAGE:
       USE NMPRD_INT, ONLY: IERSQ
@@ -1094,7 +1144,7 @@ attempts, they terminate with the message
 #+end_src
 For user-defined PRED and ERROR routines.
 
-SIMEPS is only relevant when correlations are stored in CORRL2. (See Correlation_Across_L2_Records).
+SIMEPS is only relevant when correlations are stored in @@html:<a href="/docs/reference-manual/api/variables/#corrl2">CORRL2</a>@@.
 
 - IERSQ: the SIMEPS error return code.
    + IERSQ=0: Normal return
@@ -1107,6 +1157,9 @@ Up to NONMEM through 7.2, C was used rather than CORRL2; Up to  NONMEM
 7.3, the value of IERSQ is not checked in generated code.
 
 ** Correlation across L2 records
+:PROPERTIES:
+:CUSTOM_ID: corrl2
+:END:
 #+begin_src f90
  USAGE:
       CORRL2(n,m)=...
@@ -1285,10 +1338,13 @@ blocks (epsilons sets) based on how Y is evaluated.
  population  sample  with a single individual, and OMEGA is constrained
  to be 0.
 
- (See Simulation:_SIMEPS_Error_Code)
+ (See @@html:<a href="/docs/reference-manual/api/variables/#simeps-error">Simulation:_SIMEPS_Error_Code</a>@@).
 
 
-** PRED: EXIT
+** PRED EXIT code
+:PROPERTIES:
+:CUSTOM_ID: pred-exit
+:END:
 With versions of NONMEM before 7.4.2:
 #+begin_src f90
  USAGE:
@@ -1312,7 +1368,7 @@ With versions of NONMEM starting with 7.4.2:
 
 - NETEXT:
   + NETEXT=0 to 3: the number of lines of text of  an  error  message
-    stored by PRED in ETEXT (See PRED Error Message).
+    stored by PRED in ETEXT (See @@html:<a href="/docs/reference-manual/api/variables/#pred-error">PRED Error Message</a>@@).
 
 - Values may be stored in IERPRD two ways. PREDPP may store error
   messages such as PK  PARAMETER  FOR  KA  IS NON-POSITIVE in ETEXT
@@ -1334,8 +1390,7 @@ With versions of NONMEM starting with 7.4.2:
 - PREDPP will not set these values; only the EXIT statement in
   abbreviated  code can do this.  IERPRDU is ignored if it is not the
   Simuation Step.  For NONMEM 7.5 use of the error code during
-  simulation, (See Simulation Block) and look for "Simulation Error
-  Forgiveness".
+  simulation, (See @@html:<a href="/docs/user-guide/advanced/abbr_block/#simulation-block">Simulation Block</a>@@) and look for "Simulation Error Forgiveness".
 
 REFERENCES: Guide V, section 12.4.15
 
@@ -1452,6 +1507,9 @@ information which ETAs are excluded in the ETA shrinkage assessment.
 REFERENCES: Guide Introduction_7
 
 ** PRED error message
+:PROPERTIES:
+:CUSTOM_ID: pred-error
+:END:
 #+begin_src f90
  USAGE:
       USE NMPRD_CHAR, ONLY :: ETEXT
@@ -1463,7 +1521,7 @@ REFERENCES: Guide Introduction_7
   When PRED returns to NONMEM with IERPRD>0, PRED  may  store  here
   one  to  three  lines of text explaining the error, for printing.
   The number of lines of text to  be  printed  must  be  stored  in
-  NETEXT. (See PRED Exit Code)
+  NETEXT. (See @@html:<a href="/docs/reference-manual/api/variables/#pred-exit">PRED Exit Code</a>@@)
 
 When  abbreviated  code is used, the EXIT statement causes appropriate text to be stored in ETEXT.
 
@@ -1473,6 +1531,9 @@ REFERENCES: Guide VI, section III.K.2 , IV.F
 REFERENCES: Guide IV, section IV.G
 
 ** CTUP
+:PROPERTIES:
+:CUSTOM_ID: ctup
+:END:
 #+begin_src f90
  USAGE:
       USE NMPR_REAL, ONLY CTUP,DCTUP,DDCTUP
@@ -1487,14 +1548,16 @@ If the endpoint depends on an ETA variable (for population data), also provide i
 
 CTUP may be assigned in $PRED or $ERROR code, where NM-TRAN automatically sets derivatives. NONMEM detects when CTUP is unset. When CTUP is used, the Laplacian estimation method is required.
 
-CTLO may be used in conjunction with CTUP. (See CTLO).
+@@html:<a href="/docs/reference-manual/api/variables/#ctlo">CTLO</a>@@ may be used in conjunction with CTUP.
 
-PR_CT  is the estimated probability that an observation will be of the category in question.
- (See pr_ct, CTLO_TUP_Probability:_PR_CT).
+@@html:<a href="/docs/reference-manual/api/variables/#pr-ct">PR_CT</a>@@ is the estimated probability that an observation will be of the category in question.
 
 Limitation: may not be used with the LIKELIHOOD or -2LOGLIKELIHOOD options.
 
 ** CTLO
+:PROPERTIES:
+:CUSTOM_ID: ctlo
+:END:
 #+begin_src f90
  USAGE:
       USE NMPR_REAL, ONLY:CTLO=>CTLW,DCTLO=>DCTLW,DDCTLO=>DDCTLW
@@ -1517,17 +1580,17 @@ set in a $PRED or $ERROR abbreviated code, and then NM-TRAN
 automatically sets the derivatives. NONMEM can detect when CTLO is not
 set.  When CTLO is set, the  Laplacian estimation method must be used.
 
-CTUP may be used in conjunction with CTLO. (See ctup).
+@@html:<a href="/docs/reference-manual/api/variables/#ctup">CTUP</a>@@ may be used in conjunction with CTLO.
 
-PR_CT  is the estimated probability that an observation will be of the
-category in question. (See pr_ct, CTLO_CTUP_Probability:_PR_CT).
+@@html:<a href="/docs/reference-manual/api/variables/#pr-ct">PR_CT</a>@@  is the estimated probability that an observation will be of the category in question.
 
 
 Limitation: may not be used with the LIKELIHOOD or -2LOGLIKELIHOOD options.
 
-
-
 ** SKIP
+:PROPERTIES:
+:CUSTOM_ID: skip
+:END:
 #+begin_src f90
  USAGE:
       USE NMPR_INT, ONLY SKIP_=>SKIP
@@ -1642,7 +1705,7 @@ A nonzero value of F_FLAG has no effect during a Simulation Step.  But
 
 - When F_FLAG/=0 for an observation within an individual record,
   inter-L2 correlated epsilons are not  allowed  with the observations
-  within the individual record. (See Correlation Across L2 Records)
+  within the individual record. (See @@html:<a href="/docs/reference-manual/api/variables/#corrl2">Correlation Across L2 Records</a>@@).
 
 - If  the  data are population data, a nonzero F_FLAG cannot be used
   within a multiple-observation L2 record.  If the data are
@@ -1677,6 +1740,9 @@ $INFN and $PRED blocks.  After being set during the  Simulation  Step,
 they remain available during problem finalization (i.e., ICALL=3).
 
 ** YLO, YUP
+:PROPERTIES:
+:CUSTOM_ID: ylo-yup
+:END:
 #+begin_src f90
  USAGE:
       USE NMPR_REAL, ONLY: YLO,YUP
@@ -1700,9 +1766,7 @@ not set, it is assumed to be minus infinity or plus infinity,
 respectively.  When YLO or YUP  is set, the Laplacian estimation
 method must be used.
 
-PR_Y is the estimated probability that an observation will fall within (or  outside) the  interval.
-
-(See pr_y, YLO_YUP_Probability:_PR_Y).
+@@html:<a href="/docs/reference-manual/api/variables/#pr-y">PR_Y</a>@@ is the estimated probability that an observation will fall within (or  outside) the  interval.
 
 ** PASS: PASSRC
 #+begin_src f90
@@ -1731,7 +1795,7 @@ PASSRC  contains  the  data  record  at  ICALL values 0, 1 and 3. PASSRC changes
     "repetition base with value n", i.e.  as the  first  of  a  series
     of  contiguous records  of  the current individual record (with
     single-sub- ject data, contiguous records of the data set) which
-    will be repeated.  See the repeat data item (See RPT_).
+    will be repeated.  See the repeat data item (See @@html:<a href="/docs/reference-manual/data/#rpt_">RPT_</a>@@).
   + RPTO=-n (n between 1 and 5): the current record thus becomes a
     "repetition initiator with value n", i.e.  before the next record
     is passed to PRED all preceding records of the individual record
@@ -1887,6 +1951,9 @@ This is the case for PREDPP.
 
 
 ** PRED-defined variables
+:PROPERTIES:
+:CUSTOM_ID: pred-defined-variables
+:END:
 #+begin_src f90
  USAGE:
       USE NMPRD4, ONLY: COM=>VRBL
@@ -1909,8 +1976,8 @@ resource/sizes.f90, but this can be changed using the $SIZES record.
 Variables are stored in NMPRD4 for communication with other blocks  of
 abbreviated  code  or  with  user-written codes, or so that NONMEM has
 access to these variables  for  display  in  tables  or  scatterplots.
-(See $table, $scatter).   Values are stored by PRED and by subroutines
-of PREDPP. A SAVE region of NMPRD4 may be designated; (See COMACT,COMSAV).
+(See @@html:<a href="/docs/reference-manual/control-records/table/">$TABLE</a>@@, @@html:<a href="/docs/reference-manual/control-records/scatter/">$SCATTER</a>@@).  Values are stored by PRED and by subroutines
+of PREDPP. A SAVE region of NMPRD4 may be designated; (See @@html:<a href="/docs/reference-manual/api/variables/#comact">COMACT</a>@@,@@html:<a href="/docs/reference-manual/api/variables/#comres-comsav">COMSAV</a>@@).
 
 When  abbreviated  code  is  used,  by default NM-TRAN lists all
 PRED-defined variables in the module, as well  as  certain
@@ -1922,7 +1989,7 @@ desirable.  (An exception  is  made  for initialization-finalization
 variables;  these  are PRED-defined variables that are first defined
 within a block that tests for ICALL 0, 1, 3.   Such variables are
 stored locally and will not be changed by NONMEM at ICALL 2 or 4.)
-(See INFN-defined_variables.)
+(See @@html:<a href="/docs/reference-manual/api/variables/#infn-defined-variables">INFN-defined_variables</a>@@.)
 
 Variables from a given block of abbreviated code can be excluded  from
 the module by including the following pseudo-statement in that block:
@@ -2096,6 +2163,9 @@ REFERENCES: Guide Introduction_7
 
 
 ** MTIME
+:PROPERTIES:
+:CUSTOM_ID: mtime
+:END:
 Model event times are additional PK parameters defined in the PK
 routine or $PK block, related to the model event time feature of PREDPP.  A model event time is not associated with any
 compartment, but, like an absorption lag time, defines a  time  to
@@ -2214,7 +2284,7 @@ Read-only indicator variables, not to be set by PK.
 PREDPP modules contain values that are (for the most part)
 communicated from PRED to its subroutines.  Listed below are MODULE
 (previous COMMON block name), and a description of the variables.
-(See NONMEM_modules).
+(See @@html:<a href="/docs/reference-manual/api/modules/">NONMEM modules</a>@@).
 
 PREDPP read-only modules contain values  that  are  communicated  from
 PREDPP to various user-subroutines PK, ERROR, DES and AES.
@@ -2307,8 +2377,7 @@ REFERENCES: Guide VI, section III.I , IV.D , Figure 14
       USE SIZES, ONLY: LVR
       INTEGER(KIND=ISIZE) :: NACTIV,IDXETA(LVR)
 #+end_src
-- NACTIV: NACTIV = number of ETAs in the problem - NRETA. (See
-  Non-Active_ETA_list_for_PRED). It is the number of ETAs that NONMEM is currently
+- NACTIV: NACTIV = number of ETAs in the problem - NRETA. (See @@html:<a href="/docs/reference-manual/api/variables/#non-active-eta">non-active ETA list for PRED</a>@@). It is the number of ETAs that NONMEM is currently
   calculating partial derivatives for.
 - M: M(k) is the index of the  kth  0-valued  element  of  LVOUT  (for
   k=1,...,NACTIV).
@@ -2494,7 +2563,7 @@ ADVAN17, ADVAN18, SS6, and SS9.
   individual-by-individual  basis.   PREDPP  examines  INTFLG  when
   NEWIND=0 or 1 (i.e., at the start of an individual's data).
   Presumably,  this is  the  only  time  that  NONMEM  might  change
-  the LVOUT array (See non-active eta list for pred).
+  the LVOUT array. (See @@html:<a href="/docs/reference-manual/api/variables/#non-active-eta">non-active ETA list for PRED</a>@@).
 
   When  INTFLG  is  set  to  any  other  value   than   -1,   ADVAN
   6,8,13,14,16,18   and SS6 calculate second derivatives "one group at a
@@ -2591,6 +2660,9 @@ For user-supplied DES and AES routines.
 
 REFERENCES: Guide VI, section III.C
 ** Dose time non-event: DOSTIM
+:PROPERTIES:
+:CUSTOM_ID: dostim
+:END:
 #+begin_src f90
  USAGE:
       USE PROCM_REAL, ONLY: DOSTIM,DDOST,D2DOST
@@ -2606,8 +2678,7 @@ For user-supplied PK, DES, AES routines.
 
   + DOSTIM>0: this call to PK occurs at a non-event dose time DOSTIM,
     i.e.,  at  the  time  of  an  additional  or lagged dose.  DDOST,
-    D2DOST, and DOSREC contain values of interest.  (See Dose Record:
-    DOSREC).
+    D2DOST, and DOSREC contain values of interest.  (See @@html:<a href="/docs/reference-manual/api/variables/#dose-record-dosrec">Dose Record: DOSREC</a>@@).
 
 - DDOST: DDOST(i) = Partial derivative of DOSTIM with respect to eta(i).
 
@@ -2616,11 +2687,13 @@ For user-supplied PK, DES, AES routines.
 
 When DOSTIM>0, TIME and all user (concomitant) data  items  in  EVTREC
 are from the next event record.  All other NONMEM/PREDPP reserved data
-items are from the initiating dose event record.   (The  $BIND  record
-may be used to override this; (See bind)
+items are from the initiating dose event record.   (The  @@html:<a href="/docs/reference-manual/control-records/bind/">$BIND</a>@@  record may be used to override this)
 
 REFERENCES: Guide VI, section III.I
 ** Dose record: DOSREC
+:PROPERTIES:
+:CUSTOM_ID: dose-record-dosrec
+:END:
 #+begin_src f90
  USAGE:
       USE PROCM_REAL, ONLY: DOSREC
@@ -2637,10 +2710,13 @@ For user-supplied PK, DES, AES routines.
 
   When PK is called at an event time, DOSREC contains 0's.
 
-(See Dose Time Non-Event: DOSTIM).
+(See @@html:<a href="/docs/reference-manual/api/variables/#dostim">Dose Time Non-Event: DOSTIM</a>@@).
 
 REFERENCES: Guide VI, section III.I
 ** New individual indicator: NEWIND
+:PROPERTIES:
+:CUSTOM_ID: newind
+:END:
 #+begin_src f90
  USAGE:
       USE PROCM_INT, ONLY: NEWIND=>PNEWIF
@@ -2760,10 +2836,10 @@ verbatim code is present.
     highest   numbered  theta  used.   IDEFD(1)=-9  means  "unknown".
     PREDPP determines from the value stored in IDEFD(1) how many
     elements of theta to copy from its input argument THETA to THETAS.
-    (See DES_AES:_THETA).
+    (See @@html:<a href="/docs/reference-manual/api/variables/#des-aes-theta">DES_AES:THETA</a>@@).
 
   + When IDEFD(1)  is  set by DES to -9, PREDPP copies all thetas in
-    the  problem  to  THETAS  (See DES AES: THETA).   With   NM-TRAN,
+    the  problem  to  THETAS  (See @@html:<a href="/docs/reference-manual/api/variables/#des-aes-theta">DES_AES:THETA</a>@@).   With   NM-TRAN,
     IDEFD(1) is set to -9 when the $DES block contains verbatim code.
     If a user-written DES leaves IDEFD(1) unchanged, it  defaults  to
     -9,  which  does no harm, but may cause the run to be slower than
@@ -2774,8 +2850,7 @@ verbatim code is present.
     (the default).
 
 - IDEFA: AES may set IDEFA when ICALL is 1, as follows.
-  + IDEFA(1) is set by AES to indicate how many thetas it uses.   See
-    above remarks for IDEFD and DES.
+  + IDEFA(1) is set by AES to indicate how many thetas it uses. See above remarks for IDEFD and DES.
   + IDEFA(2) for the calling protocol for ADVAN9 and ADVAN15 and
     ADVAN17. AES sets this as follows: IDEFA(2)=-1 "call with every
     event record" (the default); IDEFA(2)=1 "call once per individual
@@ -2787,7 +2862,10 @@ verbatim code is present.
 
  REFERENCES: None.
 
-** DES AES: THETA
+** DES AES:THETA
+:PROPERTIES:
+:CUSTOM_ID: des-aes-theta
+:END:
 #+begin_src f90
  USAGE:
       USE PROCM_REAL, ONLY: THETA=>THETAS
@@ -2798,12 +2876,16 @@ verbatim code is present.
 #+end_src
 The THETA  vector  passed  as an argument by NONMEM to PRED, PK, ERROR.
 IDEFD(1) and IDEFA(1) affect how many elements are copied.
-(See DES_AES:_ICALL,IDEFD,IDEFA)
+
+(See @@html:<a href="/docs/reference-manual/api/variables/#des-aes-icall">DES_AES:_ICALL,IDEFD,IDEFA</a>@@).
 
 * PK variables
 Internal variables used by PREDPP can also be accessed by "using" specific
 Fortran modules within the user-defined PK routine.
 ** Initial steady state: I_SS,ISSMOD
+:PROPERTIES:
+:CUSTOM_ID: initial-steady-state-i_ss-issmod
+:END:
 #+begin_src f90
  USAGE:
       USE PRMOD_INT, ONLY: I_SS,ISSMOD
@@ -2864,7 +2946,8 @@ feature of MODEL and/or PK.
    I_SS=0
    ENDIF
   #+end_src
- (See $model, model).
+
+ (See @@html:<a href="/docs/reference-manual/control-records/model/">$MODEL</a>@@, @@html:<a href="/docs/reference-manual/api/subroutines/#model">MODEL</a>@@).
 
 ** PASTZERO (NM75)
 #+begin_src f90
