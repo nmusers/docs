@@ -360,13 +360,11 @@ Output argument:
         It  is  possible to introduce drug into a compartment by explicit
         terms in a differential equation,  rather  than  by  PREDPP  dose
         event records.  Drug introduced in this manner is not included by
-        PREDPP in the computation of the  output  compartment.   Specifi-
-        cally,  the amount in the output compartment may be thought of as
+        PREDPP in the computation of the  output  compartment.   Specifically,  the amount in the output compartment may be thought of as
         being calculated by summing all relevant  doses  from  the  INPUT
         file  (i.e.,  those  that precede the time of the present record,
         accounting for bioavailability), subtracting all amounts  present
-        in  compartments other than the output compartment, and then mul-
-        tiplying the result by the output fraction parameter.
+        in  compartments other than the output compartment, and then multiplying the result by the output fraction parameter.
 
         For example, suppose differential equations were used for ADVAN2,
         rather than the analytic solution.  They would be:
@@ -435,9 +433,7 @@ DIMENSION :: IDEF(*),THETA(*),EVTREC(IREV,*),INDXS(*)
 REAL(KIND=DPSIZE) :: G(GERD,*),HH(HERD,*)
 #+end_src
 The  ERROR  subroutine  is  called by PREDPP to model intra-individual
-error in observed values.  It can also be used to to  convert  predic-
-tions  from  PREDPP, i.e., scaled drug amounts, to other types of pre-
-dictions (for example, to obtain the prediction of a drug effect as  a
+error in observed values.  It can also be used to to  convert  predictions  from  PREDPP, i.e., scaled drug amounts, to other types of predictions (for example, to obtain the prediction of a drug effect as  a
 function of concentration, in a pharmacodynamic study).
 
 
@@ -457,23 +453,18 @@ Input argument:
      HH. If  ERROR  changes F, it should also change the derivates of
      F in G.
 
-   + ICALL=4: ERROR has been called during the Simulation Step; multi-
-      ple calls occur.  ERROR should compute simulated observations and
+   + ICALL=4: ERROR has been called during the Simulation Step; multiple calls occur.  ERROR should compute simulated observations and
       store them in F.
 
-   + ICALL=5: ERROR has been called during the computation of expecta-
-      tions;  multiple calls occur.  Such calls occur when the marginal
-      (MRG_) data item is defined in the data set and has non-zero val-
-      ues  for  some records.  If the MRG_ data item has the value 1 or
+   + ICALL=5: ERROR has been called during the computation of expectations;  multiple calls occur.  Such calls occur when the marginal
+      (MRG_) data item is defined in the data set and has non-zero values  for  some records.  If the MRG_ data item has the value 1 or
       2, expectations are computed  for  that  record,  and  the  value
       returned  by  ERROR  in  F contributes to the expectation that is
-      being computed for the PRED data item.  The value  of  an  ERROR-
-      defined  item  contributes  to  the  expectation computed for the
+      being computed for the PRED data item.  The value  of  an  ERRORdefined  item  contributes  to  the  expectation computed for the
       item.
 
    + ICALL=6: ERROR has been called during the computation of raw data
-      averages;  multiple  calls occur.  Such calls occur when the raw-
-      data (RAW_) data item is defined in the  data  set  and  has  the
+      averages;  multiple  calls occur.  Such calls occur when the rawdata (RAW_) data item is defined in the  data  set  and  has  the
       value 1 for some records (See template).  ERROR may re-compute DV
       when the value of DV in the data record is not the quantity to be
       included  in  the average.  ERROR may return a value of 1 in F if
@@ -524,15 +515,13 @@ Output argument:
 Input/Output argument:
 
 - F   On  input,  the  prediction  based  on the pharmacokinetic model,
-      i.e., the value of the scaled drug amount in the observation com-
-      partment.   On output, F may be unchanged, or it may be modified,
+      i.e., the value of the scaled drug amount in the observation compartment.   On output, F may be unchanged, or it may be modified,
       e.g., when a PD prediction is needed.  If ERROR  modifies  F  and
       uses  population  eta  variables  to do so, then at ICALL=2 ERROR
       must call GETETA to obtain eta values prior to modifying F.  When
       ICALL=4,  ERROR should calculate the simulated observation (after
       calling  SIMETA  and/or  SIMEPS  to  obtain  simulated  etas  and
-      epsilons, as necessary) and place its value in F.  With the Simu-
-      lation Step, ERROR may return the simulated observation as the DV
+      epsilons, as necessary) and place its value in F.  With the Simulation Step, ERROR may return the simulated observation as the DV
       data item, rather than in the argument F.  With odd-type data the
       simulated observation must be  returned  as  the  DV  data  item.
       (See @@html:<a href="/docs/reference-manual/control-records/estimation/">$ESTIMATION</a>@@).
@@ -782,14 +771,11 @@ Output argument:
       summary page.
 
 -  NCM
-      The total number of compartments in the model, excluding the out-
-      put compartment.  Contains 0 when MODEL is called.  NCM  must  be
+      The total number of compartments in the model, excluding the output compartment.  Contains 0 when MODEL is called.  NCM  must  be
       no greater than PC-1.
 
 -  NPAR
-      The  number  of basic PK parameters used in the PK routine.  Con-
-      tains 0 when MODEL is called.  NPAR must be no greater than  con-
-      stant  PG  in  file  SIZES.   With  the general non-linear models
+      The  number  of basic PK parameters used in the PK routine.  Contains 0 when MODEL is called.  NPAR must be no greater than  constant  PG  in  file  SIZES.   With  the general non-linear models
       (ADVAN6, ADVAN8,  ADVAN9,  ADVAN13,  ADVAN14,  ADVAN15,  ADVAN16,
       ADVAN17, ADVAN18), NPAR may remain 0.
 
@@ -910,8 +896,7 @@ Output argument:
     - -1: PK may initialize A_0.
     -  0: PK does not initialize A_0.
     -  1: PK does initialize A_0.
-    The default used by PREDPP is IDEF(1,3)=-1.  However,  when  com-
-      partment  initialization is not implemented, then if IDEF(1,3) is
+    The default used by PREDPP is IDEF(1,3)=-1.  However,  when  compartment  initialization is not implemented, then if IDEF(1,3) is
       set to  0,  PREDPP  can  avoid  some  time-consuming  processing.
       Indeed,  when  $PK  abbreviated or verbatim code is supplied, and
       there is  no  reference  to  compartment  initialization  amounts
@@ -927,12 +912,10 @@ Output argument:
     - -1: PK may use derivatives of compartment amounts.
     -  0: PK does not use derivatives of compartment amounts.
     -  1: PK uses derivatives of compartment amounts.
-    The default used by PREDPP is IDEF(1,4)=-1.  However, when deriv-
-      atives  of compartment amounts are not used, then if IDEF(1,4) is
+    The default used by PREDPP is IDEF(1,4)=-1.  However, when derivatives  of compartment amounts are not used, then if IDEF(1,4) is
       set to  0,  PREDPP  can  avoid  some  time-consuming  processing.
       Indeed,  when  $PK  abbreviated or verbatim code is supplied, and
-      there is no reference to A(n) (as a random variable in an  arith-
-      metic  statement)  in  the abbreviated code (or to derivatives of
+      there is no reference to A(n) (as a random variable in an  arithmetic  statement)  in  the abbreviated code (or to derivatives of
       A(n) in the verbatim code), then NM-TRAN sets IDEF(1,4)=0.
 
   + Remaining elements contain row numbers in GG:
@@ -946,8 +929,7 @@ Output argument:
     - IDEF(6,n): row number of Dn (modeled duration for comp. n)
     - IDEF(7,n): row number of ALAGn (absorption lag for comp. n)
 
-- GG  The array of PK parameters and their eta derivatives.  The  maxi-
-      mum  number  of rows in GG is given by IRGG, which is the same as
+- GG  The array of PK parameters and their eta derivatives.  The  maximum  number  of rows in GG is given by IRGG, which is the same as
       constant PG found in file SIZES (See @@html:<a href="/docs/reference-manual/api/memory/">SIZES</a>@@).
   + At ICALL = 2:
      - GG(k,1,1) contains the value of the kth parameter.
@@ -1087,14 +1069,12 @@ Output argument:
       with  the  data record.  Alternatively, F can be ignored, and the
       DV item in the data record can be directly set to  the  value  of
       the  simulated  observation.   With  odd-type data, F is ignored;
-      PRED should directly set the DV item to the value  of  the  simu-
-      lated observation.
+      PRED should directly set the DV item to the value  of  the  simulated observation.
 
 - G   An array of derivatives of F with respect to etas.  Values should
       be set when ICALL=2.
       G(i,1) is the partial derivative of F with respect to eta(i).
-      When the data are population, G(i,j+1) is the second partial  de-
-      rivative  of  F with respect to eta(i), eta(j) (lower-triangular;
+      When the data are population, G(i,j+1) is the second partial  derivative  of  F with respect to eta(i), eta(j) (lower-triangular;
       j=1,..., i).
       Second derivatives are needed only when the Laplacian  method  is
       used to estimate parameters.
@@ -1511,22 +1491,21 @@ of verbatim  code is positioned in the generated code after all code
 generated from the preceding line of  abbreviated  code.   The  user
 may explicitly specify a different location as follows.
 
-- FIRST verbatim code
+- FIRST verbatim code:
       Verbatim  lines  which  must  be positioned immediately after the
       declarations which are part of the normal subroutine header,  and
       prior  to  the FIRST executable statement of the subroutine, must
       precede the first line of abbreviated code and  must  start  with
       the line "FIRST.
 
-- MAIN verbatim code
+- MAIN verbatim code:
       FIRST  verbatim  code is normally terminated by the first line of
       abbreviated code.  If there is both FIRST and MAIN verbatim code,
       and/or  the main section is to start with verbatim code, the line
       "MAIN may be used to separate the FIRST and MAIN verbatim code.
 
-- LAST verbatim code
-      Verbatim lines which are to immediately precede the RETURN state-
-      ment  from  the generated subroutine must follow the last line of
+- LAST verbatim code:
+      Verbatim lines which are to immediately precede the RETURN statement  from  the generated subroutine must follow the last line of
       abbreviated code and must be preceded by the line "LAST.
 
       Example:
