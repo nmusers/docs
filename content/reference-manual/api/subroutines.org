@@ -1,11 +1,11 @@
 #+title: Subroutines
 
 * User-defined subroutines
-"Stubs,"  or  "dummy" routines, are subroutines or functions called by
-NONMEM, PREDPP or user code.  NONMEM  releases contain dummy
-implementations of these routines, to be replaced by user-written code in advanced applications.
+NONMEM supports subroutines and functions called by
+NONMEM, PREDPP or user code.  NONMEM releases contain dummy
+implementations (that do nothing) of these routines, to be replaced by user-written code in advanced applications.
 
-- Stubs for NONMEM
+- User-defined subroutines in NONMEM
  | CRIT   | Modifies the computation of the default objective function.                         |
  | CONTR  | Specifies the contribution to the objective  function  of  a level 1 ("L1") record. |
  | CCONTR | Specifies  the  contribution  to the objective function of a level 2 ("L2") record. |
@@ -15,13 +15,13 @@ implementations of these routines, to be replaced by user-written code in advanc
  | THETAI | THETAI is used to transform initial thetas.                                         |
  | THETAR | THETAR is used to transform final thetas for reporting.                             |
 
-- stubs for PREDPP
+- User-defined subroutines for PREDPP
 
  | INFN | Initialization/Finalization routine. |
 
-- Stubs for User functions: =FUNCA=, =FUNCB=, =FUNCC=, ... define functions in abbreviated code.
+- User-defined subroutines for user functions in abbreviated code: =FUNCA=, =FUNCB=, =FUNCC=, ... .
 
-Code to replace a function stub should be placed in a file and provided to $SUBROUTINES:
+User-defined subroutines/functions should be placed in a file and provided to $SUBROUTINES:
 #+begin_src perl
 $SUBROUTINES ... OTHER=funcacode
 #+end_src
@@ -37,10 +37,10 @@ selectively passed to PK,  ERROR,  and  INFN. It can  be  used  in
 $PK, $ERROR, and $PRED abbreviated code.  The discussion below
 describes the values of ICALL as seen by PRED.
 
-- ICALL=-1: the routine has been called for the @@html:<a href="/docs/user-guide/advanced/abbr_block/#pred_ignore_data_block"> PRED_IGNORE_DATA</a>@@ feature (NM75).  One  call per data record, at the start
+- ICALL=-1: the routine has been called for the [[file:/docs/user-guide/advanced/abbr_block/#pred_ignore_data_block][ PRED_IGNORE_DATA]] feature (NM75).  One  call per data record, at the start
   of the run. These  calls  occur  only   if   abbreviated   code
   uses  variables PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if
-  the @@html:<a href="/docs/reference-manual/control-records/data/#pred_ignore_data_option">PRED_IGNORE_DATA option</a>@@ of $DATA is used.  Otherwise, there are
+  the [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]] of $DATA is used.  Otherwise, there are
   no calls to  PRED  with ICALL=-1.
 
 - ICALL=0:  the routine has been called for initialization at the
@@ -109,9 +109,9 @@ Output argument:
 Other Inputs: other inputs are available to CONTR in NONMEM read-only
 global  variables. In particular:
 
-- THETA (current theta) (See CONTR_MIX:_THETA)
-- DV and data values for this L1 record. (See @@html:<a href="/docs/reference-manual/control-records/contr/">$CONTR</a>@@)
-- Predictions and derivatives.  (See @@html:<a href="/docs/reference-manual/api/subroutines/#contr">CONTR</a>@@)
+- Current THETA (See also [[file:/docs/reference-manual/api/variables/#contr-mix-theta][CONTR_MIX:THETA]])
+- DV and data values for this L1 record. (See [[file:/docs/reference-manual/control-records/contr/][$CONTR]])
+- Predictions and derivatives.  (See [[file:/docs/reference-manual/api/subroutines/#contr][CONTR]])
 
 NONMEM Utility routines may be called by CONTR, depending on the type
  of data:
@@ -196,7 +196,7 @@ Output argument:
 
 - Other inputs
       Other  inputs  are available to CCONTR in NONMEM read-only global variables.
-      (See MIX_CONTR:_THETA)
+      (See [[file:/docs/reference-manual/api/variables/#contr-mix-theta][CONTR_MIX:THETA]])
       E.g., USE ROCM_REAL,   ONLY: THETA=>THETAC
       (See CCONTR:_Y,DATA,N1,N2,DIM)
       (See CCONTR:_F,G,H)
@@ -322,7 +322,7 @@ Output argument:
 - DT(k)
       The derivative of g(k) with respect to T.
 
-Also see @@html:<a href="/docs/reference-manual/api/variables/">variables in NONMEM modules</a>@@, @@html:<a href="/docs/reference-manual/api/modules/#nm-pred-mod">NONMEM-PRED modules</a>@@, particularly @@html:<a href="/docs/reference-manual/api/variables/#des-aes-icall">DES AES: ICALL,IDEFD,IDEFA</a>@@.
+Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/#nm-pred-mod][NONMEM-PRED modules]], particularly [[file:/docs/reference-manual/api/variables/#des-aes-icall][DES AES: ICALL,IDEFD,IDEFA]].
 
  REFERENCES: Guide IV, section V.C.8 , V.C.9
  REFERENCES: Guide VI, section VI.E
@@ -400,8 +400,8 @@ is the  default format for these arrays.  A description of compact
 format is beyond the scope of this document, but is described in  the
 NONMEM 7.4 version of Guide VI, Appendix IV. Compact Arrays in DES.
 
-Also see @@html:<a href="/docs/reference-manual/api/variables/">variables in NONMEM modules</a>@@, @@html:<a href="/docs/reference-manual/api/modules/#nm-pred-mod">NONMEM-PRED modules, and  PREDPP modules</a>@@, particularly
- @@html:<a href="/docs/reference-manual/api/variables/#des-aes-icall">DES AES: ICALL,IDEFD,IDEFA</a>@@.
+Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/#nm-pred-mod][NONMEM-PRED modules, and  PREDPP modules]], particularly
+ [[file:/docs/reference-manual/api/variables/#des-aes-icall][DES AES: ICALL,IDEFD,IDEFA]].
 
  REFERENCES: Guide IV, section V.C.7
 
@@ -524,7 +524,7 @@ Input/Output argument:
       epsilons, as necessary) and place its value in F.  With the Simulation Step, ERROR may return the simulated observation as the DV
       data item, rather than in the argument F.  With odd-type data the
       simulated observation must be  returned  as  the  DV  data  item.
-      (See @@html:<a href="/docs/reference-manual/control-records/estimation/">$ESTIMATION</a>@@).
+      (See [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
 
 - G   On  input,  at  ICALL=2 when the data are population, an array of
       partial derivatives of F with respect to etas
@@ -546,14 +546,15 @@ Input/Output argument:
       are only needed with conditional estimation when  the  dependence
       on  etas  of the variance of intra-individual random error should
       be preserved in the computation of the  objective  function;  see
-      the INTERACTION option (See @@html:<a href="/docs/reference-manual/control-records/estimation/">$ESTIMATION</a>@@).
+      the INTERACTION option of [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
 
-Also  see  NONMEM  read-only  modules (of the form ROCMn), NONMEM-PRED
- modules (of the form NMPRDn), and PREDPP  read-only  modules  (of  the
- form PROCMn).
+Also  see [[file:/docs/reference-manual/api/modules/][modules]] for NONMEM  read-only  modules (of the form ROCMn), NONMEM-PRED
+ modules (of the form NMPRDn), and PREDPP  read-only  modules  (of the form PROCMn).
 
  REFERENCES: Guide IV, section V.C.6
+
  REFERENCES: Guide V, section 8
+
  REFERENCES: Guide VI, section IV
 
 ** INFN
@@ -584,8 +585,7 @@ be written to a user file.  There is no  opportunity to do subproblem
 initialization.
 
 The  INFN  subroutine  is  called by PREDPP to make initialization and
-finalization computations.  The version distributed with PREDPP  is  a
-"stub"  or  "dummy" routine that does nothing. It may be replaced by a
+finalization computations.  The dummy distributed with PREDPP may be replaced by a
 user-written code.
 
 Input/Output argument:
@@ -597,7 +597,7 @@ Input/Output argument:
     #+begin_src f90
         USE NMPRD_INT, ONLY: PRED_IGNORE_DATA,PRED_IGNORE_DATA_TEST
     #+end_src
-    The  option $DATA @@html:<a href="/docs/reference-manual/control-records/data/#pred_ignore_data_option">PRED_IGNORE_DATA option</a>@@  is required to cause NONMEM to make a PRED_IGNORE_DATA  pass.
+    The  option $DATA [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]]  is required to cause NONMEM to make a PRED_IGNORE_DATA  pass.
 
   + ICALL=0: INFN may now make computations for  run  initialization.
     ICALL may be reset by INFN to a number in the range 1-8999.  This
@@ -612,7 +612,7 @@ Input/Output argument:
     required.   Then  test  for  IREP=NREP (the number of the current
     subproblem equals the total number of subproblems), and if  true,
     do problem finalization.  Values of IREP and NREP may be found in
-    NONMEM modules (See @@html:<a href="/docs/reference-manual/api/variables/#simulation-nrep-irep">Simulation: NREP,IREP</a>@@).
+    NONMEM modules (See [[file:/docs/reference-manual/api/variables/#simulation-nrep-irep][Simulation: NREP,IREP]]).
 
 INPUT ARGUMENTS:
 
@@ -650,7 +650,7 @@ EXAMPLES OF USAGE:
   stored  in  a module or common block declared both in INFN and PK.
 
 - Transgeneration: the  data can be accessed and even modified via use
-  of the NONMEM utility routine PASS in routine @@html:<a href="/docs/reference-manual/api/subroutines/#infn">INFN</a>@@.   As the  data records  are  passed one-by-one to INFN, each record is
+  of the NONMEM utility routine PASS in routine [[file:/docs/reference-manual/api/subroutines/#infn][INFN]].   As the  data records  are  passed one-by-one to INFN, each record is
   stored in turn in DATREC. Data can be transgenerated and additional
   data items can be  produced  at  both initialization and
   finalization.  Data items that appear in a table or scatterplot with
@@ -716,12 +716,12 @@ Output argument:
 Other  inputs  are  available  to MIX in NONMEM read-only global
 variables.  In particular, data items that are requested using the
 $CONTR record, and the current value of THETA, as shown above. (See
-MIX:_DATA, MIX CONTR:_THETA).
+[[file:/docs/reference-manual/api/variables/#mix-data][MIX:DATA]], [[file:/docs/reference-manual/api/variables/#contr-mix-theta][CONTR_MIX:THETA]]).
 
-The @@html:<a href="/docs/reference-manual/api/variables/#var-templt">MIX CONTR: TEMPLT</a>@@  data  record  in  a NONMEM read-only global variable also
+The [[file:/docs/reference-manual/api/variables/#var-templt][MIX CONTR: TEMPLT]]  data  record  in  a NONMEM read-only global variable also
 serves to provide an additional way for  individual-specific  information to be made available.
 
-See also @@html:<a href="/docs/reference-manual/api/variables/#mixnum-mixest-mixp">MIXNUM, MIXEST and MIXP</a>@@.
+See also [[file:/docs/reference-manual/api/variables/#mixnum-mixest-mixp][MIXNUM, MIXEST and MIXP]].
 
  (See mixture_model_example).
 
@@ -815,10 +815,10 @@ Output argument:
       distribution is computed by PK and stored in the kth row of GG.
       When MODEL is called, all elements of LINK are 0.
 
- (See @@html:<a href="/docs/reference-manual/api/memory/">SIZES</a>@@).
+ (See [[file:/docs/reference-manual/api/memory/][SIZES]]).
 
  An initial steady state may be requested by routine MODEL;
- (See @@html:<a href="/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod">Initial Steady State: I_SS,ISSMOD</a>@@).
+ (See [[file:/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod][Initial Steady State: I_SS,ISSMOD]]).
 
  REFERENCES: Guide IV, section V.C.4
  REFERENCES: Guide VI, section VI.B , Figures 28, 29, 43
@@ -862,7 +862,7 @@ compartment amounts to concentrations, and dose-related  parameters
 such  as  modeled  infusion rates.
 
 Input argument:
-- ICALL: see ICALL.
+- ICALL: see ICALL above.
 
 - THETA: the NONMEM THETA vector.
 
@@ -888,7 +888,7 @@ Output argument:
 
     An initial steady state may be requested by routine PK;
 
-    (See @@html:<a href="/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod">Initial Steady State: I_SS,ISSMOD</a>@@).
+    (See [[file:/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod][Initial Steady State: I_SS,ISSMOD]]).
 
   + IDEF(1,3) describes whether PK performs  compartment
       initialization,  i.e.,  whether or not PK initializes elements of
@@ -904,7 +904,7 @@ Output argument:
       sets IDEF(1,3)=0.
 
       Compartment amounts may be used by routine PK;
-      (See @@html:<a href="/docs/reference-manual/api/variables/#state-vec-a">State Vector A</a>@@).
+      (See [[file:/docs/reference-manual/api/variables/#state-vec-a][State Vector A]]).
 
   + IDEF(1,4) describes whether PK uses  derivatives  of
       compartment amounts (e.g. compartment amounts themselves are used
@@ -930,7 +930,7 @@ Output argument:
     - IDEF(7,n): row number of ALAGn (absorption lag for comp. n)
 
 - GG  The array of PK parameters and their eta derivatives.  The  maximum  number  of rows in GG is given by IRGG, which is the same as
-      constant PG found in file SIZES (See @@html:<a href="/docs/reference-manual/api/memory/">SIZES</a>@@).
+      constant PG found in file SIZES (See [[file:/docs/reference-manual/api/memory/][SIZES]]).
   + At ICALL = 2:
      - GG(k,1,1) contains the value of the kth parameter.
      - GG(k,i+1,1) contains its derivative with respect to the ith eta.
@@ -938,7 +938,7 @@ Output argument:
   + At ICALL = 4:
       GG(k,1,1)  contains  the  individual-specific  value  of  the kth parameter.  Other columns of GG need not be computed.
 
-Also see @@html:<a href="/docs/reference-manual/api/variables/">variables in NONMEM modules</a>@@, @@html:<a href="/docs/reference-manual/api/modules/#nm-pred-mod">NONMEM-PRED modules, and  PREDPP modules</a>@@.
+Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/#nm-pred-mod][NONMEM-PRED modules, and  PREDPP modules]].
 
 - REFERENCES: Guide IV, section V.C.5
 - REFERENCES: Guide V, section 7
@@ -978,10 +978,10 @@ for common Population PK models.
 Input argument:
 
 - ICALL
-  + ICALL=-1: the routine has been called for the  @@html:<a href="/docs/user-guide/advanced/abbr_block/#pred_ignore_data_block"> PRED_IGNORE_DATA</a>@@ feature (NM75).   One call per data record, at the start
+  + ICALL=-1: the routine has been called for the  [[file:/docs/user-guide/advanced/abbr_block/#pred_ignore_data_block][ PRED_IGNORE_DATA]] feature (NM75).   One call per data record, at the start
     of the run.  These calls  occur  only  if  abbreviated  code  uses
     variables PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if the
-    @@html:<a href="/docs/reference-manual/control-records/data/#pred_ignore_data_option">PRED_IGNORE_DATA option</a>@@ of $DATA is used.  Otherwise, there are no
+    [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]] of $DATA is used.  Otherwise, there are no
     calls to  PRED  with ICALL=-1.
 
   + ICALL=0:  PRED  has  been  called  for  initialization purposes at
@@ -1047,7 +1047,7 @@ Input argument:
    + NEWIND=0: First record of the data set.  THETA value  may  differ from value at last call with this record.
    + NEWIND=1: First record of the data set, THETA value does not
      differ from value at last call with this record, and PRED is
-     nonrecursive (see @@html:<a href="/docs/reference-manual/api/variables/#I_REC">I_REC</a>@@), or, First record of a subsequent individual record.
+     nonrecursive (see [[file:/docs/reference-manual/api/variables/#I_REC][I_REC]]), or, First record of a subsequent individual record.
    + NEWIND=2: Subsequent data record of an individual record.
 
 - THETA: the NONMEM THETA vector.
@@ -1084,9 +1084,9 @@ Output argument:
       H(i,1) is the derivative of F with respect to eps(i).
       H(i,j+1) is the partial derivative  of  H(i,1)  with  respect  to
       eta(j)
-      These  mixed second derivatives are needed only when the INTERACTION option  isused to estimate parameters.  (See @@html:<a href="/docs/reference-manual/control-records/estimation/">$ESTIMATION</a>@@).
+      These  mixed second derivatives are needed only when the INTERACTION option isused to estimate parameters.  (See [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
 
-Also see @@html:<a href="/docs/reference-manual/api/variables/">variables in NONMEM modules</a>@@.
+Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]].
 
  REFERENCES: Guide I, section C.2
 
@@ -1113,7 +1113,7 @@ stable estimates to be obtained with insufficient data.
 
 When  the  Simulation  Step is implemented, THETA and OMEGA, and SIGMA
 may also be simulated (along with etas and epsilons, should  any  such
-appear  in  the model and have nonzero-variances) in the @@html:<a href="/docs/reference-manual/api/subroutines/#prior">PRIOR</a>@@
+appear  in  the model and have nonzero-variances) in the [[file:/docs/reference-manual/api/subroutines/#prior][PRIOR]]
 subroutine.  However, this  need
 not  be done  (simply execute a return in PRIOR at ICALL=4), in which
 case the values for THETA, OMEGA, and SIGMA used in the simulation are
@@ -1131,7 +1131,7 @@ Output argument:
 
 - CNT: the penalty term.
 
-Other Inputs are  available  to  PRIOR  in @@html:<a href="/docs/reference-manual/api/modules/">NONMEM read-only modules</a>@@.
+Other Inputs are  available  to  PRIOR  in [[file:/docs/reference-manual/api/modules/][NONMEM read-only modules]].
 
 PRIOR  may  call   NONMEM   utility   routines  NWPRI   and   TNPRI:
 
@@ -1170,9 +1170,9 @@ parameters", or UCP).  TNPRI computes a penalty function based  on  a
 prior that  has  a multivariate normal form for all UCP.  When used
 during a Simulation Step, it produces a random value of the vector of
 all model parameters  (whose  values  are  not fixed).  The prior
-information is found in an input @@html:<a href="/docs/reference-manual/files/#msf">Model Specification File</a>@@, and it has
+information is found in an input [[file:/docs/reference-manual/files/#msf][Model Specification File]], and it has
 been  automatically  stored  there as part of a NONMEM analysis of a
-prior data set. (See also @@html:<a href="/docs/reference-manual/control-records/msfi/">$MSFI</a>@@).  This prior is
+prior data set. (See also [[file:/docs/reference-manual/control-records/msfi/][$MSFI]]).  This prior is
 especially  useful   for   an   empirical   specification   of  a
 penalty  function. (See TNPRI).
 
@@ -1222,13 +1222,13 @@ Other Inputs:
 
  NONMEM read-only global variables.
 
- (See @@html:<a href="/docs/reference-manual/api/variables/#mix-data">MIX:_DATA</a>@@)
+ (See [[file:/docs/reference-manual/api/variables/#mix-data][MIX:_DATA]])
 
- (See @@html:<a href="/docs/reference-manual/api/variables/#non-active-eta">Non-active ETA for PRED</a>@@)
+ (See [[file:/docs/reference-manual/api/variables/#non-active-eta][Non-active ETA for PRED]])
 
- (See @@html:<a href="/docs/reference-manual/api/variables/#parameters-omega-sigma-current">Parameters OMEGA SIGMA: Current</a>@@)
+ (See [[file:/docs/reference-manual/api/variables/#parameters-omega-sigma-current][Parameters OMEGA SIGMA: Current]])
 
- (See @@html:<a href="/docs/reference-manual/api/variables/#record-counters">Record_Counters:_NIREC,NDREC</a>@@)
+ (See [[file:/docs/reference-manual/api/variables/#record-counters][Record_Counters:_NIREC,NDREC]])
 
 ** TRANS
 #+begin_src f90
@@ -1269,7 +1269,7 @@ Input/Output argument:
     the first column of  the  GG  array  need  be  computed  as  with
     ITRANS=2.  Other columns need not be computed.
 
-  + GG:  the array of @@html:<a href="/docs/reference-manual/api/subroutines/#PK">PK</a>@@ parameters and their eta derivatives.
+  + GG:  the array of [[file:/docs/reference-manual/api/subroutines/#PK][PK]] parameters and their eta derivatives.
 
 
 Input argument:
@@ -1278,8 +1278,8 @@ Input argument:
 
 Certain variables are available in modules.  Their use is optional.
 
-- Variables in read/write modules: IERPRD NETEXT ETEXT (See @@html:<a href="/docs/reference-manual/api/variables/#pred-exit">PRED Exit Code</a>@@, @@html:<a href="/docs/reference-manual/api/variables/#pred-error">PRED Error Message</a>@@).
-- Variables in read-only commons: NOETAS, SECOND (see @@html:<a href="/docs/reference-manual/api/variables/#partial-derivative-indicators">Partial Derivative Indicators</a>@@). When  SECOND  is  true,  PREDPP requires second-partial derivatives of etas.
+- Variables in read/write modules: IERPRD NETEXT ETEXT (See [[file:/docs/reference-manual/api/variables/#pred-exit][PRED Exit Code]], [[file:/docs/reference-manual/api/variables/#pred-error][PRED Error Message]]).
+- Variables in read-only commons: NOETAS, SECOND (see [[file:/docs/reference-manual/api/variables/#partial-derivative-indicators][Partial Derivative Indicators]]). When  SECOND  is  true,  PREDPP requires second-partial derivatives of etas.
 
 REFERENCES: Guide VI, section III.M
 
