@@ -1,0 +1,184 @@
+#+title: nested random effects (levels)
+
+* Adding nested random levels above subject ID
+The method in section is an improvement from NONMEM 7.4 and earlier
+(see the last section below). The method will give similar results,
+but additionally standard errors to THETAs that reflect the variability in the highest random
+level, rather than at the lowest, subject level. It does this by pointing the MU referencing to
+the ETA of the highest random level, rather than at the individual level, and preventing level
+ETAs summing to 0 (centering), by setting $EST LEVCENTER=0.
+
+The $LEVEL control records is intended for modeling grouping effects
+such that several subjects belong to a group/level, e.g. inter-site
+variability or inter-trial variability. The following control
+stream fragment contains an inter-site variability ETA(5) in addition
+to the inter-subject variability ETA(1) for clearance (CL). Data item
+SID is for site IDs.
+#+begin_src perl
+$PK
+MU_5=THETA(1)
+MU_2=THETA(2)
+MU_3=THETA(3)
+MU_4=THETA(4)
+CL=DEXP(MU_5+ETA(5)+ETA(1))
+V1=DEXP(MU_2+ETA(2))
+Q=DEXP(MU_3+ETA(3))
+V2=DEXP(MU_4+ETA(4))
+S1=V1
+
+;#...
+$LEVEL
+SID=(5[1])
+
+;#...
+$EST METHOD=ITS INTERACTION PRINT=1 NSIG=2 NITER=500 SIGL=8 FNLETA=0 NOABORT CTYPE=3 MCETA=0
+LEVCENTER=0 ;# Do not force level etas to sum to 0
+$EST METHOD=1 INTERACTION PRINT=5 NSIG=2 NBURN=1000 NITER=500 SIGL=10 FNLETA=0 NOHABORT SLOW NONINFETA=1 MCETA=20
+$COV MATRIX=R UNCONDITIONAL SIGL=10
+#+end_src
+~LEVCENTER=0~ means level ETAs are not force to sum to 0,  and
+~FNLETA=0~ means that the ETAs reflect what were used in the
+estimation.  Without ~FNELTA=0~,  $TABLE output for super ID ETA
+values will incorrectly differ with each subject, rather than averaged
+for each LEVEL item value. The $LEVEL record says that ETA(5) is for the
+inter-site random effect, and within it nested the inter-subject
+random effect ETA(1). Both are for the multiplicative model of the
+clearance CL.
+
+Site variability can be added to the other PK parameters in the same
+way, such as for V1, Q, and V2:
+#+begin_src perl
+  $PK
+  MU_5=THETA(1)
+  MU_6=THETA(2)
+  MU_7=THETA(3)
+  MU_8=THETA(4)
+  CL=DEXP(MU_5+ETA(5)+ETA(1))
+  V1=DEXP(MU_6+ETA(6)+ETA(2))
+  Q=DEXP(MU_7+ETA(7)+ETA(3))
+  V2=DEXP(MU_8+ETA(8)+ETA(4))
+  S1=V1
+
+  ;# ...
+  $LEVEL
+  SID=(5[1],6[2],7[3],8[4])
+#+end_src
+
+** Another level of nesting
+The "superid2_*" models in examples shows how to add another
+level in addition to site variability and subject variability. In this
+case, we have data item CID for countries, such that there can be a
+few SIDs with a same CID. We model the hierarchy as the following.
+#+begin_src perl
+  $PK
+  MU_9=THETA(1)
+  MU_10=THETA(2)
+  MU_11=THETA(3)
+  MU_12=THETA(4)
+  CL=DEXP(MU_9+ETA(9)+ETA(5)+ETA(1))
+  V1=DEXP(MU_10+ETA(10)+ETA(6)+ETA(2))
+  Q=DEXP(MU_11+ETA(11)+ETA(7)+ETA(3))
+  V2=DEXP(MU_12+ETA(12)+ETA(8)+ETA(4))
+  S1=V1
+
+  ;# ...
+  $LEVEL
+  SID=(5[1],6[2],7[3],8[4])
+  CID=(9[5],10[6],11[7],12[8])
+#+end_src
+For clearance, ETA(9) varies by country, within it nested site-varying
+ETA(5), which in turn has nested in it the subject-varying (the standard ID data) ETA(1).  When performing FOCE with $LEVEL, you must use the SLOW option in $EST, and MATRIX=R for the covariance step $COV should be selected.  Notice in these examples the THETAs are MU referenced to the highest random level.
+
+** Select random effect level
+Assume we conclude there is inter-site variability but no
+inter-subject variability. We can achieve this by making residual SD
+change only with each site, and setting the inter-subject variance to 0.
+#+begin_src perl
+  $PK
+  MU_1=THETA(1)
+  MU_2=THETA(2)
+  MU_4=THETA(3)
+  CL=DEXP(MU_1+ETA(1))
+  V=DEXP(MU_2+ETA(2))
+  W=DEXP(MU_4+ETA(4)+ETA(3))
+  S1=V
+
+  $ERROR
+  IPRED=F
+  Y = F + F*W*EPS(1)
+
+  $THETA 0.5  1.0 -.5  ;# initial THETA values
+
+  ;# initial OMEGA values for ETA(1) and ETA(2)
+  $OMEGA BLOCK(2)
+  0.02
+  0.001 0.02
+
+  ;# set OMEGA to zero for ETA(3)
+  $OMEGA
+  (0.0 FIXED)
+
+  ;# initial OMEGA value for ETA(4)
+  $OMEGA
+  0.2
+
+  $SIGMA
+  1.0 FIXED
+
+  $LEVEL
+  SID=(4[3])
+#+end_src
+Alternatively (NM74), one can use "0" in $LEVEL to indicate no nested
+variability:
+#+begin_src perl
+  ;#...
+  W=DEXP(MU_4+ETA(3))
+  ;#...
+  ;# initial OMEGA values for ETA(1) and ETA(2)
+  $OMEGA BLOCK(2)
+  0.02
+  0.001 0.02
+
+  ;# initial OMEGA value for ETA(3)
+  $OMEGA
+  0.2
+
+  $SIGMA
+  1.0 FIXED
+
+  $LEVEL
+  SID=(3[0])
+#+end_src
+
+** LEVWT=[0|1] (NM74)
+By default, ~LEVWT=0~, and weights each level value equally,
+regardless of number of subjects per level value.  If you wish to
+weight according to number of subjects for that value, set ~LEVWT=1~ in
+$EST record.
+
+** LEVCENTER=[0|1] (NM75)
+No default. ~LEVCENTER=1~ means the ETAs of super ID random levels sum
+to 0.  This is the only option in the earlier versions.
+
+** LEVOBJTYPE=[0|1] (NM75)
+~LEVOBJTYPE=0~ (default) means for IMP/ITS/FOCE/Laplace, the reported
+objective function (and what is used for estimation) is the average of
+two cycles of optimization.  The first optimization floats all etas,
+and the second optimization fixes the super-ID etas to the appropriate
+average of etas per super-id group from the first optimization, and
+then floats the ID (and below) level etas.  If ~LEVOBJTYPE=1~, then
+the OBJ reported (and used for estimation) is only that of the second
+optimization cycle. ~LEVOBJTYPE=0~ provides more consistent results between FOCE/Laplace and the EM and Bayes methods, particularly with super-ID levels higher than 1 (so, site ID and country ID, for example).  The LEVOBJTYPE=1 provides an OBJ more consistent with theory.
+
+By default, NONMEM sets the estimation process to SLOW when a $LEVEL option is used. As of NM751, you may set NOSLOW or FAST.  While there is an increase in speed, but there may not be as good optimization progress as with the SLOW option.  It may be best to use SLOW for the $EST step, and use NOSLOW or FAST for the $COV step.
+
+** NM74 and NM73
+The behavior of $LEVEL in these earlier versions are different in two
+ways. First, the MU referencing pointed to the individual (ID) level
+rather than the top random level.  Secondly, the ETAs to random levels
+above ID were constrained to sum to 0, with the OMEGA estimation
+corrected for the loss of one degree of freedom. This older method
+applies some additional constraints on the model, and offers greater
+stability, especially for EM/BAYES methods, if the number of distinct
+items in a level is small (<5). The old implementation is based on modeling grouping
+effect as fixed effects using THETAs (see example superid3_6 and superid3_1).
