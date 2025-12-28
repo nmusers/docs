@@ -168,7 +168,242 @@ initial estimates for the next Estimation Step.
 See  also "Reserved Variables that are of Interest During the  Estima-
 tion Step", at the end of this help item.
 
+We discuss the METHOD option first, since many other options are
+context-dependent on the estimation method used.
+
+*** METHOD=kind
+  - kind=0 or ZERO: always set etas to 0 during the computation of the
+    objective function.  Also called the "first order (FO) method."
+    This is the default.
+  - kind=1 or CONDITIONAL: use  conditional  estimates for the etas
+    during the computation of  the  objective  function.   METHOD=1
+    (without  the LAPLACIAN  option)  is  also  called the "first
+    order conditional estimation (FOCE) method."  The conditional
+    estimates of  the  etas are referred to as Conditional Parametric
+    Etas (CPE).
+    #+begin_src perl
+      METH=COND NOLAPLACIAN         ;# the FOCE method.
+      METH=COND LAPLACE             ;# the Laplace method.
+      METH=COND NOLAPLACE CENTERING ;# the Centering FOCE method.
+      METH=COND LAPLACE CENTERING   ;# the Centering Laplace method.
+    #+end_src
+
+  - HYBRID: use conditional estimates for the etas during  the
+     computation  of the objective function, with the exception of
+     those etas listed in the ZERO option.  Cannot be used with
+     LAPLACIAN or CENTERING.
+
+The  following  methods  are  new to NONMEM 7.  When any of these
+methods are used, the data are inferred  to  be  population,  and
+METHOD=1  is  supplied  if  it is not already present.  The first four
+methods are referred  to  as /Expectation-Maximization/ (EM) Methods.
+*** METHOD=ITS
+ITS stands for  the  iterative two-stage method.  This method evaluates
+    the conditional /mode/ and first order (expected) or second order
+    (Laplace) approximation of the conditional variance of parameters
+    of individuals by maximizing the posterior density.  This
+    integration step is the same as is used in FOCE or Laplace.
+    Population parameters are updated from subjects’ conditional mode
+    parameters and their approximate variances by single iteration
+    maximization steps that are very stable (usually converging in
+    50-100 iterations). Because of approximations used, population
+    parameters almost, but not quite, converge towards the linearized
+    objective function of FOCE.  Iterative two stage method is about
+    as fast as FOCE with simple one or two compartment models, and
+    when set up with MU referencing (described below) can be several
+    fold faster than FOCE with more complex problems, such as three-compartment models, and differential equation problems.
+    #+begin_src perl
+      ;# Example
+      $EST METHOD=ITS INTERACTION NITER=50
+    #+end_src
+    NITER (default 50) sets maximum number of iterations.  For all new
+    methods, it is essential to set INTERACTION if the residual error
+    is heteroscedastic.
+*** METHOD=IMP
+The Monte Carlo Importance Sampling EM
+    evaluates the conditional (posterior) mean and variance of
+    parameters of ETAs by Monte Carlo sampling
+    (integration, expectation step).  It uses the posterior density
+    which incorporates the likelihood of parameters relative to
+    population means (THETAs) and variances (ETAs) with the
+    individual’s observed data.  By default, for the first iteration,
+    the mode and first order approximation of the variance are
+    estimated (called mode a posteriori, or MAP estimation) as is done
+    in ITS or FOCE, and are used as the parameters to a normal
+    distribution proposal (sampling) density.  From this proposal
+    density Monte Carlo samples are generated, then weighted according
+    to the posterior density as a correction, since the posterior
+    density itself is generally not truly normally distributed, and
+    conditional means and their conditional variances are evaluated.
+    For subsequent iterations, the normal density near the mean of the
+    posterior (obtained from the previous iteration) is used as a
+    proposal density.  Population parameters (THETAs, SIGMAs, and
+    OMEGAs) are then updated from subjects’ conditional mean
+    parameters, gradients, and their variances by single iteration
+    maximization steps that are very stable, and improve the objective
+    function.  The population parameters converge towards the minimum
+    of the objective function, which is an accurate marginal density
+    based likelihood.
+    #+begin_src perl
+      ;# Usage
+      $EST METHOD=IMP INTERACTION
+    #+end_src
+*** METHOD=IMPMAP
+Sometimes for highly dimensioned PK/PD problems with very
+    rich data the importance sampling method does not advance the
+    objective function well or even diverges.  For this the IMPMAP
+    method may be used.  At each iteration, conditional modes and
+    conditional first order variances are evaluated as in the ITS or
+    FOCE method, not just on the first iteration as is done with IMP
+    method.   These are then used as parameters to the multivariate
+    normal proposal density for the Monte Carlo importance sampling
+    step.
+    #+begin_src perl
+      $EST METHOD=IMPMAP INTERACTION
+      ;# equivalently
+      $EST METHOD=IMP INTERACTION MAPITER=1 MAPINTER=1
+    #+end_src
+
+*** METHOD=SAEM
+As in importance sampling, random samples are generated from
+    normal distribution proposal densities.  However, instead of
+    always centered at the mean or mode of the posterior density, the
+    proposal density is centered at the previous sample position. New
+    samples are accepted with a certain probability. The variance of
+    the proposal density is adjusted to maintain a certain average
+    acceptance rate (IACCEPT). This method requires more elaborate
+    sampling strategy, but is useful for highly non-normally
+    distributed posterior densities, such as in the case of very
+    sparse data (few data points per subject), or when there is
+    categorical data.
+
+    In the first phase, called the burn-in or stochastic mode, SAEM
+    evaluates an unbiased but highly stochastic approximation of
+    individual parameters (semi integration, usually 2 samples per
+    individual).  Population parameters are updated from individual
+    parameters by single iteration maximization steps that are very
+    stable, and improves the objective function (usually in 300-5000
+    iterations).  In the second mode, called the accumulation mode,
+    individual parameter samples from previous iterations are averaged
+    together, converging towards the true conditional individual
+    parameter means and variances.  The algorithm leads to population
+    parameters converging towards the maximum of the exact likelihood.
+
+The SAEM method is specified by
+#+begin_src perl
+$EST METHOD=SAEM INTERACTION
+#+end_src
+
+The following table shows the mapping of SAEM parameters between Monolix and SAEM.
+#+caption: SAEM parameters in Monolix and NONMEM
+| Monolix                | NONMEM                                                                                                      |
+|------------------------+-------------------------------------------------------------------------------------------------------------|
+| Number of Chains       | ISAMPLE                                                                                                     |
+| K0                     | CONSTRAINT subroutine may be user modified to provide any constraining pattern on any population parameters |
+| K1                     | NBURN                                                                                                       |
+| K2                     | NITER                                                                                                       |
+| Auto K1                | CTYPE=1,2,3                                                                                                 |
+| rho                    | IACCEPT                                                                                                     |
+| m1                     | ISAMPLE_M1                                                                                                  |
+| m2                     | ISAMPLE_M1A                                                                                                 |
+| m3                     | ISAMPLE_M2                                                                                                  |
+| m4                     | ISAMPLE_M3                                                                                                  |
+| No simulated annealing | CONSTRAIN=0                                                                                                 |
+| Simulated Annealing    | CONSTRAIN=1,2,3,or user-defined                                                                             |
+| SEED                   | SEED                                                                                                        |
+
+After the analysis, suitable objective functions for hypothesis testing and second order standard errors can be obtained by importance sampling at the final population parameter values.  Thus, one could issue this sequence of commands:
+#+begin_src perl
+$EST METHOD=SAEM INTERACTION NBURN=2000 NITER=1000
+$EST METHOD=IMP EONLY=1 ISAMPLE=1000 NITER=5
+#+end_src
+Here, after SAEM, IMPMAP estimation done on its first iteration, is performed, but without updating the main population parameters.  Sometimes the MAP estimation is problematic, or the user wishes to use the SAEM’s last conditional mean and variances as the parameters to the importance sampler’s sampling density for the first iteration, so one may try:
+#+begin_src perl
+$EST METHOD=SAEM INTERACTION NBURN=2000 NITER=1000
+$EST METHOD=IMP EONLY=1 ISAMPLE=1000 NITER=5 MAPITER=0
+#+end_src
+
+For very large dimensioned problems (large OMEGA matrix), the IMP evaluated objective function can have a lot of stochastic variability (more than plus or minus 10 units), or continually increase with each iteration even though the population parameters are kept fixed.  One way to reduce this volatility is to use IMPMAP instead of IMP, if the MAP estimation is not an issue:
+#+begin_src perl
+$EST METHOD=IMPMAP EONLY=1 ISAMPLE=1000 NITER=5 MAPITER=0
+#+end_src
+Alternatively one can increase ISAMPLE (or combine it with IMPMAP):
+#+begin_src perl
+$EST METHOD=IMP EONLY=1 ISAMPLE=3000 NITER=5 MAPITER=0
+#+end_src
+
+As of NM74, another choice is to set EONLY=2, and the Monte Carlo
+variability of the objective function can be significantly reduced if,
+like the population parameters, the conditional means and variances
+from the SAEM estimation are also not updated after each IMP
+iteration:
+#+begin_src perl
+$EST METHOD=SAEM INTERACTION NBURN=2000 NITER=1000
+$EST METHOD=IMP EONLY=2 ISAMPLE=1000 NITER=5 MAPITER=0
+#+end_src
+Or, have the first iteration evaluate conditional modes and conditional MAP variances, and then use them for the subsequent iterations, by setting EONLY=3 and MAPITER=1:
+#+begin_src perl
+$EST METHOD=SAEM INTERACTION NBURN=2000 NITER=1000
+$EST METHOD=IMP EONLY=3 ISAMPLE=1000 NITER=5 MAPITER=1
+#+end_src
+
+Another approach to use SAEM is to begin with a short ITS run to
+provide good initial ETA estimates for each subject, followed by the
+SAEM analysis. The SAEM step uses these initial ETA estimates as a starting point for its MCMC of each subject’s conditional (posterior) density, followed by objective function evaluation:
+#+begin_src perl
+$EST METHOD=ITS INTERACTION NITER=5
+$EST METHOD=SAEM NBURN=1000 ISAMPLE=2 NITER=1000
+$EST METHOD=IMP EONLY=2 ISAMPLE=1000 NITER=5 MAPITER=0
+#+end_src
+
+To have conditional mean values (values in "root.phi") evaluated by MCMC sampling used in the SAEM method, but at a constant set of the final fixed parameters, then you could invoke EONLY=1 with the SAEM method as well:
+#+begin_src perl
+$EST METHOD=ITS INTERACTION NITER=5
+$EST METHOD=SAEM NBURN=1000 ISAMPLE=2 NITER=1000
+$EST METHOD=SAEM EONLY=1 NBURN=200 ISAMPLE=2 NITER=1000
+$EST METHOD=IMP EONLY=2 ISAMPLE=1000 NITER=5 MAPITER=0
+#+end_src
+
+*** METHOD=BAYES
+ The  Markov  Chain Monte Carlo (MCMC) Bayesian
+    Analysis method.  The goal of the MCMC Bayesian analysis is to
+    obtain a  large sample set of probable population parameters.
+    Various summary statistics of the population parameters may then
+    be obtained such a
+
+*** METHOD=DIRECT
+Requests  Monte  Carlo  Direct Sampling.  Creates
+    completely independent samples (unlike MCMC), and there is no
+    chance of causing  bias  if the sampling density is not similar
+    enough to the conditional density (unlike  IMP).   However,  it
+    is very  inefficient,  requiring  ISAMPLE  settings of 10000 to
+    300000 to properly estimate the problem.
+
+*** METHOD=NUTS (NM74)
+Requests No U-Turn Sampling (NUTS) Markov Chain Monte
+    Carlo (MCMC)  Bayesian  Analysis  Method.   Options unique to this
+    method are  listed  alphabetically  under  NUTS_....   Other
+    options of interest with their defaults are as follows:
+    #+begin_src f90
+      MASSRESET=-1
+      MADAPT=-1
+      KAPPA=1
+      TTDF=0
+      OLKJDF=0
+      OVARF=1
+      SLKJDF=0
+      SVARF=1
+    #+end_src
+
+*** METHOD=CHAIN
+Allows  the user to create a series of random initial
+    values of THETAs and OMEGA's, or for reading in initial
+    population parameters  from a file of rectangular (rows/column)
+    format. Applies only to the Estimation Step.
+
+
 ** OPTIONS
+Setting an option to "-100" will force NONMEM to select the default value for that parameter.
 
 *** ABORT | NOABORT | NOHABORT
 ABORT requests that during  the  Estimation  Step,  NONMEM  does not
@@ -271,8 +506,9 @@ minimize the objective function.  Values for n are:
   - 2 or 6: Requests simulated annealing for SIGMA.
   - 3 or 7: Requests simulated annealing for both OMEGA and SIGMA.
 
-When CONSTRAIN>=4, simulated annealing is also performed on diagonal elements of OMEGA that are fixed  to  0  to  facilitate  any
-      associated thetas.
+When CONSTRAIN>=4, simulated annealing is also performed on diagonal
+elements of OMEGA that are fixed  to  0  to  facilitate  any
+associated THETAs.
 
 Simulated annealing is performed by subroutine CONSTRAINT.
 
@@ -329,8 +565,8 @@ works only for the Monte Carlo EM algorithms such as IMP, DIRECT,
 IMPMAP, and SAEM.
 
 *** DF=n
-The proposal density is to be a t distribution with n degrees  of
-freedom.   Default is 0, a normal density.  Used with the IMP and
+The proposal density is to be a t-distribution with n the number of degrees  of
+freedom (DF).   Default DF=0, a normal density.  Used with the IMP and
 IMPMAP methods.
 
 *** DFS=n (NM73)
@@ -339,10 +575,11 @@ Degrees of freedom for the Sigma matrix for  simulation  purposes by CHAIN.
   - DFS=n: the SIGMA matrix is randomly created with an inverse Wishart distribution centered about the initial SIGMA  values,  with degrees of freedom DFS for dispersion.
   - DFS=0: as  above,  but  the  size  of  the  SIGMA matrix is used as degrees of freedom.
   - DFS=>1000000: SIGMA is fixed at its initial value.
+
 *** EONLY=[0|1]
-A value of 1 indicates the IMP objective function should be evaluated
-by  performing only the expectation step without advancing the
-population parameters. Default is 0.
+Evaluate the IMP objective function by performing only the expectation step, without advancing the population parameters (default is 0, population parameters are updated).  When this method is used, NITER should equal 5 to 10, to allow proposal density to improve with each iteration, since mean and variance of parameters of normal or t distribution proposal density are obtained from the previous iteration.  Also it is good to get several objective function values to assess the Monte Carlo noise in it.
+
+As of NM74, if EONLY=2, then not only are the population parameters not updated with each iteration, neither are the individual conditional means/modes and conditional variances until the last iteration, if the variances of the population parameter estimates are estimated ($COV is requested).  If EONLY=3, then the conditional modes and approximate variances from MAP estimation will be saved on the first iteration, and used for the sampling density of all subsequent iterations.  This improves efficiency when selecting MAPITER=1, MAPINTER=0, so that the MAP estimation did not need to be repeatedly performed.
 
 *** ETABARCHECK | NOETABARCHECK
 ETABARCHECK: there is an ETABAR statistic (see [[file:/docs/reference-manual/files/#output-etabar][ETABAR]]) from a  previous  problem,
@@ -377,11 +614,44 @@ needed.
     equivalent to using the  "Laplace  NUMERICAL"  method,  even
     though FOCE may be selected.
 *** ETASAMPLES=[0|1] (NM74)
-Used with $EST METHOD=SAEM or $EST METHOD=BAYES.  ETASAMPLES=0 is the
-default.  ETASAMPLES=1 causes individual ISAMPLE  random  eta samples
-per subject, to be written to root.ets, where root is the root name of
-the control stream file. See "Stochastic  Approximation  Expectation
-Maximization  (SAEM) Method" in Guide INTRODUCTION TO NONMEM 7.
+Used with SAEM or BAYES. Default ETASAMPLES=0. ETASAMPLES=1 causes individual ISAMPLE  random  ETA samples
+per subject, output to "root.ets". To do this, perform an SAEM
+analysis (or BAYES) after the primary estimation, keeping the
+population parameters fixed (ETYPE=1), only performing a BURN period
+so samples do not get accumulatively averaged, and set ISAMPLE to 10 or higher to collect suffient samples per subject.  For example, note the $EST line in bold, after the usual SAEM analysis:
+#+begin_src perl
+  $SIZES ISAMPLEMAX=250
+  ;#...
+  $EST METHOD=SAEM NBURN=500 NITER=1000 MASSRESET=1 ISAMPLE=2
+       PRINT=20 NOPRIOR=1 RANMETHOD=P
+  $EST METHOD=SAEM NBURN=0 NITER=0 MASSRESET=0 ETASAMPLES=1 ISAMPLE=200 EONLY=1
+  $EST METHOD=IMP NITER=5 MASSRESET=1 ETASAMPLES=0 ISAMPLE=1000
+       EONLY=1 PRINT=1 MAPITER=0
+#+end_src
+
+ETASAMPLES=1 causes individual ISAMPLE random eta samples per subject,
+to be written to root.ets, where root is the root name of the control
+stream file.  MASSRESET is set to 1 to initialize the internal burn-in
+coefficients, and collect that information during the population
+parameter estimation.  Then, have the next SAEM step accumulate eta
+samples (ETASAMPLES=1), and set MASSRESET=0 so the internal burn-in
+coefficients are note reset, but use those obtained during the
+previous SAEM step.  After this, you could request the IMP step (IMP
+needs to use its own burn-in or shaping coefficients, so re-initialize
+with MASSRESET=1).
+
+Suppose your result was from a previous analysis, called
+precevample.ctl.  You could do the following for the present problem:
+#+begin_src perl
+;# Obtain final result of previous example from its ext file
+$EST METHOD=CHAIN NSAMPLE=0 TBLN=1 ISAMPLE=-1000000000 FILE=prevexample.ext
+
+;# Have a burn-in process with just 2 chains (ISAMPLE=2), to create appropriate burn-in coefficients
+$EST METHOD=SAEM NBURN=0 NITER=0 MASSRESET=1 ISAMPLE=2 EONLY=1 RANMETHOD=P
+
+;# Use burned-in coefficients (MASSRESET=0) and collect many samples, and store in .ets file.
+$EST METHOD=SAEM NBURN=0 NITER=0 MASSRESET=0 ETASAMPLES=1 ISAMPLE=200 EONLY=1
+#+end_src
 
 *** ETASTYPE (NM73)
 ETASTYPE=0: ETA shrinkage is averaged for all subjects.  This is the default.
@@ -488,10 +758,23 @@ GRD=TG(3,5-8):TS(4):SN(1-3)
 THETAs and SIGMAs not specified are given a  default  D  designation.
 
 *** GRDQ=0 (NM74)
-GRDQ allows THETAs that must be gradient assessed (such as those that
-are  not  MU-referenced) and SIGMAS to be more quickly evaluated by
-not evaluating the gradients for every one of the ISAMPLE random
-samples, but chooses a subset of the most important samples.
+GRDQ ("gradient quick") option allows THETAs that must be gradient
+assessed (such as those that are not mu-referenced) and SIGMAS to be
+more quickly evaluated by not evaluating the gradients for every one
+of the ISAMPLE random samples, but chooses a subset of the most
+important samples.  This reduces the computational cost, since
+gradients of the objective function with respect to the THETAs require
+more objective function calls than is usually required when evaluating
+mu-referenced THETAs.
+
+If GRDQ>=1, then this is interpreted as the number of important
+samples to be used for theta gradient assessment per subject.
+
+If GRDQ<1, then GRDQ is interpreted as the fraction of ISAMPLEs to be used (GRDQ*ISAMPLE samples are used for theta gradient assessment).  When GRDQ<0.0, then the number of samples used is ABS(GRDQ)*ISAMPLE/(Number of subjects with observations).
+
+When GRDQ=0 (default), then all ISAMPLE samples are used to evaluate the theta gradients.  Some experience suggests that if GRDQ is too low (<30 samples), the quality of standard error assessments may deteriorate, so some trial and error may be needed to determine to what extent the GRDQ can be reduced.   Suggestion of the GRDQ algorithm courtesy of Robert Leary.
+
+During estimation, the iteration output for importance sampling contains the objective function, average effective number of samples (eff.), actual samples (smpl., which is usually ISAMPLE), and average fitness (fit.) of proposal (sampling) density to the posterior density.   The average effective number of samples per total samples is essentially the average ratio (or weights) of posterior to proposal density at all sample positions, and NONMEM tries to adjust the scaling of the variance to the proposal density so that on average, eff./smpl.  approximates the IACCEPT value.   The average fitness is the average absolute difference between the posterior density and proposal density among the samples, and indicates to what extent that the proposal density matches the posterior density.  Typically if the IACCEPT is not too low, then the closer the shape of the posterior density is to a normal density, the higher the fitness, with perfect fitness being 1 if IACCEPT is set to 1.
 
 *** GRID=(nr,ns,r0,r1)
 See details in option STIELTJES.  Briefly, a  grid  is  obtained
@@ -509,14 +792,35 @@ The function of IACCEPT depends on the method.
   are accepted x fraction of the time.  See ISAMPLE_M2 option. Default
   is 0.4.
 
-- Importance sampling (IMP INTERACTION): expand proposal (sampling) density variance relative to conditional density  so  that on  average conditional density/proposal density=IACCEPT (default 0.4).  For very sparse data or highly non-linear posterior densities (such as with categorical data), you may want to decrease to 0.1 to 0.3.
+- Importance sampling: expand proposal (sampling) density variance relative to conditional density  so  that on  average conditional density/proposal density=IACCEPT (default 0.4).  For very sparse data or highly non-linear posterior densities (such as with categorical data), consider IACCEPT=0.1 to 0.3.
 
-- IACCEPT=0: for importance sampling only. NONMEM will  determine  the most appropriate IACCEPT level for each subject, and if necessary, will use a t- distribution  (by  altering the  DF  for each subject) as well.  If IACCEPT=0, the individual IACCEPT values and DF values will be listed in root.imp.
+- IACCEPT=0: for importance sampling only. NONMEM will  determine  the
+  most appropriate IACCEPT level for each subject, and if necessary,
+  will use a t-distribution  (by  altering the  degrees of freedom of
+  the distribution for each subject) as well.  In this case, the
+  individual IACCEPT values and degrees of freedom (DF) values will be listed in "root.imp".
 
 *** IACCEPTL=x (NM74)
-      A scale to a second multi-variate normal density, to  cover  long
-      tails  in the posterior density (hence L for long tails), in combination with the normal IACCEPT value  to  cover  the  posterior
-      density near the mode.
+If IACCEPTL is set to greater than 0 then NONMEM uses this value as a
+scale to a second multi-variate normal density, to cover long tails in
+the posterior density (hence L for long tails), in combination with
+the ACCEPT value to cover the posterior density near the mode.  For
+one half of ISAMPLE samples, IACCEPT is used to scale a
+multivariate-normal proposal density, and for the other half of
+ISAMPLE samples, IACCEPTL is used to scale another multivariate normal
+proposal density.  Thus, a mixture of two normal densities, with two
+different variance scales, are used as the proposal density.  This
+serves as a pseudo t-distribution, but assuring radial symmetry as
+well as statistically independent samples, that may be useful when
+using with the Sobol method.  This method has been suggested by Robert
+Leary, recommending IACCEPT=1.0 and IACCEPTL=0.01.
+
+If IACCEPT is set to 0, and IACCEPTL is set to a value greater than 0,
+then a search for the best IACCEPTL for each subject is made, starting
+the testing at the IACCEPTL value given by the user, while IACCEPT is
+fixed to 1.  The root.imp file will contain the final values selected
+for each subject, listing the two IACCEPT scale values, the first one
+being 1 for near the mode, and the second for the long tails.
 
 *** IKAPPA=x (NM74)
 Used in computing weight for individual parameters in ISAMPLE_M1B mode.  IKAPPA is 1.
@@ -534,21 +838,74 @@ model  for intraindividual  random  error.   This  is  the default
 with non-EM and non-Bayes methods.
 
 *** ISAMPEND=n (NM73)
-      For SAEM, if ISAMPEND is specified  as  an  upper  integer  value
-      (usually  10),  then  NONMEM will perform a ISAMPLE preprocess to
-      determine the best ISAMPLE value. See also STDOBJ below.
+For SAEM, if ISAMPEND is specified  as  an  upper  integer  value
+(usually  10),  then  NONMEM will perform a ISAMPLE preprocess to
+determine the best ISAMPLE value. For the ISAMPLE preprocessing the
+used entered ISAMPLE value must be at least 2.  It will perform 200
+iterations during the ISAMPLE preprocess, and the last 50 iterations
+will be used to obtain average conditional variance/OMEGA (eta
+shrinkage) for each subject.  The largest etashrinkage fraction*10 is
+the ISAMPLE for that subject.  Thus,
+#+begin_src perl
+ISAMPLE=2 ISAMPEND=10
+#+end_src
+assesses a best ISAMPLE for each subject.  The ISAMPLE will not be higher than 10 or lower than 2.
+
+See also STDOBJ below.
 
 *** ISAMPLE=n
-      When used with the IMP or IMPMAP methods n is the number of  random  samples  per subject used for the expectation step.  Default
-      is 300.  When used with the SAEM or BAYES method n is the  number
-      of  chains used by the Metropolis-Hastings algorithm for individual parameter estimation. The default is 2 for  SAEM  and  1  for
-      BAYES.
+When used with the IMP or IMPMAP methods n is the number of random
+samples  per subject used for the expectation step. Default n=300, but
+may require 1000-3000 for very sparse data.
 
-      A  kernel  is  the  Metropolis-Hastings sampling and testing mode
-      used.  The ISAMPLE_Mx options define how many times  to  generate
-      and test a sample for goodness-of-fit using a given kernel. ISAMPLE does not refer to a kernel, but defines the number of  chains
-      that  are  maintained, each chain having their own sample generation and testing sequence using the various kernels.  Each  chain
-      retains a final sample for each subject, at the end of each iteration.
+When used with the SAEM or BAYES method n is the  number of  chains
+used by the Metropolis-Hastings algorithm for individual parameter
+estimation. The default n=2 for  SAEM  and  n=1  for BAYES.
+
+A  kernel  is  the  Metropolis-Hastings sampling and testing mode
+used.  The ISAMPLE_Mx options define how many times  to  generate and
+test a sample for goodness-of-fit using a given kernel. ISAMPLE does
+not refer to a kernel, but defines the number of  chains that  are
+maintained, each chain having their own sample generation and testing
+sequence using the various kernels.  Each  chain retains a final
+sample for each subject, at the end of each iteration.
+
+For each ISAMPLE, SAEM performs ISAMPLE_M1 mode (or kernel) 1
+iterations using the population means and variances as proposal
+density, followed by ISAMPLE_M1B mode 1B iterations using the
+individual conditional mean and individual conditional variance
+collected from previous iterations as proposal density, followed by
+ISAMPLE_M1A mode 1A iterations, testing model parameters from other
+subjects as possible values (by default this is not used,
+ISAMPLE_M1A=0), followed by ISAMPLE_M2 mode 2 iterations, using the
+present parameter vector position as mean, and a scaled variance of
+OMEGA as variance [11].  Next, ISAMPLE_M3 mode 3 iterations are
+performed, in which samples are generated for each parameter
+separately.  The scaling is adjusted so that samples are accepted
+IACCEPT fraction of the time.  The final sample for a given chain is
+then kept.  The average of the isample parameter vectors and their
+variances are used in updating the population means and variances.
+Usually, these options need not be changed.
+
+The ISAMPLE_M1A method of sampling has limited use to assist certain
+subjects to find good parameter values by borrowing from their
+neighbors, in case the neighbors had obtained good values while the
+present subject has difficulty finding good samples.   This mode
+should generally not be used, and can be inaccurate if not all
+subjects share the same  and  , such as in covariate modeling.
+Alternatively, use mode 1A sampling at the beginning of an SAEM
+analysis for a few burn in iterations, then continue with a complete
+SAEM analysis with mode 1A sampling turned off, with more burn in and
+accumulated sampling iterations, for example:
+#+begin_src perl
+$EST METHOD=SAEM INTERACTION NBURN=500 NITER=0 ISAMPLE_M1A=2
+$EST METHOD=SAEM INTERACTION NBURN=500 NITER=1000 ISAMPLE_M1A=0
+#+end_src
+As of NM75, If the option MCETA is set to greater than ISAMPLE_M1,
+then for the first iteration of SAEM, ISAMPLE_M1, ISAMPLE_M2, and
+ISAMPLE_M3 will be set to MCETA, to facilitate a robust initial search
+for reasonable parameter values.
+
 
 *** ISAMPLE_M1=n
       n is the number of mode 1 iterations for  the  Metropolis-Hasting
@@ -575,11 +932,27 @@ with non-EM and non-Bayes methods.
       are  generated  for each parameter separately. Used with the SAEM
       and BAYES methods.  Default is 2.
 
-*** ISCALE_MIN=x ISCALE_MAX=x (NM72)
-      In importance sampling, the scale factor used to vary the size of
+*** ISCALE_MIN, ISCALE_MAX (NM72)
+In importance sampling, the scale factor used to vary the size of
       the variance of the proposal density in order to meet the IACCEPT
-      condition is  by  default  bounded  by  ISCALE_MIN  of  0.1,  and
-      ISCALE_MAX=10.0.   Defaults  are  (1.0E-06,1.0E+06) for MCMC sampling.  These options allow the scale factor boundary to be modified.
+      condition is  by  default  bounded  by  ISCALE_MIN=0.1  and
+      ISCALE_MAX=10.0. On rare occasions, the IMP objective function
+      varies widely, and the scale factor boundary may need to be
+      reduced, e.g. ISCALE_MIN=0.3, ISAMPLE_MAX=3.  After the IMP
+      estimation, remember to revert these parameters to default
+      operation on the next $EST step:
+      #+begin_src perl
+	ISCALE_MIN=-100 ISCALE_MAX=-100    ;# reset to default
+      #+end_src
+
+In MCMC sampling (SAEM and BAYES), the scale factor used to vary the
+size of the variance of the proposal density in order to meet the
+IACCEPT condition, is by default bounded by ISCALE_MIN=1.0E-06 and
+ISCALE_MAX=1.0E+06.  This should left alone for MCMC sampling, but on
+occasion there may be a reason to reduce the boundaries (perhaps to
+ISCALE_MIN=0.001, ISAMPLE_MAX=1000).  Similar to in IMP, after the
+saem estimation method, remember to revert these parameters back to
+default operation on the next $EST step.
 
 *** KAPPA=x (NM74)
       Used with NUTS method.  Default is 1.
@@ -664,7 +1037,19 @@ NOLAPLACIAN: do not use the Laplacian method.  This is the default.
       Used with NUTS method.  Default is -1.
 
 *** MAPCOV=1 (NM74)
-      Unused. The default is 1.
+For iterations for which the MAP estimation is performed, by default
+(MAPCOV=1), the MAP estimated mode is used as the center (mean) for
+the sampling density, and the first order (or second order if Laplace
+option is used) approximate conditional variance is used as the
+variance of the sampling density.  If MAPCOV=0, then only the mode is
+used for the sampling density’s center, and the Monte Carlo assessed
+variance of the previous iteration is used as the sampling density’s
+variance.  If MAPCOV=2, then the Monte Carlo assessed conditional mean
+of the previous iteration is used, but the MAP first order (or second
+order if Laplace option) assessed variance is used for the sampling
+density.  This option has been added for experimental purposes, and
+has no value for the user. It should be left at its default value
+of 1.
 
 *** MAPINTER=n (NM72)
       Every nth iteration, the MAP estimation should be used to provide
@@ -675,10 +1060,20 @@ NOLAPLACIAN: do not use the Laplacian method.  This is the default.
       NONMEM to select the default value for that parameter.
 
 *** MAPITER=n (NM72)
-      The first n iterations are to use MAP estimation to assess parameters for the sampling density.  After these  n  iterations,  the
-      conditional  means  and  variances  of the pervious iteration are
-      used for the sampling density parameters of  the  present  iteration.  If MAPITER=0, then the first iteration will rely on conditional means and variances that are in memory.   These  may  have
-      come from an MSF file, or from a previous estimation step.
+By default, MAP estimation is performed only on the first iteration,
+to obtain initial conditional values (modes and approximate variances)
+to be used for the sampling density.  Subsequently, the Monte Carlo
+assessed conditional means and variances from the previous iteration
+are used as parameters to the sampling density.  However, the user can
+select the pattern by which MAP estimations are intermittently done,
+and their conditional statistics used for the sampling density.
+MAPITER=n means the first n iterations are to use MAP estimation to
+assess parameters for the sampling density.  After these n iterations,
+the Monte Carlo conditional means and variances of the pervious
+iteration are used for the sampling density parameters of the present
+iteration.  If MAPITER=0, then the first iteration will rely on
+conditional means and variances that are in memory.  These may have
+come from an MSF file, or from a previous estimation step.
 
 *** MAPITERS=[0|1] (NM75)
 By  default,  no  MAP estimation is performed with SAEM or BAYES. To
@@ -723,92 +1118,6 @@ or
     objective function is used as initial setting  for  the  MAP
     optimization.
 
-*** METHOD=kind
-  - kind=0 or ZERO: always set etas to 0 during the computation of the
-    objective function.  Also called the "first order (FO) method."
-    This is the default.
-  - kind=1 or CONDITIONAL: use  conditional  estimates for the etas
-    during the computation of  the  objective  function.   METHOD=1
-    (without  the LAPLACIAN  option)  is  also  called the "first
-    order conditional estimation (FOCE) method."  The conditional
-    estimates of  the  etas are referred to as Conditional Parametric
-    Etas (CPE).
-    #+begin_src perl
-      METH=COND NOLAPLACIAN         ;# the FOCE method.
-      METH=COND LAPLACE             ;# the Laplace method.
-      METH=COND NOLAPLACE CENTERING ;# the Centering FOCE method.
-      METH=COND LAPLACE CENTERING   ;# the Centering Laplace method.
-    #+end_src
-
-  - HYBRID: use conditional estimates for the etas during  the
-     computation  of the objective function, with the exception of
-     those etas listed in the ZERO option.  Cannot be used with
-     LAPLACIAN or CENTERING.
-
-The  following  methods  are  new to NONMEM 7.  When any of these
-methods are used, the data are inferred  to  be  population,  and
-METHOD=1  is  supplied  if  it is not already present.  The first four
-methods are referred  to  as  EM  (Expectation-Maximization) Methods.
-
-  - ITS:  use  the  iterative two-stage method.  This method evaluates
-    the conditional mode and first order  approximation  of  the
-    conditional  variance  of parameters of individuals by maximizing
-    the posterior density.  This integration step is  the same as used
-    in the FO
-  - IMP:  use  the  Monte-Carlo  Importance Sampling Expectation
-    Maximization method.  This method evaluates the conditional mean
-    and  variance  of  parameters  of individuals by Monte Carlo
-    sampling. It uses the posterior density, which  incorporates the
-    likelihood  of  parameters relative to population means and
-    variances with the individual's observed data.  The normal
-    density  near the mean or mode of the posterior is used as a
-    proposal density, then weighted according to the posterior density
-    as a correction.
-
-  - IMPMAP: use the Importance Sampling method assisted by Mode a
-    Posteriori (MAP)  estimation.   At  each  iteration,  conditional
-    modes and conditional first order variances are evaluated as in
-    the ITS or FOCE method.  These are then used  as  parameters to
-    the multivariat
-
-  - SAEM: use  the  Stochastic  Approximation Expectation Maximization
-    method.  As in importance sampling, random samples are  generated
-    from normal proposal densities.  However, instead of always being
-    centered at the mean or mode of  the  posterior density, the
-    proposal
-
-  - BAYES: use  the  Markov  Chain Monte Carlo (MCMC) Bayesian
-    Analysis method.  The goal of the MCMC Bayesian analysis is to
-    obtain a  large sample set of probable population parameters.
-    Various summary statistics of the population parameters may then
-    be obtained such a
-
-  - DIRECT: requests  Monte  Carlo  Direct Sampling.  Creates
-    completely independent samples (unlike MCMC), and there is no
-    chance of causing  bias  if the sampling density is not similar
-    enough to the conditional density (unlike  IMP).   However,  it
-    is very  inefficient,  requiring  ISAMPLE  settings of 10000 to
-    300000 to properly estimate the problem.
-
-  - NUTS (NM74): requests No U-Turn Sampling (NUTS) Markov Chain Monte
-    Carlo (MCMC)  Bayesian  Analysis  Method.   Options unique to this
-    method are  listed  alphabetically  under  NUTS_....   Other
-    options of interest with their defaults are as follows:
-    #+begin_src f90
-      MASSRESET=-1
-      MADAPT=-1
-      KAPPA=1
-      TTDF=0
-      OLKJDF=0
-      OVARF=1
-      SLKJDF=0
-      SVARF=1
-    #+end_src
-
-  - CHAIN: allows  the user to create a series of random initial
-    values of THETAs and OMEGA's, or for reading in initial
-    population parameters  from a file of rectangular (rows/column)
-    format. Applies only to the Estimation Step.
 
 *** LNTWOPI (NM74)
       The objective function is reported including the N*LOG(2pi)  constant  term,  where N is the total number of normally distributed
@@ -852,17 +1161,36 @@ MUM=N(3,5-8):X(2):M(6,12)
 #+end_src
 
 *** NBURN=n
-      When used with the SAEM method n is the maximum number of  iterations  used  to  perform  the stochastic phase.  Default is 2000.
+When used with the SAEM method n is the maximum number of  iterations
+used  to  perform  the stochastic phase. Default n=2000. During this
+time, the advance of the parameters may be monitored by observing the
+results in file specified by the FILE parameter (described later in
+the Format of Output Files section), and the advance of the objective
+function (SAEMOBJ) at the console may be monitored.  When all
+parameters or the SAEMOBJ do not appear to drift in a specific
+direction, but appear to bounce around in a stationary region, then it
+has sufficiently “burned” in.    A termination test is available
+(described later), that will give a statistical assessment of the
+stationarity of objective function and parameters. Note that the
+objective function SAEMOBJ that is displayed during SAEM analysis is
+not valid for assessing minimization or for hypothesis testing.  It is
+highly stochastic, and does not represent a marginal likelihood that
+is integrated over all possible eta, but rather, is the likelihood for
+a given set of ETAs.
 
       When used with the BAYES method n is the maximum number of iterations used to perform the burn-in phase. Default is 4000.
 
 *** NITER=n
-      When  used with the ITS, IMP, and IMPMAP methods n is the maximum
-      number of iterations. Default is 50.  When  used  with  the  SAEM
-      method  n5  is  the  number  of iterations for the non-stochastic
-      accumulation phase. Default is 1000. When  used  with  the  BAYES
-      method n5 is the number of iterations used to obtain the stationary distribution.  Default is 10000.  NITER  may  also  be  coded
-      NSAMPLE.
+When  used with the ITS, IMP, and IMPMAP methods n is the maximum
+number of iterations. Default n=50.
+
+When  used  with  the  SAEM
+method  n  is  the  number  of iterations for the non-stochastic
+accumulation phase. Default n=1000.
+
+When  used  with  the  BAYES
+method n is the number of iterations used to obtain the stationary
+distribution.  Default n=10000.  NITER  may  also  be coded NSAMPLE.
 
 *** NOCOV=[0|1] (NM73)
       If  covariance estimation is not desired for a particular estimation step, set NOCOV=1.  It may be turned on again for  the  next
@@ -1171,12 +1499,10 @@ REFERENCES: Guide Introduction_7.
       PARAFPRINT=1.
 
 *** PHYTYPE=n (NM74)
-      Default is 0.  By default, after an estimation is performed,  the
-      phi(),  conditional means of the individual parameters, and their
-      variances, are reported in the root.phi file, where root  is  the
-      root  name of the control stream file. If you wish to have conditional mean etas reported, set PHITYPE=1.
-      See "Stochastic  Approximation  Expectation  Maximization  (SAEM)
-      Method" in Guide INTRODUCTION TO NONMEM 7.
+Default is 0.  By default, after an estimation is performed,  the
+phi(),  conditional means of the individual parameters, and their
+variances, are reported in the "root.phi" file. If you wish to have
+conditional mean etas reported, set PHITYPE=1.
 
 *** POSTHOC | NOPOSTHOC
 POSTHOC: used when the FO method is used.  After the Estimation Step
@@ -1232,7 +1558,7 @@ NOPOSTHOC: ETAs  are not estimated.  This is the default with METHOD=0.  May not
       but  on  occasion  there may be a reason to expand the boundaries
       (perhaps to PSCALE_MIN=1.0E-06, PSCALE_MAX=1.0E+06).
 
-*** RANMETHOD=[n|S|m|P] (NM72)
+*** RANMETHOD=[n|M|S|m|P] (NM72)
 :PROPERTIES:
 :CUSTOM_ID: estm-ranmethod
 :END:
@@ -1245,20 +1571,85 @@ See INTRODUCTION TO NONMEM 7, Reference [5] and [7].
   + n=4: NONMEM's traditional random number generator used in $SIMULATION
 - S:  Sobol  method  without  scrambling, used during importance or
   direct sampling (methods IMP, IMPMAP, and DIRECT)  and  only  for
-  the purpose of creating quasi-random samples of eta vectors.  As of
-  NONMEM 7.3, Sobol may be used for BAYES and  SAEM  methods  as well.
-- m: the type of scrambing desired
-  + m=0: no scrambing (S0 is the same as S)
-  + m=1: Owen type scrambling
-  + m=2: Faure-Tezuka type scrambling
-  + m=3: Owen plus Faure-Tezuka type scrambling.
-- P:  each  subject  will receive its own seed path, that will stay
-  with that subject regardless of whether the job is run as a  single
-  process or parallel process. (NM74)
+  the purpose of creating quasi-random samples of ETAs.
+  For example,
+  #+begin_src perl
+    RANMETHOD=2S
+  #+end_src
+  selects random number generator ran2 for general purposes, and Sobol
+  sequence for the eta vector generation.
 
-The RANMETHOD specification
+- m: the type of scrambing desired
+  + m=0: no scrambing (S0 is the same as S);
+  + m=1: Owen type scrambling;
+  + m=2: Faure-Tezuka type scrambling;
+  + m=3: Owen plus Faure-Tezuka type scrambling.
+  For example,
+  #+begin_src perl
+    RANMETHOD=S1
+  #+end_src
+  indicates Sobol sequence with Owen scrambling for eta vector
+  generation.  Since there is no integer in the first position of
+  RANMETHOD indicated, the general random number generator remains
+  unchanged from the RANMETHOD specification previously specified, or
+  ran method 3, if none was specified earlier. On the other hand,
+  #+begin_src perl
+    RANMETHOD=1S2
+  #+end_src
+  indicates ran1 type random number generator for general purposes,
+  Sobol sequence with Faure-Tezuka scrambling for eta vector
+  generation.
+
+  The Sobol sequence method of quasi-random number generation can
+  reduce the Monte Carlo noise in the objective function evaluation
+  during importance sampling under some circumstances.  When the
+  sampling density fits the posterior density well, such as with rich,
+  continuous data, the Sobol sequence method does not reduce the Monte
+  Carlo noise by much.  If you are fitting categorical data, or sparse
+  data, and perhaps you are using the t distribution (DF>0) for the
+  importance sampling density, then Sobol sequence generation may be
+  helpful in reducing Monte Carlo noise.  The RANMETHOD specification
   propagates to subsequent $EST records in a given problem, but does
+  not propagate to $CHAIN or $TABLE records.
+
+  In NM72, only DIRECT and IMP/IMPMAP methods could utilize the Sobol
+  quasi-random method.  As of NM73, Sobol may be used for BAYES and
+  SAEM methods as well.  From experience, The S0 and S1 methods
+  produce considerable bias for SAEM and BAYES, whereas S2 and S3
+  perform better.
+
+- P (NM73):  each  subject  will receive its own seed path, that will stay
+  with that subject regardless of whether the job is run as a  single
+  process or parallel process. This assures that stochastically
+  similar answers will be obtained for Monte Carlo estimation methods,
+  regardless of the number of processes or different kinds of
+  parallelization setups used to solve the problem.  There is
+  additional memory cost in using this option because the seed and
+  seed status (additional internal variables of the random number
+  generator that establish the random sequence) must be stored for
+  each subject, and for SOBOL/QR sampling there may even be a
+  reduction in speed because the random sampling algorithm has to be
+  re-set for each subject.  To reiterate, a single job run without the
+  P descriptor will not be stochastically similar to a single job run
+  with the P descriptor (although they will be statistically similar),
+  or to any parallel job run.  But, a single job run using the P
+  descriptor will be stochastically similar to any parallel job run
+  also using the P descriptor. If maintaining stochastic similarity
+  regardless of how the job is run (single or any parallel profile) is
+  important to you, then always set the P descriptor (so, RANMETHOD=P,
+  at least).
+
+The RANMETHOD specification propagates to subsequent $EST records in a given problem, but does
   not propagate to  $CHAIN  or  $TABLE records.
+
+When using the t-distribution sampling density (DF>0), by default the algorithm creates a random vector from n independent univariate t-distributed samples.  This is called the U algorithm, and the most efficient use of the U type t-distribution is when DF=1,2,4,5,8, or 10.  These algorithms were designed to work well with the Sobol method’s ability to reduce Monte Carlo noise.
+
+As of NM74, another way of producing the vector is from a multi-variate t-distribution algorithm (suggested by Robert Leary), which can be selected by placing an M in the RANMETHOD descriptor, placed after the random number method number, for example:
+#+begin_src perl
+RANMETHOD=3MS2
+#+end_src
+(the default setting is U for composite univariate).  The multivariate t-distribution algorithm (M) produces samples that have radially symmetric densities (that is, the density is a function of the sum of squares of vector elements) may provide a better fitting sampling density for some kinds of models, and hence, more efficient sampling.  However, the individual random elements in the vector are not statistically independent, and when used with the Sobol method, does not result in as much reduced Monte Carlo noise as when the composite univariate t-distribution vector (U) is used. An alternative method is by a mixture of two normal densities, using IACCEPTL.
+
 
 *** REPEAT | NOREPEAT
 REPEAT: the search is repeated with the initial estimates being the
@@ -1309,12 +1700,11 @@ NOREPEAT2: the  estimate  obtained  at  the  end of the search of the second
       the course of the search.  Normally, should be set to 1.  Default
       is 0.
 
-*** SEED=n
-      The  initial  seed  for  the random number generator used for the
-      Monte-Carlo methods. Default is 14455.
-
-*** CLOCKSEED=[0|1] (NM75)
-      If CLOCKSEED=1 (default is  0),  actual  starting  seed  will  be
+*** SEED=n, CLOCKSEED=[0|1] (NM75)
+SEED (default 11456) sets the initial  seed  for  the random number generator used for the
+      Monte-Carlo methods. Alternatively, one can set CLOCKSEED=1
+      (default CLOCKSEED=0) so
+      that the actual starting  seed  will  be
       10000*(seconds  after  midnight)+SEED.   This  allows  a  control
       stream to produce  different  stochastic  results  for  automated
       replications,  without  the  need to modify the seed value in the
