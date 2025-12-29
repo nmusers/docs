@@ -366,10 +366,14 @@ $EST METHOD=IMP EONLY=2 ISAMPLE=1000 NITER=5 MAPITER=0
 
 *** METHOD=BAYES
  The  Markov  Chain Monte Carlo (MCMC) Bayesian
-    Analysis method.  The goal of the MCMC Bayesian analysis is to
-    obtain a  large sample set of probable population parameters.
-    Various summary statistics of the population parameters may then
-    be obtained such a
+    Analysis method.  The goal of the MCMC Bayesian analysis [12,13] is not to obtain the most likely THETAs, SIGMAs, and OMEGAs, but to obtain a large sample set of probable population parameters, usually 10000-30000.  The samples are not statistically independent, but when analysis is properly performed, they are uncorrelated overall. Various summary statistics of the population parameters may then be obtained, such as means, standard deviations, and even confidence (or credible) ranges.  The mean population parameter estimates and their variances are evaluated with considerable stability. Maximum likelihood parameters are not obtained, but with problems of sufficient data, these sample mean parameters are similar to maximum likelihood values, and the standard deviations of the samples are similar to standard errors obtained with maximum likelihood methods. A maximum likelihood objective function is also not obtained, but, a distribution of joint probability densities is obtained, from which 95% confidence bounds (assuming a type I error of 0.05 is desired) can be constructed and tested for overlap with those of alternative models.
+
+As with the SAEM method, there are two phases to the BAYES analysis.  The first phase is the burn-in mode, during which population parameters and likelihood may change in a very directional manner with each iteration, and which should not be used for obtaining statistical summaries.  The second phase is the stationary distribution phase, during which the likelihood and parameters tend to vary randomly with each iteration, without changing on average.  It is these samples that are used to obtain summary statistics.
+
+The Bayesian method is specified by
+#+begin_src perl
+$EST METHOD=BAYES INTERACTION
+#+end_src
 
 *** METHOD=DIRECT
 Requests  Monte  Carlo  Direct Sampling.  Creates
@@ -380,20 +384,46 @@ Requests  Monte  Carlo  Direct Sampling.  Creates
     300000 to properly estimate the problem.
 
 *** METHOD=NUTS (NM74)
-Requests No U-Turn Sampling (NUTS) Markov Chain Monte
-    Carlo (MCMC)  Bayesian  Analysis  Method.   Options unique to this
-    method are  listed  alphabetically  under  NUTS_....   Other
-    options of interest with their defaults are as follows:
-    #+begin_src f90
-      MASSRESET=-1
-      MADAPT=-1
-      KAPPA=1
-      TTDF=0
-      OLKJDF=0
-      OVARF=1
-      SLKJDF=0
-      SVARF=1
-    #+end_src
+The No-U-Turn Sampling (NUTS) algorithm was developed by Hoffman,
+Gelman, and others of the Stan Development Team ([19,20], and
+communications with Bob Carpenter, Andrew Gelman, Matt Hoffman, Michael Betancourt, and Sebastian Weber.).  The algorithm developed in NONMEM is a limited version of NUTS in Stan, focused on analyzing population PK/PD models, with normally distributed THETA priors (or t-distributed theta priors, see TTDF), and Wishart/Gamma distributed OMEGA and SIGMA priors, or using the LKJ correlation prior (see OLKJDF and SLKJDF options) for OMEGAS and SIGMAS.
+
+Typical Bayesian algorithms search for individual parameters (PHIs or ETAs) and population parameters (THETAs, OMEGAs, and SIGMAs) in separate stages.  While this provides for rapid generation of an MCMC sample, the samples can be heavily correlated, especially if there are high correlations in the OMEGA matrix.  The NUTS sampler uses a directed search using partial derivatives and scaling techniques using posterior density knowledge from previous samples to reduce the correlation of the parameters from one iteration to the next.  While each iteration takes longer to generate with NUTS, the samples may be 10-100 times decorrelated relative to a standard MCMC sampling.  Thus,  10000 samples with NUTS may be worth 100000 samples with traditional MCMC algorithms.  See the NEFF (Number of EFFective samples) utility for analyzing the quality of an MCMC run, I.103 NEFF and NEFFI Utility Programs (NM74).
+
+Because the NUTS algorithm relies on derivatives, it is best if analytical derivatives are created for each of the estimated parameters.  For OMEGAs and SIGMAs, these are done automatically, but for THETAs, analytical derivatives are created only if they are MU referenced (see MU Reference section below).  So MU reference all THETAs that are to be estimated.  It is okay to set their OMEGA to 0, the analytical derivative will still be utilized.
+
+The easiest way to use the NUTS algorithm in NONMEM is to use the AUTO option (see section I.46 Some General Options and Notes Regarding EM and Monte Carlo Methods for more details on the AUTO feature, AUTO=0 (default) (NM73)).  For example, stanrb42.ctl uses AUTO=1:
+
+#+begin_src perl
+$EST METHOD=NUTS AUTO=1 PRINT=20
+#+end_src
+
+The example stanrb10.ctl shows another setup for using NUTS:
+#+begin_src perl
+$EST METHOD=ITS NITER=0 file=stanrb10_its.ext
+$EST METHOD=NUTS NBURN=1000 NITER=2000 PRINT=20 OLKJDF=3.0 file=stanrb10.ext
+#+end_src
+The OLKJDF option specifies the degrees of freedom to the LKJ decorrelation density for the OMEGA prior.  The OLKJDF should be set to a value greater than 0 to use the LKJ decorrelation prior for OMEGAs, as recommended by the STAN group.  Also see comment below about using LKJ decorrelation versus inverse Wishart prior.  Experience has shown that a low non- or weakly-informative OLKJDF should be at least 2, and no greater than the number of the Omega diagonals.  If OLKJDF is set to 1, then there may be considerable pull towards high correlations which reduces efficiency of sampling.  A single iteration of ITS is helpful to center the initial etas at their modes, as a good facilitator for initiating the NUTS run that follows it (NITER=0, so population parameters are not advanced).
+
+An alternative method is to use the traditional BAYES method to rapidly generate samples for an initial mass matrix, which can then be passed on to the NUTS algorithm (example stanrb9):
+
+#+begin_src perl
+$EST METHOD=BAYES NBURN=2000 NITER=2000 PRINT=50 MASSRESET=1
+file=stanrb9_bayes.ext KAPPA=0.75
+$EST METHOD=NUTS NBURN=500 NITER=2000 PRINT=20 file=stanrb9.ext
+     OLKJDF=3.0 MASSRESET=0 KAPPA=1.0 MADAPT=250
+#+end_src
+
+Notice that the MASSRESET is set to 1 to initialize the mass matrix accumulator at the BAYES step, and then set MASSRESET=0 at the NUTS step, so that the mass matrix is not re-initialized, but rather, carried over, from the BAYES step.  Also, you may wish to set KAPPA=0.75 during BAYES so that the accumulated mass matrix favors values collected during the latter portion of the BAYES analysis (for the NUTS step itself, KAPPA should be set back to 1).  This technique can sometimes make the burn-in (warm-up) period for NUTS execute faster, and/or improve the de-correlation.  MADAPT is set to ½ of NBURN, during which the mass matrix is continuously updated every NUTS_BASE iterations (which in this case by default is 0.025*NBURN=25).
+
+Other stanrb* examples in the examples directory show the various ways in which the problem may be analyzed.
+
+Several versions of a differential equation problem, example6, are also in the examples directory, example6hmt*, to be compared with example6classic2. and example6classico3.  Comparing example6hmto26.ctl using pure NUTS algorithm with example6hmto19 which uses a pre-warmup from a previous BAYES estimation, you can see that the pre-warmup can reduce time of computation.
+
+To request NUTS as estimation method, use
+#+begin_src perl
+$ESTIMATION METHOD=NUTS
+#+end_src
 
 *** METHOD=CHAIN
 Allows  the user to create a series of random initial
@@ -452,15 +482,36 @@ problem, so use with care.
 See INTRODUCTION TO NONMEM 7 for more information.
 
 *** BAYES_PHI_STORE=[0|1] (NM75)
-If  BAYES_PHI_STORE=1  then  phi  and  eta values from each BAYES iteration will be stored in root.iph.
+As of NM75, samples of phi/eta are collected at each BAYES iteration,
+and summarized to provide mean phi and phc() in the root.phi table, as
+described above.  By default, the individual phi values from each
+iteration are not stored.  However, if you set
+#+begin_src perl
+$EST ... BAYES_PHI_STORE=1
+#+end_src
+then PHI and ETA values from each BAYES iteration will be stored in root.iph.  For non-mixture problems, only records of SUBP=0 are recorded, as there are no sub-population divisions.  For mixture problems, the SUBP=0 records contain the composite phis and etas (the average of these across all non-negative iterations are in the root.phi table), and the SUBP>0 records contain the phis and etas appropriate to each sub-population SUBP (the average of these across all non-negative iterations are in the root.phm table).  The root.iph file can become quite large, so it should be used only on the final analysis.  This root.iph file can be read by the utility program NEFFI (see I.103 NEFF and NEFFI Utility Programs (NM74)).
 
 *** BIONLY=[0|1] (NM75)
 BIONLY stands for Bayesian individual parameters only,  and  when set
 to 1, will create new samples of individual parameters only, but will
-keep the population parameters fixed.  May be used  with
-BAYES_PHI_STORE=1  or  write  statements capturing the individual
-parameters samples.  See INTRODUCTION TO NONMEM 7 for more
-information.
+keep the population parameters fixed.  This is equivalent to EONLY=1
+used for SAEM and IMP estimation.  Of course, for this to be useful,
+either write statements capturing the individual parameters samples in
+the control stream must be entered (see example 8 near end of this
+manual), or the BAYES_PHI_STORE option must be set to 1, to collect
+individual samples in the .iph file.
+
+Example:
+#+begin_src perl
+$EST METHOD=BAYES INTERACTION NBURN=200
+     NITER=1000 PRINT=100 NOPRIOR=1 CINTERVAL=100 BIONLY=1
+     BAYES_PHI_STORE=1
+#+end_src
+The BIONLY option of BAYES, with collection of individual samples in
+the .iph file, is comparable to the ETASAMPLES option of SAEM, with
+collection of individual samples in the .ets file (ETASAMPLES=0
+(default) (NM74) for SAEM.
+
 
 *** BOOTDATA=[0|1] (NM75)
 By  default  (BOOTDATA=0),  when data are selected based on $SIML
@@ -823,7 +874,12 @@ for each subject, listing the two IACCEPT scale values, the first one
 being 1 for near the mode, and the second for the long tails.
 
 *** IKAPPA=x (NM74)
-Used in computing weight for individual parameters in ISAMPLE_M1B mode.  IKAPPA is 1.
+The individual parameters are averaged using a weight N-IKAPPA for the
+Nth iteration (so a simple average with each iteration’s value equally
+weighted would be IKAPPA=1), in obtaining the mean and
+variance-covariance for the ISAMPLE_M1B mode.  A value of 0.75 can
+sometimes provide an improved decorrelation efficiency when performing
+standard Bayesian analysis.
 
 *** INTERACTION | NOINTERACTION
 INTERACTION: The dependence on etas of the model for  intra-individual
@@ -908,9 +964,14 @@ for reasonable parameter values.
 
 
 *** ISAMPLE_M1=n
-      n is the number of mode 1 iterations for  the  Metropolis-Hasting
-      algorithm  for estimating individual parameters using the population means and variances as proposal density. Used with the  SAEM
-      and BAYES methods.  Default is 2.
+The number of mode 1 iterations for  the  Metropolis-Hasting
+algorithm  for estimating individual parameters using the population
+means and variances as proposal density. Used with the  SAEM and BAYES
+methods.  Default n=2.
+
+For Bayesian analysis, the MCMC algorithm performs ISAMPLE_M1 mode 1 iterations using the population means and variances as proposal density, followed by ISAMPLE_M1B mode 1B iterations using the individual conditional mean and individual conditional variance collected from previous iterations as proposal density, followed by ISAMPLE_M1A mode 1A iterations, testing model parameters from other subjects as possible values (by default this is not used, ISAMPLE_M1A=0), followed by ISAMPLE_M2 mode 2 iterations, using the present parameter vector position as mean, and a scaled variance of OMEGA as variance [11].  Next, ISAMPLE_M3 mode 3 iterations are performed, in which samples are generated for each parameter separately.  The scaling is adjusted so that samples are accepted IACCEPT fraction of the time.  The final sample for a given chain is then kept.  Usually, these options need not be changed.  There is only one chain  of samples produced for a given NONMEM run (ISAMPLE is not used for MCMC, only for SAEM).  If you would like additional chains, then create separate control stream files with different starting seed numbers.
+
+As of NM75, if the option MCETA is set to greater than ISAMPLE_M1, then for the first iteration of SAEM, ISAMPLE_M1, ISAMPLE_M2, and ISAMPLE_M3 will be set to MCETA, to facilitate a robust initial search for reasonable parameter values.
 
 *** ISAMPLE_M1A=n(NM72)
       n  is the number of mode 1A iterations for the Metropolis-Hasting
@@ -949,13 +1010,13 @@ In MCMC sampling (SAEM and BAYES), the scale factor used to vary the
 size of the variance of the proposal density in order to meet the
 IACCEPT condition, is by default bounded by ISCALE_MIN=1.0E-06 and
 ISCALE_MAX=1.0E+06.  This should left alone for MCMC sampling, but on
-occasion there may be a reason to reduce the boundaries (perhaps to
+occasion there may be a reason to reduce the boundaries (e.g., to
 ISCALE_MIN=0.001, ISAMPLE_MAX=1000).  Similar to in IMP, after the
 saem estimation method, remember to revert these parameters back to
 default operation on the next $EST step.
 
 *** KAPPA=x (NM74)
-      Used with NUTS method.  Default is 1.
+The parameters are averaged using a weight N-KAPPA (also called PKAPPA) for the Nth iteration (so a simple average with each iteration’s value equally weighted would be KAPPA=1), in obtaining the mass matrix.  A value of 0.75 gives the best results when preparing a mass matrix during the BAYES step, in anticipation of the NUTS step.
 
 *** KNUTHSUMOFF=n] (NM74)
       The  Knuth summing method is used to allow the most accurate summation of individual objective function values, even  with  large
@@ -1034,7 +1095,55 @@ NOLAPLACIAN: do not use the Laplacian method.  This is the default.
   coded "-2LLIKELIHOOD".  Compare with PREDICTION option.
 
 *** MADAPT=n (NM74)
-      Used with NUTS method.  Default is -1.
+If MADAPT/=-1 (also called PMADAPT), the mass matrix is accumulative
+average updated throughout the NUTS analysis during the burn-in
+period, the update occurring every NUTS_BASE iterations, for the first
+MADAPT iterations for the parameters, then changes no further after
+that.  For example, if NBURN=300, NUTS_BASE=20, and MADAPT=200, then
+during the first 20 burn-in iterations, an identity mass matrix is
+used because there is no past history of samples collected yet, then
+during the next 20 burn-in iterations the mass matrix derived from the
+first twenty burn-in iterations is used, then for following 20 burn-in
+iterations, the mass matrix from the first 40 burn-in iterations are
+used, etc.  If KAPPA/=1, the samples of each are not evenly weighted,
+but are weighted according to the description of KAPPA below.  If
+MASSRESET=0 because the previous $EST was a METHOD=BAYES … MASSRESET=1
+estimation from which an initial mass matrix was derived, then the
+first 20 burn-in iterations use this BAYES pre-prepared mass matrix,
+the next 20 burn-in iterations use a mass matrix derived from an
+average of the pre-prepared BAYES mass matrix (weighted as 2*number of
+population parameters to be estimated) plus the first 20 burn-in
+iterations (weighted as 20), the next 20 burn-in iterations use  a
+mass matrix derived from an average of the pre-prepared BAYES mass
+matrix (weighted as 2*number of population parameters to be estimated)
+plus the first 40 burn-in iterations (weighted as 40), etc.  This
+weighting is modified according to the KAPPA value used.
+
+In the following code portion (from examples\nuts_example6h.ctl), a
+brief iterative 2 stage is performed to center the parameters quickly
+in the stationary zone, followed by a BAYES estimation to quickly
+create a starting mass matrix, followed by the NUTS estimation, that
+uses the BAYES derived mass matrix as a starting point:
+#+begin_src perl
+$EST METHOD=ITS … NITER=15 …
+$EST METHOD=bayes … NBURN=200 NITER=0 … MASSRESET=1
+$EST METHOD=NUTS … NBURN=100 NUTS_BASE=20 … NITER=200 MASSRESET=0
+     PMADAPT=100
+#+end_src
+In the above setting, the mass matrix is updated every 20 (NUTS_BASE) iterations during the entire 100 NBURN iterations (since PMADAPT=NBURN).
+
+In another example, (from examples\nuts_example6g.ctl), the mass matrix from the BAYES estimation is used directly for the stationary sampling phase of the NUTS estimation, as there is no burn-in period for the NUTS estimation (NBURN=0):
+#+begin_src perl
+$EST METHOD=ITS … NITER=15 …
+$EST METHOD=bayes … NBURN=200 NITER=0 … MASSRESET=1
+$EST METHOD=NUTS … NBURN=0 … NITER=200 MASSRESET=0 PMADAPT=100
+#+end_src
+
+If MADAPT=-1, then the STAN method of warmup and mass matrix accumulation is used (according to the STAN manual [20], Optimization Algorithms section).  When using MADAPT=-1, the tuning options, NUTS_INIT, NUTS_BASE, and NUTS_TERM are useful.  Use of the AUTO option allows for easy setup of the STAN method of matrix accumulation without having to deal with every one of these options.  An example of this is examples\nuts_example6f.ctl:
+#+begin_src perl
+$EST METHOD=NUTS AUTO=1 NITER=200 NUTS_INIT=25 …
+#+end_src
+The AUTO=1 option (TODO: see section I.46 Some General Options and Notes Regarding EM and Monte Carlo Methods for more details on the AUTO feature, AUTO=0 (default) (NM73)) automatically sets the various options to appropriate default values (including setting MADAPT=-1) for Stan type mass matrix development, unless over-written by the user, as is done above for NUTS_INIT (default is 75), to reduce computation time.  Using the Stan warmup method for creating the mass matrix takes longer than using the BAYES pre-analysis BAYES as done in nuts_example6g.
 
 *** MAPCOV=1 (NM74)
 For iterations for which the MAP estimation is performed, by default
@@ -1093,8 +1202,17 @@ or
 #+end_src
 
 *** MASSRESET=n (NM74)
-      Mass matrix information accumulation for NUTS method.  Default is
-      -1.
+By default mass matrix information accumulation is turned off.
+However, MASSRESET=1 should be set when performing a Gibbs/MH Baysian
+analysis to initialize accumulation of mass matrix information,
+followed by the NUTS algorithm, with MASSRESET=0 set, so the mass
+matrix accumulator information is not reset to 0, but adds to the
+information acquired during the previous Gibbs/MH process.  IF you
+have a BAYES record setup previous to the NUTS record, make sure to
+set the NUTS_MASS value at the BAYES record first, so it accumulates
+the correct type of mass matrix information, and allocates the
+appropriate memory for its storage.  See the description of  MADAPT=-1
+(default) below.
 
 *** MAXEVALS=n
       Maximum allowable number of evaluations of the objective function
@@ -1178,7 +1296,8 @@ highly stochastic, and does not represent a marginal likelihood that
 is integrated over all possible eta, but rather, is the likelihood for
 a given set of ETAs.
 
-      When used with the BAYES method n is the maximum number of iterations used to perform the burn-in phase. Default is 4000.
+When used with the BAYES method n is the maximum number of iterations
+used to perform the burn-in phase. Default n=4000. During this time, the advance of the parameters may be monitored by observing the results in file specified by the FILE parameter, and/or the objective function displayed at the console.  The objective function progress is also written in OFV.TXT, and the report file.  Full sets of population parameters and likelihood functions are also written in the file specified with the FILE option.  When all parameters and objective function do not appear to drift in a specific direction, but appear to bounce around in a stationary region, then it has sufficiently “burned” in.  A termination test may be implemented to perform a statistical assessment of stationarity for the objective function and parameters.  As mentioned earlier, the objective function (MCMCOBJ) that is displayed during BAYES analysis is not valid for assessing minimization or for hypothesis testing in the usual manner.  It does not represent a likelihood that is integrated over all possible ETA (marginal density), but the likelihood at a given set of ETAs.
 
 *** NITER=n
 When  used with the ITS, IMP, and IMPMAP methods n is the maximum
@@ -1222,19 +1341,21 @@ Sometimes  gradients  are  not  properly evaluated for classical
       the final objective function value.  Should this occur, add  NONINFETA=1 to the $EST record.  NONINFETA=0 is the default.
 
 *** NOPRIOR=[0|1]
-      If  prior  information  was specified using the $PRIOR statement,
-      then normally the analysis is set up for three stage hierarchical
-      analysis.   By default NOPRIOR=0, and this prior information will
-      be used.  If NOPRIOR=1, then for the particular  estimation,  the
-      prior information is not included in the analysis. This is useful
-      if you do not want to use prior information during a maximization
-      (METHOD=IMP,  CONDITIONAL, IMPMAP, SAEM, or ITS), but then use it
-      for the Bayesian analysis (METHOD=BAYES).  With  NOPRIOR=1,  FOCE
-      is still allowed to evaluate an S MATRIX, since prior information
-      is not used.  I.e.,  $EST NOPRIOR=1 and $COV MATRIX=S are permitted.  With NONMEM 7.3, when NOPRIOR=1 is set, the estimation will
-      not use TNPRI prior information (TNPRI should only be  used  with
-      FO/FOCE/Laplace  estimations).  In   previous versions of NONMEM,
-      NOPRIOR=1 did not act on TNPRI priors.
+If  prior  information  was specified using the $PRIOR statement, then
+normally the analysis is set up for three stage hierarchical analysis.
+By default NOPRIOR=0, and this prior information will be used.  If
+NOPRIOR=1, then for the particular  estimation,  the prior information
+is not included in the analysis. This is useful if you do not want to
+use prior information during a maximization (METHOD=IMP,  CONDITIONAL,
+IMPMAP, SAEM, or ITS), but then use it for the Bayesian analysis
+(METHOD=BAYES).  With  NOPRIOR=1,  FOCE is still allowed to evaluate
+an S MATRIX, since prior information is not used, i.e.,  $EST
+NOPRIOR=1 and $COV MATRIX=S are permitted.
+
+With NONMEM 7.3, when NOPRIOR=1 is set, the estimation will not use
+TNPRI prior information (TNPRI should only be  used  with
+FO/FOCE/Laplace  estimations).  In   previous versions of NONMEM,
+NOPRIOR=1 did not act on TNPRI priors.
 
 *** NOSUB=[0|1] (NM74)
 With NOSUB=0, label substitution  will  be  performed  for  final estimates  in  the NONMEM report file. (See [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]]).  This is the default.  With NOSUB=1, label  substitution  will  not  be performed.
@@ -1264,49 +1385,156 @@ method be computed by PRED.  Not permitted with the  combination
 LAPLACIAN and INTERACTION.  Otherwise, this is the default.
 
 *** NUTS_BASE (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 0.025.
+When using the STAN algorithm (MADAPT=-1) for mass matrix and step size  development during the burnin-in (warmup) stage, NUTS_BASE (if NUTS_BASE>=1) or NUTS_BASE*NBURN (if NUTSBASE<1) serves as the number of iterations for the first Stage II of the warmup period ([20]), and doubles in iteration number with each subsequent segment of Stage II.    The total number of stage II iterations is bounded by NBURN-NUTSINIT-NUTS_TERM.  If NUTS_INIT=75, NUTS_BASE=25, NUTS_TERM=150, and NBURN=1000, then you have 5 segments of stage II, so that
+
+NUTS_INIT+NUTS_TERM+NUTS_BASE+NUTS_BASE*2+NUTS_BASE*4=NBURN=
+75 + 150 +25 +25*2+25*4+25*8+25*16=1000
+
+When MADAPT>0, this period is also used to update the mass matrix every NUTSBASE iterations until MADAPT total iterations have been performed.
+
+If NUTS_BASE<=-1.0, then NUTS_BASE will be set to the largest block section of the mass matrix plus 10.  This assures that a large enough base set of samples are collected before the mass matrix is used.
+
+If NUTS_BASE<-1, then in addition, the number of stage II iterations is ABS(NUTS_BASE).  The actual NBURN will be based on the above equation, but not to exceed the user specified  NBURN, which serves as the max NBURN.  With NUTS_BASE<-1.0, set NBURN to a large number (4000 or so).   The AUTO feature set NUTS_BASE to -3.
+
+Default is 0.025.
 
 *** NUTS_DELTA  (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 0.8
+This is essentially the sample acceptance rate  for the NUTS sampling process, equivalent to PACCEPT in standard MH sampling.  NUTS experts recommend 0.8.
 
 *** NUTS_EPARAM  (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 0
+When NUTS_EPARAM=0, parameters are entered into the NUTS algorithm
+parameterized as THETAs and phis, Cholesky.  When NUTS_EPARAM=1,
+parameters are entered into the NUTS algorithm parameterized as THETAs
+and etas.  When NUTS_EPARAM=2, parameters are entered into the NUTS
+algorithm parameterized as THETAs and Choleksy of OMEGA inverse*ETA.
+Default 0.
 
 *** NUTS_GAMMA  (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 0.05
+Gamma factor in the NUTS algorithm. Should not be changed. Default 0.05.
 
 *** NUTS_INIT  (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 0.075.
+When using the STAN algorithm (MADAPT=-1) for mass matrix and step
+size  development during the burn-in (warmup) stage, when NUTS_INIT<1
+serves as the fraction of NBURN iterations for Stage I of the warmup
+period ([20]).  When NUTS_INITS>1, then the explicit number of
+iterations is interpreted. Similarly, when MADAPT>0, this period is
+also used to accumulate NUTS_INIT*NBURN iterations before using the
+mass matrix. Default 0.075.
 
 *** NUTS_MASS  (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is B
+- NUTS_MASS=B (default): uses a block diagonal mass matrix for scaling
+  its search.  The THETAs/SIGMAs/OMEGAs and their correlations will be
+  scaled with one block matrix, and parameter sets of each individual
+  will have their own block matrix correlations.  Correlations between
+  THETAs and individual parameters will not be accounted for.  Most
+  efficient.
+- NUTS_MASS=F: full mass matrix.  A full correlation matrix between
+  THETAs, OMEGAs, SIGMAs, and individual parameters among all
+  individuals will be accounted for.  Computationally very expensive.
+  When using METHOD=BAYES as a preparation for NUTS, as shown in
+  example stanrb_177.ctl, make sure you set the NUTS_MASS (if you will
+  be using something different from the default B value) at the
+  METHOD=BAYES record, as well as MASSRESET=1, as this is required to
+  set the appropriate memory allocation, and store the posterior
+  variance-covariance (mass matrix) information that the NUTS
+  algorithm will then use.
+- NUTS_MASS=D: diagonal mass matrix. No correlations between parameters will be considered.
+- NUTS_MASS=BD: Block mass matrix covering THETAs, SIGMAs, OMEGAs, and diagonal mass matrix on individual parameters.
+- NUTS_MASS=DB: diagonal mass matrix covering THETAs, SIGMAs, OMEGAs, and block mass matrix on individual parameters.
+- NUTS_MASS=BBD: THETAs and SIGMAs are blocked together, OMEGAs are in
+  their own block, and individual parameters are diagonal.
+- NUTS_MASS=BBB: THETAs and SIGMAs are blocked together, OMEGAs are in
+  their own block, and individual parameters are blocked within each
+  subject.
+
+The mass matrix is generated by accumulating previous samples of parameters and obtaining their variance-covariance, so that the NUTS algorithm performs an efficient search in the domain of the empirical posterior density.  It is best to acquire this mass matrix by first performing a couple of thousand iterations using standard Gibbs Bayesian analysis, followed by a NUTS process.
+
+In the following we discuss the combinations of NUTS_MASS,
+NUTS_EPARAM, NUTS_OPARAM, and NUTS_SPARAM options.
+
+  - NUTS_EPARAM=0, NUTS_MASS=B
+    Default. The most efficient for many of the problems tested so
+    far.  They offer the greatest speed efficiency and sampling
+    (Neff/Nsample) efficiency. On occasion, one or two THETAs will
+    have low efficiencies relative to the rest.  The AUTO=1 option
+    allows an easy setup of this configuration (see section I.46 Some
+    General Options and Notes Regarding EM and Monte Carlo Methods for
+    more details on the AUTO feature, AUTO=0 (default) (NM73)).
+    Example stanrb42.ctl uses the AUTO=1 feature.
+  - NUTS_EPARAM=1, NUTS_MASS=D
+    When the problem is submitted to the NUTS algorithms with etas
+    rather than phis (NUTS_REPARAM=1), the NUTS_MASS=B does not yield
+    good efficiencies on THETAs.  Therefore, NUTS_MASS=D needs to be
+    used.  However, this reduces speed efficiencies by about 5 fold,
+    but evens out the theta efficiencies so the lowest Neff/Nsample
+    efficiency is about 3x higher than the lowest sampling efficiency
+    of the NUTS_EPARAM=0 setting. The AUTO=3 option allows an easy
+    setup of this configuration.
+  - NUTS_EPARAM=2, NUTS_MASS=BD
+    With NUTS_EPEARM=2, this is called the “Matt trick” in the Stan
+    community, and offers very high sampling efficiencies of 3 to 5
+    fold than that of the default settings.  However, the speed is
+    about 4-8 times slower from the default settings when performing
+    NUTS in NONMEM, so there may or may not be greater overall
+    efficiency, in terms of number of independent samples per unit
+    time.  Furthermore, this method uses a conditional likelihood
+    equation that differs from the standard that the population
+    analysis community is used to: It drops the NIND*LOG(DET(OMEGA))
+    term (where NIND=number of subjects), resulting in a conditional
+    likelihood that has very different distribution properties and
+    does not fully represent the contribution of the individual etas
+    to the likelihood.  An example of using NUTS_EPARAM=2 is
+    ..\examples\stanrb19.  The AUTO=2 option allows an easy setup of
+    this configuration, and example ..\examples\stanbrb39 uses this
+    option.
 
 *** NUTS_MAXDEPTH  (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 10
+This sets the maximum number of total branchings to try in the NUTS
+algorithm in the search for the next decorrelated sample.  If many
+messages are received of reaching the maximum buildtree level,
+increase NUTS_MAXDEPTH.
 
 *** NUTS_OPARAM  (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 1
+When NUTS_OPARAM=1, Omega elements are parameterized in a correlation
+cholesky format that constrains correlations to be between -1 and 1.
+When NUTS_OPARAM=0, then the full Omega elements are parameterized in
+Cholesky format. Default 1.
 
 *** NUTS_REG  (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 0.0
+By default, the mass matrix is made slightly diagonal dominant by
+adding a fraction of the diagonal element.  If NUTS_REG>0.0, then the
+mass matrix is made slightly diagonal dominant by adding the value of
+NUTS_REG.  When OLKJDF>0, then NUTS_REG=1.0 may provide a more
+efficient sampling process. Default 0.0.
 
 *** NUTS_SPARAM  (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 1
+When NUTS_SPARAM=1, Sigma elements are parameterized in a correlation
+cholesky format that constrains correlations to be between -1 and 1.
+When NUTS_SPARAM=0, then the full SIGMA elements are parameterized in
+Cholesky format. Default 1.
 
 *** NUTS_STEPINTER (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 0
+An initial step size is calculated every NUTS_STEPINTER iterations. Default is 0.
 
 *** NUTS_STEPITER (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 1
+An initial step size is calculated for the first NUTS_STEPITER
+iterations. Default 1.
 
 *** NUTS_TERM (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 0.05
+When using the STAN algorithm (MADAPT=-1) for mass matrix and step
+size  development during the burn-in (warmup) stage, NUTS_TERM serves
+as the number of iterations for Stage III of the warmup period ([20]),
+to make final adjustments in step size. Default 0.05.
 
 *** NUTS_TEST (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 0
+The acceptance of a sample is tested using an algorithm as originally in algorithm 6 of Hoffman and Gelman [19] (default, NUTSTEST=0), or as performed in STAN (NUTSTEST=1). Default 0.
 
 *** NUTS_TRANSFORM (NM74)
-      See Guide INTRODUCTION TO NONMEM 7. Default is 0
+When NUTS_TRANSFORM=0, model parameters are transformed using the mass
+matrix, for population parameters.  If NUTS_TRANSFORM=1, the momentum
+parameters are transformed using the mass matrix.  It is best to set
+NUTS_TRANSFORM to 1 if NUTS_TEST is set to 1, and NUTS_TRANSFORM
+should be set to 0 when NUTS_TEST is set to 0. Default 0.
 
 *** OACCEPT=n
 Used  only  with  the  BAYES method. n has meaning only for OMEGA
@@ -1315,7 +1543,7 @@ Used  only  with  the  BAYES method. n has meaning only for OMEGA
       fraction of the time. See OSAMPLE_M2 option. Default is
 
 *** OLKJDF=n (NM74)
-      Used with NUTS  method,  OLKJDF  stands  for  Omega  LKJ  density
+Used with NUTS  method,  OLKJDF  stands  for  OMEGA  LKJ  density
       degrees  of  freedom.  When 0, the usual inverse Wishart prior is
       used for Omegas. When OLKJDF>0, then the LKJ density is  used  as
       the  prior,  with OLKJDF degrees of freedom for all omega blocks.
@@ -1326,6 +1554,41 @@ Used  only  with  the  BAYES method. n has meaning only for OMEGA
       Default is 0.
 
       See [[file:/docs/reference-manual/control-records/olkjdf/][$OLKJDF]] to specify LKJ correlation  degrees  of freedom for each OMEGA block.
+
+Using LKJ correlation
+priors for supporting OMEGAs, rather than inverse Wishart priors,
+is reasonable when using LKJ decorrelation as an uninformative
+prior, and there is no previous knowledge of the scale of the
+variances.  For example, one could use Identity matrix for the Omega
+priors (diagonal OMEGA values=1, and very low degrees of freedom, and
+the LKJ decorrelation prior will not introduce much bias, whereas the
+inverse Wishart prior would introduce considerable bias.  However, the
+uninformative inverse Wishart prior is reasonable to use if the
+diagonal Omega values are in a reasonable range of where the data are.
+In PK/PD modeling, we have the benefit of obtaining reasonable
+variances from first performing a maximum likelihood analysis, (using
+FOCE, ITS, IMP, ITS, or SAEM), which often do not require any priors,
+and then supplying these results as priors for the NUTS analysis, as
+long as the degrees of freedom is set to <=D, the dimension of the
+block matrix.  In such cases, the Inverse Wishart as an uninformative
+prior (DF<=D), but with the variances obtained from an earlier maximum
+likelihood analysis on the same data, is equivalent to LKJ correlation
+prior in terms of quality and lack of bias.
+
+When using OMEGA information from a previous study to supply as an
+informative prior to a present study, the Inverse Wishart format of
+the prior information conjugates well with the information in the
+cross products of etas provided by the present study, and the
+informative prior information from the previous study offers a natural
+statistical support, as if the data of the previous study were added
+to the present study.  Furthermore, the inverse Wishart prior supplies
+the information of the entire block, off-diagonals and diagonals,
+whereas the LKJ correlation prior method (OLKJDF>0) only uses the
+diagonal elements, and some general notion of correlation in the
+OLKJDF value.  Such a natural interpretation for the inverse Wishart
+is evident in the mathematical structure of the total likelihood, when
+using NUTS_EPARAM=0 or NUTS_EPARAM=1, and Omega priors with inverse
+Wishart distribution.
 
 *** OLNTWOPI (NM74)
       The    objective    function    is    reported    including   the
@@ -1458,9 +1721,8 @@ Note  that  the  ORDER  option does not affect the NONMEM report file,
 REFERENCES: Guide Introduction_7.
 
 *** OSAMPLE_M1=n
-      Used  only  with  the BAYES method. n is the number of times each
-      iteration that OMEGA is generated using  the  Metropolis-Hastings
-      algorithm  and an inverse Wishart proposal density that has variance based on the previous samples. If n < 0 this indicates that
+      Used  only  with  the BAYES method. OSAMPLE_M1, OSAMPLE_M2,
+      OSAMPLE_M3, and OACCEPT are the options for the MCMC Metropolis-Hastings algorithm for OMEGA sampling.  If OSAMPLE_M1<0 (default), then the OMEGAs are Gibbs sampled using the appropriate inverse Wishart proposal density, and the other options (OSAMPLE_M2 and OACCEPT) are not relevant.  Otherwise,  for each iteration, a matrix of OMEGAs are generated using an inverse Wishart proposal density that has variance based on the previous samples, done OSAMPLE_M1 times.  Next, a matrix of OMEGAS are generated using a Wishart proposal density at the present OMEGA values postion, and degrees of freedom (dispersion factor for variances) scaled to have samples accepted with OACCEPT  frequency.  This is done OSAMPLE_M2 times (if OSAMPLE_M2<0, then program performs this as many times as there are non-fixed omega elements).  Then, individual cholesky elements of OMEGA are varied, each OSAMPLE_M3 times (if OSAMPLE_M3<0, then program performs this as many times as there are non-fixed omega elements).  The final OMEGA matrix is kept.  Usually these options do not need to be changed from their default values, listed above.
 
 *** OSAMPLE_M2=n
       Used only with the BAYES method. n has  meaning  only  for  OMEGA
@@ -1536,9 +1798,8 @@ NOPOSTHOC: ETAs  are not estimated.  This is the default with METHOD=0.  May not
       term (constant term to the prior).
 
 *** PSAMPLE_M1=n
-      Used  only  with the BAYES method. n has meaning only for population parameters sampled by the Metropolis-Hastings algorithm.   n
-      is  the  number of times that a vector of THETA's and SIGMA's are
-      generated using a multivariate normal proposal densit
+Used  only  with the BAYES method. Options PSAMPLE_M1, PSAMPLE_M2,
+PSAMPLE_M3, PACCEPT are for the MCMC Metropolis-Hastings algorithm. They only have meaning for population parameters (THETA/SIGMA) that are not Gibbs sampled.  Normally NONMEM determines whether THETA and SIGMA parameters are Gibbs sampled or not, based on the model setup (see MU_ Referencing section below).    For each iteration, a vector of THETAs/SIGMAs are generated using a multivariate normal proposal density that has mean/variances based on the previous samples, done PSAMPLE_M1 times.  Next, a vector of parameters are generated using a multivariate normal proposal density with mean at the present parameter position, and variance scaled to have samples accepted with PACCEPT  frequency.  This is done PSAMPLE_M2 times (if PSAMPLE_M2<0, then program performs this as many times as there are M-H parameters).  Finally, each parameter is individually sampled PSAMPLE_M3 times.  The final accepted parameter vector is kept.  Usually these options do not need to be changed from their default values, listed above.
 
 *** PSAMPLE_M2=n
       Used only with the BAYES method. n has meaning only  for  population  parameters sampled by the Metropolis-Hastings algorithm.  n
@@ -1753,7 +2014,7 @@ Used with METHOD=CHAIN and $CHAIN to specify how  the  sample  is selected.
       as extensions of the THETA parameters in M-H sampling methods).
       Default is 0.
 
-      See [[file:/docs/reference-manual/control-records/slkjdf/][record $SLKJDF]] (NM75) to specify LKJ correlation degrees of freedom for each sigma block.
+      See [[file:/docs/reference-manual/control-records/slkjdf/][record $SLKJDF]] (NM75) to specify LKJ correlation degrees of freedom for each SIGMA block.
 
 *** SIGL=n
       n is used to calculate the step-size for finite difference derivatives  independent of the SIGDIGITS value.  If n=0 or n=100 then
@@ -1925,20 +2186,25 @@ Reserved Variables that are of Interest During the Estimation Step
       include nonmem_reserved_general.
 
 *** OBJQUICK (NM74)
-      The  OBJQUICK option can speed up the NUTS method, and also ordinary BAYES, FAST FOCE, ITS, and the EM methods.  Set OBJQUICK  in
-      $PRED or $PK.
+The  OBJQUICK option can speed up the NUTS method, and also ordinary BAYES, FAST FOCE, ITS, and the EM methods.  Set OBJQUICK  in $PRED or $PK.
 
-      OBJQUICK=0:
-           Default. Standard NONMEN processing of the model occurs.
+  - OBJQUICK=0: Default. Standard NONMEN processing of the model occurs.
 
-      OBJQUICK=1:
-           Certain tests and initializations are skipped.
+  - OBJQUICK=1: Certain tests and initializations are skipped.
 
-      OBJQUICK=2:
-           A  simplified  modeling  process occurs, but which cannot be
-           used when $LEVEL or $MIX is used in the model.
-      The first statement of the $PRED or $PK block should be
-      include nonmem_reserved_general.
+  - OBJQUICK=2: A  simplified  modeling  process occurs, but which
+    cannot be used when $LEVEL or $MIX is used in the model. In
+    addition, parallelization is not performed.
+
+The OBJQUICK and MUFIRSTREC can also speed up the other analysis
+methods, such as ordinary BAYES, FAST FOCE, ITS, and the EM methods. The first statement of the $PRED or $PK block should include nonmem_reserved_general:
+#+begin_src perl
+$PRED
+include nonmem_reserved_general
+MUFIRSTREC=1
+OBJQUICK=1
+#+end_src
+
 
 ** REFERENCES
 Guide Introduction_7
