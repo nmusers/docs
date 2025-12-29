@@ -1,0 +1,71 @@
+#+title: Store NUTS warmup results
+* Prepare a single warmup for multiple chains
+Because the warmup (also known as "burn-in") of NUTS is computationally expensive, you can use
+the MSF file to perform a one-time warmup in one control stream file,
+and then have subsequent control stream files use the burn-in
+information (including the mass density information) and evaluate
+their stationary phases in parallel (at different starting seeds).
+For example, start with the following burn-in control stream, where
+NITER=0.
+
+#+begin_src perl
+$PROB RUN# Example 1 (from samp5l)
+$INPUT C SET ID JID TIME  DV=CONC AMT=DOSE RATE EVID MDV CMT CLX
+       V1X QX V2X SDIX SDSX
+$DATA example1.csv IGNORE=C
+$SUBROUTINES ADVAN3 TRANS4
+$PK
+MU_1=THETA(1)
+MU_2=THETA(2)
+MU_3=THETA(3)
+MU_4=THETA(4)
+CL=DEXP(MU_1+ETA(1))
+V1=DEXP(MU_2+ETA(2))
+Q=DEXP(MU_3+ETA(3))
+V2=DEXP(MU_4+ETA(4))
+S1=V1
+$ERROR
+Y = F + F*EPS(1)
+$THETA (2.0)X4
+$OMEGA BLOCK(4) VALUES(0.15,0.01)
+$SIGMA  (0.6 )   ;[P]
+$PRIOR NWPRI
+$THETAP (2.0 FIX)X4
+$THETAPV BLOCK(4) FIX VALUES(10000,0.0)
+$OMEGAP BLOCK(4) FIX VALUES(0.2,0.0)
+$OMEGAPD (4 FIX)
+$SIGMAP 0.06 FIX
+$SIGMAPD (1 FIX)
+$EST METHOD=ITS NITER=0 PRINT=10 file=nuts_resume.ext
+$EST METHOD=NUTS INTERACTION  AUTO=1 NITER=0 PRINT=10 file=nuts_resume.txt
+     MSFO=nuts_resume.msf
+$COV MATRIX=R PRINT=E UNCONDITIONAL
+#+end_src
+
+Afterwards one may use the MSF to resume an analysis (NITER>0).
+#+begin_src perl
+$PROB RUN# Example 1 (from samp5l)
+$INPUT C SET ID JID TIME  DV=CONC AMT=DOSE RATE EVID MDV CMT CLX
+       V1X QX V2X SDIX SDSX
+$DATA example1.csv IGNORE=C
+$SUBROUTINES ADVAN3 TRANS4
+$PK
+MU_1=THETA(1)
+MU_2=THETA(2)
+MU_3=THETA(3)
+MU_4=THETA(4)
+CL=DEXP(MU_1+ETA(1))
+V1=DEXP(MU_2+ETA(2))
+Q=DEXP(MU_3+ETA(3))
+V2=DEXP(MU_4+ETA(4))
+S1=V1
+$ERROR
+Y = F + F*EPS(1)
+$PRIOR NWPRI NTHETA=4, NETA=4, NTHP=4, NETP=4, NEPS=1, NEPP=1
+$MSFI nuts_resume.msf
+$EST METHOD=NUTS AUTO=1 NITER=1000 PRINT=10 file=nuts_resume2.txt
+     SEED=2234556
+$COV MATRIX=R PRINT=E UNCONDITIONAL
+#+end_src
+
+We can run additional control streams as the one above, in parallel, each with a different starting seed.  These will serve as separate chains.

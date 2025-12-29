@@ -376,12 +376,19 @@ $EST METHOD=BAYES INTERACTION
 #+end_src
 
 *** METHOD=DIRECT
-Requests  Monte  Carlo  Direct Sampling.  Creates
-    completely independent samples (unlike MCMC), and there is no
-    chance of causing  bias  if the sampling density is not similar
-    enough to the conditional density (unlike  IMP).   However,  it
-    is very  inefficient,  requiring  ISAMPLE  settings of 10000 to
-    300000 to properly estimate the problem.
+On rare occasions, direct Monte Carlo sampling may desired.  This method is the purest method for performing expectation maximization, in that it creates completely independent samples (unlike MCMC), and there is no chance of causing bias if the sampling density is not similar enough to the conditional density (unlike IMP).  However, it is very inefficient, requiring ISAMPLE values of 10000 to 300000 to properly estimate the problem.  The method can be implemented by issuing a command such as
+#+begin_src perl
+$EST METHOD=DIRECT INTERACTION ISAMPLE=10000 NITER=50
+#+end_src
+
+On occasion it can have some use in jump starting an importance sampling method, especially if the first iteration of importance sampling fails because it relies on MAP estimation, and the problem is too unstable for it.  Thus, one could perform the following, where just a few iterations of direct sampling begin the estimation process:
+
+#+begin_src perl
+$EST METHOD=DIRECT INTERACTION ISAMPLE=10000 NITER=3
+$EST METHOD=IMP INTERACTION ISAMPLE=1000 NITER=50 MAPITER=0
+#+end_src
+Notice that since MAPITER=0, the first iteration of IMP method relies on starting parameters for its sampling density that came from the DIRECT sampling method.
+
 
 *** METHOD=NUTS (NM74)
 The No-U-Turn Sampling (NUTS) algorithm was developed by Hoffman,
@@ -470,16 +477,106 @@ problem, so use with care.
       subroutine should test NM_STEP and set ANRD accordingly.
 
 *** AUTO=[0|1|2|3]
+AUTO sets recommended options for METHOD used. This option is ignored by the classic NONMEM methods (FO/FOCE/Laplace).
   - AUTO=0 (NM73): NONMEM  does  not provide best settings of certain options. This is the default.
   - AUTO=1 (NM73): Several options will be set by NONMEM that will allow
     best  settings  to  be determined.  User may still over-ride those
     options set by auto, by specifying them on the  same  $EST
-    record.   The AUTO option is ignored by the FO/FOCE/Laplace
-    methods.
-  - AUTO=2 (NM74): allow user with NUTS estimation to setup the alternative sampling strategy.
-  - AUTO=3 (NM74): allow user with NUTS estimation to setup the alternative sampling strategy of ETA sampling.
+    record:
+    #+begin_src perl
+      $EST METHOD=ITS AUTO=1 PRINT=10
+      $EST METHOD=SAEM AUTO=1 PRINT=50
+      $EST METHOD=IMP PRINT=1 EONLY=1 NITER=5 ISAMPLE=1000
+      $EST METHOD=BAYES AUTO=1 NITER=1000 FILE=auto.txt PRINT=100
+    #+end_src
+    The setting of AUTO=1 for each METHOD is as follows.
+    #+begin_src perl
+      METHOD=DIRECT INTERACTION ISAMPLE=1000 CTYPE=3 NITER=500 STDOBJ=10
+          ISAMPEND=10000 NOPRIOR=1 CITER=10 CINTERVAL=0 CALPHA=0.05
+          EONLY=0
 
-See INTRODUCTION TO NONMEM 7 for more information.
+      METHOD=BAYES INTERACTION CTYPE=3 NITER=10000 NBURN=4000
+          NOPRIOR=0 CITER=10 CINTERVAL=0 CALPHA=0.05
+          IACCEPT=0.4 ISCALE_MIN=1.0E-06 ISCALE_MAX=1.0E+06
+          PACCEPT=0.5 PSCALE_MIN=0.01 PSCALE_MAX=1000
+          PSAMPLE_M1=1 PSAMPLE_M2=-1 PSAMPLE_M3=1 OSAMPLE_M1=-1
+          OSAMPLE_M2=-1 OACCEPT=0.5 ISAMPLE_M1=2 ISAMPLE_M1A=0
+          ISAMPLE_M2=2 ISAMPLE_M3=3 ISAMPLE_M1B=2 MCETA=0
+
+      METHOD=SAEM INTERACTION CTYPE=3 NITER=1000 NBURN=4000
+          ISAMPEND=10 NOPRIOR=1 CITER=10 CINTERVAL=0 CALPHA=0.05
+          IACCEPT=0.4 ISCALE_MIN=1.0E-06 ISCALE_MAX=1.0E+06
+          ISAMPLE_M1=2 ISAMPLE_M1A=0 ISAMPLE_M1B=2 ISAMPLE_M2=2
+          ISAMPLE_M3=2 CONSTRAIN=1 EONLY=0 ISAMPLE=2 MCETA=0
+
+      METHOD=ITS INTERACTION CTYPE=3 NITER=500
+          NOPRIOR=1 CITER=10 CINTERVAL=1 CALPHA=0.05
+
+      METHOD=IMP INTERACTION CTYPE=3 NITER=500 ISAMPLE=300 STDOBJ=10
+          ISAMPEND=10000 NOPRIOR=1 CITER=10 CINTERVAL=1 CALPHA=0.05
+          IACCEPT=0.0 ISCALE_MIN=0.1 ISCALE_MAX=10 DF=0 MCETA=3
+          EONLY=0 MAPITER=1 MAPINTER=-1
+
+      METHOD=IMPMAP INTERACTION CTYPE=3 NITER=500 ISAMPLE=300 STDOBJ=10
+          ISAMPEND=10000 NOPRIOR=1 CITER=10 CINTERVAL=1 CALPHA=0.05
+          IACCEPT=0.0 ISCALE_MIN=0.1 ISCALE_MAX=10 DF=0 MCETA=3
+          EONLY=0
+
+      ;# NM74
+      METHOD=NUTS INTERACTION CTYPE=0 NITER=2000 NBURN=10000
+          NOPRIOR=0 NUTS_STEPITER=1 NUTS_STEPINTER=0 NUTS_TEST=0
+          NUTS_INIT=75 NUTS_BASE=-3 NUTS_TERM=50 NUTS_GAMMA=0.05
+          NUTS_DELTA=0.8 KAPPA=1.0 IKAPPA=1.0
+          NUTS_REG=0.0 MADAPT=-1
+          NUTS_EPARAM=0 NUTS_OPARAM=1 NUTS_SPARAM=1 NUTS_MASS=B
+          NUTS_TRANSFORM=0 NUTS_MAXDEPTH=10
+
+    #+end_src
+
+  - AUTO=2: allow user setup the alternative sampling strategy.
+    #+begin_src perl
+      ;# (NM74) IMP estimation: settings in AUTO=1 with additional:
+      GRDQ=-1.0 DERCONT=1 RANMETHOD=3S2P
+
+      ;# (NM75) SAEM estimation: settings in AUTO=1 with additional:
+      MAPITERS=1 ;# MAP assessment assist on the first iteration
+      MCETA=100
+
+      ;# (NM75) BAYES estimation: settings in AUTO=1 with additional:
+      MAPITERS=1 ;# MAP assessment assist on the first iteration
+      MCETA=100
+
+      ;# (NM74) NUTS estimation: settings in AUTO=1 but changes on:
+      NUTS_EPARAM=2 NUTS_MASS=BD
+    #+end_src
+  - AUTO=3 (NM74): for NUTS only. Same settings in AUTO=1 but with changes
+    #+begin_src perl
+      NUTS_EPARAM=1 NUTS_MASS=D
+    #+end_src
+
+The AUTO setting itself transfers to the next $EST within the same
+$PROB, just like any other option settings explicitly set by the user
+in the control stream file, so AUTO remains on or off until then next
+AUTO option specified.  For example, with
+#+begin_src perl
+$EST METHOD=ITS AUTO=1 PRINT=10
+$EST METHOD=SAEM AUTO=1 PRINT=50
+$EST METHOD=IMP PRINT=1 EONLY=1 NITER=5 ISAMPLE=1000
+$EST METHOD=BAYES AUTO=1 FILE=auto.txt PRINT=100 NITER=1000
+#+end_src
+the IMP statement also has AUTO=1.  However, with
+#+begin_src perl
+$EST METHOD=ITS AUTO=1 PRINT=10
+$EST METHOD=SAEM AUTO=1 PRINT=50
+$EST METHOD=IMP PRINT=1 EONLY=1 NITER=5 ISAMPLE=1000 AUTO=0
+$EST METHOD=BAYES AUTO=1 FILE=auto.txt PRINT=100 NITER=1000
+#+end_src
+the AUTO setting is turned off for IMP, and turned back on for BAYES.
+Any option settings implicitly set by the AUTO feature does not
+transfer to the next $EST statement.  Also, when using AUTO=1, the
+transfer of any options settings explicitly set by the user from
+previous $EST statements may or may not occur for those options set by
+the AUTO option, depending on the situation.
 
 *** BAYES_PHI_STORE=[0|1] (NM75)
 As of NM75, samples of phi/eta are collected at each BAYES iteration,
@@ -1543,6 +1640,9 @@ Used  only  with  the  BAYES method. n has meaning only for OMEGA
       fraction of the time. See OSAMPLE_M2 option. Default is
 
 *** OLKJDF=n (NM74)
+:PROPERTIES:
+:CUSTOM_ID: estm-olkjdf
+:END:
 Used with NUTS  method,  OLKJDF  stands  for  OMEGA  LKJ  density
       degrees  of  freedom.  When 0, the usual inverse Wishart prior is
       used for Omegas. When OLKJDF>0, then the LKJ density is  used  as
