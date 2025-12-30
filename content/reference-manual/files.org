@@ -810,7 +810,7 @@ Summary of data used in the analysis is listed, e.g.
 In FORTRAN terms, the summary shows file I/O unit,  the REWIND
 (necessary only with multiple runs using the data).
 
-REFERENCES: Guide IV, section III.B.2
+See also [[file:/docs/reference-manual/control-records/input/][$INPUT]] control record.
 
 *** Monitoring of search
 NONMEM  output  includes  a report of the history of the search
@@ -1285,9 +1285,8 @@ A  data  set  will  be  simulated, and EB2 will be obtained.  With the
  records in the simulated data set may differ from those for the previous problem; so if desired, this data set can be much larger than  the
  real data set.
 
-REFERENCES: Guide VII Section II.A, III.D
-
 REFERENCES: Guide VII, section II.A , III.D
+
 *** Final parameter estimate
 :PROPERTIES:
 :CUSTOM_ID: final-parameter-estimate
@@ -1325,10 +1324,6 @@ step is not run.
 
 With NONMEM 7.3 and higher, the [[file:/docs/reference-manual/control-records/thetar/][$THETAR]] record may be used  to  transform  final  estimates of THETA before they are reported in the NONMEM
 output.
-
-
-REFERENCES: Guide V, section 10.5
-
 
 *** Value of the objective function
 :PROPERTIES:
@@ -1388,7 +1383,6 @@ Model Time examples
 REFERENCES: Guide I, section C.3.5.1
 
 REFERENCES: Guide V, section 5.5
-
 
 *** Inferential statistics
 Confidence intervals for parameters, testing hypotheses about
@@ -1464,38 +1458,108 @@ REFERENCES: Guide IV, section III.B.16 , III.B.17
 REFERENCES:  Guide V, section 9.5 , 10.7 , 11.4.4.2
 
 *** Shrinkage
-Shrinkage are output between #TERM and #TERE entries.
+Shrinkage are output between #TERM and #TERE entries. Inter-subject
+shrinkage for each \(\eta\) is calculated as:
+$$
+\text{ETASHRINKSD}=1-\frac{\text{sd}(\eta(j))}{\Omega(j, j)},\quad \text{(NM73)}
+$$
 
-- With NONMEM 7.3, these are
-  #+begin_src txt
-      ETAshrink
-      EBVshrink
-      EPSshrink
-  #+end_src
-  For details, see the NONMEM 7 guide.
-- With NONMEM 7.4, these are
-  #+begin_src txt
-      ETAshrinkSD (ETAshrink in NM73)
-      ETAshrinkVR
-      EBVshrinkSD (EBVshrink in NM73)
-      EBVshrinkVR
-      EPSshrinkSD (EPSshrink in NM73)
-      EPSshrinkVR
-  #+end_src
-  For details, see the NONMEM 7.4 guide
+$$
+\text{ETASHRINKVR}=1-\frac{\text{var}(\eta(j))}{\Omega(j, j)}.\quad \text{(NM74)}
+$$
+Here \(\eta(j)=\eta_j\) is individual's empirical Bayes estimate
+(FORCE/Laplace/ITS) or sampled conditional mean (IMP/SAEM).
 
-- NONMEM v7.3+ provides option ETASTYPE=1 in $EST to average shrinkage
-  information only among individuals with non-zero derivative of their
-  data likelihood with respect to ETA, and will not include subjects
-  with a non-influential ETAs that have zero derivative.
+In addition, the ETA shrikage based on the average empirical Bayes
+variance (EBV), the etc(j, j) (from .phi file) or phc(j, j) (from
+.phm) file, are available.
+$$
+\text{EBVSHRINKSD}=1-\sqrt{1-\frac{\text{etc}_{\text{ave}}(j, j)}{\Omega(j, j)}},\quad \text{(NM73)}
+$$
 
-- One may  request include/exclude ETA output using
-  [[file:/docs/reference-manual/api/variables/#ETASXI][ETASXI]]. Shrinkage map for included/exlucded ETAs is documented in root.shm.
+$$
+\text{EBVSHRINKSD}=1-\sqrt{1-\frac{\text{phc}_{\text{ave}}(j, j)}{\Omega(j, j)}},\quad \text{(NM73)}
+$$
 
-- Shrinkage  data  are  reported in file root.shk.
+$$
+\text{EBVSHRINKVR}=\frac{\text{etc}_{\text{ave}}(j, j)}{\Omega(j, j)},\quad \text{(NM74)}
+$$
 
-REFERENCES: Guide Introduction_7
+$$
+\text{EBVSHRINKVR}=\frac{\text{phc}_{\text{ave}}(j, j)}{\Omega(j, j)},\quad \text{(NM74)}
+$$
 
+In the above the average is taken among included subjects, for ETA(j) or PHI(j).  Again, etc/phc is evaluated as first order approximation of the posterior variance around the mode (FOCE/ITS), second order approximation around the mode (LAPLACE), or Monte Carlo assessed posterior variance around the conditional mean (IMP/SAEM).
+
+# todo: relativeinf from intro 7
+
+In summary,
+  - With NONMEM 7.3, shrinkage output are
+    #+begin_src txt
+        ETAshrink
+        EBVshrink
+        EPSshrink
+    #+end_src
+  - With NONMEM 7.4, shrinkage output are
+    #+begin_src txt
+        ETAshrinkSD (ETAshrink in NM73)
+        ETAshrinkVR
+        EBVshrinkSD (EBVshrink in NM73)
+        EBVshrinkVR
+        EPSshrinkSD (EPSshrink in NM73)
+        EPSshrinkVR
+    #+end_src
+
+  - NONMEM v7.3+ provides option ETASTYPE=1 in $EST to average shrinkage
+    information only among individuals with non-zero derivative of their
+    data likelihood with respect to ETA, and will not include subjects
+    with a non-influential ETAs that have zero derivative.
+
+  - One may  request include/exclude ETA output using
+    [[file:/docs/reference-manual/api/variables/#ETASXI][ETASXI]]. Shrinkage map for included/exlucded ETAs is documented in root.shm.
+
+  - Shrinkage  data  are  reported in file root.shk.
+
+As of nm73, if the eta shrinkage is less than 0, it will reported as a
+value of 1.0E-10.  Less than 0 shrinkage can occur due to limited
+precision evaluations, and/or sometimes with classical NONMEM methods.
+
+ETA shrinkage is averaged for all individuals if ETASTYPE=0.  As of nm73, should you wish to correct for some individuals not contributing at all to one or more etas (this may or may not be desirable, depending on your needs), the shrinkage can be calculated by NONMEM to not include these etas by setting ETASTYPE=1 in the $EST record. This will average shrinkage information only among individuals that provided a non-zero derivative of their data likelihood with respect to that eta, and will not include subjects with a non-influential eta, that is in which the derivative of the data likelihood is zero.  Furthermore, you may specify eta i of particular subjects to be excluded, by setting a reserved variable ETASXI(i) to 1 in $PK or $PRED, or specify eta i of certain subjects to be included, by setting ETASXI(i)=2 (ETASXI stands for eta shrinkage exclude/include):
+
+#+begin_src perl
+IF(ID==3)  ETASXI(1)=1
+IF(ID==23) ETASXI(3)=2
+#+end_src
+The results in the NONMEM report file refer to average ETA shrinkage.
+
+Residual error shrinkage standard deviation version for each residual
+error is evaluated for simple problems as (EPSSHRINKSD is EPSSHRINK in NM73)
+$$
+\text{EPSSHRINKSD}=1-\text{sd}(\text{WRES}),\quad (\text{NM73})
+$$
+$$
+\text{EPSSHRINKVR}=1-\text{var}(\text{WRES}),\quad (\text{NM74})
+$$
+
+For more complicated problems, the data and individual predicted
+values that contribute to assessing the shrinkage for each epsilon is
+not as straight-forward.   For example, if EPS(1) is proportional
+error to PK data, and EPS(2) is proportional error to PD, and they are
+not connected by an off-diagonal sigma, then EPS1 shrinkage pertains
+to PK data residuals, and EPS2 shrinkage pertains to PD data
+residuals.  If they are related by an off-diagonal SIGMA, then their
+shrinkage is related, and they will have similar or identical
+shrinkage values.
+
+If two epsilons pertain to the same data, such as proportional EPS and additive EPS for PK data:
+$$
+y=f+f\epsilon(1)+\epsilon(2),
+$$
+then the same epsilon shrinkage is associated with EPS(1) and EPS(2).  However, if F=0 for some data, then such values contribute to EPS(2) shrinkage assessment, but not to EPS(1) shrinkage assessment.  In such cases, shrinkage to EPS(1) and EPS(2) may differ slightly, where EPS(1) shrinkage incorporates only residuals to data with predicted values that are non-zero, and EPS(2) shrinkage incorporates residuals to all PK data.
+
+See also ETASAMPLES=0 (default) (nm74) for SAEM method for other methods of coariate model diagnostics.
+
+The reported shrinkage information from an MCMC Bayesian analysis is based on the average of the shrinkage across all individuals across all stationary iterations (positive numbered iterations in the .ext file).
 
 ** Model specification file
 :PROPERTIES:
