@@ -347,8 +347,6 @@ A file simliar to the raw output file is root.cnv.  This file contains convergen
       For importance sampling and  iterative  two  stage,  the  average
       objective  function listed in root.cnv could be used as an alternative to the  final  objective  function  for  likelihood  ratio tests.
 
-REFERENCES: Guide Introduction_7
-
 ** Additional output files
 :PROPERTIES:
 :CUSTOM_ID: addi-output
@@ -518,11 +516,9 @@ defined in the $EST record.
 *** .ets (NM74)
 As of NM74, one can obtain random samples of individual ETAs, and uses
 these  for  covariate  and  model diagnostics.  $EST option
-ETASAMPLES=1 causes individual ISAMPLE  random  eta  samples  per
+ETASAMPLES=1 causes individual ISAMPLE  random  ETA  samples  per
 subject,  to  be written to  root.ets, where root is the root name of
-the control stream file.
-
-See "Stochastic  Approximation  Expectation  Maximization  (SAEM) Method" in Guide Introduction_7.
+the control stream file. See also [[file:/docs/reference-manual/control-records/estimation/#method-saem][SAEM method]].
 
 *** .bfm (NM75)
 When  OFVTYPE=8  during  optimal  design  ($DESIGN OFVTYPE=8) the
@@ -533,9 +529,7 @@ the -1000000000 line, during an optimization. The RAW file (by default
 named root.ext) which shows only  the  starting,  and final  values of
 the standard errors of population parameters, as extra information.
 
-
 REFERENCES: Guide Introduction_7
-
 
 ** Output quantities
 *** PRED-defined items
@@ -716,9 +710,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
   WR  is  the weighted intraindividual residual with no eta-eps
   interaction.  It is defined in a conditional assignment since it is
   possible that  the typical value of F is zero with some
-  non-observation record. (With previous versions of the help guide
-  the SIGMA term  was  omitted and the WR was proportional to the
-  weighted intraindividual residual.) It is a no-interaction residual
+  non-observation record. It is a no-interaction residual
   because  the  denominator  term,  the residual   standard
   deviation  FT*SQRT(SIGMA(1,1)),  represents  the epsilon error, and
   uses the predicted value (FT) evaluated with eta=0, that is, eta
@@ -804,12 +796,6 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
   copying pass  to  obtain  values  for tables and with MIXNUM>MIXEST,
   CLE would retain its value set with the previous data record.
 
-REFERENCES: Guide IV, section III.B.7 , IV.E.2
-
-REFERENCES: Guide VI, section III.J , IV.E
-
-REFERENCES: Guide Introduction_7
-
 *** Data set
 Summary of data used in the analysis is listed, e.g.
 
@@ -842,11 +828,7 @@ entails the following steps.
 1. The  search  is  carried out in a different parameter space.  The
    parameters are transformed to unconstrained parameters (UCP).  In
    the  transformation  process a scaling occurs so that the initial
-   estimate of each of the UCP is 0.1.  (NONMEM Users Guide  I
-   Sections  C.3.5.1 "ESTIMATION" and G.3 "Messages from the
-   Estimation Step" refer to the UCP as "scaled transformed
-   parameters" or STP. NONMEM  Users Guide II Section F "Rescaling"
-   refers to the UCP as "rescaled canonical parameters" or RCP.)
+   estimate of each of the UCP is 0.1 [fn:2].
 
 2. At the  current parameter estimate the GRADIENT vector (the
    vector  of  first  partial  derivatives of the objective function
@@ -883,7 +865,7 @@ entails the following steps.
    computation of the gradient vector and Hessian matrix at the
    approximate minimum point.)
 
-4. Iteration stops when one of the following conditions holds:
+4. Iteration stops when meeting one of the following conditions:
 
    - A successful (local) minimum point has been found.
 
@@ -941,8 +923,7 @@ entails the following steps.
      1.1307E-04  6.4128E-05  1.1193E-04 -1.7655E-05  4.2676E-05
    #+end_src
    Note that the values of the PARAMETERs are the values of the  UCP,
-   so that at the 0th iteration, all the PARAMETERs have the value
-   0.1.
+   so that at the 0th iteration, all the PARAMETERs have the value 0.1.
 
    The  first  parameter  (and gradient) elements correspond to the
    THETA elements which are not fixed.  The remaining  elements
@@ -982,10 +963,6 @@ entails the following steps.
    alone assure that the objective function is not "flat" in a region
    of  the  point. For such assurances, one also needs to implement
    the Covariance Step.
-
-REFERENCES: Guide I, section C.3.5.1
-
-REFERENCES: Guide V, section 10.4.1
 
 *** Initial parameter estimate
 :PROPERTIES:
@@ -1056,7 +1033,7 @@ are provided by the user.
 
 (See [[file:/docs/reference-manual/files/#final-parameter-estimate][Final Parameter Estimate]]).
 
-REFERENCES:  Guide  IV,  section  III.B.9  , III.B.10 , III.B.11
+See also control record [[file:/docs/reference-manual/control-records/theta/][$THETA]], [[/docs/reference-manual/control-records/omega/][$OMEGA]], and [[/docs/reference-manual/control-records/sigma/][$SIMGA]].
 
 *** Hessian matrix
 :PROPERTIES:
@@ -1103,11 +1080,7 @@ the parameters of the model are utilized in NONMEM.
       NUMERICAL HESSIAN OF OBJ. FUNC. ...
   #+end_src
 
-REFERENCES: Guide IV, section III.B.15
-
-REFERENCES: Guide V, section 12.4.6
-
-REFERENCES: Guide VII, section II.A
+See also [[file:/docs/reference-manual/control-records/covar/][$COVARIANCE]] control record.
 
 *** Covariance matrix of estimate
 parameter estimators follow multivariate  normal distribution
@@ -1181,11 +1154,7 @@ confidence region for the complete set of population parameters.
   significant digits in the final  parameter  estimate (See [[file:/docs/reference-manual/control-records/estimation/#sigdigits][SIGDIGITS]]). When the model specification file is used as input the
   Covariance  Step  can be run without the  Estimation step (MAXEVAL=0). In that case one should ensure the requested number of significant digits is less than the reported number  of significant digits from the previous run.
 
- REFERENCES: Guide I, section C.3.5.2
-
- REFERENCES: Guide II, section D.2.5
-
- REFERENCES: Guide V, section 5.4 , 13.3
+See also the error message section below.
 
 *** Correlation matrix of estimate
 :PROPERTIES:
@@ -1220,10 +1189,7 @@ With  NONMEM  7.2  and  higher, the diagonal elements are the standard
 error (the square root of the diagonal elements of the covariance
 matrix. Earlier versions they were 1.0.
 
-REFERENCES: Guide I, section C.3.5.2
-
-REFERENCES: Guide V, section 5.4
-
+See also the error message section below.
 
 *** ETABAR
 :PROPERTIES:
@@ -1684,6 +1650,93 @@ NONMEM THETA-recovery has failed.
 #+end_src
 An  error  occurred  while NONMEM was obtaining conditional estimates of ETA.
 
+**** Covariance Step
+The following error messages from the Covariance Step either indicate the reasons why various
+anticipated output is omitted from the Covariance Step or give a warning. The system action in each case
+is to continue processing. Reference is made to the R and S matrices. These matrices, computed in the
+Covariance Step. The R matrix is a numerical approximation to the hessian matrix of the objective function evaluated at the final estimate. As such, it is
+desireable that it be nonsingular and positive semidefinite. If it is not, then the covariance matrix may not
+be obtainable. If the S matrix is singular, then the inverse covariance matrix may not be obtainable.
+#+begin_src perl
+  ;# error in R matrix calculation
+  R MATRIX UNOBTAINABLE
+  ...
+  ERROR RMATX-n m
+
+  ;# error in S matrix calculation
+  S MATRIX UNOBTAINABLE
+  ...
+  ERROR SMATX-n m
+
+  ;# The OFV could be nearly-flat over in the parameter space
+  R MATRIX ALGORITHMICALLY SINGULAR
+
+  ;# the final estimate is not a local minimum
+  R MATRIX ALGORITHMICALLY SINGULAR
+  AND ALGORITHMICALLY NON-POSITIVE SEMIDEFINITE
+
+
+  ;# the final estimate is not a local minimum
+  R MATRIX ALGORITHMICALLY NON-POSITIVE SEMIDEFINITE
+  BUT NONSINGULAR
+
+  ;# The OFV could be nearly-flat over in the parameter space
+  S MATRIX ALGORITHMICALLY SINGULAR
+
+  ;# The OFV could be nearly-flat over in the parameter space
+  PSEUDO INVERSE OF S MATRIX UNOBTAINABLE
+
+  ;# error in inverse covariance calculationa
+  PSEUDO INVERSE OF COVARIANCE MATRIX UNOBTAINABLE
+
+  ;# error in inverse covariance calculation
+  EIGENVALUES NO. n AND GREATER UNOBTAINABLE
+#+end_src
+The above errors cause certain output omitted, hence often acompanied
+by some of the following messages
+#+begin_src perl
+COVARIANCE MATRIX UNOBTAINABLE
+
+INVERSE COVARIANCE MATRIX UNOBTAINABLE
+
+COVARIANCE MATRIX SET EQUAL TO INVERSE OF R MATRIX
+
+COVARIANCE MATRIX SET EQUAL TO INVERSE OF S MATRIX
+
+INVERSE OF COVARIANCE MATRIX SET EQUAL TO R MATRIX
+
+INVERSE OF COVARIANCE MATRIX SET EQUAL TO S MATRIX
+#+end_src
+If the covariance matrix is unobtainable, so are the standard errors and the correlation matrix.
+
+When the following error occurs, one should check
+- that a suitable model has been chosen for the data;
+- for programming errors in PRED;
+- that reasonable initial estimates have been specified;
+- for mistakes in the data set.
+#+begin_src perl
+  ;# The error can occur only when the final estimate is the initial estimate and only when
+  ;#  either the Covariance Step is unconditionally implemented or a MSF is used.
+  ;# If MSF is used, check that it is the correct one.
+    PROGRAM TERMINATED BY OBJ, ERROR IN ELS
+    VAR-COV WITH INDIVIDUAL n (IN INDIVIDUAL RECORD ORDERING)
+    ESTIMATED TO BE ALGORITHMICALLY SINGULAR
+
+    MESSAGE ISSUED FROM COVARIANCE STEP
+#+end_src
+The same when the following error occurs.
+#+begin_src perl
+  ;# CONTR is the user-supplied subprogram for computing the contribution made to the
+  ;# objective function from a iven individual’s data. It has encountered a fatal
+  ;# error with individual n, and it has
+  ;# issued a return code m.
+    PROGRAM TERMINATED BY OBJ, ERROR IN CONTR
+    WITH INDIVIDUAL n (IN INDIVIDUAL RECORD ORDERING)
+    RETURN CODE m
+
+    MESSAGE ISSUED FROM COVARIANCE STEP
+#+end_src
+
 *** Errors in PREDPP
 As of NONMEM 7, A differential equation solver  has  been  introduced,
 called  LSODA, and is accessed using ADVAN=13 or ADVAN13.  The code to
@@ -1760,3 +1813,8 @@ the beginning of LSODA.f90.  They are printed here for convenience:
 [fn:1] Displayed etas are the simulated etas if the simulated etas are
 stored in common NMPRD7. This is the case when NM-TRAN is used. If
 they are not stored in NMPRD7, displayed etas are all 0.
+[fn:2] NONMEM Users Guide  I Sections  C.3.5.1 "ESTIMATION" and G.3
+"Messages from the Estimation Step" refer to the UCP as "scaled
+transformed parameters" or STP. NONMEM  Users Guide II Section F
+"Rescaling" refers to the UCP as "rescaled canonical parameters" or
+RCP.

@@ -703,6 +703,110 @@ record.
  REFERENCES: Guide III, section V.3.0
  REFERENCES: Guide Introduction_7
 
+** Change buffer sizes
+The entire data set is not necessarily stored in memory at one time.
+It may be stored in a temporary disk file, and parts of it are brought
+into a memory buffer as needed. Some other large arrays are also
+stored on disk files. Of course, memory-file swapping of data set
+information leads to increased computer run-time. So the bigger the
+buffer size, the shorter may be the run time.  The sizes of the NONMEM
+buffers are set by constants LIM1 to LIM16.  The default settings of
+these constants are set in SIZES.f90.  If these constants are not
+adequate, NONMEM will produce error messages such as the following.
+#+begin_src
+TOT NO. OF DATA RECS IN BUFFER 1 IS LESS THAN
+NO. OF DATA RECS IN INDIVIDUAL REC NO. 1 (IN INDIVIDUAL REC ORDERING)
+#+end_src
+
+Unlike most of the other dynamically changeable parameters, NMTRAN
+does not determine the most appropriate LIM value for the problem, but
+instructs NONMEM to use the default value specified in
+resource\SIZES.f90 by default.  For many problems, the default LIM
+values are high enough that all of the data may reside in memory
+without resorting to the buffer files.  For large data sets, buffer
+files are likely to be used.  The user may, however, select a LIM
+value that is different from that specified in sizes.f90, via the
+$SIZES record in the control stream file, e.g.:
+#+begin_src perl
+$SIZES LIM1=20000
+#+end_src
+It is not necessary to recompile NONMEM, just rerun the nmfe script, and the appropriate arrays will be allocated according to the user specified LIM value.
+
+It is most desirable to set the LIM value that is the proper size for the run, so that the buffer file does not have to be used.  With today’s very large memory computers, this should usually be alright to do without running out of memory.  Below is a table describing the minimal allowable value for each LIM, and the value needed to prevent using the buffer file for a particular problem:
+
+|                 LIM | Minimum Value | In-memory buffer size | Buffer file                        |
+|---------------------+---------------+-----------------------+------------------------------------|
+|                   1 |       MAXDREC | TOTDREC               | 10,13,20,33                        |
+|                   2 |       MAXDREC | TOTDREC               | 39,14                              |
+|                   3 |             2 | MAXIDS                | 12                                 |
+|                   4 |             2 | MAXIDS                | 15,16                              |
+|                   5 |             2 | MAXIDS                | 17,18                              |
+|                   6 |       MAXDREC | TOTDREC               | 7,19                               |
+|                   7 |             2 | MAXDREC               | 21,22                              |
+|                   8 |             2 | MAXIDS                | 23,24                              |
+| 9 (nm74, uses LIM1) |       MAXDREC | TOTDREC               | For simulation REWIND: 41,42,43,44 |
+|           10 (nm74) |            10 | MAXIDS*(NPNIND+1)     | 45,46                              |
+|11	              |2              |	NPROB                 | 31,32 |
+|12 (nm74, uses LIM6) | MAXDREC	      | TOTDREC               | 47,48 |
+|13	              |2              |	MAXIDS                |	11 |
+|14	NOT USED
+|15	|2	       |MAXIDS	|26,27|
+|16	|MAXDREC       |TOTDREC	|26,27|
+with
+  - MAXDREC= Largest number of data records in any one individual record (in any one subject)
+  - TOTDREC=total number of data records (lines) in largest data set to be used.
+  - NPNIND=Larger of MAXIDS and NPSUPP/NPSUPPE given on $NONP record.
+  - NPROB=Total number of problems in the control stream.
+  - LVR=Largest number of etas in any problem (including those listed in $PRIOR)
+
+As of NM73, the values for MAXDREC and TOTDREC are assessed by NMTRAN, and the user may take advantage of NMTRAN’s evaluation by using the –maxlim option to the nmfe75 script (see below).  But NMTRAN may not always correctly assess these values.  Thus, it is best if the user ascertains these values ahead of time by inspection of his largest data set among all of the problems to be used by the control stream file, and the largest number of parameters to be used.  Then set the LIM values accordingly via the $SIZES record.
+
+One can alternatively assess empirically whether file buffers are used, by beginning the run, allowing perhaps one iteration to transpire, then from another command window do a directory search for FILE*, (or WK* for worker files in parallelization problems, section  I.76 Parallel Computing (NM72)
+If any of the FILExx do not have 0 size, then they are being used.  Interrupt the analysis, then increase the appropriate LIM value with the $SIZES record, delete the FILE* in case some remain due to a ctrl-C interrupt, rerun the problem, and look again for any non-zero sized FILE* again.  Repeat as needed.
+
+By default (-maxlim=0), NMTRAN will set the LIM values to those listed in sizes.f90, or to the minimum required, whichever is larger.  As of NM73, if you set –maxlim=1 on the command line, then LIM1, LIM3, LIM4, LIM13, and LIM15 (those used during estimation, and therefore by workers in a parallelization problem), will be set to the size needed to assure no buffer files are used, and everything is stored in memory, for the particular prolem.  If you set –maxlim=2, then LIM1, LIM2, LIM3, LIM4, LIM5, LIM6, LIM7, LIM8, LIM10, LIM11, LIM13, LIM15, and LIM16 are also sized to what is needed to assure that buffer files are not needed.
+
+If you set -maxlim=3, then MAXRECID will also be sized, to MAXDREC, the largest number of records in any individual.  MAXRECID sizes arrays involved in storing state variables during partial derivative estimates of SIGMAs and sigma like THETAs, to improve efficiency of the EM and Monte Carlo methods.  When setting -maxlim=3, it is preferred to also use –tprdefault, or –prcompile, but not –prdefault, as NMTRAN’s optional resizing of the PREDPP size parameter MAXRECID may conflict with the –prdefault option.
+
+To specify only a subset of LIM’s to be sized by NMTRAN, set –maxlim to a number list enclosed within parantheses, such as –maxlim=(1,2,3,11-16), which will have NMTRAN find size requirements for LIM1, LIM2, LIM3, LIM11, LIM13, LIM15, and LIM16 (LIM12 and LIM14 are not used).  Enclosing the option in quotes “–maxlim=(1,2,3,11-16)” is required for some operating systems.  For sizing MAXRECID, use the number 17.  Setting maxlim=(1-17) is equivalent to –maxlim=3, whereas –maxlim=(3) means to have NMTRAN size only LIM3.
+
+*** Buffers
+A number of contiguous data records are stored in memory at any one time in buffers. If a large enough memory area can be made available for this purpose, then the entire data set can be stored in memory throughout the NONMEM run, and computing costs can be decreased.  The following discussion of NONMEM buffers should not be confused with I/O buffers which are used by the operating system.
+
+The size of buffer 1 is related to the number, LIM1, of data records stored in memory at any one time. A large proportion of data sets will consist of no more than 10000 data records. Consequently, the size of buffer 1 has been set to allow LIM1=10000 data records. The least number of data records allowable must exceed the largest number of data records used with any one subject, which rarely will be as large as 10000.  Each data record consists of PD 8 byte double precision computer words, and the allocation of memory for buffer 1 is PD*(LIM1+3)*8  bytes.
+
+Buffer 2 holds a number of contiguous residual records.  For each data record, NONMEM generates prediction, residual and weighted residual data items, NPDE, EWRES, etc.; these data items comprise the residual record.  The default size of buffer 2 is related to the number, LIM2, of residual records, stored in memory at any one time. The size of buffer 2 has been set to allow LIM2=100,000 residual records, for up to 100,000 data records. The least number of residual records allowable must exceed the largest number of data records used with any one subject.  Each residual data record consists of 19 eight byte double precision computer words. The allocation of memory for buffer 2 is 19*(LIM2+3)*8 bytes.
+
+Buffer 3 holds a number of contiguous subject header records for input data.   The size of buffer 3 is related to the number, LIM3, of subject header records stored in memory at any one time. The default size of buffer 3 has been set to allow LIM3=1000 subject header records. Each subject header record consists of four 8 byte computer words. The allocation of memory for buffer 3 is 4*(LIM3+1)*8 bytes.
+
+Buffer 4 holds a number of contiguous ETA records.  For each subject, NONMEM generates values for ETA variables.  The size of buffer 4 is related to the number, LIM4, of ETA records stored in memory at any one time. The size of buffer 4 has been set to allow LIM4=1000 ETA records. Each ETA record consists of MMX*LVR 8 byte double precision computer words. The allocation of memory for buffer 4 is MMX*LVR*(LIM4+3)*8.
+
+Buffer 5 holds a number of contiguous mixture model records. For each subject record, NONMEM generates information about the component models of a mixture model; this information constitutes the mixture model record.  The size of buffer 5 is related to the number, LIM5, of mixture model records stored in memory at any one time. The default size of buffer 5 has been set to allow LIM5=200 mixture model records. Each mixture model record consists of five 8 byte single precision computer words. The allocation of memory for buffer 5 is (MMX+1)*(LIM5+3)*8 bytes.
+
+Buffer 6 holds a number of contiguous PRED-defined records.  For each data record of a given subject record, NONMEM stores the values found in module NMPRD4; these values comprise the NMPRD4 record. The size of buffer 6 is related to the number, LIM6, of PRED-defined records stored in memory at any one time. The size of buffer 6 has been set to allow LIM6=400 PRED-defined records. The least number of PRED-defined records allowable must exceed the largest number of data records used with any one subject, which rarely will be as large as 400. Each PRED-defined record consists of PDT 8 byte double precision computer words. The allocation of memory for buffer 6 is PDT*(LIM6+3)*8 bytes.
+
+Buffer 7 holds a number of contiguous NMPRD4 records for a single individual only.  For each problem in a NONMEM run, NONMEM generates information about the problem; this constitutes the problem header record. The size of buffer 7 is related to the number, LIM7, of NMPRD4 records stored in memory at any one time. The size of buffer 7 has been set to allow LIM7=2 NMPRD4 records, which is generally fewer than the number of NMPRD4 records existing for any given subject. Each NMPRD4 record consists of (LIM7+2)*LNP4 8 byte double precision computer words. The default allocation of memory for buffer 7 is 4*LNP4*8  bytes.
+
+
+The memory allocation of Buffer 8 is (LVR+1)*(LIM8+3) double precision values.
+The memory allocation of Buffer 10 is (LIM10+3) double precision values.
+
+Buffer 11 holds a number of contiguous problem header records. The size of buffer 11 is related to the number, LIM11, of problem header records stored in memory at any one time. The size of buffer 11 has been set to allow LIM11=25 problem header records. Each problem header record consists of forty-two 8 byte integer computer words. The allocation of memory for buffer 11 is 42*(LIM11+3)*8= 9408 bytes.
+
+
+The memory allocation of Buffer 13 is 404*(LIM13+3) double precision values.
+
+After NONMEM VI, there are also buffers 15 and 16. The sizes of these buffers are related
+to constants LIM15 and LIM16. These buffers are used in DAT15 and DAT16. If
+LIM16 is , not adequate, NONMEM will produce error messages such as the following.
+TOT NO. OF RESIDUAL RECS IN BUFFER 16 IS LESS THAN
+NO. OF DATA RECS WITH SOME INDIVIDUAL
+
+The memory allocation of Buffer 15 is LCM110*(LIM15+3) double precision values.
+The memory allocation of Buffer 16 is MMX*4*(LIM16+3) double precision values.
+
+Buffers 1, 3, 4, 13, and 15 are used during an estimation step.  To obtain the fastest analysis, even when the estimation is parallelized, you may want to optimize their LIM sizes.
+
 
 [fn:6] With NONMEM 7.2 and higher, either upper or lower case may be
 used. Variables in modules whose names start ROCM or PROCM may be used
