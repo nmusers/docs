@@ -233,15 +233,76 @@ records.
 :PROPERTIES:
 :CUSTOM_ID: pred_ignore_data_option
 :END:
-This option informs  NONMEM that a PRED_IGNORE_DATA pass through the
-data set is  required.    If   the   abbreviated   code   uses
-variables PRED_IGNORE_DATA  or  PRED_IGNORE_DATA_TEST,  this option is
-supplied.  The  explicit  option  is  needed  if  the  use of   the
-PRED_IGNORE_DATA  variables  occurs  in  user-written or verbatim
-code, so that NMTRAN is unaware of it.
+The $DATA IGNORE=(list) and ACCEPT=(list) provide a limited means of filtering the input data set, which is performed by NMTRAN.  To provide more elaborate filtering for excluding data, PRED can instruct NONMEM to filter out additional data records at the beginning of the run or problem.
 
-(See Guide Introduction_7 "PRED_IGNORE_DATA Feature (NM75)")
+This is done by creating a PRED_IGNORE_DATA_TEST==1 IF block presented in $INFN, $PK, or $PRED. For eample:
+#+begin_src perl
+$INFN
+IF(PRED_IGNORE_DATA_TEST==1) THEN
+ PRED_IGNORE_DATA=0
+ IF(AGE>35.0) PRED_IGNORE_DATA=1
+ IF( ID>10.AND.ID<18.OR.ID>60.AND.ID<70 ) PRED_IGNORE_DATA=1
+ RETURN ;# Assures no additional code in INFN is executed (saves time)
+ENDIF
+#+end_src
+or
+#+begin_src perl
+$PRED
+IF(PRED_IGNORE_DATA_TEST==1) THEN
+PRED_IGNORE_DATA=0
+ IF(AGE>35.0) PRED_IGNORE_DATA=1
+ IF( ID>10.AND.ID<18.OR.ID>60.AND.ID<70 ) PRED_IGNORE_DATA=1
+RETURN ;# Assures no additional code in PRED is executed (saves time)
+ENDIF
+#+end_src
+If PRED_IGNORE_DATA is set to a non-zero value, then the data record
+is ignored, and excluded from the internal data set.  This allows the
+user to use more complex, multi-line and FORTRAN syntax based, logical
+operations on data record exclusions.
 
+When PRED_IGNORE_DATA_TEST=1, then ICALL is set to -1.  the following variables have properly defined values during this call:
+#+begin_src perl
+NEWIND, NEWL2,IPROB, NPROB, S1NUM, S2NUM, S1NIT, S2NIT, S1IT, S2IT
+#+end_src
+So, it is possible to restrict PRED_IGNORE_DATA actions to a particular problem number:
+#+begin_src perl
+IF(IPROB==2.AND.PRED_IGNORE_DATA_TEST==1) THEN
+ PRED_IGNORE_DATA=0
+ IF(AGE>35.0) PRED_IGNORE_DATA=1
+ IF( ID>10.AND.ID<18.OR.ID>60.AND.ID<70 ) PRED_IGNORE_DATA=1
+ RETURN
+ENDIF
+#+end_src
+
+No other variables are properly defined during PRED_IGNORE_DATA_TEST=1, such as THETAS, data record information such as NIREC, NDREC, etc., and no calls to complicated functions that  such as RANDOM() will be valid (simple functions, such as built-in FORTRAN functions, are fine).  Furthermore, changes to data items may not be made during this call.  Any other functions of $INFN, such as data modification, RANDOM() calls, etc., should be made with separate ICALL==0 or ICALL==1 blocks.
+
+If the user write his own INFN routine in which PRED_IGNORE_DATA code is constructed, then NONMEM needs to be informed with the PRED_IGNORE_DATA option in $DATA.  For example:
+#+begin_src perl
+$PROB  THEOPHYLLINE   POPULATION DATA
+$INPUT      ID DOSE=AMT TIME CP=DV WT
+$DATA       THEOPP PRED_IGNORE_DATA
+$SUBROUTINES  ADVAN2 INFN=myinfn.f90
+#+end_src
+with =myinfn.f90=
+#+begin_src f90
+  SUBROUTINE INFN(ICALL,THETA,DATREC,INDXS,NEWIND)
+  USE SIZES,     ONLY: DPSIZE,ISIZE
+  USE NMPRD_INT, ONLY: PRED_IGNORE_DATA,PRED_IGNORE_DATA_TEST
+  INTEGER(KIND=ISIZE) :: ICALL,INDXS,NEWIND
+  REAL(KIND=DPSIZE) :: THETA
+
+  REAL(KIND=DPSIZE) :: DATREC
+  DIMENSION :: THETA(*),DATREC(*),INDXS(*)
+  IF(PRED_IGNORE_DATA_TEST==  1)THEN
+  IF (DATREC(3)>3) THEN
+  PRED_IGNORE_DATA=1
+  ENDIF
+  ENDIF
+  RETURN
+  END
+#+end_src
+If  PRED_IGNORE_DATA_TEST and PRED_IGNORE_DATA are used only in verbatim code, it
+is also necessary to code the PRED_IGNORE_DATA option in $DATA.
 
 *** NULL=c2
 Specifies  that null data items in the NM-TRAN data set are to be
@@ -399,19 +460,81 @@ coded in full.
 :PROPERTIES:
 :CUSTOM_ID: repl
 :END:
-      When  the REPL=n option of $DATA is coded, the NONMEM data set is
-      considered to be a template data set.  NONMEM  itself  replicates
-      the template data set n times at the start of the problem to cre-
-      ate an expanded NONMEM data set [fn:2].
+For clinical trial simulations, one can create a data file
+containing template subjects, then replicate them a number of
+times. As of NM75, NONMEM will replicate each subject REPL=n times, and then
+utilize this expanded data set [fn:2]. For example, suppose a data
+file, called template.csv, contains 3 subjects, each one representing
+a particular covariate type, dosing type, and/or sample time pattern.
+The desire is that each of these subjects be replicated 100 times in
+the data set.  This is done with the following record.
+#+begin_src perl
+$DATA template.csv ignore=@ REPL=100
+#+end_src
+Make sure that the ID values of the template are integer valued.  If
+the number of replications is greater than the difference between two
+consecutive ID values in the template, NONMEM will add a fractional
+value to each replicate subject, so that the integer portion of the ID
+is the original ID, and the fractional portion represents the
+replication number (NONMEM does not require integer valued ID’s, only
+unique ID numbers that have no more than 14 significant digits).
+Otherwise, the replicate ID’s will be integer incremented.  To assure
+only integer ID’s are created, make sure the template ID’s are spaced
+by an amount greater than the number of replications desired for each
+subject.
 
-      The REPL option may be used with the REPL_ data  item.   If  both
-      are  used  the [[file:/docs/reference-manual/data/#REPL_][REPL_ data item]] applies first, and the REPL option applies second.
+To specify a different replication for each subject, a reserved data
+item has been introduced in nm75, called REPL_, the value of which
+will be used as the replication number for that subject. If  both are
+used  the [[file:/docs/reference-manual/data/#REPL_][REPL_ data item]] applies first, and the REPL option applies
+second. If the value is fractional, it will be truncated to the
+nearest integer.  Only the REPL_ value of the first record of each
+individual will be used to determine its replication.  For example,
+with control stream
+#+begin_src perl
+$INPUT ID TIME  AMT  RATE EVID MDV DV  REPL_
+$DATA warfarin.dat ignore=C
+#+end_src
+and data file
+#+begin_src r
+CID TIME    AMT  RATE EVID MDV DV    REPL_
+1.0 0.0    70.0  0.0  1    1   0.0   2
+1.0 0.5     0.0  0.0  0    0   1.0   .
+1.0 1.0     0.0  0.0  0    0   1.0   .
+1.0 2.0     0.0  0.0  0    0   1.0   .
+1.0 6.0     0.0  0.0  0    0   1.0   .
+1.0 24.0    0.0  0.0  0    0   1.0   .
+1.0 36.0    0.0  0.0  0    0   1.0   .
+1.0 72.0    0.0  0.0  0    0   1.0   .
+1.0 120.0   0.0  0.0  0    0   1.0   .
+2.0 0.0    70.0  0.0  1    1   0.0   3
+2.0 0.5     0.0  0.0  0    0   1.0   .
+2.0 1.0     0.0  0.0  0    0   1.0   .
+2.0 2.0     0.0  0.0  0    0   1.0   .
+2.0 6.0     0.0  0.0  0    0   1.0   .
+2.0 24.0    0.0  0.0  0    0   1.0   .
+2.0 36.0    0.0  0.0  0    0   1.0   .
+2.0 72.0    0.0  0.0  0    0   1.0   .
+2.0 120.0   0.0  0.0  0    0   1.0   .
+#+end_src
+data of subject 1 will be replicated 2 times within NONMEM, and data of subject 2 will be replicated 3 times.  The ID values of the replicates will be 1.00, 1.01, 2.0, 2.01, 2.02.
 
-      The REPL option and REPL_ data item are meant  to  be  used  with
-      $SIMULATION or $DESIGN.
-      For  important  information,  see  Guide  Introduction_7  Section "$DATA REPL".
+Using the $DATA REPL option along with the REPL_ data item such as:
+#+begin_src perl
+$INPUT ID TIME  AMT  RATE EVID MDV DV  REPL_
+$DATA warfarin.dat ignore=C REPL=100
+#+end_src
+will result in 200 replications for subject 1, and 300 replications
+for subject 2.  The order in which they appear will be as follows.
+Two replicates of subject 1 followed by 3 replicates of subject 2, and
+this pattern is replicated 100 times. If one subject type takes much
+longer than another to compute during estimation,  this pattern allows
+the best load balancing for  parallelization.
 
-      (See Guide Introduction_7 "Extension to $DATA  IGNORE=st  filtering")
+the DV patterns will be identically replicated as well, so replicated
+data templates make sense only if you will be using $SIML or $DESIGN
+to subsequently create the unique DV patterns for each replicated
+subject.
 
 *** NOFDATACSV (NM760)
       An  additional  file, FDATA.csv is produced that outputs the con-
@@ -428,7 +551,7 @@ coded in full.
 
  Another  change  in  NONMEM  VI  2.0 is that tab characters (and other
  characters that are smaller than blank  in  the  computer's  collating
- sequence,  such  as carriage return ^M) are permitted in NM-TRAN input
+ sequence,  such  as carriage return "^M") are permitted in NM-TRAN input
  files.  In the NM-TRAN data set they are treated like commas, i.e., as
  field delimiters.  In the NM-TRAN control stream they are converted to
  spaces.  They are left unchanged in verbatim code.  With NONMEM 7, the
@@ -439,15 +562,12 @@ coded in full.
  translation  of  TIME  or  II  values. These values must have the form
  hh:mm or hh:mm:ss (NM73).
 
-** REFERENCES
-See Guide Introduction_7 "$DATA NOFDATACSV (NM752)"
-
 [fn:1] The two options, IGNORE  and  ACCEPT  allow  the user  to drop
 records from the NM-TRAN data set prior to the run. With NONMEM 7.5,
 it is also possible to  drop  records  from  the NONMEM  data  set
 using abbreviated code, which is more flexible than the criteria that
 can be specified in the $DATA record. See [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]].
-[fn:2] Note that the NONMEM data set is typically the file FDATA gener-
-      ated  by  NM-TRAN.  If there is nothing for NM-TRAN to change and
-      the format is supplied on the $DATA record, the file named on the
-      $DATA  record  is  the  NONMEM data set.
+[fn:2] Note that the NONMEM data set is typically the file FDATA
+generated  by  NM-TRAN.  If there is nothing for NM-TRAN to change and
+the format is supplied on the $DATA record, the file named on the
+$DATA  record  is  the  NONMEM data set.
