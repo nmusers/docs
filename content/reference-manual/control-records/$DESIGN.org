@@ -80,58 +80,191 @@ sections:
 ** $DESIGN Record Options
 
 *** APPROX
-         default to "FO". The NLME approximation method is specified here. First order
-           (no interaction) is the default, and the appropriate type of
-           covariance matrix is evaluated or used  in  optimization  of
-           the design.  Other options are:
+Default to "FO". The NLME approximation method is specified here.
+First order (no interaction) is the default, and the appropriate type
+of covariance matrix is evaluated or used  in  optimization  of the
+design.  Other options are:
+  - FOI:  First order interaction with interaction"
 
-           - FOI:  First order interaction with interaction"
+  - FOCE: first order conditional estimation
 
-           - FOCE: first order conditional estimation
+  - FOCEI: first order conditional estimation with interaction
 
-           - FOCEI: first order conditional estimation with interaction
+  - LAPLACE: Laplace conditional estimation
 
-           - LAPLACE: Laplace conditional estimation
-
-           - LAPLACEI: Laplace conditional estimation with interaction
+  - LAPLACEI: Laplace conditional estimation with interaction
 
 *** OFVTYPE
 OFVTYPE=1 by default. The  objective  function  types  are  comparable to those of PopED:
+  - 0,1,3,4,5: design type: d-optimality, -log(det(FIM)), where FIM=Fisher Information Matrix (inverse of variance-covariance).
+  - 2: design type: a-optimality, -1/tr(1/FIM)
+  - 6: design type: ds-optimality,
+    -log(det(FIM))+log(det(FIMunintersting)) To identify parameters as
+    uninteresting, place UNINT at the parameter in the same manner you
+    would place FIX.
 
-               - 0,1,3,4,5: design type: d-optimality, -log(det(FIM)), where FIM=Fisher Information Matrix (inverse of variance-covariance).
-               - 2: design type: a-optimality, -1/tr(1/FIM)
-               - 6: design type: ds-optimality, -log(det(FIM))+log(det(FIMunintersting)) To identify parameters as uninteresting, place UNINT at the parameter in the same manner you would place FIX.
-               - 7: design type: r-optimality (relative standard error),-1/tr(sqrt(1/FIM)/Paramer))
-               - 8: optimal design type: Individual Bayesian FIM, -log(det(Bayes FIM)), as described in the PFIM 4.0 manual.
-               - 9: Same as option 2, and using the UNINT filter.
-               - 10: Same as option 7, and using the UNINT filter.
+    To identify parameters as uninteresting, place UNINT at the parameter in the same manner you would place FIX.  For example:
+    #+begin_src perl
+    $THETA 0.1 (0.5 UNINT) 0.4
 
-*** OFVDIMSCALED (nm760)
+    $OMEGA BLOCK(2)
+    0.1 UNINT ;# Sets entire block "uninteresting"
+    0.01 0.1
+    #+end_src
+  - 7: design type: r-optimality (relative standard error),-1/tr(sqrt(1/FIM)/Paramer))
+  - 8: optimal design type: Individual Bayesian FIM, -log(det(Bayes
+    FIM)), as described in the PFIM 4.0 manual.
+
+    In this case, the ETC() are optimized, as listed in the .phi
+    table.  The ETC() are the conditional variance-covariances of the
+    individual’s parameters.  If just one subject (or subject type) is
+    in the data file, then the criterion is that one subject’s
+    Bayesian FIM.  If more than one subject (or subject type), then
+    the Bayesian FIM of all the subjects, averaged together, is the
+    criterion for design.
+
+    The change in variances with each printed iteration are listed in
+    the additional raw file (.ext extension by default).  The
+    shrinkage information is reported in the main report file, and the
+    individual empirical Bayes variances (ETC()) are reported in the
+    .phi file.  For shrinkage information, only the following have
+    meaning:
+    #+begin_src perl
+      EBVSHRINKSD(%)
+      EBVSHRINKVR(%)
+      EPSSHRINKSD(%)
+      EPSSHRINKVR(%)
+    #+end_src
+    When OFVTYPE=8, the change of average individual conditional
+    variances (average empirical Bayes conditional variance)  with
+    each iteration are shown in the root.bfm file (where root is name
+    of control stream file), and the final one on the -1000000000
+    line, during an optimization.  The RAW file (by default named
+    root.ext) shows only the starting, and final values of the
+    standard errors of population parameters, as extra information.
+  - 9: Same as option 2, and using the UNINT filter.
+  - 10: Same as option 7, and using the UNINT filter.
+
+*** OFVDIMSCALED (NM76)
 OFVDIMSCALED=0 by default. If OFVDIMSCALED=1, then the objective function is scaled  to be per parameter, the dimension of the FIM, as follows:
-                - 0,1,3,4,5: design type: D-optimality, -log(det(FIM))/D, where D is the dimension of the FIM.
-                - 2: design type: a-optimality, -1/tr(1/FIM)
-                - 6: design type: DS-optimality, (-log(det(FIM))+log(det(FIMuninteresting)))/(D-U) where U=number of uninteresting parameters.
-                - 7: design type: R-optimality (relative standard error), -1/(tr(sqrt(1/FIM)/Parameter))/D)
-                - 8: -log(det(Bayes FIM))/D
-                - 9: design type: A-optimality, -1/(tr(1/FIM)/(D-U))
-                - 10: -1/(tr(sqrt(1/FIM)/Parameter))/(D-U))
+  - 0,1,3,4,5: design type: D-optimality, -log(det(FIM))/D, where D is the dimension of the FIM.
+  - 2: design type: a-optimality, -1/tr(1/FIM)
+  - 6: design type: DS-optimality, (-log(det(FIM))+log(det(FIMuninteresting)))/(D-U) where U=number of uninteresting parameters.
+  - 7: design type: R-optimality (relative standard error), -1/(tr(sqrt(1/FIM)/Parameter))/D)
+  - 8: -log(det(Bayes FIM))/D
+  - 9: design type: A-optimality, -1/(tr(1/FIM)/(D-U))
+  - 10: -1/(tr(sqrt(1/FIM)/Parameter))/(D-U))
 
 *** GROUPSIZE
-GROUPSIZE=1 by default. The  GROUPSIZE  is comparable to that of POPED, in which the
-           FIM is multiplied by this number to provide the subject num-
-           ber  size  of  the  dataset template.  For a template of one
-           subject, GROUPSIZE would then offer the  variance-covariance
-           expected from GROUPSIZE number of subjects.
+GROUPSIZE=1 by default. The  GROUPSIZE  is comparable to that of
+POPED, in which the FIM is multiplied by this number to provide the
+subject number  size  of  the  dataset template.  For a template of
+one subject, GROUPSIZE would then offer the  variance-covariance
+expected from GROUPSIZE number of subjects.
 
 *** FIMTYPE or FIMDIAG
 FIMTYPE  or  FIMDIAG may be set to the following, and corresponds to fimcalc.type in POPED:
-          - 0 (default):  Full information matrix Uses finite difference assessment for Theta, Omega, and Sigma variances and covariances.
-          - 1  Create a block diagonal information matrix of the estimates
-          - 2  Create a block information matrix
-          - 3  Create a full information matrix
+  - 0 (default):  Full information matrix Uses finite
+    difference assessment for THETA, OMEGA, and SIGMA
+    variances and covariances.
+
+    No assumptions are made about whether the approximated
+    variance (C=h*SIGMA*h+g*OMEGA*g, as described in Guide I,
+    section E.2) used in FO is dependent on  any THETAs via h and g.
+  - 1: Create a block diagonal information matrix of the
+    estimates that assumes there is neglible correlation
+    between THETAs and (OMEGAs,SIGMAs). Also, independence of
+    variance C with respect to  THETAs is assumed (that is, h
+    and g’s dependence on theta is ignored) .  This is similar
+    to the fim.calc.type=1 option in POPED or the diagonal
+    option in PFIM, and performs finite difference at  the
+    y=E(f) position on the thetaxtheta portion of the
+    information matrix (for THETAs that are mu referenced, an
+    analytical evaluation is made, and increases speed
+    considerably), analytical evaluation of (SIGMAS
+    OMEGAS)x(SIGMAS OMEGAS) portion of information matrix, and
+    THETAs x (SIGMAS OMEGAS) cross variances are set to 0.
+
+  - 2: Create a block information matrix, by performing finite
+    difference on the thetaxtheta portion of the information
+    matrix, independence of variance C with respect to  THETAs
+    is not assumed (that is, h and g’s dependence on theta is
+    not ignored), performs analytical evaluation of (SIGMAS
+    OMEGAS)x(SIGMAS OMEGAS) portion of information matrix, and
+    THETAs x (SIGMAS OMEGAS) are cross variances set to 0.
+
+  - 3: Create a full information matrix by performing finite
+    difference on the Theta x Theta portion of the information
+    matrix, and on the THETAs x (SIGMAS OMEGAS) portion of the
+    information matrix, and performs analytical evaluation of
+    (SIGMAS OMEGAS)x(SIGMAS OMEGAS) portion of information
+    matrix.
+
+For the film.calc.type=4 equivalent, see VARCROSS below.
+
+With FIMTYPE=1, it is worth while to mu reference all non-fixed
+THETAs.  This will allow analytical evaluation of the thetaXtheta
+portion of the information matrix, and can provide considerable speed
+improvement.  Even derivatives of mu-referenced THETAs with associated
+OMEGA() fixed to 0 will be analytically evaluated.
 
 *** VARCROSS
-- VARCROSS=0 (default): standard NONMEM residual variance modeling.
+- VARCROSS=0 (default): standard NONMEM residual variance modeling, as
+  in
+  #+begin_src perl
+  $PK
+  …
+  IPRED=F
+  Y=IPRED+EPS(1)+IPRED*EPS(2)
+  …
+  $SIGMA 0.5 0.15
+  #+end_src
+  as residual variance
+  #+begin_src perl
+    var=SIGMA(1,1)+IPRED*IPRED*SIGMA(2,2)
+  #+end_src
+
+  To model variance as squared residual standard deviation:
+  #+begin_src perl
+    var=(sqrt(SIGMA(1,1))+IPRED*sqrt(SIGMA(2,2))**2=
+     SIGMA(1,1)+2*sqrt(SIGMA(1,1)*SIGMA(2,2))*IPRED+IPRED*IPRED*SIGMA(2,2)
+  #+end_src
+  as in the manner of the PFIM 4.0 software, one would normally model
+  the residual variance using THETAs, such as:
+  #+begin_src perl
+    $PK
+    …
+    IPRED=F
+    W=SQRT(THETA(4))+SQRT(THETA(5))*IPRED
+    Y=IPRED+W*EPS(1)
+    …
+    $SIGMA (1.0 FIXED)
+  #+end_src
+  However, when FIMTYPE=1 is used, the theta(4) and theta(5) are not
+  identified as Sigma type parameters, and the appropriate
+  contribution by theta(4) and theta(5) is not estimated.  To provide
+  an interpretation of residual variance incorporating the the
+  cross-term
+  #+begin_src perl
+     2*sqrt(SIGMA(1,1)*SIGMA(2,2))*IPRED
+  #+end_src
+  model using the SIGMAS as shown in the first example, and set
+  VARCROSS to 1:
+  #+begin_src perl
+    $PK
+    …
+    IPRED=F
+    Y=IPRED+EPS(1)+IPRED*EPS(2)
+    …
+    $SIGMA 0.5 0.15
+    …
+    $DESIGN … VARCROSS=1 FIMTYPE=1
+  #+end_src
+  FIMTYPE=1 VARCROSS=1 is equivalent to fim.calc.type=4 in POPED, and
+  diagonal option in PFIM.  Note that the variances are still modeled,
+  rather than the standard deviation form.  See
+  ..\examples\optdesign\warfarin_pfim.ctl for an example of its use.
+
 - VARCROSS=1: residual Standard Deviation Modeling VARCROSS=1 means to
   treat the residual variance model in the manner of PFIM 4.0, as
   described in the manual. FIMTYPE=1  VARCROSS=1  is  equivalent  to
@@ -158,25 +291,25 @@ replication.
 
 *** MODE
 Used for specifying data  and  prediction  value  type  when specifying APPROX=FOCEI.  In NONMEM report:
-  - 0 (default) EVALUATE AT F(ETAsim) DURING CONDITIONAL DESIGN ASSESSMENT
-  - 1 EVALUATE AT THE MODE F(ETAhat) DURING CONDITIONAL DESIGN ASSESSMENT
-  - 2 EVALUATE AT F(ETAsim)-G*ETAsim DURING CONDITIONAL DESIGN ASSESSMENT
-  - 3 EVALUATE AT F(0) DURING CONDITIONAL DESIGN ASSESSMENT
-In other words,
-           MODE=0  means  FOCEI  with  data at F(ETAsim), and predicted
-           function evalauted at f(ETAsim), is to be used. This  method
-           works well.
-           MODE=1  means  FOCEI  with  data at F(ETAsim), and predicted
-           function evaluated at  the mode, f(ETAhat), is to  be  used.
-           The results are not satisfactory.
-           MODE=2    means    linearized    FOCEI,    with    data   at
-           F(ETAsim)-G*ETAsim, and  predicted  function  at  F(ETAsim).
-           Works well.
+  - 0 (default): FOCEI with data at F(ETAsim), and predicted function evaluated at  f(ETAsim), is to be used.
+  - 1: FOCEI with data at F(ETAsim), and predicted function evaluated
+    at  the mode, f(ETAhat), is to be used (see below).  The results
+    are less satisfactory.
+  - 2: linearized FOCEI, with data at F(ETAsim)-G*ETAsim, and predicted function  at F(ETAsim).
+  - 3: Evaluate at F(0) during conditional design assessment.
+
 
 *** DATASIM
 DATASIM=0 by default. Normally,  y-expectation evaluation of the FIM
 is performed. To actually simulate data, set  DATASIM=1,  and  along
 with APPROX=FOCEI, this will produce simulated etas as well.
+#+begin_src perl
+$DESIGN APPROX=FOCEI MODE=1 NELDER FIMDIAG=0 DATASIM=1 GROUPSIZE=32 OFVTYPE=0
+#+end_src
+produces the most empirical, “clinical trial simulation” (CTS) style
+covariances, complete with simulated etas and eps, and standard FIM is
+assessed. If FIMDIAG>0, then a y-expectation covariance will be
+evaluated, but mode will be evaluated with the simulated data.
 
 ** Additional Control Options
 The  following  options may be set within the $DESIGN record, and they
@@ -209,6 +342,55 @@ The options are as follows.
   FILE
   FNLETA
 #+end_src
+
+** Design evaluation example
+The options described above can be used to set up the design criteria,
+and can be used for finding the best design parameters (optimal
+design), or for evaluating design parameters proposed by the user
+(design evaluation).  We will consider a simple example of design
+evaluation, before we consider additional options needed for optimal
+design.  Using the example of ..\examples\optdesign\warfarin_pfim.ctl,
+note the following record:
+#+begin_src perl
+$DESIGN GROUPSIZE=200 FIMTYPE=1 VARCROSS=1
+#+end_src
+The csv file contains only one subject (that is one subject type), but
+the subject number size may be specified with GROUPSIZE.  Here, you
+request the variance-covariance one should expect from 200 subjects,
+all of the one particular subject type (equivalent time values, doses,
+covariates) defined in the csv file.  You can have more than one
+subject in the csv, each with their own design (different doses,
+sample times, etc.).  Also, by use of STRAT and STRATF (see below),
+one can desire a specific weighting of each subject type to contribute
+to the FIM.
+
+FIMTYPE=1 means to evaluate the variance-covariance with the block-diagonal modality.
+VARCROSS=1 means to treat the residual variance model in the manner of PFIM 4.0, as described in the manual.
+
+The intended result for this problem is essentially the FIM
+information and its derived components.  In warfarin_pfim.coi, is the
+inverse covariance matrix (the FIM itself), for a sample size of 200
+subjects.  In the .res file, the -log(det(PFIM)) is given.  Also,
+standard errors are given in report form here.  The .ext file has
+essentially the same information is the .res file, but is in
+rows-column format.  Much of these outputs (.res, .ext., .coi) are
+already a part of standard NONMEM outputs, they are now just recruited
+for optimal design and design evaluation.
+
+Note the usual variance-covariance intended for an actual data set is
+not created, but rather the asymptotic, y-expectation evaluation
+version, since the $DESIGN record was specified.  Much of the control
+stream setup is as is if one were performing an FO estimation analysis
+on a real data set, while the addition of the $DESIGN record then
+re-purposes the analysis for design evaluation (or optimization if
+MAXEVAL>0).
+
+View the standard error and variance-covariance outputs in the NONMEM
+report file, .ext file, .cov, .cor, and .coi files.  For optimal
+design, you can view the final optimal design in the final data set,
+which can be outputted with the $TABLE step (see Examples for Optimal
+Design).
+
 ** Options for Setting up Types
 The  additional options for $DESIGN listed below are for optimizing
 parts of the design  components.   For  example,  the  DESEL,
@@ -238,7 +420,7 @@ requested to be optimized.
     (subject template), and use STGR method to find optimal continuous
     parameters.
 
-Specific parameters must be specified to be optimized. This is done
+Data items must be specified to be optimized. This is done
 using the following options:
   - DESEL=label: The data item (column)  that  contains  the  design
     element (DESEL)  values  that are to be modified and optimized.
@@ -261,7 +443,7 @@ using the following options:
     subjects may share  the  same  time values.   Within  a  subject,
     times  will  be automatically sorted as they are changed, so that
     NONMEM's  time  ordering policy is not violated.
-  - DESELMIN=label, DESELMAX=label: the data item (column) containing the minimal/maximal value.
+  - DESELMIN, DESELMAX: the data item (column) containing the minimal/maximal value.
     You  must  impose  boundaries  on  the values that are being
     optimized.  That is done with these two  data  items.   Only those
     records  with a stratification value >0 in DESELSTRAT column will
@@ -274,7 +456,7 @@ All  the above four   DESEL  items  must  be  specified. They  may be repeated f
   DESEL=AMT  DESELMIN=AMTMIN DESELMAX=AMTMAX DESELSTRAT=AMTSTRAT
 #+end_src
 
-  - NMIN=label, NMAX=label: the name of the data item (column)
+  - NMIN, NMAX: the name of the data item (column)
     containing minimal/maximal number of time points to the subject.
     If NMIN<0 or NMAX<0, then most previous  non-negative  value is
     used.   The  NMIN  and NMAX column are only used for the DISCRETE*
