@@ -6,7 +6,7 @@
 :CUSTOM_ID: est_record
 :END:
 
-Instructions for the NONMEM Estimation Step
+Instructions for the NONMEM Estimation Step.
 
 #+begin_src perl
  $ESTIMATION
@@ -436,11 +436,171 @@ $ESTIMATION METHOD=NUTS
 #+end_src
 
 *** METHOD=CHAIN
-Allows  the user to create a series of random initial
-    values of THETAs and OMEGA's, or for reading in initial
-    population parameters  from a file of rectangular (rows/column)
-    format. Applies only to the Estimation Step.
+:PROPERTIES:
+:CUSTOM_ID: method-chain
+:END:
+Allows  the user to create a series of random initial values of THETAs
+and OMEGA's, or for reading in initial population parameters  from a
+file of rectangular (rows/column) format. Applies only to the
+Estimation Step.
 
+Consider
+#+begin_src perl
+$EST METHOD=CHAIN FILE=example1.chn DELIM=,
+     NSAMPLE=5 CTYPE=0 ISAMPLE=3 DF=100
+     SEED=122234 RANMETHOD=2 IACCEPT=0.5
+#+end_src
+The NSAMPLE=5 random samples of THETAS and OMEGAS will be generated and
+written to file "example1.chn", using “comma” as a delimiter.  SEED sets the starting seed for the random number sequence.
+
+As of nm75, the actual starting seed can be set changed with
+CLOCKSEED=1, to produce different stochastic results for automated replications, without the need to modify the seed value in the control stream file in each replication.
+
+By default (CTYPE=0), random values of THETA are generated from a
+uniform distribution within the interval [lower bound, upper bound]
+from the $THETA record.  If bound not specified, then the default bounded
+interval is
+
+~[(1-IACCEPT)*THETA, (1+IACCEPT)*THETA]~.
+
+For the SIGMA values their Cholesky-decomposed values are uniformly
+varied  within (but see option DFS)
+
+~[(1-IACCEPT)*SIGMA, (1+IACCEPT)*SIGMA]~
+
+If CTYPE=1, then the lower and upper bounds from $THETA are ignored
+and all THETAs are uniformly varied using the IACCEPT factor.  If
+CTYPE=2, then THETAs are initiated based on a normal distribution with
+the initial $THETA as the mean, and the second set of $OMEGAs (or
+$THETAPV) as the variance, if there is a $PRIOR command with NTHP
+non-zero.  This is the best way and most complete way to define the
+sampling density for the THETAs.   Otherwise, if  NTHP=0 (or no
+$THETAP are provided) , the variance for THETA is obtained from the
+first set of $OMEGA, and requires that the THETAs be MU modeled, and
+those THETAs not MU modeled will follow the uniform distribution as if CTYPE=0.
+
+The OMEGAs are sampled using a Wishart distribution with variance from
+$OMEGA, and DF is the degrees of freedom for randomly creating the
+OMEGAS.  If DF=0, then the dimensionality of the entire OMEGA matrix
+is used as the degrees of freedom.  As of NM73, setting DF>1E6 fixes OMEGA elements at their initial values.
+
+The format of the chain file that is created is exactly the same as
+the raw output files, including iteration numbers.  In the above
+example, after the 5 random samples are made, ISAMPLE=3 (the third
+randomly created sample) is selected, and brought in as the initial
+values.  If ISAMPLE=0, then the initial values are not set to any of
+the randomly generated samples, but will just be what was listed in
+$THETA and $OMEGA of the control stream file.
+
+If NSAMPLE=0, but ISAMPLE=some number, then it is expected that FILE already exists, and its iteration number specified by ISAMPLE is to be read in for setting initial values:
+#+begin_src perl
+$EST METHOD=CHAIN FILE=example1.chn NSAMPLE=0 ISAMPLE=3
+#+end_src
+
+One could create a control stream file that first creates a random set
+of population parameters, and then sequentially uses them as initial
+values for several trial estimation steps:
+#+begin_src perl
+$PROBLEM #1
+$INPUT C SET ID JID TIME  DV=CONC AMT=DOSE RATE EVID MDV CMT
+$DATA     wexample11.csv IGNORE=@
+$SUBROUTINES ADVAN3 TRANS4
+$PK
+...
+$ERROR
+...
+$THETA 2.0 2.0 4.0 4.0 ;# Initial THETAs
+$OMEGA BLOCK(4) ;# Initial Parameters for OMEGA
+2
+0.01 2
+0.01 0.01 2
+0.01 0.01 0.01 2
+$SIGMA 0.5
+
+;# First problem, creates NSAMPLE=5 random sets of initial parameters, stores
+;# them in example11.chn.  Then, selects the first sample ISAMPLE=1
+;# for estimation
+$EST METHOD=CHAIN FILE=wexample11.chn NSAMPLE=5 CTYPE=2 ISAMPLE=1 DF=4
+     SEED=122234 IACCEPT=0.8
+$EST  METHOD=COND INTERACTION MAXEVAL=9999 NSIG=2 SIGL=10 PRINT=5 NOABORT
+      FILE=wexample11_1.ext
+
+$PROBLEM #2
+$INPUT C SET ID JID TIME  DV=CONC AMT=DOSE RATE EVID MDV CMT
+$DATA     wexample11.csv IGNORE=@ REWIND
+
+$THETA 2.0 2.0 4.0 4.0 ;# Initial THETAs
+$OMEGA BLOCK(4) ;# Inital Parameters for OMEGA
+0.4
+0.01 0.4
+0.01 0.01 0.4
+0.01 0.01 0.01 0.4
+$SIGMA 0.1
+
+;# Second problem, selects sample ISAMPLE=2 for initial settings, from file wexample11.chn. Won't recreate the file, as NSAMPLE=0
+$EST METHOD=CHAIN FILE=wexample11.chn NSAMPLE=0 ISAMPLE=2
+$EST  METHOD=COND INTERACTION MAXEVAL=9999 NSIG=2 SIGL=10 PRINT=5 NOABORT
+;# etcetera, for samples 3, 4, and 5, executed as problems 3, 4, and 5.
+#+end_src
+Here the five estimations are performed in sequence.  To perform them
+in parallel, one may set up a control stream file with
+#+begin_src perl
+$EST METHOD=CHAIN FILE=example1.chn NSAMPLE=5 ISAMPLE=0 DF=20
+#+end_src
+and additionally five "child" control streams with the NSAMPLE=0 (so
+that it does not create a new chain file, but uses the already
+existing one), and different ISAMPLE's:
+#+begin_src perl
+;# control stream 1
+$EST METHOD=CHAIN FILE=example1.chn NSAMPLE=0 ISAMPLE=1 DF=20
+
+;# control stream 2
+$EST METHOD=CHAIN FILE=example1.chn NSAMPLE=0 ISAMPLE=2 DF=20
+
+;# control stream 3
+$EST METHOD=CHAIN FILE=example1.chn NSAMPLE=0 ISAMPLE=3 DF=20
+
+;# control stream 4
+$EST METHOD=CHAIN FILE=example1.chn NSAMPLE=0 ISAMPLE=4 DF=20
+
+;# control stream 5
+$EST METHOD=CHAIN FILE=example1.chn NSAMPLE=0 ISAMPLE=5 DF=20
+#+end_src
+
+Each control stream file points to a different ISAMPLE position in the
+.chn file, so each would use these as the respective initial
+positions. Each of these "child" control stream files could be loaded
+on to a job queue, as separate processes.  If the user is running a
+multi-core computer, this would be quite straight forward.
+
+An existing chain file could actually be a raw output file from a
+previous analysis, with a list of iterations.  In the following
+example:
+#+begin_src perl
+$EST METHOD=CHAIN FILE=example1_previous.txt NSAMPLE=0
+     ISAMPLE=-1000000000 TBLN=4
+#+end_src
+could pick up the final result of the previous analysis, since ISAMPLE points to the iteration number, and -1000000000 is the iteration number for the final estimate. As of nm75, you may also select the table number TBLN, as raw output files can contain multiples tables of results, with similar sample numbers.  If TBLN is not specified, the first matching iteration (isample) number is selected among all the tables in the file. Thus, the CHAIN method in this usage is really just an input command to bring in values from a raw output-type file format.  Of course, users may have the chain file created by any program, not just NONMEM, so long as it has the raw output file format, with delimiter specified by DELIM/FORMAT (which is space by default).
+
+In NM73+, if the option ISAMPEND is set to a value greater than
+ISAMPLE, then NONMEM will evaluate the objective function (using FOCEI
+method) for each sample between numbers ISAMPLE and ISAMPEND in the
+file, and then select the one with the smallest objective function.
+For example,
+#+begin_src perl
+$EST METHOD=CHAIN FILE=random.txt NSAMPLE=20 ISAMPLE=1 ISAMPEND=20
+#+end_src
+randomly creates 20 sets of initial parameters, and selects the one with the lowest objective function.
+
+If METHOD=CHAIN is used, it must be the first $EST command in the
+particular $PROB.  Furthermore, because the settings it uses for FILE,
+NSAMPLE, ISAMPLE, IACCEPT, CTYPE, and DF are functionally different
+from the way the other $EST methods use them, these settings from
+METHOD=CHAIN are not passed on to the next $EST command, which must be
+an estimation method.  However, other parameters such as DELIM,
+FORMAT, SEED, AND RANMETHOD will be passed on as default
+delimiter/format to the next $EST command.  However, the RANMETHOD
+does not propagate to the $CHAIN record.
 
 ** OPTIONS
 Setting an option to "-100" will force NONMEM to select the default value for that parameter.
@@ -721,8 +881,12 @@ freedom (DF).   Default DF=0, a normal density.  Used with the IMP and
 IMPMAP methods.
 
 *** DFS=n (NM73)
-Degrees of freedom for the Sigma matrix for  simulation  purposes by CHAIN.
-  - DFS=-1: this  is  the  default.  The cholesky elements are uniformly varied  over  the  interval  (1-accept)*initial  value   and (1+accept)*initial value.
+Degrees of freedom for the SIGMA matrix for  simulation  purposes by CHAIN.
+  - DFS=-1: this  is  the  default.  The cholesky elements are
+    uniformly varied  over  the  interval
+
+    ~[(1-accept)*initial  value, (1+accept)*initial value]~.
+
   - DFS=n: the SIGMA matrix is randomly created with an inverse Wishart distribution centered about the initial SIGMA  values,  with degrees of freedom DFS for dispersion.
   - DFS=0: as  above,  but  the  size  of  the  SIGMA matrix is used as degrees of freedom.
   - DFS=>1000000: SIGMA is fixed at its initial value.
@@ -765,10 +929,13 @@ needed.
     equivalent to using the  "Laplace  NUMERICAL"  method,  even
     though FOCE may be selected.
 *** ETASAMPLES=[0|1] (NM74)
+:PROPERTIES:
+:CUSTOM_ID: etasamples
+:END:
 Used with SAEM or BAYES. Default ETASAMPLES=0. ETASAMPLES=1 causes individual ISAMPLE  random  ETA samples
 per subject, output to "root.ets". To do this, perform an SAEM
 analysis (or BAYES) after the primary estimation, keeping the
-population parameters fixed (ETYPE=1), only performing a BURN period
+population parameters fixed (ETYPE=1), only performing the burn stage
 so samples do not get accumulatively averaged, and set ISAMPLE to 10 or higher to collect suffient samples per subject.  For example, note the $EST line in bold, after the usual SAEM analysis:
 #+begin_src perl
   $SIZES ISAMPLEMAX=250
@@ -1821,8 +1988,6 @@ Note  that  the  ORDER  option does not affect the NONMEM report file,
  printed in the same order as OMEGA, and the ORDER option applies to it
  as well.
 
-REFERENCES: Guide Introduction_7.
-
 *** OSAMPLE_M1=n
       Used  only  with  the BAYES method. OSAMPLE_M1, OSAMPLE_M2,
       OSAMPLE_M3, and OACCEPT are the options for the MCMC Metropolis-Hastings algorithm for OMEGA sampling.  If OSAMPLE_M1<0 (default), then the OMEGAs are Gibbs sampled using the appropriate inverse Wishart proposal density, and the other options (OSAMPLE_M2 and OACCEPT) are not relevant.  Otherwise,  for each iteration, a matrix of OMEGAs are generated using an inverse Wishart proposal density that has variance based on the previous samples, done OSAMPLE_M1 times.  Next, a matrix of OMEGAS are generated using a Wishart proposal density at the present OMEGA values postion, and degrees of freedom (dispersion factor for variances) scaled to have samples accepted with OACCEPT  frequency.  This is done OSAMPLE_M2 times (if OSAMPLE_M2<0, then program performs this as many times as there are non-fixed omega elements).  Then, individual cholesky elements of OMEGA are varied, each OSAMPLE_M3 times (if OSAMPLE_M3<0, then program performs this as many times as there are non-fixed omega elements).  The final OMEGA matrix is kept.  Usually these options do not need to be changed from their default values, listed above.
@@ -2051,16 +2216,33 @@ NOREPEAT2: the  estimate  obtained  at  the  end of the search of the second
       used with STIELTJES.
 
 *** SADDLE_HESS=n (NM74)
-      SADDLE_HESS=0 selects the Hessian matrix last  generated  by  the
-      variable metric method.  SADDLE_HESS=1 causes the full second derivative information matrix (identical to R matrix  in  the  $COV
-      step) to be evaluated.  Default is 0.
+Sometimes the variable metric search algorithm used for
+FO/FOCE/Laplace ends near a local minimum with an eigenvalue that is
+near zero, suggesting a saddle point or inestimable or
+non-identifiable parameters.  You can request the saddle point reset,
+which repositions the values about 1 OFV unit away, and resumes the
+search, in hopes of continuing toward a minimum with a smaller OFV.
+This is based on the method by Yasunori and Nyberg, in the Perl Speaks
+NONMEM software.  If the final OFV results is nearly the same value as
+just before the saddle point reset, and one or more of the final
+parameters differ from those just before the saddle reset (see .ext
+file, or Nparameters on the iteration just before the saddle reset
+mark), then this suggests that those parameters may be inestimable or
+non-identifiable.
 
-      See  "Resetting  the  Search  to Circumnavigate Saddle Points and
-      Detect Inestimable Parameters" in Guide INTRODUCTION TO NONMEM  7
-      for a discussion of SADDLE_HESS and SADDLE_RESET options.
+SADDLE_HESS=0 (default) selects the Hessian matrix last  generated  by
+the variable metric method. This Hessian is not the true second
+derivative, but is a guaranteed positive definite matrix.  Perturbing
+the estimates using this matrix requires very little computation, and
+is often sufficient to reposition the problem away from a saddle
+point.
+
+SADDLE_HESS=1 causes the full second
+derivative information matrix (identical to R matrix  in  the  $COV
+step) to be evaluated. Using SADDLE_HESS=1 to reposition the estimates may work better than the SADDLE_HESS=0 setting, but the computational expense is high, equivalent to that of a $COV step.
 
 *** SADDLE_RESET=n (NM74)
-      SADDLE_RESET  is the number of times that a reset should occur in
+SADDLE_RESET  is the number of times that a reset should occur in
       the course of the search.  Normally, should be set to 1.  Default
       is 0.
 
@@ -2150,12 +2332,11 @@ NOSLOW requests a faster method of computation.   This  is  the  default.
 
 FAST(NM74): the option  is  available  for  FOCE/ITS methods. The FAST
 method allows use of analytical theta derivatives  to  facilitate FOCE
-analysis.  All thetas should be MU-referenced in the manner described
-in Guide INTRODUCTION TO NONMEM  7,  "MU  Referencing". For  thetas
+analysis.  All THETAs should be [[file:/docs/cookbook/mu_model/][MU-referenced]]. For  THETAs
 that  should  not have inter-subject variability, or should not be MU
-referenced, MU reference  it  anyway  by  adding addional  etas and
-assigning them to these thetas through MU referencing, but set their
-associated omega values to 0.0 FIXED.
+referenced, do  it  anyway  by  adding addional ETAs and
+assigning them to these THETAs through MU referencing, but with the
+associated OMEGA FIXED to 0.0.
 
 *** SORT | NOSORT
 SORT: individual contribution to the objective function value and
@@ -2243,13 +2424,11 @@ SVARF=-1 for the  halfCauchy distribution. Default is 1. See also
 [[file:/docs/reference-manual/control-records/svarf/][$SVARF control record]].
 
 *** TBLN=n (NM75)
-Used with $EST METHOD=CHAIN and $CHAIN records to allow selecting a
-table within a raw output file. See "Method for  creating  several
-instances  for  a  problem starting at different randomized initial
-positions" in Guide INTRODUCTION TO NONMEM 7.
+Used with $EST METHOD=CHAIN and $CHAIN to select a
+table within a raw output file.
 
 *** THIN=n (NM74)
-      The Bayesian records retained in  the  raw  output  file  may  be
+The Bayesian records retained in  the  raw  output  file  may  be
       adjusted  by  every  THINth iteration. So, if THIN=10, then every
       10th iteration is recorded in the  raw  output  file.  The  PRINT
       option  controls  only  the iterations printed to the console and
@@ -2307,7 +2486,3 @@ include nonmem_reserved_general
 MUFIRSTREC=1
 OBJQUICK=1
 #+end_src
-
-
-** REFERENCES
-Guide Introduction_7

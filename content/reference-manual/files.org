@@ -192,35 +192,25 @@ and Guide I, section B.2.
 :PROPERTIES:
 :CUSTOM_ID: raw-output
 :END:
- With  NONMEM 7, a NONMEM run produces several additional output
- files. These provide a more efficient way  of  way  of  extracting
- numerical results  from  the  analysis  than  by  obtaining them from
- the NONMEM report file.
+With  NONMEM 7, a run outputs several additional
+ files, as a more efficient alternative of extracting
+ results  from the the NONMEM report file. These additional files
+ share a same file name "stem"
+ (file name sans extension) with the control stream given to ~nmfe~ (root="nmbayes" if the control stream
+ file  name is  not passed as an argument). We refer this stem "root" onward.
 
- Names of the files start with "root", where root is the root name
- (not including  extension)  of the NM-TRAN control stream file given
- at the nmfe7 command line, or root="nmbayes" if the control stream
- file  name is  not passed as an argument to the NONMEM executable.
- E.g., in this example the root is myexample.
-  #+begin_src sh
- nmfe7 myexample.ctl myexample.res
- #+end_src
- The raw output file ("root.ext") will be named myexample.ext
-
- A different name for this file may be specified using  the
- FILE=filename  option of the $ESTIMATION record.  This filename is
+ A different stem name may be specified using  the
+ FILE=filename option of the $ESTIMATION record.  This filename is
  used for all subsequent problems, until a new FILE=filename option is
  coded.   The raw output file is only generated if the $ESTIMATION
  record is present and accumulates information from each Estimation
- step.
+ Step. A raw output file has the following format.
 
- The first two lines of each file is the same.  First is a header  line that begins with the word TABLE, such as:
-
+ The first two lines of each file is the same: a header line that begins with the word TABLE, such as:
  #+begin_src txt
- TABLE NO.     n:
+ TABLE NO.  4: MCMC Bayesian Analysis: Goal Function=AVERAGE VALUE OF LIKELIHOOD FUNCTION
  #+end_src
-
- These  tables  are  not  related  to  the  ones produced by the
+These  tables  are  not  related  to  the  ones produced by the
  $TABLE record.  The value of n is incremented each time the
  Estimation  Step is  implemented,  i.e.,  once per $ESTIM record,
  when MAXEVAL is not 0 and $EST is not omitted.  The $EST records may
@@ -1557,7 +1547,7 @@ y=f+f\epsilon(1)+\epsilon(2),
 $$
 then the same epsilon shrinkage is associated with EPS(1) and EPS(2).  However, if F=0 for some data, then such values contribute to EPS(2) shrinkage assessment, but not to EPS(1) shrinkage assessment.  In such cases, shrinkage to EPS(1) and EPS(2) may differ slightly, where EPS(1) shrinkage incorporates only residuals to data with predicted values that are non-zero, and EPS(2) shrinkage incorporates residuals to all PK data.
 
-See also ETASAMPLES=0 (default) (nm74) for SAEM method for other methods of coariate model diagnostics.
+See also [[file:/docs/reference-manual/control-records/estimation/#etasamples][ETASAMPLES=0]] option for SAEM method for diagnostics.
 
 The reported shrinkage information from an MCMC Bayesian analysis is based on the average of the shrinkage across all individuals across all stationary iterations (positive numbered iterations in the .ext file).
 

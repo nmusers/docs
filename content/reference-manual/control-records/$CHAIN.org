@@ -2,46 +2,75 @@
 {{< katex >}}{{< /katex >}}
 
 * $CHAIN
- Supplies initial estimates for an entire problem
-
-
-
-** USAGE
+Supplies initial estimates for an entire problem.
 
 #+begin_src perl
- $CHAIN  [FILE=filename]
-         [FORMAT=s] [ORDER=xxxf]
-         [NOTITLE=[0|1]] [NOLABEL=[0|1]]
-         [ISAMPLE=n][NSAMPLE=n]
-         [SEED=n]
-         [CLOCKSEED=[0|1]]
-         [SELECT=n]
-         [RANMETHOD=[n|S|m] ]
-         [CTYPE=[0|1|2|3|4]]
-         [DF=n]
-         [DFS=n]
-         [IACCEPT=x]
-         [TBLN=n]
+   $CHAIN  [FILE=filename]
+           [FORMAT=s] [ORDER=xxxf]
+           [NOTITLE=[0|1]] [NOLABEL=[0|1]]
+           [ISAMPLE=n][NSAMPLE=n]
+           [SEED=n]
+           [CLOCKSEED=[0|1]]
+           [SELECT=n]
+           [RANMETHOD=[n|S|m] ]
+           [CTYPE=[0|1|2|3|4]]
+           [DF=n]
+           [DFS=n]
+           [IACCEPT=x]
+           [TBLN=n]
+  ;# Example
+   $CHAIN FILE=example1_previous.txt NSAMPLE=0 ISAMPLE=-1000000000
 #+end_src
 
-** EXAMPLE
- #+begin_src perl
- $CHAIN FILE=example1_previous.txt NSAMPLE=0 ISAMPLE=-1000000000
- #+end_src
-
 ** DISCUSSION
- Option  METHOD=CHAIN  of  the $ESTIMATION record will only set thetas,
- omegas, and sigmas for initial values of the estimation process.   Its
- scope  is  therefore limited in that it will not impact the parameters
- used in simulating data for the Simulation step. To introduce  initial
- THETAs  omegas  and sigmas that will cover the entire scope of a given
- problem,  use the $CHAIN record.
+Any initial settings of THETA, OMEGA, and SIGMA set by
+[[file:/docs/reference-manual/control-records/estimation/#method-chain][$EST METHOD=CHAIN]] are only applied to the Estimation Step.  The $SIML command will not be affected, and will still use the initial settings given in $THETA, $OMEGA, and $SIGMA statements, or from an $MSFI file. To introduce initial THETAs OMEGAs and SIGMAs that will cover the entire scope of a given problem,  use the $CHAIN record:
 
- The options have the same meanings  as  for  the  $ESTIMATION  record.
- Setting  SEED  or  CLOCKSEED  or RANMETHOD in a $CHAIN record does not
- propagate to $EST METHOD=CHAIN or any other $EST record.
+#+begin_src perl
+$CHAIN FILE=example1_previous.txt NSAMPLE=0
+     ISAMPLE=-1000000000
+#+end_src
 
- See also [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION record</a/>@@.
+** OPTIONS
+The following options are available for $CHAIN, and have the same actions as for $EST METHOD=CHAIN:  FILE, NSAMPLE, ISAMPLE, SEED, CLOCKSEED, RANMETHOD, FORMAT, ORDER, CTYPE, DF, DFS, IACCEPT, NOLABEL, NOTITLE.  Setting SEED or RANMETHOD in a $CHAIN record does not propagate to $EST METHOD=CHAIN or any other $EST record.
 
-** REFERENCES
-Guide Introduction_7
+ISAMPEND (NM73) has a different action with $CHAIN than with $EST METHOD=CHAIN.
+If the option ISAMPEND is set to a value greater than ISAMPLE, then NONMEM uniformly randomly selects one of these samples between ISAMPLE and ISAMPEND.  This is particularly useful in combination with the SIML record:
+
+#+begin_src perl
+$CHAIN FILE=test2.chn ISAMPLE=3 ISAMPEND=10 NSAMPLE=10 SEED=6234
+$SIML (112345) (334567 NORMAL) SUBP=4
+$EST METHOD=IMP INTERACTION NITER=40 PRINT=1 NOABORT SIGL=4
+CTYPE=3 CITER=10
+#+end_src
+In the above example, for the first subproblem, a file called
+test2.chn is created and stores NSAMPLE (10) randomly created sets of
+THETAs, OMEGAs, and SIGMAs, numbered 1 to NSAMPLE.  Then, a sample of
+parameters is selected from this file uniformly randomly between
+ISAMPLE (3) and ISAMPEND (10), and these parameters are used to create
+a data set for the first sub-problem, and an estimation is performed.
+For the second sub-problem, a new file of parameters does not need to
+be created, but another sample is selected randomly uniformly between
+samples 3 and 10, from which a new data set is created and estimation
+analysis performed.
+
+The parameter file may already exist, perhaps as a raw output file from a previous MCMC Bayesian analysis, and it is desired to randomly selected sets of parameters:
+
+#+begin_src perl
+$CHAIN FILE=example1.chn ISAMPLE=0 ISAMPEND=10000 NSAMPLE=0 SEED=6234
+$SIML (112345) (334567 NORMAL) SUBP=100
+#+end_src
+In the above example, NSAMPLE=0, so this means the file example1.chn
+already exists, which is in fact the raw output file example1.txt from
+the MCMC Bayesian analysis of example1.  Samples from 0 to 10000 (the
+stationary distribution range) are selected randomly.  Even though
+samples in physically close proximity in the file may have some
+correlation, selecting randomly among the entire set assures
+de-correlation, while assuring the samples taken represent the
+empirical distribution of uncertainty of the parameters.  In general
+sampling is performed between the larger of ISAMPLE and the lowest
+iteration (sample) number of a raw output file, and the smaller of
+ISAMPEND and the largest iteration number in the file.  So, it is safe
+to make ISAMPEND=1000000 for example, to cover most Bayesian sample
+set sizes.  If ISAMPEND is specified in the $CHAIN record, then
+$SIML’s TRUE=PRIOR will be ignored.
