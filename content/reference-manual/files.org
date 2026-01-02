@@ -259,39 +259,39 @@ IPROB IREP S1NUM S1IT  S2NUM S2IT
         negative values.  These are followed by positive  iterations
         of  the accumulation phase.
 
-      - Iteration  -1000000000  (negative one billion) identifies the
-        line that contains the final result (thetas, omegas, and
-        sigmas, and  objective  function)  of the particular analysis.
+      - Dummy iteration id "-1000000000" identifies the
+        line that contains the final result (THETA, OMEGA, and
+        SIGMA, and  OFV)  of the particular analysis.
         These are the value in the NONMEM  output  file  that  are
         labelled  FINAL PARAMETER ESTIMATE.  The order is theta,
         sigma, omega.
 
-      - Iteration  -1000000001  identifies the line that contains the
+      - Dummy iteration id  -1000000001  identifies the line that contains the
         standard errors of the final population  parameters.   These
         are the  value  in  the NONMEM output file that are labelled
-        STANDARD ERROR OF ESTIMATE.  The order is theta, sigma, omega.
+        STANDARD ERROR OF ESTIMATE.  The order is THETA, SIGMA, OMEGA.
         This  line is  present  if  the  Covariance  Step  is
         successful,  or  with METHOD=BAYES.
 
-      - Iteration -1000000002 identifies the line  that  contains  the
+      - Dummy iteration id -1000000002 identifies the line  that  contains  the
         eigenvalues  of  the  correlation  matrix of the variances of
         the final parameters.
 
-      - Iteration -1000000003 identifies the line  that  contains
+      - Dummy iteration id -1000000003 identifies the line  that  contains
         thet condition  number  , lowest, highest, Eigenvalues of the
         correlation matrix of the variances of the final parameters.
 
-      - Iteration -1000000004 identifies the line  that  contains  the
+      - Dummy iteration id -1000000004 identifies the line  that  contains  the
         OMEGA and SIGMA elements in standard deviation/correlation
         format.
 
-      - Iteration  -1000000005  identifies the line that contains the
+      - Dummy iteration id  -1000000005  identifies the line that contains the
         standard errors to the OMEGA and SIGMA elements in standard
         deviation/correlation format.
 
-      - Iteration -1000000006 identifies the line that indicates 1 if parameter was fixed in estimation, 0 otherwise.
+      - Dummy iteration id -1000000006 identifies the line that indicates 1 if parameter was fixed in estimation, 0 otherwise.
 
-      - Iteration -1000000007 lists termination status  (first  item) followed by termination codes.
+      - Dummy iteration id -1000000007 lists termination status  (first  item) followed by termination codes.
         In nm73, termination status catalogs the error status. For
         traditional analyses, an error number is listed. If negative,
         the analysis was user-interrupted. For EM/Bayes analysis, error numbers map as follows:
@@ -303,7 +303,7 @@ IPROB IREP S1NUM S1IT  S2NUM S2IT
            + 16,20: All individual objective fuctions are  zero.  problem ended
            + 4,5,6,7,12,20: reduced stochastic/stationary portion was not completed prior to user interrupt
 
-      - Iteration -1000000008 lists the  partial  derivative  of  the likelihood  (-1/2OFV)  with  respect to each estimated parameter. This may be useful for using tests like the  Lagrange  multiplier test.
+      - Dummy iteration id -1000000008 lists the  partial  derivative  of  the likelihood  (-1/2OFV)  with  respect to each estimated parameter. This may be useful for using tests like the  Lagrange  multiplier test.
 
 A file simliar to the raw output file is root.cnv.  This file contains convergence information for the Monte Carlo/EM methods, if CTYPE>0:
 
@@ -375,14 +375,17 @@ is specified, then conditional mean etas are reported in the PHI
 table. regardless  of  the  analysis method.
 
 *** .iph (NM75)
-As of nm75, samples of phi/eta are collected at each BAYES iteration,
-and summarized to provide conditional mean phi and phc() in the
-root.phi table, as described above. By default, the individual phi
-values from each iteration are not  stored.  However,  if you set
+:PROPERTIES:
+:CUSTOM_ID: iph
+:END:
+As of nm75, samples of PHI/ETA are collected at each BAYES iteration,
+and summarized to provide conditional mean PHI and PHC() in the
+root.phi table, as described above. By default, the individual PHI
+values from each iteration are not stored.  However,  if you set
 #+begin_src perl
   $EST ... BAYES_PHI_STORE=1
 #+end_src
-then  PHI and ETA values from each BAYES iteration will be stored in
+then PHI and ETA values from each BAYES iteration will be stored in
 root.iph. For non-mixture problems, only records of SUBP=0 are
 recorded,  as  there are no sub-population divisions. For mixture
 problems, the SUBP=0 records contain the composite phis and  etas (the

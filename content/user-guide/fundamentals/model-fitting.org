@@ -88,3 +88,36 @@ inverse of either matrix serves as an estimate of the covariance matrix. When th
 assumption is not made, matrix \(R^{-1}SR^{-1}\) estimates the true
   covariance matrix. NONMEM uses this as the default but allows user
   to choose alternatives in the $COVARIANCE record.
+
+** Goodness-of-Fit
+Three Goodness-of-Fit (GoF) quantities are always among the NONMEM
+output: prediction, residual, and weighted residual. One can also request additional quantities.
+
+The prediction ("PRED" in NONMEM output) is the result of \(f()\)
+based on /population estimates/. In other words, it is computed at the
+estimated population mean by setting \(\eta=0\):
+$$
+\text{PRED}_{ij} = f(x_{ij}, \mu(z_i, \hat{\theta}))
+$$
+
+The residual ("RES" in NONMEM output) is difference between observation and PRED:
+$$
+\text{RES}_{ij} = y_{ij} - \text{PRED}_{ij}
+$$
+
+Since in application RES is inevitably correlated,
+often the weighted residuals ("WRES" in NONMEM output) serves as an attempted alternative.
+$$
+\text{WRES}_{i}={\text{cov}^{-1/2}(y_i)}{\text{RES}_i}
+$$
+Here \(\text{cov}^{1/2}\) denotes the matrix square root of the
+covariance matrix, and \(\text{cov}^{-1/2}\) the inverse of the matrix
+square root. Note here we only have individual subscript,
+therefore the WRES and \(y\) in the definition are in general vectors
+(for multiple observation of subject /i/).
+
+# NONMEM provides the following additional GoF quantities.
+
+# *** CPRES, CRES, CWRES
+# Depends on the estimation method, one can obtain certain estimate of
+# \(\eta\)'s, denoted as \(\hat{\eta}\). Then CPRES is the linear prediction

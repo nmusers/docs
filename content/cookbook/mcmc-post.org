@@ -1,0 +1,126 @@
+#+title: Postprocessing MCMC draws
+{{< katex >}}{{< /katex >}}
+
+* Postprocessing MCMC draws
+Each MCMC run generates posterior draws (samples) in .ext and .iph, as
+described in [[file:/docs/reference-manual/files/#iph][output files]]. In this article we show how to postprocess
+these draws in R.
+
+Consider the following example. The model uses ITS to position the initial draws, followed by NUTS
+sampler that draws.
+#+INCLUDE: "/examples/nuts-post/w15.ctl" src perl
+
+The raw output file contains the draws for THETA, OMEGA, and SIGMA:
+#+INCLUDE: "/examples/nuts-post/w15_head_tail.ext" src r
+
+Note that the ~delim=q~ option for ~$EST METHOD=NUTS~ effectively
+saves .ext draws as a csv file and adds quotation to the column names.
+The ~NITER=1000~ option requests 1000 draws. Their summary and
+diagnostic information is printed on lines with dummy iteration id's "-100000000x".
+# For example, the line with ITERATION "-100"
+
+NONMEM provides a utility routine "format_draws.f90" to format the
+the draw files for future csv parsing. So if one builds the utility
+and applies it to the .ext file
+#+begin_src bash
+  # compiles the fortran utility
+  gfortran format_draws.f90 -o format_draws
+
+  # save the output as csv
+  ./format_draws w15.ext w15.ext.csv
+#+end_src
+The new ~w15.ext.csv~ file would contain the original draw but with
+title and summary lines commented out:
+#+INCLUDE: "/examples/nuts-post/w15_head_tail.ext.csv" src r
+so that one can read it in R:
+#+begin_src r
+  data <- read.csv("w15.ext.csv", comment.char="#")
+#+end_src
+
+Alternatively, one can read the original .ext file and skip the title
+and summary lines:
+#+begin_src r
+  data <- read.csv(text = head(readLines("w15.ext"), -6), skip=1)
+#+end_src
+
+Now we can postprocess the draws using R package [[https://mc-stan.org/posterior/index.html][posterior]]. We first
+read in the ~data~ object as draws, and we skip the warmup (burn-in)
+draws, the ones with ITERATION < 0.
+#+begin_src r
+  library(posterior)
+  d <- as_draws(data[data$ITERATION>=0, ])
+  d$ITERATION <- NULL
+#+end_src
+We first examine the summary of the draws.
+#+begin_src r
+  summary(d)
+  #> # A tibble: 16 × 10
+  #>    variable         mean     median       sd      mad         q5         q95  rhat ess_bulk ess_tail
+  #>    <chr>           <dbl>      <dbl>    <dbl>    <dbl>      <dbl>       <dbl> <dbl>    <dbl>    <dbl>
+  #>  1 THETA1         1.62       1.62    0.0265   0.0265      1.58       1.66    0.999     740.     824.
+  #>  2 THETA2         1.57       1.57    0.0379   0.0393      1.51       1.63    1.00      488.     643.
+  #>  3 THETA3         0.741      0.740   0.0569   0.0567      0.646      0.831   1.000     334.     475.
+  #>  4 THETA4         2.38       2.38    0.0614   0.0598      2.27       2.48    1.00      482.     723.
+  #>  5 SIGMA.1.1.     0.0572     0.0567  0.00568  0.00539     0.0485     0.0668  0.999     380.     403.
+  #>  6 OMEGA.1.1.     0.0535     0.0527  0.00969  0.00957     0.0386     0.0705  1.000     541.     753.
+  #>  7 OMEGA.2.1.     0.0413     0.0406  0.0117   0.0122      0.0244     0.0621  1.01      272.     510.
+  #>  8 OMEGA.2.2.     0.0772     0.0749  0.0195   0.0187      0.0482     0.113   1.01      245.     382.
+  #>  9 OMEGA.3.1.    -0.0296    -0.0295  0.0139   0.0130     -0.0522    -0.00624 1.000     292.     438.
+  #> 10 OMEGA.3.2.    -0.0154    -0.0163  0.0198   0.0186     -0.0477     0.0185  1.00      214.     390.
+  #> 11 OMEGA.3.3.     0.135      0.130   0.0389   0.0367      0.0810     0.206   1.00      223.     345.
+  #> 12 OMEGA.4.1.     0.0848     0.0830  0.0200   0.0195      0.0557     0.120   1.000     486.     763.
+  #> 13 OMEGA.4.2.     0.0620     0.0613  0.0248   0.0252      0.0241     0.103   1.00      311.     518.
+  #> 14 OMEGA.4.3.    -0.101     -0.102   0.0313   0.0298     -0.155     -0.0541  1.000     263.     347.
+  #> 15 OMEGA.4.4.     0.284      0.278   0.0554   0.0543      0.208      0.379   1.000     350.     755.
+  #> 16 MCMCOBJ    -2670.     -2669.     46.9     45.3     -2750.     -2596.      1.01      200.     276.
+#+end_src
+We can see that the standard deviation is exactly what is reported on
+dummy ITERATION "-1000000001" in the original raw output. Details of
+rhat, ess_bulk, and ess_tail can be found [[https://mc-stan.org/rstan/reference/Rhat.html ][here]].
+
+We can visulize the draws using the [[https://mc-stan.org/bayesplot/][bayesplot package]]. For example,
+#+begin_src r
+  library(bayesplot)
+
+  mcmc_dens(d)
+#+end_src
+plots the posterior desity,
+#+ATTR_HTML: :width 600
+[[/docs/examples/nuts-post/dens.png]]
+
+and
+#+begin_src r
+  mcmc_pairs(d, regex_pars="THETA*")
+#+end_src
+
+visulizes the correlation between THETAs. We can see that the
+clearance and the volume of distribution V1 & V2 are weakly correlated.
+#+ATTR_HTML: :width 600
+[[/docs/examples/nuts-post/theta_pairs.png]]
+
+With option ~BAYES_PHI_STORE=1~, the individual draws are also output
+in the .iph file. We can follow the same steps to read in those draws.
+Note that .iph file does not contain the summary lines.
+#+begin_src r
+data_ind <- read.csv("w15.iph", skip=1)
+d_ind <- as_draws(data_ind[data_ind$ITERATION>=0, ])
+#+end_src
+This draw object is much bigger than the population parameters, as it
+contains the draws of PHIs and ETAs for each of the 100 subjects. The
+posterior package provides many functions to manipulate draws. For
+example, we can extract the individual parameters for subject 1, and
+combine them with the population parameter draws.
+#+begin_src r
+  library(dplyr)
+  d1 <- bind_draws(d_ind |> filter(SUBJECT_NO==1) |> select(-"MCMCOBJ"),
+                   d |> select(-"MCMCOBJ"),
+                   along='variable')
+#+end_src
+The following pair plot shows that PHI and ETA are indeeded
+correlated, and the residual error is likely not associated with them.
+#+begin_src r
+d1 |> mcmc_pairs(pars=c("PHI.1.","ETA.1.","SIGMA.1.1."))
+#+end_src
+
+#+ATTR_HTML: :width 600
+[[/docs/examples/nuts-post/phi1_sigma_pairs.png]]

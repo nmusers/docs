@@ -1,9 +1,8 @@
 #+title: Variables
 * Module variables
-For every module variable documented here, Fortran code block "USAGE" shows
-how it can be used. "GLOBAL
-DECLARATION" block shows its definition to help advanced users
-understand the implementation.
+For every module variable documented here, Fortran code block "USAGE"
+shows how it can be used. "GLOBAL DECLARATION" block shows its
+definition to help advanced users understand the implementation.
 
 * NONMEM variables
 ** COM(n)
@@ -70,10 +69,9 @@ NM-TRAN about NMPRD4.
   - COMRES=0:  Store variables in NMPRD4,  but  do  not  reserve  any positions (the default).
   - COMRES=n1:   Store  variables in NMPRD4, and reserve the first n1 positions.
 
-COMRES=-1 (in abbreviated code): The pseudo-assignment statement
-COMRES=-1  may  be  used  in  any block  of abbreviated code to
-prevent any variable defined in the block from being stored into
-NMPRD4.
+COMRES=-1 (in abbreviated code): can be used  in  any block  of
+abbreviated code to prevent any variable defined in the block from
+being stored into NMPRD4.
 
 COMSAV=n2 (option of [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]] record): values of variables displayed  in  tables  and  scatterplots  are
       obtained  from  module  NMPRD4.   There are particular times when
@@ -99,8 +97,6 @@ COMSAV=n2 (in user written code):
  (See [[file:/docs/reference-manual/api/variables/#pred-defined-variables][PRED-Defined Variables]], [[file:/docs/reference-manual/abbr][abbreviated code]]).
 
 REFERENCES: Guide IV, section III.B.7 , IV.E.2
-
-REFERENCES: Guide VI, section III.J
 
 ** CONTR: Y DATA NOBS
 #+begin_src f90
@@ -486,12 +482,7 @@ and in an $INFN block in conjunction with PASS.
 - IPS = 1 when the data are population data.
 - IPS = 2 when the data are single-subject data.
 
- REFERENCES: Guide I, section B.1
-
- REFERENCES: Guide IV, section II.C.4
-
-
-** PRED,RES,WRES
+** PRED, RES, WRES
 :PROPERTIES:
 :CUSTOM_ID: pred-res-wres
 :END:
@@ -558,19 +549,11 @@ and in an $INFN block in conjunction with PASS.
 These items are available with passes  through  the  data  set  during
 problem finalization (i.e. ICALL=3), in a data record specific way.
 
-
 These  items  may  be used as right-hand quantities in $PRED and $INFN
 during problem finalization.  They can also be output in  table  files
 by  specifying their names (without the underscore) on a $TABLE statement.
 
- (See [[file:/docs/reference-manual/api/variables/][PRED, RES, WRES]]).
-
- For other variables, see the INTRODUCTION TO NONMEM 7.
-
- REFERENCES: Guide I, section C.3.5.3 , C.3.5.4
- REFERENCES: Guide IV, section III.B.16 , III.B.17
- REFERENCES: Guide V, section 9.5 , 10.7 , 11.4.4.2
- REFERENCES: Guide Introduction_7
+For other variables, see the INTRODUCTION TO NONMEM 7.
 
 ** Problem iteration count
 :PROPERTIES:
@@ -628,85 +611,87 @@ code for [[file:/docs/user-guide/advanced/abbr_block/#initialization-finalizatio
       INTEGER(KIND=ISIZE) :: NINDREC,NDATINDR
 
 #+end_src
--  NIREC
-      The number of the individual record at the current call.
+- NIREC: the number of the individual record at the current call.
 
--  NDREC
-      The number of the data record within the individual record at the
-      current call.
+- NDREC: the number of the data record within the individual record at the current call.
 
 NIREC and NDREC also change value in conjunction with calls to PASS, a NONMEM utility routine.
 
 NIREC  and  NDREC  may be used as right-hand quantities in $PRED, $PK, and $ERROR blocks, and in a $INFN block in conjunction with PASS.
 
-NM-TRAN automatically provides the necessary USE statement in the gen- erated subroutines.
+NM-TRAN automatically provides the necessary USE statement in the generated subroutines.
 
 In  addition  to  NDREC and NIREC, NONMEM v7.4+
 provides additional record counters.  All except  IRECIDX   refers  to
 a record number within the current individual record. They can be
 accessed through the =nonmem_reserved_general= file:
-#+begin_src f90
-  include nonmem_reserved_general
+#+begin_src perl
+$PK
+include nonmem_reserved_general
+...
+EXCL=1
+IF(NDREC==LASTOBS) EXCL=0
+IF(NDREC==FIRSTOBS) EXCL=0
+...
+$TABLE ID TIME IPRED EXCLUDE_BY EXCL NOPRINT NOAPPEND file=mytable.TAB
 #+end_src
+Then, only the record containing first and last observations will be printed to the table.
 
-- FIRSTREC
+- FIRSTREC:
       First record of the individual.
 
-- LASTREC
+- LASTREC:
       Last record of the individual.
 
-- FIRSTOBS
+- FIRSTOBS:
       First  observation  record  of the individual (for which MDV=0 or 100)
 
-- LASTOBS
+- LASTOBS:
       Last observation record of the individual  (for  which  MDV=0  or 100)
 
 - FIRSTDOS: with  PREDPP,  first  dose  record  of  the individual
   (for which EVID=1 or 4, and MDV=1 or MDV=101). Without PREDPP, -1.
 
 
-- LASTDOS With PREDPP, last dose record of the individual (for which
+- LASTDOS: With PREDPP, last dose record of the individual (for which
   EVID-1 or 4, and MDV=1 or MDV=101). Without PREDPP, -1.
 
 
-- EFIRSTREC
+- EFIRSTREC:
       First  record  of  the individual during Estimation or Covariance
       Steps (for which MDV=0 or MDV=1)
 
-- ELASTREC
+- ELASTREC:
       Last record of the individual  during  Estimation  or  Covariance
       Steps (for which MDV=0 or MDV=1)
 
-- EFIRSTOBS
+- EFIRSTOBS:
       First  observation  record of the individual during Estimation or
       Covariance Steps (for which MDV=0)
 
-- ELASTOBS
+- ELASTOBS:
       Last observation record of the individual  during  Estimation  or
       Covariance Steps (for which MDV=0)
 
-- EFIRSTDOS
+- EFIRSTDOS:
       With  PREDPP,  first dose record of the individual during Estimation or Covariance Steps (for which EVID=1 or 4, and MDV=1).
       Without PREDPP, -1.
 
-- ELASTDOS
+- ELASTDOS:
       With PREDPP, last dose record of the individual during Estimation
       or Covariance Steps (for which EVID=1 or 4, and MDV=1).
-      Without PREDPP, -1.
+      ELASTDOS=-1 if no dose record PREDPP is not used
 
-- IRECIDX
+- IRECIDX:
       IRECIDX+1  is  the  starting record number in the NONMEM data set
       for the current individual record.  NDREC starts  at  1  for  the
       first  record of each individual record, so that NDREC+IRECIDX is
       the number of the current data record within the NONMEM data set.
 
- Like NIREC and NDREC, the additional record counters also change value
- in conjunction with calls to PASS, a NONMEM utility routine.  They may
- all be used as right-hand quantities in $PRED, $PK, and $ERROR blocks,
- and in a $INFN block in conjunction with PASS.
-
- REFERENCES: Guide Introduction_7
-
+Like NIREC and NDREC, the additional record counters also change value
+in conjunction with calls to PASS, a NONMEM utility routine.  They may
+all be used as right-hand quantities in $PRED, $PK, and $ERROR blocks,
+and in a $INFN block in conjunction with PASS.
 
 ** Simulation: NREP,IREP
 :PROPERTIES:
@@ -852,8 +837,6 @@ EXAMPLE: Compute individual weighted residuals using a slope-intercept residual 
  ENDIF
 #+end_src
 
-
-
 ** Non-active ETA list for PRED
 :PROPERTIES:
 :CUSTOM_ID: non-active-eta
@@ -913,7 +896,6 @@ The NSIG and SIG values should only be used with ICALL = 3.
      eta-derivatives  are  never  expected  unless the Laplacian
      method is used.
 
-
 -  MFIRST
    + MFIRST=1 when NONMEM is expecting  first-partial  eta-derivatives with the current call to PRED.
    + MFIRST=0  when  NONMEM  is ignoring first-partial eta-derivatives
@@ -952,7 +934,7 @@ The NSIG and SIG values should only be used with ICALL = 3.
   this and restores the order of statements in FSUBS to what it was in
   previous versions.
 
- REFERENCES: Guide VI, section III.E.4 , IV.B.2
+REFERENCES: Guide VI, section III.E.4 , IV.B.2
 
 ** MIXNUM, MIXEST, MIXP
 :PROPERTIES:
@@ -1017,7 +999,9 @@ or consequence from the estimation set by NONMEM.
  (See [[file:/docs/reference-manual/api/subroutines/#mix][MIX]], mixture model example).
 
  REFERENCES: Guide IV, section III.B.4 , III.B.6
+
  REFERENCES: Guide IV, section IV.E.1 , 4.E.2
+
  REFERENCES: Guide VI, section III.L.2 , Figure 6
 
 
@@ -1082,7 +1066,7 @@ or consequence from the estimation set by NONMEM.
       REAL(KIND=DPSIZES) :: SETH(LTH),SEOM(LVR,LVR),SESIG(LVR,LVR)
 #+end_src
 - SETHET
-      SETHET(i) = the standard error of the estimate of theta(i).
+      SETHET(i) = the standard error of THETA(i) estimate.
 
 - SETHETR
       SETHETR(i)  =  the  standard  error  of  the estimate of reported
@@ -1100,8 +1084,6 @@ or consequence from the estimation set by NONMEM.
 These values should only be used with ICALL = 3.
 
  REFERENCES: Guide I, section C.3.5.2
-
- REFERENCES: Guide V, section 5.4.2.1
 
 ** Prior simulation: ICMAX
 :PROPERTIES:
@@ -1297,11 +1279,13 @@ blocks (epsilons sets) based on how Y is evaluated.
 
  SIMULATION WITH POPULATION DATA AND AUTO-CORRELATION
 
- If  population  data are simulated, the correlations must be stored in
- CORRL2 before the NONMEM utility routine SIMEPS is called.  With  NONMEM  7.3,  code  such as the following may be used in $ERROR and $PRED
- blocks.  Because the value of CORRL2 is set before SIMEPS  is  called,
- NM-TRAN omits the usual default call to SIMEPS.
+If  population  data are simulated, the correlations must be stored in
+CORRL2 before the NONMEM utility routine SIMEPS is called.  With
+NONMEM  7.3,  code  such as the following may be used in $ERROR and
+$PRED blocks.  Because the value of CORRL2 is set before SIMEPS  is
+called, NM-TRAN omits the usual default call to SIMEPS.
 
+#+begin_src perl
  $ABBR DECLARE T(NO), INTEGER I, DOWHILE J
 
  IF (ICALL == 4) THEN
@@ -1317,6 +1301,7 @@ blocks (epsilons sets) based on how Y is evaluated.
  ENDIF
  CALL SIMEPS(EPS)
  ENDIF
+#+end_src
 
  RESTRICTIONS:
 
