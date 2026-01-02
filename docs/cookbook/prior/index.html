@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content=" Setting up Prior Information Prior information is important for MCMC Bayesian analysis, but not necessary for maximization methods. Of greatest importance are priors to the OMEGAs. As a general rule, if your data set consists of fewer subjects than 100 times the dimension of the Omega matrix to be estimated, then you should have at least uninformative OMEGA prior information. Priors to THETAS are assumed multivariate normal, and priors to OMEGAS and SIGMAS are assumed inverse Wishart distributed. Alternatively, a residual variance in the form of its square root, may be modeled via THETA (a sigma-like Theta parameters is set up in example 2). See $PRIOR for prior specifications. Here we discuss the setup for most Bayesian analysis purposes.
+">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="https://nmusers.github.io/docs/cookbook/prior/">
+  <meta property="og:site_name" content="NONMEM Documentation">
+  <meta property="og:title" content="Bayesian Priors">
+  <meta property="og:description" content="Setting up Prior Information Prior information is important for MCMC Bayesian analysis, but not necessary for maximization methods. Of greatest importance are priors to the OMEGAs. As a general rule, if your data set consists of fewer subjects than 100 times the dimension of the Omega matrix to be estimated, then you should have at least uninformative OMEGA prior information. Priors to THETAS are assumed multivariate normal, and priors to OMEGAS and SIGMAS are assumed inverse Wishart distributed. Alternatively, a residual variance in the form of its square root, may be modeled via THETA (a sigma-like Theta parameters is set up in example 2). See $PRIOR for prior specifications. Here we discuss the setup for most Bayesian analysis purposes.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="cookbook">
+    <meta property="article:modified_time" content="2026-01-02T10:29:06-08:00">
+
+
+  <meta itemprop="name" content="Bayesian Priors">
+  <meta itemprop="description" content="Setting up Prior Information Prior information is important for MCMC Bayesian analysis, but not necessary for maximization methods. Of greatest importance are priors to the OMEGAs. As a general rule, if your data set consists of fewer subjects than 100 times the dimension of the Omega matrix to be estimated, then you should have at least uninformative OMEGA prior information. Priors to THETAS are assumed multivariate normal, and priors to OMEGAS and SIGMAS are assumed inverse Wishart distributed. Alternatively, a residual variance in the form of its square root, may be modeled via THETA (a sigma-like Theta parameters is set up in example 2). See $PRIOR for prior specifications. Here we discuss the setup for most Bayesian analysis purposes.">
+  <meta itemprop="dateModified" content="2026-01-02T10:29:06-08:00">
+  <meta itemprop="wordCount" content="1513">
+
+<title>Bayesian Priors | NONMEM Documentation</title>
+<link rel="icon" href="/docs/favicon.png" >
+<link rel="manifest" href="/docs/manifest.json">
+<link rel="canonical" href="https://nmusers.github.io/docs/cookbook/prior/">
+<link rel="stylesheet" href="/docs/book.min.d4e6b62882e125f74e9d9d54ba648dfa9d887bace364bb515b00d18f0f0d1257.css" integrity="sha256-1Oa2KILhJfdOnZ1UumSN&#43;p2Ie6zjZLtRWwDRjw8NElc=" crossorigin="anonymous">
+
+
+  <script defer src="/docs/fuse.min.js"></script>
+  <script defer src="/docs/en.search.min.bcb82d6949b51c4d0a6634fc10b966fd3bb2dbb8f6cc6d28027d63fd567f9004.js" integrity="sha256-vLgtaUm1HE0KZjT8ELlm/Tuy27j2zG0oAn1j/VZ/kAQ=" crossorigin="anonymous"></script>
+
+
+
+  
+</head>
+<body dir="ltr" class="book-kind-page book-type-cookbook">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    
+<aside class="book-menu">
+  <div class="book-menu-content">
+    
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/docs/"><span>NONMEM Documentation</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input id="book-search-input" type="text" 
+    placeholder="Search"
+    aria-label="Search"
+    maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/quick-start/" class="">
+      Quick start</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/" class="">
+      User guide</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/introduction/" class="">
+      Introduction</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-44a5ffdb7f06989151f3c4e11083520b" class="toggle"  />
+    <label for="section-44a5ffdb7f06989151f3c4e11083520b" class="flex">
+      <a href="/docs/user-guide/fundamentals/" class="">
+        Fundamentals</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/population/" class="">
+      1. Population models</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/pkode/" class="">
+      2. PK and ODEs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/likelihood/" class="">
+      3. Likelihood</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/model-fitting/" class="">
+      4. Model fitting</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-ac8225f98f95bed71798e0be7ea190cc" class="toggle"  />
+    <label for="section-ac8225f98f95bed71798e0be7ea190cc" class="flex">
+      <a href="/docs/user-guide/nmtran/" class="">
+        Data and model</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/data/" class="">
+      1. Data</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/control/" class="">
+      2. Control records</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/output/" class="">
+      3. Output</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-72ba181ec78d31040713db91ccee5ae1" class="toggle"  />
+    <label for="section-72ba181ec78d31040713db91ccee5ae1" class="flex">
+      <a href="/docs/user-guide/predpp/" class="">
+        PopPK models</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-3588eec4ae7b05621971d2a7883fa0d8" class="toggle"  />
+    <label for="section-3588eec4ae7b05621971d2a7883fa0d8" class="flex">
+      <a href="/docs/user-guide/advanced/" class="">
+        Advanced topics</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/components/" class="">
+      NONMEM components</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/abbr_block/" class="">
+      Code blocks</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/" class="">
+      Reference manual</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-377f7f7cc3b0210dc0b24704642ecae6" class="toggle"  />
+    <label for="section-377f7f7cc3b0210dc0b24704642ecae6" class="flex">
+      <a href="/docs/reference-manual/control-records/" class="">
+        Control records</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/abbrev/" class="">
+      $ABBREVIATED</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/aes/" class="">
+      $AES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/aesinit/" class="">
+      $AESINIT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/anneal/" class="">
+      $ANNEAL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/bind/" class="">
+      $BIND</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/chain/" class="">
+      $CHAIN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/contr/" class="">
+      $CONTR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/covar/" class="">
+      $COVARIANCE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/data/" class="">
+      $DATA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/default/" class="">
+      $DEFAULT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/des/" class="">
+      $DES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/design/" class="">
+      $DESIGN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/error/" class="">
+      $ERROR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/estimation/" class="">
+      $ESTIMATION</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/etasphis/" class="">
+      $ETAS, $PHIS</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/format/" class="">
+      $FORMAT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/include/" class="">
+      $INCLUDE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/index/" class="">
+      $INDEX</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/infn/" class="">
+      $INFN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/input/" class="">
+      $INPUT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/ldfold/" class="">
+      $LDFOLD</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/level/" class="">
+      $LEVEL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/mix/" class="">
+      $MIX</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/model/" class="">
+      $MODEL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/msfi/" class="">
+      $MSFI</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/nonpara/" class="">
+      $NONPARAMETRIC</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/olkjdf/" class="">
+      $OLKJDF</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/omega/" class="">
+      $OMEGA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/omegap/" class="">
+      $OMEGAP</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/omit/" class="">
+      $OMIT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/ovarf/" class="">
+      $OVARF</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/pk/" class="">
+      $PK</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/pred/" class="">
+      $PRED</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/prior/" class="">
+      $PRIOR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/problem/" class="">
+      $PROBLEM</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/rcov/" class="">
+      $RCOV, $RCOVI</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/scatter/" class="">
+      $SCATTERPLOT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/sigma/" class="">
+      $SIGMA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/sigmap/" class="">
+      $SIGMAP, $SIGMAPD</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/simulation/" class="">
+      $SIMULATION</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/sizes/" class="">
+      $SIZES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/slkjdf/" class="">
+      $SLKJDF</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/subroutines/" class="">
+      $SUBROUTINES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/super/" class="">
+      $SUPER</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/svarf/" class="">
+      $SVARF</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/table/" class="">
+      $TABLE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/theta/" class="">
+      $THETA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/thetai/" class="">
+      $THETAI</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/thetap/" class="">
+      $THETAP, $THETAPV</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/thetar/" class="">
+      $THETAR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/tol/" class="">
+      $TOL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/ttdf/" class="">
+      $TTDF</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/warning/" class="">
+      $WARNINGS</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/abbr/" class="">
+      Abbreviated code</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/data/" class="">
+      Data</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/files/" class="">
+      Output and files</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/" class="">
+      Internals &amp; API</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/modules/" class="">
+      Modules</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/subroutines/" class="">
+      Subroutines</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/variables/" class="">
+      Variables</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-d8246e9b0dff86e0cd3364b2b239c898" class="toggle" checked />
+    <label for="section-d8246e9b0dff86e0cd3364b2b239c898" class="flex">
+      <a href="/docs/cookbook/" class="">
+        Cookbook</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/symbolic_label/" class="">
+      symbolic_label</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/prior/" class="active">
+      Bayesian Priors</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/dowhile/" class="">
+      DO WHILE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/steady_state/" class="">
+      Empirical state state</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/indi/" class="">
+      Indicator variables</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/etabar_mix/" class="">
+      Mixture model: ETABAR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/mu_model/" class="">
+      MU referencing</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/nested/" class="">
+      Nested random effects</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/mcmc-post/" class="">
+      Postprocessing MCMC draws</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/protect/" class="">
+      PROTECT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/repeated_records/" class="">
+      Repeated Observation Records</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/msf-warmup/" class="">
+      Reuse NUTS warmup results</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/saem-extra-request/" class="">
+      SAEM_EXTRA variables</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/random/" class="">
+      Stochastic structure</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/time_vary/" class="">
+      Time-varying covariates</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+
+  </div>
+</aside>
+ 
+
+    <div class="book-page">
+      <header class="book-header hidden">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/docs/icons/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>Bayesian Priors</h3>
+
+  <label for="toc-control">
+    
+    <img src="/docs/icons/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden">
+    
+  
+<nav id="TableOfContents">
+<ul>
+<li><a href="#headline-1">Setting up Prior Information</a>
+<ul>
+<li><a href="#headline-2">Degrees of freedom</a>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article">
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Setting up Prior Information
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>Prior information is important for MCMC Bayesian analysis, but not
+necessary for maximization methods.  Of greatest importance are priors
+to the OMEGAs. As a general rule, if your data set consists of fewer
+subjects than 100 times the dimension of the Omega matrix to be
+estimated, then you should have at least uninformative OMEGA prior
+information.  Priors to THETAS are assumed multivariate normal, and
+priors to OMEGAS and SIGMAS are assumed inverse Wishart distributed.
+Alternatively,  a residual variance in the form of its square root,
+may be modeled via THETA (a sigma-like Theta parameters is set up in
+example 2). See <a href="/docs/reference-manual/control-records/prior/">$PRIOR</a> for prior specifications. Here we discuss the setup
+for most Bayesian analysis purposes.</p>
+<p>
+To set up the $PRIOR NWPRI statement such as</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$PRIOR</span> NWPRI NTHETA<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>, NETA<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>, NEPS<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> NTHP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>, NETP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>, NEPP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>keep in mind the following:</p>
+<ul>
+<li>NTHETA=number of THETAs to be estimated;</li>
+<li>NETA=number of Etas (OMEGAs) to be estimated (and is to be described by an NETAxNETA OMEGA matrix);</li>
+<li>NEPS=number of epsilons (SIGMAs) to be estimated (and is to be described by an NEPSxNEPS SIGMA matrix);</li>
+<li>NTHP=number of THETAs which have a prior;</li>
+<li>NETP=number of OMEGAs with prior;</li>
+<li>NEPP=number of SIGMAs with prior (NM73).  Before NM73, the NEPP
+option was ignored, as supplying priors for SIGMAs was not
+activated,</li>
+</ul>
+<p>so that the $THETA records list the parameters, in order, the following:</p>
+<ul>
+<li>NTHETA of initial THETAs;</li>
+<li>NTHP of Priors to THETAS;</li>
+<li>Degrees of freedom to each OMEGA block Prior;</li>
+<li>Degrees of freedom to each SIGMA block Prior;</li>
+</ul>
+<p>the $OMEGA records list the variances, in order, the following:</p>
+<ul>
+<li>NETAxNETA of initial OMEGAS;</li>
+<li>NTHPxNTHP of variances of Priors to THETAS;</li>
+<li>NETPxNETP of priors to OMEGAS, matching the block pattern of the initial OMEGAS;</li>
+</ul>
+<p>the $SIGMA records list the variances, in order, the following:</p>
+<ul>
+<li>NEPSxNEPS of initial SIGMAS</li>
+<li>NEPPxNEPP of priors to SIGMAS, matching the block pattern of the initial SIGMAS (NM73).</li>
+</ul>
+<p>The following snippet shows details of setting up a THETA, OMEGA, and
+SIGMA.</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$THETA</span> <span style="color:#ff9f43">2.0</span> <span style="color:#ff9f43">2.0</span> <span style="color:#ff9f43">4.0</span> <span style="color:#ff9f43">4.0</span> ; Initial THETAs
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGA</span> BLOCK(<span style="color:#ff9f43">4</span>) ; Initial Parameters <span style="color:#ff6ac1">for</span> OMEGA
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMA</span> <span style="color:#ff9f43">0.1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PRIOR</span> NWPRI NTHETA<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>, NETA<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>, NEPS<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>, NTHP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>, NETP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>, NEPP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Prior information of THETAS (NTHP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span> of them)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETA</span> (<span style="color:#ff9f43">2.0</span> FIX) (<span style="color:#ff9f43">2.0</span> FIX) (<span style="color:#ff9f43">2.0</span> FIX) (<span style="color:#ff9f43">2.0</span> FIX)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Variance to prior information of THETAS (NTHPxNTHP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>x4 of them)<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span>; Because variances are very large, this means that the prior
+</span></span><span style="display:flex;"><span>; information to the THETAS is highly uninformative<span style="color:#ff6ac1">.</span>  Note that the
+</span></span><span style="display:flex;"><span>; order of <span style="color:#ff5c57">$THETA</span> <span style="color:#ff5c57">values</span> among the THETA records, <span style="color:#ff6ac1">and</span> the order
+</span></span><span style="display:flex;"><span>; of <span style="color:#ff5c57">$OMEGA</span> <span style="color:#ff5c57">values</span> among the OMEGA records, is very important,
+</span></span><span style="display:flex;"><span>; But <span style="color:#ff5c57">$THETAs</span> <span style="color:#ff6ac1">and</span> <span style="color:#ff5c57">$OMEGAs</span> can be interspersed<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGA</span> BLOCK(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">10000</span> FIX
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.00</span> <span style="color:#ff9f43">10000</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.00</span>  <span style="color:#ff9f43">0.00</span> <span style="color:#ff9f43">10000</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.00</span>  <span style="color:#ff9f43">0.00</span> <span style="color:#ff9f43">0.0</span> <span style="color:#ff9f43">10000</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Prior to OMEGA (NETPxNETP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>x4 <span style="color:#ff6ac1">if</span> them)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGA</span> BLOCK(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.2</span> FIX
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.0</span>  <span style="color:#ff9f43">0.2</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.0</span>  <span style="color:#ff9f43">0.0</span> <span style="color:#ff9f43">0.2</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.0</span>  <span style="color:#ff9f43">0.0</span> <span style="color:#ff9f43">0.0</span> <span style="color:#ff9f43">0.2</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Set degrees of freedom of OMEGA Prior (one value per OMEGA block)
+</span></span><span style="display:flex;"><span>; Uninformative Omega prior is designated by having a DF that is equal to
+</span></span><span style="display:flex;"><span>; the dimension size of the Omega block<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETA</span> (<span style="color:#ff9f43">4</span> FIX)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Prior to SIGMA (NEPPxNEPP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>x1 <span style="color:#ff6ac1">if</span> them)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMA</span> <span style="color:#ff9f43">0.05</span> FIX
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Set degrees of freedom of SIGMA Prior (one value per SIGMA block)
+</span></span><span style="display:flex;"><span>; Uninformative SIGMA prior is designated by having a DF that is equal to
+</span></span><span style="display:flex;"><span>; the dimension size of the Sigma block<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETA</span> (<span style="color:#ff9f43">1</span> FIX)</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>By default, the number of prior experiments is 1.  However, perhaps
+you have more than one previous study, and you wish to average their
+contribution, forming a composite average set of prior parameters to
+influence the present analysis.  In this case, add NEXP=n to the
+$NWPRI record above, where n is the number of experiments.  Then, add
+the prior information of each additional study with additional $THETA,
+$OMEGA, and $SIGMA statements.  The order is as following.</p>
+<ul>
+<li>$THETA records list the parameters, in order, the following:
+NTHETA of initial THETAs
+Exp 1:
+NTHP of Priors to THETAS
+Degrees of freedom to each OMEGA block Prior
+Degrees of freedom to each SIGMA block Prior
+Exp 2:
+NTHP of Priors to THETAS
+Degrees of freedom to each OMEGA block Prior
+Degrees of freedom to each SIGMA block Prior
+…</li>
+<li>The $OMEGA records list the variances, in order, the following:
+NETAxNETA of initial OMEGAS
+Exp 1:
+NTHPxNTHP of variances of Priors to THETAS
+NETPxNETP of priors to OMEGAS, matching the block pattern of the initial OMEGAS
+Exp 2:
+NTHPxNTHP of variances of Priors to THETAS
+NETPxNETP of priors to OMEGAS, matching the block pattern of the initial OMEGAS
+…</li>
+<li>The $SIGMA records list the variances, in order, the following:
+NEPSxNEPS of initial SIGMAS
+Exp 1:
+NEPPxNEPP of priors to SIGMAS, matching the block pattern of the initial SIGMAS
+Exp 2:
+NEPPxNEPP of priors to SIGMAS, matching the block pattern of the initial SIGMAS
+…</li>
+</ul>
+<p>As of NM73, you can use more informative names as follows:</p>
+<ul>
+<li>$THETAP for theta priors;</li>
+<li>$THETAPV for variance to theta priors;</li>
+<li>$OMEGAP for omega priors;</li>
+<li>$OMEGAPD for degrees of freedom (or dispersion factor) for omega priors;</li>
+<li>$SIGMAP for SIGMA priors;</li>
+<li>$SIGMAPD for degrees of freedom (or dispersion factor) for SIGMA priors.</li>
+</ul>
+<p>This allows you to intersperse these records at will in the control
+stream files, but it also gives NMTRAN an alternative source for
+values to NTHETA, NETA, NTHT, NETP, NEPS, and NEPP that is typically
+given in the $PRIOR NWPRIOR record.  However, if these values are also
+listed in $PRIOR NWPRI, then these values are chosen over what is
+surmised from the informatively labeled theta/omega/sigma records.
+Thus, the above control stream file could be structured as follows,
+with the various records in any order, and a shortened $PRIOR record
+(in the following example uninformative priors are used):</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$PRIOR</span> NWPRI
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Prior information of THETAS (NTHP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span> of them)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETAP</span> (<span style="color:#ff9f43">2.0</span> FIX) (<span style="color:#ff9f43">2.0</span> FIX) (<span style="color:#ff9f43">2.0</span> FIX) (<span style="color:#ff9f43">2.0</span> FIX)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETA</span> <span style="color:#ff9f43">2.0</span> <span style="color:#ff9f43">2.0</span> <span style="color:#ff9f43">4.0</span> <span style="color:#ff9f43">4.0</span> ; Initial THETAs
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGA</span> BLOCK(<span style="color:#ff9f43">4</span>) ; Inital Parameters <span style="color:#ff6ac1">for</span> OMEGA
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.01</span> <span style="color:#ff9f43">0.4</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Set degrees of freedom of SIGMA Prior (one value per SIGMA block)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMAPD</span> (<span style="color:#ff9f43">1</span> FIX)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>;intial parameters to sigma
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMA</span> <span style="color:#ff9f43">0.1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Set degrees of freedom of OMEGA Prior (one value per OMEGA block)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGAPD</span> (<span style="color:#ff9f43">4</span> FIX)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Prior to OMEGA (NETPxNETP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>x4 <span style="color:#ff6ac1">if</span> them)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGAP</span> BLOCK(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.2</span> FIX
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.0</span>  <span style="color:#ff9f43">0.2</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.0</span>  <span style="color:#ff9f43">0.0</span> <span style="color:#ff9f43">0.2</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.0</span>  <span style="color:#ff9f43">0.0</span> <span style="color:#ff9f43">0.0</span> <span style="color:#ff9f43">0.2</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Variance to prior information of THETAS (NTHPxNTHP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span>x4 of them)<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETAPV</span> BLOCK(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">10000</span> FIX
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.00</span> <span style="color:#ff9f43">10000</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.00</span>  <span style="color:#ff9f43">0.00</span> <span style="color:#ff9f43">10000</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.00</span>  <span style="color:#ff9f43">0.00</span> <span style="color:#ff9f43">0.0</span> <span style="color:#ff9f43">10000</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>; Prior to SIGMA (NEPPxNEPP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>x1 <span style="color:#ff6ac1">if</span> them)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMAP</span> <span style="color:#ff9f43">0.05</span> FIX</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>
+Informative prior information may come from a previous study.
+Typically, they are used as follows. The theta priors for the present
+analysis are obtained from the estimates of THETAs from the previous
+study.  For example, in the report file of the previous study:</p>
+<div class="src src-text">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>FINAL PARAMETER ESTIMATE
+</span></span><span style="display:flex;"><span> THETA - VECTOR OF FIXED EFFECTS PARAMETERS
+</span></span><span style="display:flex;"><span>         TH 1      TH 2      TH 3      TH 4
+</span></span><span style="display:flex;"><span>         1.64E+00  1.57E+00  7.58E-01  2.35E+00</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>would be placed in the present study control stream file as:</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$THETAP</span>   (<span style="color:#ff9f43">1.64</span> FIXED) (<span style="color:#ff9f43">1.57</span> FIXED) (<span style="color:#ff9f43">0.758</span> FIXED)
+</span></span><span style="display:flex;"><span>          (<span style="color:#ff9f43">2.35</span> FIXED)</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>The variance-covariance to theta priors of the present analysis are
+obtained from the variance-covariance submatrix pertaining to the
+theta estimates from the previous study.  For example, the information
+in the report file of the previous study:</p>
+<div class="src src-text">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>COVARIANCE MATRIX OF ESTIMATE
+</span></span><span style="display:flex;"><span>            TH 1      TH 2      TH 3      TH 4
+</span></span><span style="display:flex;"><span> TH 1
+</span></span><span style="display:flex;"><span>+        2.33E-03
+</span></span><span style="display:flex;"><span> TH 2
+</span></span><span style="display:flex;"><span>+        4.76E-04  2.86E-03
+</span></span><span style="display:flex;"><span> TH 3
+</span></span><span style="display:flex;"><span>+        7.87E-04  1.27E-04  5.35E-03
+</span></span><span style="display:flex;"><span> TH 4
+</span></span><span style="display:flex;"><span>+        7.80E-05  2.36E-04  1.76E-03  2.98E-03</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>would be placed in the control stream file of the present study as:</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$THETAPV</span> BLOCK(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff9f43">2.33E-03</span> FIXED
+</span></span><span style="display:flex;"><span>        <span style="color:#ff9f43">4.76E-04</span>  <span style="color:#ff9f43">2.86E-03</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff9f43">7.87E-04</span>  <span style="color:#ff9f43">1.27E-04</span>  <span style="color:#ff9f43">5.35E-03</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff9f43">7.80E-05</span>  <span style="color:#ff9f43">2.36E-04</span>  <span style="color:#ff9f43">1.76E-03</span>  <span style="color:#ff9f43">2.98E-03</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>The omega priors of the present analysis are obtained from the
+estimates of OMEGAs from the previous study.  For example, from the
+report file of the previous study:</p>
+<div class="src src-text">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS
+</span></span><span style="display:flex;"><span>            ETA1      ETA2      ETA3      ETA4
+</span></span><span style="display:flex;"><span> ETA1
+</span></span><span style="display:flex;"><span>+        1.75E-01
+</span></span><span style="display:flex;"><span> ETA2
+</span></span><span style="display:flex;"><span>+        8.33E-03  1.51E-01
+</span></span><span style="display:flex;"><span> ETA3
+</span></span><span style="display:flex;"><span>+        2.98E-02  1.74E-02  2.41E-01
+</span></span><span style="display:flex;"><span> ETA4
+</span></span><span style="display:flex;"><span>+       -8.05E-03  1.84E-02  5.14E-02  1.62E-01</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>and we can use it in the control stream of the present study:</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGAP</span> BLOCK(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff9f43">1.75E-01</span> FIXED
+</span></span><span style="display:flex;"><span>    <span style="color:#ff9f43">8.33E-03</span>  <span style="color:#ff9f43">1.51E-01</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff9f43">2.98E-02</span>  <span style="color:#ff9f43">1.74E-02</span>  <span style="color:#ff9f43">2.41E-01</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ff6ac1">-</span><span style="color:#ff9f43">8.05E-03</span>  <span style="color:#ff9f43">1.84E-02</span>  <span style="color:#ff9f43">5.14E-02</span>  <span style="color:#ff9f43">1.62E-01</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>Similarly for Sigma priors, the results of the previous study:</p>
+<div class="src src-text">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>SIGMA - COV MATRIX FOR RANDOM EFFECTS - EPSILONS  ***
+</span></span><span style="display:flex;"><span>            EPS1
+</span></span><span style="display:flex;"><span> EPS1
+</span></span><span style="display:flex;"><span>+        5.28E-02</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>is used in the present study as:</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMAP</span> (<span style="color:#ff9f43">5.28E-02</span> FIXED)</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-3">
+<h3 id="headline-2">
+<span class="todo status-todo">TODO</span>
+Degrees of freedom
+</h3>
+</div>
+</div>
+</div>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+<div>
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/b93da036c02228160022b7c8808042d89babcddb" title='Last modified by Yi Zhang | 2026 Jan 2' target="_blank" rel="noopener">
+    <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
+    <span>2026 Jan 2</span>
+  </a>
+
+</div>
+
+<div>
+
+</div>
+
+</div>
+
+
+
+  
+
+
+
+  
+  
+  
+  <div class="flex flex-wrap justify-between">
+    <span>
+    
+      <a href="/docs/cookbook/symbolic_label/" class="flex align-center">
+        <img src="/docs/icons/backward.svg" class="book-icon" alt="Backward" />
+        <span>symbolic_label</span>
+      </a>
+    
+    </span>
+    <span>
+    
+      <a href="/docs/cookbook/dowhile/" class="flex align-center">
+        <span>DO WHILE</span>
+        <img src="/docs/icons/forward.svg" class="book-icon" alt="Forward" />
+      </a>
+    
+    </span>
+  </div>
+  
+
+
+ 
+        
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+        
+        
+  
+ 
+        
+  
+  
+    <script>(function(){document.querySelectorAll("pre:has(code)").forEach(e=>{e.addEventListener("click",e.focus),e.addEventListener("copy",function(t){if(t.preventDefault(),navigator.clipboard){const t=window.getSelection().toString()||e.textContent;navigator.clipboard.writeText(t)}})})})()</script>
+  
+
+      </footer>
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+  
+  <aside class="book-toc">
+    <div class="book-toc-content">
+      
+  
+<nav id="TableOfContents">
+<ul>
+<li><a href="#headline-1">Setting up Prior Information</a>
+<ul>
+<li><a href="#headline-2">Degrees of freedom</a>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+
+
+
+    </div>
+  </aside>
+  
+ 
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
