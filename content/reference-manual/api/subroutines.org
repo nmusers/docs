@@ -1,4 +1,5 @@
 #+title: Subroutines
+{{< katex >}}{{< /katex >}}
 
 * User-defined subroutines
 NONMEM supports subroutines and functions called by
@@ -26,10 +27,6 @@ User-defined subroutines/functions should be placed in a file and provided to $S
 $SUBROUTINES ... OTHER=funcacode
 #+end_src
 
-REFERENCES: (CRIT) Guide II, section C.6
-
-REFERENCES: (INFN) Guide VI, section VI.A , Figure 37
-
 ** ICALL
 ICALL is  an  argument  passed by NONMEM to user-supplied
 subroutines CCONTR, CONTR, CRIT, PRED, PRIOR and MIX. It is also
@@ -37,37 +34,69 @@ selectively passed to PK,  ERROR,  and  INFN. It can  be  used  in
 $PK, $ERROR, and $PRED abbreviated code.  The discussion below
 describes the values of ICALL as seen by PRED.
 
-- ICALL=-1: the routine has been called for the [[file:/docs/user-guide/advanced/abbr_block/#pred_ignore_data_block][ PRED_IGNORE_DATA]] feature (NM75).  One  call per data record, at the start
-  of the run. These  calls  occur  only   if   abbreviated   code
-  uses  variables PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if
-  the [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]] of $DATA is used.  Otherwise, there are
-  no calls to  PRED  with ICALL=-1.
+  - ICALL=-1: the routine has been called for the [[file:/docs/user-guide/advanced/abbr_block/#pred_ignore_data_block][ PRED_IGNORE_DATA]]
+    feature (NM75).  One  call per data record, at the start of the run.
+    These  calls  occur  only   if   abbreviated   code uses  variables
+    PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if the
+    [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]] of $DATA is used.  Otherwise, there are no
+    calls to  PRED  with ICALL=-1.
 
-- ICALL=0:  the routine has been called for initialization at the
-  beginning of the NONMEM run; one such call per run.
+  - ICALL=0:  the routine has been called for initialization at the
+    beginning of the NONMEM run; one such call per run.
 
-- ICALL=1: the routine has been called for initialization at the
-  beginning of a NONMEM problem; one such call per problem.
+  - ICALL=1: the routine has been called for initialization at the
+    beginning of a NONMEM problem; one such call per problem.
 
-- ICALL=2:  the routine has been called for a prediction. Multiple
-  calls occur.
+  - ICALL=2:  the routine has been called for a prediction. Multiple
+    calls occur.
 
-- ICALL=3: the routine has been called for finalization at the end of
-  a NONMEM problem; one such call per problem.
+  - ICALL=3: the routine has been called for finalization at the end of
+    a NONMEM problem; one such call per problem.
 
-- ICALL=4:  the routine has been called during the Simulation Step;
-  multiple calls occur, as with ICALL=2.
+  - ICALL=4:  the routine has been called during the Simulation Step;
+    multiple calls occur, as with ICALL=2.
 
-- ICALL=5: the routine has been called when expectations are being
-  computed; multiple calls occur.
+  - ICALL=5: the routine has been called when expectations are being
+    computed; multiple calls occur.
 
-- ICALL=6:  the routine has been called when raw data averages are
-  being computed; multiple calls occur.
+  - ICALL=6:  the routine has been called when raw data averages are
+    being computed; multiple calls occur.
 
-- Note: Some subroutines are called with only a subset of  the  possible values of ICALL.
+Note that not every subroutine listed is called all possible ICALL values.
 
-- REFERENCES: Guide  I, section C,4.2; Guide IV, section IV.D ,
-  IV.E.1; Guide VI, section III.C , IV.B.1
+One common pattern of using ICALL is to test it in the abbreviated
+code:
+#+begin_src f90
+IF (ICALL==0) THEN
+;! Run Initialization block
+ENDIF
+
+IF (ICALL==1) THEN
+;! Problem Initialization block
+ENDIF
+
+IF (ICALL==2) THEN
+;! Data Analysis block
+ENDIF
+
+IF (ICALL==3) THEN
+;! Problem and Run Finalization block
+ENDIF
+
+IF (ICALL==4) THEN
+;! Simulation block
+ENDIF
+
+IF (ICALL==5) THEN
+;! Expectation block
+ENDIF
+
+IF (ICALL==6) THEN
+;! Data Average block
+ENDIF
+#+end_src
+
+See [[file:/docs/user-guide/advanced/abbr_block][code blocks]] for extensive use of ICALL.
 
 ** CONTR
 :PROPERTIES:
@@ -133,11 +162,6 @@ If the scatterplot step is implemented, and zero lines are appropriate  for  val
       ENDIF
 #+end_src
 
- REFERENCES: Guide I, section G.3
- REFERENCES: Guide IV, section III.B.4
- REFERENCES: Guide V, section 12.4.16
-
-
 ** CCONTR
 :PROPERTIES:
 :CUSTOM_ID: ccontr
@@ -149,7 +173,7 @@ If the scatterplot step is implemented, and zero lines are appropriate  for  val
       INTEGER(KIND=ISIZE), INTENT(IN OUT)    :: I,IER1,IER2
       REAL(KIND=DPSIZE),   INTENT(IN OUT)    :: CNT,P1(:),P2(:,:)
 #+end_src
-CCONTR is a user-supplied routine for computing the contribution  made
+CCONTR is a user-supplied routine for computing the contribution made
 to  the  objective function from an L2 record.  It is used to override
 the NONMEM default objective function.
 
@@ -210,9 +234,6 @@ a  group  of observation records grouped together by a common value of
 L2.
 
 
-REFERENCES: Guide IV, section III.B.4
-
-
 ** CRIT
 USAGE:
 #+begin_src f90
@@ -262,13 +283,6 @@ Output argument:
 
 Note:  When a user CRIT is supplied, NONMEM subroutine CELS may not be called.
 
-REFERENCES: Guide II, section C.6 , Figure 8
-
-REFERENCES: Guide III, section V.5.0
-
-REFERENCES: Guide IV, section III.B.6
-
-
 ** AES
 :PROPERTIES:
 :CUSTOM_ID: AES-routine
@@ -283,7 +297,30 @@ For use with PREDPP's ADVAN9 and ADVAN15 and ADVAN17.
  REAL(KIND=DPSIZE) :: A,P,E,DA,DP,DT
  DIMENSION :: A(*),P(*),E(*),DA(IR,*),DP(IR,*),DT(*)
 #+end_src
+In general, a system of differential-algebraic equations has the form
+$$
+\frac{dA(t)}{dt}=g(A(t), p, t),\quad 0=h(A(t), p, t)
+$$
+For both equations the left-hand-side (LHS) and right-hand-size (RHS)
+are vectors in general,
+\(A=[A_1, \dots, A_{n_1}]^T\), \(g=[g_1, \dots, g_{n_1}]^T\), \(h=[h_1, \dots, h_{n_2}]^T\).
+/A/ denotes the drug amount in all compartments except the output
+compartment, \(p\) the internal PK parameters, and \(t\) the time.
+This is used to describe a system with \(n_1\) compartments in
+nonequilibrium and \(n_2\) compartments in equilibrium.
+
+For example,
+$$
+p=[K_e, K_a, R]^T,\quad g_1=-K_aA_1, \quad g_2=K_aA_1-K_2A_2, \quad h_1=A_3-RA_2
+$$
+describes the one compartment model with linear elimination and
+absorption from a drug depot (ADVAN2), coupled with a third
+compartment in equilibrium with the central central compartment.
+Constant R is the ratio of the drug amount.
+
 The AES subroutine is called by PREDPP to evaluate  algebraic  expressions for ADVAN9, ADVAN15, and ADVAN17.
+It evaluates \(h()\) functions and store the results in vector /E/.
+The evaluation \(g()\) is delegated to the DES routine.
 
 Input argument:
 
@@ -300,8 +337,8 @@ Input/output arguments:
       stored in the lower-numbered elements of A.)  DA, DP, DT need not
       be computed.
 
-      If AES stores approximate values in A, it must set INIT=0.
-      If AES stores exact values in A, it must leave INIT unchanged.
+      If AES stores approximate values in A, it must set INIT=0;
+      if AES stores exact values in A, it must leave INIT unchanged.
 
       When AES is called with  INIT=2,  the  values  of  the  algebraic
       expressions  must  be  stored in E and the derivatives in DA, DP,
@@ -324,123 +361,179 @@ Output argument:
 
 Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/#nm-pred-mod][NONMEM-PRED modules]], particularly [[file:/docs/reference-manual/api/variables/#des-aes-icall][DES AES: ICALL,IDEFD,IDEFA]].
 
- REFERENCES: Guide IV, section V.C.8 , V.C.9
- REFERENCES: Guide VI, section VI.E
-
+REFERENCES: Guide IV, section V.C.8 , V.C.9
 
 ** DES
 :PROPERTIES:
 :CUSTOM_ID: des-ref
 :END:
-For  use  with ADVAN 6,8,9,13,14,15,16,17,18, called by PREDPP to evaluate right-sides of differential equations.
+For  use  with ADVAN 6,8,9,13,14,15,16,17,18, called by PREDPP to
+evaluate right-sides of differential equations.
 #+begin_src f90
- USAGE:
-
  SUBROUTINE DES (A,P,T,DADT,IR,DA,DP,DT)
  USE SIZES, ONLY: DPSIZE,ISIZE
  INTEGER(KIND=ISIZE) :: IR
  REAL(KIND=DPSIZE) :: A,P,DADT,DA,DP,DT
  DIMENSION :: A(*),P(*),DADT(*),DA(IR,*),DP(IR,*),DT(*)
 #+end_src
+In general, a system of differential equations has the form
+
+$$
+\frac{dA(t)}{dt}=g(A(t), p, t).
+$$
+
+Here both left-hand-side (LHS) and right-hand-size (RHS) are vectors
+of dimention /n/: \(A=[A_1, \dots, A_n]^T\), \(g=[g_1, \dots, g_n]^T\).
+/A/ denotes the drug amount in all compartments except the output
+compartment, \(p\) the internal PK parameters, and \(t\) the time.
+For example, for the one compartment model with linear elimination and
+absorption from a drug depot (ADVAN2) we have
+$$
+n=2,\quad p=[K_e, K_a]^T,\quad g_1=-K_aA_1,\quad g_2=K_aA_1-K_eA_2
+$$
+
+The above arguments are the input arguments for  the DES routine. The
+routine's output argument DADT stores the evaluation of \(g()\).
+
 Input argument:
 
-  - A(n) The amount in the nth compartment at time T.
+  - A(n): the amount in the nth compartment at time T.
 
-  - P(n) The value of the nth PK parameter.
+  - P(n): the value of the nth PK parameter.
 
-  - T:    Time. T takes values continuously over an integration interval.
+  - T: time. T takes values continuously over an integration interval.
 
 Output argument:
 
   - DADT(n)
-        The derivative with respect to T of the nth compartment's amount.
-        It is important to note that PREDPP itself adds in the rates  for
-        any infusions that may be active.
+    The derivative with respect to T of the nth compartment's amount.
+    It is important to note that PREDPP itself adds in the rates  for
+    any infusions that may be active.
 
-        It  is  possible to introduce drug into a compartment by explicit
-        terms in a differential equation,  rather  than  by  PREDPP  dose
-        event records.  Drug introduced in this manner is not included by
-        PREDPP in the computation of the  output  compartment.   Specifically,  the amount in the output compartment may be thought of as
-        being calculated by summing all relevant  doses  from  the  INPUT
-        file  (i.e.,  those  that precede the time of the present record,
-        accounting for bioavailability), subtracting all amounts  present
-        in  compartments other than the output compartment, and then multiplying the result by the output fraction parameter.
+    For example, the above equations for ADVAN2 can be coded as:
+    #+begin_src f90
+      DADT(1)=-P(2)*A(1)
+      DADT(2)= P(2)*A(1)-P(1)*A(2)
+    #+end_src
 
-        For example, suppose differential equations were used for ADVAN2,
-        rather than the analytic solution.  They would be:
-        #+begin_src f90
-        DADT(1)=-P(3)*A(1)
-        DADT(2)= P(3)*A(1)-P(1)*A(2)
-        #+end_src
+  - DA(i,j)
+    The  derivative of \(g_i()\) with respect to A(j). Continuing the above example,
+    #+begin_src f90
+      DA(1,1)=-P(2)
+      DA(2,1)= P(2)
+      DA(2,2)=-P(1)
+    #+end_src
 
-  - DA(n,j)
-        The  derivative  of  DADT(n) with respect to A(j). Continuing the
-        above example,
-        #+begin_src f90
-        DA(1,1)=-P(3)
-        DA(2,1)= P(3)
-        DA(2,2)=-P(1)
-        #+end_src
-
-  - DP(n,j)
-        The derivative of DADT(n) with respect to  P(j).  Continuing  the
-        above example,
-        #+begin_src f90
-        DP(1,3)=-A(1)
-        DP(2,3)= A(1)
-        DP(2,1)=-A(2)
-        #+end_src
-
+  - DP(i,j)
+    The derivative of \(g_i()\) with respect to  P(j).  Continuing  the above example,
+    #+begin_src f90
+      DP(1,2)=-A(1)
+      DP(2,2)= A(1)
+      DP(2,1)=-A(2)
+    #+end_src
   - DT(n)
-        The derivative of DADT(n) with respect to T.
+    The derivative of \(g_i()\) with respect to T.
 
-The  format  of arrays DA, DP, DT described above is called "full
-format".  Alternately, compact format may be used  (See prdde1).   It
-is the  default format for these arrays.  A description of compact
-format is beyond the scope of this document, but is described in  the
-NONMEM 7.4 version of Guide VI, Appendix IV. Compact Arrays in DES.
+The full implementation of the above example model is
+#+begin_src f90
+  SUBROUTINE DES (A,P,T,DADT,IR,DA,DP,DT)
+    USE NMPRD4P
+    USE SIZES, ONLY: DPSIZE,ISIZE
+    USE PRDIMS, ONLY: GPRD,HPRD,GERD,HERD,GPKD
+    USE NMPRD_INT, ONLY: MSEC=>ISECDER,MFIRST=>IFRSTDER,IFIRSTEM,IFIRSTEMJAC,FIRSTEM
+    USE PRCOM_INT, ONLY: DES_DER=>MITER
+    USE NMPRD_INT, ONLY: MDVRES,ETASXI,NPDE_MODE,NOFIRSTDERCODE
+    USE NMPRD_REAL, ONLY: DV_LOQ,CDF_L,DV_LAQ,CDF_LA
+    USE PRMOD_INT, ONLY: ICALL=>ICALLD,IDEFD,IDEFA
+    USE NMBAYES_REAL, ONLY: ADDL_ACTUAL,ADDL_TIMEDIFF,ADDL_TIME
+    IMPLICIT REAL(KIND=DPSIZE) (A-Z)
+    SAVE
+    INTEGER(KIND=ISIZE) :: IR
+    DIMENSION :: A(*),P(*),DADT(*),DA(IR,*),DP(IR,*),DT(*)
+    INTEGER(KIND=ISIZE) :: IFIRSTEMJACIN
+    FIRSTEM=IFIRSTEM
+    IF(DES_DER==1.OR.DES_DER==4) FIRSTEM=1
+    IFIRSTEMJACIN=IFIRSTEMJAC
+    IF(NOFIRSTDERCODE/=1) THEN
+       IFIRSTEMJAC=FIRSTEM
+    ELSE
+       IFIRSTEMJAC=0
+    ENDIF
+    IF(IFIRSTEMJACIN==-2) RETURN
+    IF (ICALL == 1) THEN
+       CALL ASSOCNMPRD4
+       IDEFD(1)= 0
+       RETURN
+    ENDIF
+    ! level 0
+    ! level 0
+    DADT(1)=-P(002)*A(1)
+    DADT(2)=P(002)*A(1)-P(001)*A(2)
+    IF (FIRSTEM == 1) THEN ! 1
+       ! E000004 = DERIVATIVE OF DADT(1) W.R.T. A(001)
+       E000004=-P(002)
+       ! F000081 = DERIVATIVE OF DADT(1) W.R.T. P(002)
+       F000081=-A(1)
+       ! E000005 = DERIVATIVE OF DADT(2) W.R.T. A(001)
+       E000005=P(002)
+       ! E000006 = DERIVATIVE OF DADT(2) W.R.T. A(002)
+       E000006=-P(001)
+       ! F000082 = DERIVATIVE OF DADT(2) W.R.T. P(002)
+       F000082=A(1)
+       ! F000083 = DERIVATIVE OF DADT(2) W.R.T. P(001)
+       F000083=-A(2)
+    ENDIF !1
+    IF (FIRSTEM == 1) THEN !3
+       DA( 1, 1)=E000004
+       DA( 2, 1)=E000005
+       DA( 2, 2)=E000006
+       DP( 1,002)=F000081
+       DP( 2,001)=F000083
+       DP( 2,002)=F000082
+    ENDIF !3
+    RETURN
+  END SUBROUTINE DES
+#+end_src
+See [[file:/docs/reference-manual/api/variables][variables]] for module variables involved in the code.
+
+The format  of arrays DA, DP, DT described above is called "full
+format". It is the  default format. Alternately, compact format may be used.
+See Guide VI, Appendix IV. Compact Arrays in DES.
 
 Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/#nm-pred-mod][NONMEM-PRED modules, and  PREDPP modules]], particularly
  [[file:/docs/reference-manual/api/variables/#des-aes-icall][DES AES: ICALL,IDEFD,IDEFA]].
 
- REFERENCES: Guide IV, section V.C.7
-
- REFERENCES: Guide VI, section VI.C
-
-
 ** ERROR
-USAGE: Versions before NONMEM 7.2:
-
+:PROPERTIES:
+:CUSTOM_ID: error
+:END:
 #+begin_src f90
-SUBROUTINE ERROR (ICALL,IDEF,THETA,IREV,EVTREC,NVNT,INDXS,F,G,HH)
-USE SIZES, ONLY: DPSIZE,ISIZE,LVR
-INTEGER (KIND=ISIZE) :: ICALL,IDEF,IREV,NVNT,INDXS
-REAL(KIND=DPSIZE) :: THETA,F,G,HH
-DIMENSION IDEF(*),THETA(*),EVTREC(IREV,*),INDXS(*),G(LVR,*)
-DIMENSION HH(LVR,*)
-#+end_src
+  ! Versions before NONMEM 7.2:
+  SUBROUTINE ERROR (ICALL,IDEF,THETA,IREV,EVTREC,NVNT,INDXS,F,G,HH)
+    USE SIZES, ONLY: DPSIZE,ISIZE,LVR
+    INTEGER (KIND=ISIZE) :: ICALL,IDEF,IREV,NVNT,INDXS
+    REAL(KIND=DPSIZE) :: THETA,F,G,HH
+    DIMENSION IDEF(*),THETA(*),EVTREC(IREV,*),INDXS(*),G(LVR,*)
+    DIMENSION HH(LVR,*)
 
-With NONMEM 7.2 and higher:
-
-#+begin_src f90
-SUBROUTINE ERROR (ICALL,IDEF,THETA,IREV,EVTREC,NVNT,INDXS,F,G,HH)
-USE SIZES,     ONLY: DPSIZE,ISIZE
-USE PRDIMS,    ONLY: GERD,HERD
-IMPLICIT REAL(KIND=DPSIZE) (A-Z)
-REAL(KIND=DPSIZE) :: EVTREC
-INTEGER(KIND=ISIZE) :: ICALL,IDEF,IREV,NVNT,INDXS
-DIMENSION :: IDEF(*),THETA(*),EVTREC(IREV,*),INDXS(*)
-REAL(KIND=DPSIZE) :: G(GERD,*),HH(HERD,*)
+  ! With NONMEM v7.2+:
+  SUBROUTINE ERROR (ICALL,IDEF,THETA,IREV,EVTREC,NVNT,INDXS,F,G,HH)
+    USE SIZES,     ONLY: DPSIZE,ISIZE
+    USE PRDIMS,    ONLY: GERD,HERD
+    IMPLICIT REAL(KIND=DPSIZE) (A-Z)
+    REAL(KIND=DPSIZE) :: EVTREC
+    INTEGER(KIND=ISIZE) :: ICALL,IDEF,IREV,NVNT,INDXS
+    DIMENSION :: IDEF(*),THETA(*),EVTREC(IREV,*),INDXS(*)
+    REAL(KIND=DPSIZE) :: G(GERD,*),HH(HERD,*)
 #+end_src
 The  ERROR  subroutine  is  called by PREDPP to model intra-individual
 error in observed values.  It can also be used to to  convert  predictions  from  PREDPP, i.e., scaled drug amounts, to other types of predictions (for example, to obtain the prediction of a drug effect as  a
 function of concentration, in a pharmacodynamic study).
 
-
 Input argument:
 
--  ICALL
-   + ICALL=1:  ERROR  has been called for initialization at the
+-  ICALL: see ICALL above for general discussions.
+   + ICALL=1:  ERROR  is being called for initialization at the
      beginning of a NONMEM problem; one such call per problem.  EVTREC
      contains  the  first event record.  THETA contains the initial
      estimates.  ERROR must return values in IDEF which inform PREDPP
@@ -449,27 +542,32 @@ Input argument:
      requested  that ERROR be called only once per problem.
 
    + ICALL=2:  ERROR has been called to obtain the modeled value;
-     multiple calls occur.  ERROR should compute derivatives of F for
-     HH. If  ERROR  changes F, it should also change the derivates of
+     multiple calls occur.  ERROR should compute derivatives of prediction F to
+     be stored in ~HH~. If  ERROR  changes F, it should also change the derivates of
      F in G.
 
-   + ICALL=4: ERROR has been called during the Simulation Step; multiple calls occur.  ERROR should compute simulated observations and
-      store them in F.
+   + ICALL=4: ERROR has been called during the Simulation Step;
+     multiple calls occur.  ERROR should compute simulated
+     observations and store them in F.
 
-   + ICALL=5: ERROR has been called during the computation of expectations;  multiple calls occur.  Such calls occur when the marginal
-      (MRG_) data item is defined in the data set and has non-zero values  for  some records.  If the MRG_ data item has the value 1 or
-      2, expectations are computed  for  that  record,  and  the  value
-      returned  by  ERROR  in  F contributes to the expectation that is
-      being computed for the PRED data item.  The value  of  an  ERRORdefined  item  contributes  to  the  expectation computed for the
-      item.
+   + ICALL=5: ERROR has been called during the computation of
+     expectations;  multiple calls occur.  Such calls occur when the
+     marginal (MRG_) data item is defined in the data set and has
+     non-zero values  for  some records.  If the MRG_ data item has
+     the value 1 or 2, expectations are computed  for  that  record,
+     and  the  value returned  by  ERROR  in  F contributes to the
+     expectation that is being computed for the PRED data item.  The
+     value  of  an  ERRORdefined  item  contributes  to  the
+     expectation computed for the item.
 
    + ICALL=6: ERROR has been called during the computation of raw data
-      averages;  multiple  calls occur.  Such calls occur when the rawdata (RAW_) data item is defined in the  data  set  and  has  the
-      value 1 for some records (See template).  ERROR may re-compute DV
-      when the value of DV in the data record is not the quantity to be
-      included  in  the average.  ERROR may return a value of 1 in F if
-      no DV item is to be included in the average with  the  particular
-      record.
+     averages;  multiple  calls occur.  Such calls occur when the
+     rawdata (RAW_) data item is defined in the  data  set  and  has
+     the value 1 for some records (See template).  ERROR may
+     re-compute DV when the value of DV in the data record is not the
+     quantity to be included  in  the average.  ERROR may return a
+     value of 1 in F if no DV item is to be included in the average
+     with  the  particular record.
 
 -  THETA
       The NONMEM THETA vector.
@@ -514,7 +612,7 @@ Output argument:
 
 Input/Output argument:
 
-- F   On  input,  the  prediction  based  on the pharmacokinetic model,
+- F:  On  input,  the  prediction  based  on the pharmacokinetic model,
       i.e., the value of the scaled drug amount in the observation compartment.   On output, F may be unchanged, or it may be modified,
       e.g., when a PD prediction is needed.  If ERROR  modifies  F  and
       uses  population  eta  variables  to do so, then at ICALL=2 ERROR
@@ -526,7 +624,7 @@ Input/Output argument:
       simulated observation must be  returned  as  the  DV  data  item.
       (See [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
 
-- G   On  input,  at  ICALL=2 when the data are population, an array of
+- G:  On  input,  at  ICALL=2 when the data are population, an array of
       partial derivatives of F with respect to etas
       G (i,1) is the partial derivative of F with respect to eta(i).
       G (i,j+1) is the second derivative of F with respect  to  eta(i),
@@ -537,7 +635,7 @@ Input/Output argument:
       thus  changed the derivatives of F with respect to the population
       etas.
 
-- HH  An array of partial derivatives of F with respect to  etas  (when
+- HH:  An array of partial derivatives of F with respect to  etas  (when
       the  data are single-subject data) or epsilons (when the data are
       population).  Values should be stored when ICALL=2 and also  when
       ICALL=1 if ERROR sets IDEF(2)=2.
@@ -551,11 +649,80 @@ Input/Output argument:
 Also  see [[file:/docs/reference-manual/api/modules/][modules]] for NONMEM  read-only  modules (of the form ROCMn), NONMEM-PRED
  modules (of the form NMPRDn), and PREDPP  read-only  modules  (of the form PROCMn).
 
- REFERENCES: Guide IV, section V.C.6
+*** Calling protocol
+:PROPERTIES:
+:CUSTOM_ID: error-calling-protocol
+:END:
+As the pharmacokinetic system is advanced, ERROR is called one or more
+times, each time with some argument record. The event records comprise
+these argument records, and are passed to ERROR in time order. The
+simulation and/or data analytic computations will normally be done
+correctly if routine ERROR is called with one event record after
+another (within an individual record), no event records being skipped,
+and no event record being repeated. This is the default. However,
+PREDPP can implement a few different protocols for calling ERROR. A
+protocol is specified by setting IDEF(2) to various values at ICALL=1
+(for more about IDEF, see section B.1). The default is IDEF(2)=-1
+(call with every event record), described above. The ERROR routine can
+be called only with each observation event record of the individual
+record. If this more limited sequence of calls is desired, this can be
+accomplished by setting IDEF(2)=0. Note, though, that in this case,
+IDEF(2) must be explicitly set to 0.
 
- REFERENCES: Guide V, section 8
+There are two general considerations to be remembered about
+calling-protocols with ERROR. First, no matter what calling-protocol
+is used, it applies only to calls to ERROR at ICALL=2; at ICALL=4
+(i.e. during simulation) ERROR is always called with every event
+record. [This differs from calling-protocols with PK, where whatever
+calling-protocol is used for PK at ICALL=2 is the same as that used at
+ICALL=4.] Second, a calling-protocol that limits the sequence of calls
+to ERROR should not be requested when the value of F returned by ERROR
+may differ from the value input to ERROR.
 
- REFERENCES: Guide VI, section IV
+Often, none of the EPS derivatives depend on concomitant variables
+whose values vary within an individual record i.e. vary over time.
+This is true if y is given by (1) or (6), for example, or if log y is
+given by (5). This may not be true if y is given by (2); it depends on
+whether the value of Z varies over time. Unless there is only one
+observation per individual, this generally is not true if y is given
+by (3) or (4), since when time varies, f(P) varies, and time itself is
+to be regarded as a concomitant variable. When though this is true,
+then the values stored in the HH array must be the same for each
+observation event record of a given individual record (for THETA and
+ETA fixed). Considerable computation time can be saved; PREDPP need
+call ERROR only once per individual record, with the first event
+record only (for any given values of the THETA and ETA arrays). The
+user can request this calling-protocol by setting IDEF(2)=1. Since the
+first event record need not be an observation record, care must be
+taken that HH is indeed set with this record, and that any data items
+needed for this purpose are contained in that record.
+
+Notice that with y given by (1), for example, the EPS-derivatives do
+not depend on any concomitant variables, nor do they depend on ETA or
+THETA. In such a case the values stored in the HH array must be the
+same for each observation event record of the entire data set; indeed,
+these values could be computed only once during the entire NONMEM
+problem. If at ICALL=1, IDEF(2) is set to 2, then at ICALL=2 values
+for HH will always be taken to be (constant) values stored in HH at
+ICALL=1. Note that the HH array is initialized to zero immediately
+before the call to ERROR with ICALL=1.
+
+If log y is given by (5), the derivatives of log y with respect to the
+EPS are particularly simple; they satisfy the requirement for using
+IDEF(2)=2. By setting IDEF(1)=1, the user is specifying that when
+ICALL=2, the derivatives of log y are to be found in HH (see section
+B.1). By also setting IDEF(2)=2, these derivatives are actually taken
+to be the values stored in HH at ICALL=1.
+
+Even when IDEF(2)=0, 1, or 2, a call to ERROR with any given event record can be forced with
+the use of the CALL data item.
+
+IDEF(2) may be set to -1, or not set at all, i.e. this is the default. This results in ERROR being
+called with every event record (see above).
+
+NM-TRAN abbreviated code provides a reserved variable [[file:/docs/reference-manual/abbr/#calling_protocol][CALLFL]] and
+corresponding pseudo-statements to specify the value for
+IDEF.
 
 ** INFN
 :PROPERTIES:
@@ -572,12 +739,12 @@ Also  see [[file:/docs/reference-manual/api/modules/][modules]] for NONMEM  read
 A  run  consists of one or more problems, and each problem consists of
 one or more subproblems.  With NONMEM 75, there is an  opportunity  to
 drop  data  records  from the NONMEM data set at the start of the run,
-using the .  There are opportunities  to  make
+using the PRED_IGNORE_DATA feature.  There are opportunities  to  make
 some  rudimentary computations at the beginning of a run (run
 initialization), at the beginning of a problem (problem
 initialization),  at the  end  of  a  subproblem (subproblem
 finalization), at the end of a problem (problem finalization), and at
-the end of a run (run finaliza- tion).   For  example, at problem
+the end of a run (run finalization).   For  example, at problem
 initialization, data transgeneration may take place, or a variable
 that  will  be  modified  at  subproblem finalization,  may be
 initialized.  At problem finalization, the value of this variable may
@@ -671,7 +838,6 @@ EXAMPLES OF USAGE:
 
   (See Infn interpolation example).
 
-  REFERENCES: Guide VI, section VI.A , Figure 37
 ** MIX
 :PROPERTIES:
 :CUSTOM_ID: mix
@@ -701,12 +867,11 @@ Input argument:
 
 Output argument:
 
--  NSPOP An integer variable or integer constant.  The maximum  number
+- NSPOP: an integer variable or integer constant.  The maximum  number
   of sub-populations  that  are  possible.  Must be given a value when
   ICALL=1.
 
-
-- P   An array. For each i (i=1, ... , NSPOP), P(i) gives  the
+- P: an array. For each i (i=1, ... , NSPOP), P(i) gives  the
   modeled fraction  of the population in the ith subpopulation.  The
   sum of the P(i) should equal 1.  In principle, the P(i) can change
   from individual  to individual.  If for a given individual, the
@@ -723,39 +888,25 @@ serves to provide an additional way for  individual-specific  information to be 
 
 See also [[file:/docs/reference-manual/api/variables/#mixnum-mixest-mixp][MIXNUM, MIXEST and MIXP]].
 
- (See mixture_model_example).
 
- REFERENCES: Guide III, section V.5.0
-
- REFERENCES: Guide IV, section III.B.4 , III.B.6
-
- REFERENCES: Guide IV, section IV.E.1 , 4.E.2
-
- REFERENCES: Guide VI, section III.L.2 , Figure 6
+See [[file:/docs/user-guide/predpp/population_model/#mixture][mixture model]] example for using $MIX and MIX.
 
 ** MODEL
 :PROPERTIES:
 :CUSTOM_ID: model
 :END:
 #+begin_src f90
- USAGE:
+! USAGE:
  SUBROUTINE MODEL(IDNO,NCM,NPAR,IR,IATT,LINK)
  USE PRMOD_CHAR, ONLY: NAME
  USE SIZES,     ONLY: DPSIZE,ISIZE
  INTEGER(KIND=ISIZE) :: IDNO,NCM,NPAR,IR,IATT,LINK
  DIMENSION :: IATT(IR,*),LINK(IR,*)
-#+end_src
-GLOBAL DECLARATION:
 
-Versions before NONMEM 7.4:
-
-#+begin_src f90
+! GLOBAL DECLARATION:
+! Versions before NONMEM 7.4:
  CHARACTER(LEN=8) :: NAME(PC)
-#+end_src
-
-Versions after NONMEM 7.4:
-
-#+begin_src f90
+! Versions NONMEM v7.4+:
  USE SIZES,     ONLY: SD
  CHARACTER(LEN=SD) :: NAME(PC)
 #+end_src
@@ -765,64 +916,251 @@ Input argument: None.
 
 Output argument:
 
--  IDNO
-      An  identification  number  for  the  MODEL  routine.   The value
-      assigned by MODEL to IDNO is printed on the first PREDPP  problem
-      summary page.
+  - IDNO:
+    An  identification  number  for  the  MODEL  routine.   The value
+    assigned by MODEL to IDNO is printed on the first PREDPP  problem
+    summary page. The user may have several MODEL routines and use
+    different ones for different runs. The routine used in a particular
+    run can be identified from the output. For this to happen, an
+    integer identification value should be assigned by MODEL to the
+    variable IDNO. This value will be printed on the first PREDPP
+    problem summary page. When NM-TRAN abbreviated code is used, IDNO is
+    set to 9999.
 
--  NCM
-      The total number of compartments in the model, excluding the output compartment.  Contains 0 when MODEL is called.  NCM  must  be
-      no greater than PC-1.
+  - NCM: the total number of compartments in the model, excluding the
+    output compartment.  Contains 0 when MODEL is called.  NCM  must
+    be no greater than PC-1.
 
--  NPAR
-      The  number  of basic PK parameters used in the PK routine.  Contains 0 when MODEL is called.  NPAR must be no greater than  constant  PG  in  file  SIZES.   With  the general non-linear models
-      (ADVAN6, ADVAN8,  ADVAN9,  ADVAN13,  ADVAN14,  ADVAN15,  ADVAN16,
-      ADVAN17, ADVAN18), NPAR may remain 0.
+  - NPAR: basic PK parameters exist for general linear and nonlinear
+    models as they do for more specific models. A TRANS routine is
+    used which translates the set of basic PK parameters whose values
+    are computed in the PK routine to a set of parameters used
+    internally by the ADVAN routine. The maximum number of basic PK
+    parameters to be used in any TRANS routine is specified by
+    assigning this number to the variable NPAR. NPAR may be 0, e.g.,
+    when only THETA and data record items are used in differential
+    equations. The maximum number of basic PK parameters plus the
+    number of additional parameters whose row indices are given
+    explicitly in PK (at ICALL=1) cannot exceed PG, a constant in
+    SIZES.f90 which is given by PARAMETER (PG=50+PCT), where PCT is
+    the maximum number of model event time parameters given by
+    PARAMETER (PCT=30) Both these parameters can be changed with the
+    $SIZES record. With  the general non-linear models (ADVAN6,
+    ADVAN8,  ADVAN9,  ADVAN13,  ADVAN14,  ADVAN15, ADVAN16, ADVAN17,
+    ADVAN18), NPAR may remain 0.
 
--  IATT
-      Values  of compartment attributes. The values of IATT(I,*) refers
-      to the ith compartment.
-       + IATT(I,1)=0  initially off
-       + IATT(I,1)=1  initially on
-       + IATT(I,2)=0  may not be turned on and off
-       + IATT(I,2)=1  may be turned on and off
-       + IATT(I,3)=0  may not receive doses
-       + IATT(I,3)=1  may receive doses
-       + IATT(I,4)=0  not the default observation compartment
-       + IATT(I,4)=1  the default observation compartment
-       + IATT(I,5)=0  not the default dose compartment
-       + IATT(I,5)=1  the default dose compartment
+  - IATT:
+       Values  of compartment attributes. The values of IATT(I,*) refers
+       to the ith compartment.
+    + IATT(I,1)=0  initially off
+    + IATT(I,1)=1  initially on
+    + IATT(I,2)=0  may not be turned on and off
+    + IATT(I,2)=1  may be turned on and off
+    + IATT(I,3)=0  may not receive doses
+    + IATT(I,3)=1  may receive doses
+    + IATT(I,4)=0  not the default observation compartment
+    + IATT(I,4)=1  the default observation compartment
+    + IATT(I,5)=0  not the default dose compartment
+    + IATT(I,5)=1  the default dose compartment
 
-      The remainder is used only with ADVAN9, ADVAN15, and ADVAN17:
+    Most pharmacokinetic models involve only nonequilibrium
+    compartments, compartments such that the amounts of drug in them
+    can be given by a solution to a system of differential equations.
+    However, some ADVAN routines - ADVAN9, ADVAN15, ADVAN17 - allow a
+    model (a general nonlinear model) to be comprised of both
+    nonequilibrium and equilibrium compartments. Equilibrium
+    compartments are, roughly speaking, compartments such that at any
+    time the amounts of drug in them can be given by a solution to a
+    system of algebraic equations. These ADVAN routines allow the user
+    to define a model consisting only of equilibrium compartments, in
+    which case the ADVAN becomes a purely algebraic equation solver.
+    The quantities A(i) may be thought of as unknowns to be determined
+    rather than as "compartment" amounts. Records with EVID=1 and
+    EVID=4 (dose, reset and dose) may not be present in the data set
+    because doses cannot be placed in equilibrium compartments.
+    Similarly, data items related to doses (RATE, AMT, SS, II, ADDL)
+    may or may not be used in the data set. If used, they must contain
+    null values. The TIME data item is optional. If TIME is used,
+    ADVAN is called exactly as other ADVAN routines are called: when
+    the value of TIME increases. If TIME is not defined, AES routine
+    specifies the calling protocol for ADVAN: call with every event
+    record (the default) or once per individual record (see section
+    E.C). If calls to ADVAN are limited, the CALL data item may be
+    defined in the data set and given the value 10 to force additional
+    calls to ADVAN (see chapter V, section J). There are two
+    additional attributes to which values must be given only when
+    these ADVAN routins are used. The first of these simply identifies
+    the compartment as an equilibrium compartment or not. The second
+    of these relates to the output compartment. The amount of drug in
+    the output compartment at time t is given by A+B-C, where A is the
+    total amount in the system at s, the time the compartment is
+    turned on, B is the total amount of drug input to the system
+    between times s and t, and C is the total amount in the system at
+    time t. If an equilibrium compartment represents a subcompartment,
+    i.e. the amount D of drug in the compartment is part of the amount
+    of drug in another compartment, D should be excluded from A and C.
+    The attribute in question is concerned with whether D should or
+    should not be excluded from A and C. The settings below is used
+    only with ADVAN9, ADVAN15, and ADVAN17:
 
-       + IATT(I,8)=0  not an equilibrium compartment
-       + IATT(I,8)=1  an equilibrium compartment
-       + IATT(I,9)=0  should not be included in the total drug amount in the system interior
-       + IATT(I,9)=1  should be included in the total drug amount in the system interior
+    + IATT(I,8)=0  not an equilibrium compartment
+    + IATT(I,8)=1  an equilibrium compartment
+    + IATT(I,9)=0  should not be included in the total drug amount in the system interior
+    + IATT(I,9)=1  should be included in the total drug amount in the system interior
 
--  NAME
-      Labels for the compartments (to be printed on the PREDPP  summary
-      page under "FUNCTION").
-      NAME(I)  is  the  label  for compartment i.  With versions before
-      NONMEM 7.4, NAME was limited to 8  characters.   With  NONMEM  74
-      NAME may be up to SD characters long.  SD is defined in SIZES and
-      is set to 30 with NONMEM 7.4.
+  - NAME: labels for the compartments (to be printed on the PREDPP  summary
+       page under "FUNCTION"). NAME(I)  is  the  label  for
+    compartment i.  With versions before NONMEM 7.4, NAME was limited
+    to 8  characters.   With  NONMEM  74 NAME may be up to SD
+    characters long.  SD is defined in SIZES and is set to 30 with
+    NONMEM 7.4.
 
--  LINK: Only used with a general linear model (ADVAN5 and ADVAN7).
-    + LINK(I, J)=0: no drug may distribute from compartment i  to  compartment j.
-    + LINK(I,  J)=K: drug distributes from compartment i to
+  - LINK: Only used with general linear models (ADVAN5 and ADVAN7).
+    The internal parameters of these models are the rate constants.
+    The user assigns each rate constant a number, any number between 1
+    and the value assigned to NPAR. The numbering is estab- lished
+    using the LINK array. LINK is a two-dimensional integer array. If
+    no drug can distribute from the Ith compartment to the Jth
+    compartment, then one can assign 0 to LINK(I,J), or not bother
+    assigning any value to LINK(I,J). In particular, LINK(I,I) should
+    always be ignored. If drug can distribute from the Ith compartment
+    to the Jth compartment, then one assigns to LINK(I,J) the number
+    of the rate constant quantifying this (first- order) distribution.
+    The LINK array should, in particular, account for the distribution
+    of drug from com- partment I to the output compartment. That is,
+    if such distribution can take place, then a number should be
+    assigned to LINK(I,NCM+1). The numbers of the rate constants need
+    not start with the number 1, and they need not be consecutive,
+    i.e. numbers may be skipped. Moreover, two rate constants can be
+    assigned the same number; this forces their values and
+    η-derivatives to be the same. With NM-TRAN, there are two ways to
+    specify LINK. When the $PK abbreviated code is used, link
+    relationships are implied by variable names such as Kij or KiTj
+    (where "T" stands for "TO"). When a user-supplied PK is used, the
+    LINK relationships must be specified explicitly on the $MODEL
+    record using options such as Kij.
+
+    With a general nonlinear model the user explicitly specifies by
+    DES. These equations are parameterized in terms a set of internal
+    kinetic parameters. The LINK array plays no role with a general
+    nonlinear model. The internal parameters are numbered between 1
+    and the number assigned to NPAR. The rules concerning internal
+    parameter numbering are the same as given above for rate constant
+    numbering.
+
+    + LINK(I, J)=0: no drug may distribute from compartment i to compartment j.
+    + LINK(I, J)=K: drug distributes from compartment i to
       compartment j.  The rate constant quantifying this first  order
       distribution is computed by PK and stored in the kth row of GG.
       When MODEL is called, all elements of LINK are 0.
 
- (See [[file:/docs/reference-manual/api/memory/][SIZES]]).
+Example below uses MODEL routine to specify the one compartment
+linear model with first order absorption, just as with ADVAN2.
+#+begin_src f90
+  ! DEFINES A 1 COMPARTMENT LINEAR MODEL WITH FIRST-ORDER ABSORPTION
+  ! COMPT1: DRUG DEPOT COMPT2: CENTRAL COMPT
+  !
+  SUBROUTINE MODEL (IDNO,NCM,NPAR,IR,IATT,LINK)
+    USE PRMOD_CHAR, ONLY: NAME
+    USE SIZES, ONLY: DPSIZE,ISIZE,SD
+    USE PRDIMS, ONLY: GPRD,HPRD,GERD,HERD,GPKD
+    INTEGER(KIND=ISIZE) :: IDNO,NCM,NPAR,IR,IATT,LINK,I,J
+    DIMENSION :: IATT(IR,*),LINK(IR,*)
+    SAVE
+    INTEGER(KIND=ISIZE), DIMENSION (2,7) :: MOD
+    CHARACTER(LEN=SD), DIMENSION(2) :: CMOD
+    DATA (MOD(I, 1),I= 1, 2)/&
+         ! INITIAL STATUS: OFF ON
+         0,1 /
+    DATA (MOD(I, 2),I= 1, 2)/&
+         ! ON/OFF ALLOWED: YES NO
+         1,0 /
+    DATA (MOD(I, 3),I= 1, 2)/&
+         ! DOSE ALLOWED: YES YES
+         1,1 /
+    DATA (MOD(I, 4),I= 1, 2)/&
+         ! DEFAULT FOR OBSERVATIONS: NO YES
+         0,1 /
+    DATA (MOD(I, 5),I= 1, 2)/&
+         ! DEFAULT FOR DOSES: YES NO
+         1,0 /
+    DATA (MOD(I, 6),I= 1, 2)/&
+         0,0 /
+    DATA (MOD(I, 7),I= 1, 2)/&
+         0,0 /
+    DATA (CMOD(I),I= 1, 2) &
+         /’DEPOT’,’CENTRAL’/
+    FORALL (I=1:2) NAME(I)=CMOD(I)
+    FORALL (I=1:2,J=1:7) IATT(I,J)=MOD(I,J)
+    IDNO=9999
+    NCM= 2
+    NPAR=002
+    RETURN
+  END SUBROUTINE MODEL
+#+end_src
 
- An initial steady state may be requested by routine MODEL;
+For another example, we implement the MODEL routine for the following
+$MODEL block
+#+begin_src perl
+$MODEL COMP=(DEPOT,NOOFF,DEFDOSE) COMP=(CENTRAL NOOFF NODOSE)
+COMP=(EFFECT, NOOFF NODOSE DEFOBS)
+#+end_src
+#+begin_src f90
+  ! DEFINES A 3 COMPARTMENT MODEL
+  ! COMPT1: DRUG DEPOT COMPT2: CENTRAL COMPT COMPT3: EFFECT COMPT
+  !
+  SUBROUTINE MODEL (IDNO,NCM,NPAR,IR,IATT,LINK)
+    USE PRMOD_CHAR, ONLY: NAME
+    USE SIZES, ONLY: DPSIZE,ISIZE,SD
+    USE PRDIMS, ONLY: GPRD,HPRD,GERD,HERD,GPKD
+    INTEGER(KIND=ISIZE) :: IDNO,NCM,NPAR,IR,IATT,LINK,I,J
+    DIMENSION :: IATT(IR,*),LINK(IR,*)
+    SAVE
+    INTEGER(KIND=ISIZE), DIMENSION (3,7) :: MOD
+    CHARACTER(LEN=SD), DIMENSION(3) :: CMOD
+    DATA (MOD(I, 1),I= 1, 3)/&
+         ! INITIAL STATUS: ON ON ON
+         1,1,1 /
+    DATA (MOD(I, 2),I= 1, 3)/&
+         ! ON/OFF ALLOWED: NO NO NO
+         0,0,0 /
+    DATA (MOD(I, 3),I= 1, 3)/&
+         ! DOSE ALLOWED: YES NO NO
+         1,0,0 /
+    DATA (MOD(I, 4),I= 1, 3)/&
+         ! DEFAULT FOR OBSERVATIONS: NO NO YES
+         0,0,1 /
+    DATA (MOD(I, 5),I= 1, 3)/&
+         ! DEFAULT FOR DOSES: YES NO NO
+         1,0,0 /
+    DATA (MOD(I, 6),I= 1, 3)/&
+         0,0,0 /
+    DATA (MOD(I, 7),I= 1, 3)/&
+         0,0,0 /
+    DATA (CMOD(I),I= 1, 3) &
+         /’DEPOT’,’CENTRAL’,’EFFECT’/
+    FORALL (I=1:3) NAME(I)=CMOD(I)
+    FORALL (I=1:3,J=1:7) IATT(I,J)=MOD(I,J)
+    IDNO=9999
+    NCM= 3
+    NPAR=004
+    ! SET LINK:
+    ! K12
+    LINK( 1,002)=001
+    ! K23
+    LINK( 2,003)=003
+    ! K20
+    LINK( 2,004)=002
+    ! K30 (KEO)
+    LINK( 3,004)=004
+    RETURN
+  END SUBROUTINE MODEL
+#+end_src
+
+(See [[file:/docs/reference-manual/api/memory/][SIZES]]).
+
+An initial steady state may be requested by routine MODEL;
  (See [[file:/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod][Initial Steady State: I_SS,ISSMOD]]).
-
- REFERENCES: Guide IV, section V.C.4
- REFERENCES: Guide VI, section VI.B , Figures 28, 29, 43
- REFERENCES: Guide VI, Appendix II
 
 ** PK
 :PROPERTIES:
@@ -862,18 +1200,35 @@ compartment amounts to concentrations, and dose-related  parameters
 such  as  modeled  infusion rates.
 
 Input argument:
-- ICALL: see ICALL above.
+- ICALL: see ICALL above for general discussions.
+  + ICALL=1: PK routine is being called for the first time in the NONMEM problem. At such a time PK must store certain information in array IDEF, and optionally certain information in GG.
+  + ICALL=2: PK routine is being called for regular data analysis and
+    that values of PK parameters are to be stored in the first column
+    of GG. These can be typical (population mean) values , or they can
+    be subject-specific values. In addition, partial derivatives are also stored. see sections D and E.
+  + ICALL=4: PK routine is being called for regular data simulation.
+    If the data are population data, simulated subject-specific PK
+    parameters values are to be stored in the first column of GG; see
+    section E.2. However, if the data are all from a single subject,
+    so that the subject’s specific values are synonomous with the
+    typical values, then typical values are stored in this column.
+  + ICALL=5: PK routine is being called for regular expectations
+    computation. Multiple calls can occur. See [[file:/docs/user-guide/advanced/abbr_block/#expectation-block][Expectation blocks]]. In this case no ETA derivatives are needed.
 
-- THETA: the NONMEM THETA vector.
+If there is abbreviated code in the $PK block conditional on ICALL=0, ICALL=1, or ICALL=3, the
+code is transcribed to the INFN routine as part of an $INFN
+block.
 
-- EVTREC: the PREDPP event record.
+  - THETA: the NONMEM THETA vector.
 
-- INDXS: the  values specified in the $INDEX record of the NM-TRAN
-  control stream.  (This is the NONMEM Index array starting at
-  position 12, the first position beyond those positions used by
-  PREDPP itself).
+  - EVTREC: the PREDPP event record. See [[file:/docs/reference-manual/api/variables/#evtrec][EVTREC]].
 
-- NETAS: the number of population etas in the problem.
+  - INDXS: the  values specified in the $INDEX record of the NM-TRAN
+    control stream.  (This is the NONMEM Index array starting at
+    position 12, the first position beyond those positions used by
+    PREDPP itself).
+
+  - NETAS: the number of population etas in the problem.
 
 Output argument:
 
@@ -896,15 +1251,15 @@ Output argument:
     - -1: PK may initialize A_0.
     -  0: PK does not initialize A_0.
     -  1: PK does initialize A_0.
-    The default used by PREDPP is IDEF(1,3)=-1.  However,  when  compartment  initialization is not implemented, then if IDEF(1,3) is
-      set to  0,  PREDPP  can  avoid  some  time-consuming  processing.
-      Indeed,  when  $PK  abbreviated or verbatim code is supplied, and
-      there is  no  reference  to  compartment  initialization  amounts
-      A_0(n)  in  either the abbreviated or verbatim code, then NM-TRAN
-      sets IDEF(1,3)=0.
+    The default used by PREDPP is IDEF(1,3)=-1.  However,  when
+    compartment  initialization is not implemented, then if IDEF(1,3)
+    is set to  0,  PREDPP  can  avoid  some  time-consuming
+    processing. Indeed,  when  $PK  abbreviated or verbatim code is
+    supplied, and there is  no  reference  to  compartment
+    initialization  amounts A_0(n)  in  either the abbreviated or
+    verbatim code, then NM-TRAN sets IDEF(1,3)=0.
 
-      Compartment amounts may be used by routine PK;
-      (See [[file:/docs/reference-manual/api/variables/#state-vec-a][State Vector A]]).
+    Compartment amounts may be used by routine PK (See [[file:/docs/reference-manual/api/variables/#state-vec-a][State Vector A]]).
 
   + IDEF(1,4) describes whether PK uses  derivatives  of
       compartment amounts (e.g. compartment amounts themselves are used
@@ -912,11 +1267,14 @@ Output argument:
     - -1: PK may use derivatives of compartment amounts.
     -  0: PK does not use derivatives of compartment amounts.
     -  1: PK uses derivatives of compartment amounts.
-    The default used by PREDPP is IDEF(1,4)=-1.  However, when derivatives  of compartment amounts are not used, then if IDEF(1,4) is
-      set to  0,  PREDPP  can  avoid  some  time-consuming  processing.
-      Indeed,  when  $PK  abbreviated or verbatim code is supplied, and
-      there is no reference to A(n) (as a random variable in an  arithmetic  statement)  in  the abbreviated code (or to derivatives of
-      A(n) in the verbatim code), then NM-TRAN sets IDEF(1,4)=0.
+    The default used by PREDPP is IDEF(1,4)=-1.  However, when
+    derivatives  of compartment amounts are not used, then if
+    IDEF(1,4) is set to  0,  PREDPP  can  avoid  some  time-consuming
+    processing. Indeed,  when  $PK  abbreviated or verbatim code is
+    supplied, and there is no reference to A(n) (as a random variable
+    in an  arithmetic  statement)  in  the abbreviated code (or to
+    derivatives of A(n) in the verbatim code), then NM-TRAN sets
+    IDEF(1,4)=0.
 
   + Remaining elements contain row numbers in GG:
     - IDEF(2,1): row number of F0 (output fraction)
@@ -929,39 +1287,113 @@ Output argument:
     - IDEF(6,n): row number of Dn (modeled duration for comp. n)
     - IDEF(7,n): row number of ALAGn (absorption lag for comp. n)
 
-- GG  The array of PK parameters and their eta derivatives.  The  maximum  number  of rows in GG is given by IRGG, which is the same as
-      constant PG found in file SIZES (See [[file:/docs/reference-manual/api/memory/][SIZES]]).
+- GG:  the array of PK parameters and their eta derivatives,
+  initialized to zero immediately before PK calls. The  maximum
+  number  of rows in GG is given by IRGG, which is the same as
+  constant PG found in file SIZES (See [[file:/docs/reference-manual/api/memory/][SIZES]]).
   + At ICALL = 2:
-     - GG(k,1,1) contains the value of the kth parameter.
-     - GG(k,i+1,1) contains its derivative with respect to the ith eta.
-     - GG(k,i+1,j+1) contains its second derivative with respect to  the ith eta and the jth eta (lower-triangular; j=1, ..., i).  (Second derivatives are only needed  with  estimation  by  the  Laplacian method.)
-  + At ICALL = 4:
-      GG(k,1,1)  contains  the  individual-specific  value  of  the kth parameter.  Other columns of GG need not be computed.
+     - GG(k,1,1) contains the value of the k'th parameter;
+     - GG(k,i+1,1) contains its derivative with respect to the ETA(i);
+     - GG(k,i+1,j+1) contains its second derivative with respect to
+       ETA(i) and ETA(j) (lower-triangular; j=1, ..., i).  Recall that
+       second derivatives are only needed with METHOD=LAPLACE,
+       therefore GG may be declared as a two-dimensional array
+       ~GG(IRGG,*)~ when the Laplacian method is not used.
+  + At ICALL = 4: GG(k,1,1)  contains  the  individual-specific  value  of  the
+    k'th parameter.  Since ICALL=4 indicates simulation, other columns
+    of GG for partial derivatives need not be computed.
+  + At ICALL = 1: GG(k,1,1)=[0|1] specifies transformation of the
+    values that will be stored at GG(k,1,1) during
+    calls with ICALL=2 or 4. GG(k,1,1)=0 means no transformation,
+    while GG(k,1,1)=1 indicates GG(k,1,1) will store a log-transformed
+    parameter value.
 
 Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/#nm-pred-mod][NONMEM-PRED modules, and  PREDPP modules]].
 
-- REFERENCES: Guide IV, section V.C.5
-- REFERENCES: Guide V, section 7
-- REFERENCES: Guide VI, section III
+*** Calling protocol
+:PROPERTIES:
+:CUSTOM_ID: pk-calling-protocol
+:END:
+As the pharmacokinetic system is advanced, PK is called one or more
+times, each time with some argument record. The event records comprise
+these argument records, and are passed to PK in time order. The
+simulation and/or data analytic computations will normally be done
+correctly if routine PK is called with one event record after another
+(within an individual record), no event records being skipped, and no
+event record being repeated. This is the default. However, PREDPP can
+implement a few different protocols for calling PK. A protocol is
+specified by setting IDEF(1,2) to one of various values at ICALL=1
+(for more about IDEF, see section G). For example, the PK routine can
+be called only with the first event record of the individual record
+and with every event record thereafter where the time data item
+differs from the time data item of the previous event record. If this
+more limited sequence of calls is desired, this can be accomplished by
+setting IDEF(1,2)=0. Note, though, that in this case, IDEF(1,2) must
+be explicitly set to 0 because 0 is not the default.
+
+Often, none of the basic or additional PK parameters depend on
+concomitant variables whose values vary within an individual record,
+i.e. vary over time. In this situation the information output by PK,
+i.e. the GG array, is the same for each event record of an individual
+record (for fixed THETA and ETA). Considerable computation time can be
+saved; PREDPP need call PK only once per individual record, with the
+first event record only (for any given values of the THETA and ETA
+arrays). The values of continuously acting PK parameters computed with
+this call can be assumed to hold over all state-time intervals for the
+individual record, and the values of discretely acting PK parameters
+can be assumed to hold at each state time for the record. The user can
+request this calling-protocol by setting IDEF(1,2)=1.
+
+When the data are from a single subject, PREDPP treats all event
+records in the entire data set as though they are associated with the
+same subject. (This is a consequence of the single-subject assumption;
+see section IV.A.) In particular, suppose that every call to PK with a
+different event record results in the same output from PK (for fixed
+THETA). Then only one call is necessary, a call with the first event
+record in the entire data set. The values of continuously acting PK
+parameters computed at this call can be assumed to hold over all
+state-time intervals for the entire data set, and the values of
+discretely acting PK parameters can be assumed to hold at all state
+times for the entire data set. Setting IDEF(1,2) to 1 has this effect.
+
+Even when IDEF(1,2)=0 or 1, a call to PK with any given event record can be forced with the use
+of the CALL data item.
+
+The protocol where PK is called once with every event record can be
+specified by setting IDEF(1,2) to -1, or by not setting IDEF(1,2) at
+all, i.e. this protocol is the default. If it is desired that, in
+addition, the values of PK parameters at any nonevent dose time t be
+computed with access to both the argument record associated with t and
+the event record describing the dose (see section B.2), set
+IDEF(1,2)=-2. This has the effect that PK may be called repeatedly
+with the same event record (for if t is a nonevent dose time, and s is
+the subsequent event time, PK is called with the event record for s at
+both times t and s). The primary use of this protocol is so that the
+values of certain discretely acting PK parameters, the bioavailability
+fractions and duration parameters, can always be computed with access
+to useful dose-related concomitant information contained in the dose
+record, such as the type of preparation, even when the dose is an
+additional or lagged dose. Another use of this protocol is to cause
+PREDPP to call PK at the time specified by a model event time
+parameter; this protocol is required with such parameters.
+
+NM-TRAN abbreviated code provides a reserved variable [[file:/docs/reference-manual/abbr/#calling_protocol][CALLFL]] and
+corresponding pseudo-statements to specify the value for
+IDEF.
+
 ** PRED
 :PROPERTIES:
 :CUSTOM_ID: pred
 :END:
-USAGE:
-
-Versions before NONMEM 7.2:
-
 #+begin_src f90
+! Versions before NONMEM 7.2:
  SUBROUTINE PRED (ICALL,NEWIND,THETA,DATREC,INDXS,F,G,H)
  USE SIZES,     ONLY: DPSIZE,ISIZE,LVR
  REAL(KIND=DPSIZE) :: DATREC
  INTEGER(KIND=ISIZE) :: ICALL,NEWIND,INDXS
  DIMENSION :: THETA(*),DATREC(*),INDXS(*),G(LVR,*),H(LVR,*)
 
-#+end_src
-With NONMEM 7.2 and higher:
-
-#+begin_src f90
+! NONMEM v7.2+:
  SUBROUTINE PRED (ICALL,NEWIND,THETA,DATREC,INDXS,F,G,H)
  USE SIZES, ONLY: DPSIZE,ISIZE
  USE PRDIMS,ONLY: GPRD,HPRD,GERD,HERD,GPKD
@@ -978,7 +1410,7 @@ for common Population PK models.
 Input argument:
 
 - ICALL
-  + ICALL=-1: the routine has been called for the  [[file:/docs/user-guide/advanced/abbr_block/#pred_ignore_data_block][ PRED_IGNORE_DATA]] feature (NM75).   One call per data record, at the start
+  + ICALL=-1: the routine has been called for the [[file:/docs/user-guide/advanced/abbr_block/#pred_ignore_data_block][PRED_IGNORE_DATA]] feature (NM75).   One call per data record, at the start
     of the run.  These calls  occur  only  if  abbreviated  code  uses
     variables PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if the
     [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]] of $DATA is used.  Otherwise, there are no
@@ -1088,11 +1520,250 @@ Output argument:
 
 Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]].
 
- REFERENCES: Guide I, section C.2
+*** SIMEPS
+:PROPERTIES:
+:CUSTOM_ID: simeps
+:END:
+#+begin_src f90
+    USE SIZES, ONLY: DPSIZE,LVR
+    REAL(KIND=DPSIZE):: EPS(LVR)
+    CALL SIMEPS (EPS)
+#+end_src
+SIMEPS can be called by PRED during the simulation
+step to obtain simulated epsilon values.  It can only be called with
+ICALL=4.
 
- REFERENCES: Guide IV, section III.B.8 , IV
+Output argument:
 
- REFERENCES: Guide V, section 12.3
+EPS: a 1-D array that stores  simulated  epsilon values
+EPS(1), EPS(2).
+
+The simulated epsilon values follow a multivariate normal
+distribution with mean 0 and covariance matrix SIGMA.  With  different  calls  to  SIMEPS  with
+different  level-two records, new and different simulated epsilon
+values are obtained. (A level-two record has the same value of L2 and
+may also be called an L2 record. When the L2 data item is
+not defined, all data records are  level-two records,  and
+different  data  records  are  different  level-two records.)  By
+default, with different calls to SIMEPS  with  the  same level-two
+record,  the  same  simulated epsilon values are obtained - those
+obtained at the first  call  with  the  record.   (There  is  an
+advanced feature whereby records are "repeated". See
+Repetition_Variables).  When  records of a level-two record are
+being repeated, with different calls to SIMEPS with the  same
+level-two record,  the  values obtained are the last values stored in
+these variables when the record was previously passed to PRED.
+
+If, the NEW option is used with the first random source on the
+$SIMULATION  record, then each time SIMEPS is called (with the same or
+different level-two record), new and different  values  are  obtained.
+With  any particular call to SIMEPS, the effect of the NEW option can,
+though, be overridden; (See Simulation:_IETAOL_IEPSOL)
+
+So that simple simulation can be easily implemented  with  abbreviated
+code,  values  of epsilon are obtained by calls to SIMEPS occurring in
+the generated subroutine.  When the data are population data  and  the
+Simulation  Step is implemented, SIMEPS is called once with every call
+to PRED (or once at every call to ERROR if  PREDPP  is  used).   These
+calls  are implemented so that even if, initially, the Simulation Step
+is not implemented, the NONMEM  executable  resulting  from  using  an
+abbreviated  code  for  PRED  (or  for ERROR if PREDPP is used) can be
+reused with a run implementing the Simulation Step.
+
+Additional calls to SIMEPS may appear in simulation blocks of $PRED
+and $ERROR abbreviated code. There is an analogous routine SIMETA.
+(See SIMETA).
+
+For example, implementation below illustrates
+ERROR routine for the Simulation Step along with a data analysis step,
+applicable when drug levels are being simulated under the same model
+used for the data analysis. Here
+EPS is obtained using SIMEPS, and the value for the observation /y/ is
+computed and returned in ~F~. Note that the
+computation at ICALL=2 implements a slightly different model for residual variability than is
+simulated.
+#+begin_src f90
+  ! ERROR ROUTINE FOR THE PHENOBARB POPULATION DATA
+  ! ILLUSTRATING DATA SIMULATION
+  ! EXPONENTIAL ERROR MODEL
+  !
+  SUBROUTINE ERROR (ICALL,IDEF,THETA,IREV,EVTREC,NVNT,INDXS,F,G,HH)
+    USE SIZES, ONLY: DPSIZE,ISIZE
+    USE PRDIMS, ONLY: GERD
+    USE NMPRD_REAL,ONLY: EPS
+    IMPLICIT REAL(KIND=DPSIZE) (A-Z)
+    REAL(KIND=DPSIZE) :: EVTREC
+    INTEGER(KIND=ISIZE) :: ICALL,IDEF,IREV,NVNT,INDXS
+    DIMENSION :: IDEF(*),THETA(*),EVTREC(IREV,*),INDXS(*)
+    REAL(KIND=DPSIZE) :: G(GERD,*),HH(*)
+    IF (ICALL.EQ.2) HH(1)=F
+    IF (ICALL.EQ.4) THEN
+       CALL SIMEPS (EPS)
+       F=F*EXP(EPS(1))
+    ENDIF
+    RETURN
+  END SUBROUTINE ERROR
+#+end_src
+
+*** SIMETA
+#+begin_src f90
+! USAGE:
+      USE SIZES, ONLY: DPSIZE,LVR
+      REAL(KIND=DPSIZE):: ETA(LVR)
+      CALL SIMETA (ETA)
+#+end_src
+Routine SIMETA can be called by PRED during the simulation step, to
+obtain simulated eta values.   It  may  be  called only when ICALL=4.
+
+Output argument:
+
+ETA: an  array  into  which SIMETA stores simulated eta values ETA(1),
+      ETA(2), ...  The dimension of the array may be smaller  than  the
+      maximum, e.g., it may equal the number of etas in the problem.
+
+Simulated  ETA  values  arise from a multivariate normal pseudo-random
+distribution with mean 0  and  variance-covariance  as  specified  for
+OMEGA.   With  different  calls  to  SIMETA  with different individual
+records, new and different simulated eta values are obtained. (With
+population data, an individual record has the same value  of  ID and
+may also be called a level-one "L1" record.)  (See ID). By  default,
+with  different calls to SIMETA with the same individual record, the
+same simulated eta values are obtained - those obtained at the first
+call with the record.  (There is an advanced feature whereby records
+are "repeated" (See Repetition_Variables), and when records of an
+individual record are being repeated, with dif- ferent  calls  to
+SIMETA  with the same individual record, the values obtained are the
+last values stored in these variables when the record was previously
+passed to PRED.)
+
+If, though, the NEW option is used with the first random source on the
+$SIMULATION record, then each time SIMETA is called (with the same  or
+different  individual  record), new and different values are obtained.
+Thus, for example, when PRED is called with the first data  record  of
+an  individual  record,  PRED  can  in turn call SIMETA multiple times
+until values are obtained such that, for example, ETA(2) is not larger
+than 5 in absolute value; that is, values can be obtained from a
+truncated distribution (see below).  With any particular call  to
+SIMETA, the effect of the NEW option can, though, be overridden; (See
+Simulation:_IETAOL_IEPSOL) So  that  simple simulation can be easily
+implemented with abbreviated code, values of etas are obtained by
+calls to SIMETA occurring in  the generated  subroutine.   When  the
+data are population data, SIMETA is called once per individual record
+by PRED (or PK if PREDPP  is  used). (In  the  case  of  PK, the array
+of etas is stored in a common and is available to the ERROR subroutine
+as well.)  When the data are single- subject  data,  SIMETA  is
+called once at every call to PRED (once at every call to ERROR if
+PREDPP is used).
+
+These calls are implemented so that even if, initially, the Simulation
+Step is not implemented, the NONMEM executable resulting from using an
+abbreviated code for PRED (for PK or ERROR if PREDPP is used)  can  be
+reused with a run implementing the Simulation Step.
+
+EXAMPLES OF USAGE:
+
+In  this example, the value of ETA(2) used by PRED will be less than 5
+in absolute value.  For this code to  have  the  desired  effect,  the
+option NEW must be used in the $SIMULATION record.
+
+#+begin_src f90
+    IF (ICALL.EQ.4.AND.NEWIND.NE.2) THEN
+       DO WHILE (ABS(ETA(2)).GT.5)
+          CALL SIMETA (ETA)
+       ENDDO
+    ENDIF
+#+end_src
+
+Suppose  there  are two ETAs to be selected in this manner.  Each one
+needs its own CALL SIMETA loop, because each CALL SIMETA replaces  all
+the ETAs.
+
+#+begin_src f90
+    IF (ICALL.EQ.4.AND.NEWIND.NE.2) THEN
+       DO WHILE (ABS(ETA(2)).GT.5)
+          CALL SIMETA (ETA)
+       ENDDO
+       ETA2=ETA(2)
+       DO WHILE (ABS(ETA(1)).GT.0.52)
+          CALL SIMETA (ETA)
+       ENDDO
+       ETA1=ETA(1)
+    ENDIF
+#+end_src
+Another way this can be implemented is as follows:
+
+#+begin_src f90
+    IF (ICALL.EQ.4.AND.NEWIND.NE.2) THEN
+       DO WHILE(ABS(ETA(2)).GT.5.OR.ABS(ETA(1)).GT.0.52)
+          CALL SIMETA (ETA)
+       ENDDO
+       ETA2=ETA(2)
+       ETA1=ETA(1)
+    ENDIF
+#+end_src
+
+See also the analogous routine SIMEPS.
+
+*** Error recovery
+:PROPERTIES:
+:CUSTOM_ID: error-recovery
+:END:
+Similar to the [[file:/docs/reference-manual/control-records/pred/#error][$PRED record]], PREDPP may exit with a nonzero PRED error
+return code. Then either the NONMEM run is immediately aborted or an
+error-recovery procedure is implemented. An error-recovery procedure
+entails continued calls to PRED, but with values of THETA or ETA
+different from those with previous calls which resulted in nonzero
+return codes. There are two error-recovery procedures: one with which
+different ETA values are tried, the ETA-recovery , a second with which
+different THETA (and possibly ETA) values are tried, the
+THETA-recovery . Whenever it is possible to implement the
+ETA-recovery, this is done. If this procedure fails, or if it is not
+possible to implement the ETA-recovery, and the error return code is
+obtained during either the search in the Estimation Step or the search
+in the Initial Estimation Step, then a choice exists between an abort
+and implementation of the THETA-recovery. If the THETA-recovery fails,
+or if it is not actually possible to implement the THETA-recovery, the
+NONMEM run is aborted.
+
+A PRED error return code can have values 0, 1, or 2. The value 0 means
+that the return is a normal return. The value 1 means that if the
+choice exists between an abort or implementation of the
+THETA-recovery, then this choice is to be made using control stream
+information. The value 2 means that if the choice exists between an
+abort or implementation of the THETA-recovery, then the abort should
+be chosen.
+
+When an abort occurs, an error message will appear in the NONMEM
+output, in the intermediate output file (if such a file exists), and
+in the PRED Error file. When the THETA-recovery is implemented, an
+error message appears in the intermediate output file (if such a file
+exists), in the PRED Error file, and if recovery is not possible, in
+the NONMEM output. The error message is called a PRED error message .
+When the PRED error return code is 1, and a choice exists between
+implementation of the THETA- recovery and an abort, the THETA-recovery
+is implemented if the NOABORT option is used in the $ESTIMATION
+($THETA) record. Often, the most appropriate response to an abort
+occuring during the Initial Estimate Step, or during the Estimation
+Step after the 0th iteration summary has been output, is to rerun the
+problem requesting that the THETA-recovery be implemented. Warning: If
+the implementation of the THETA-recovery is requested before an actual
+abort has occured, be sure to check the PRED Error file PRDERR for
+possibly useful diagnostic information that is otherwise available in
+NONMEM output when an abort occurs.
+
+- Error-Recovery from PREDPP: PREDPP may exit with a nonzero PRED
+  error return code as a result of some computation undertaken in a
+  PREDPP kernal or Library routine, or when PK returns an invalid
+  value of a PK parameter. The nature of the problem will be described
+  in the PRED error message if this message appears
+- Error-Recovery from PK (same as AES, DES): PK (as well as ERROR, DES, and AES) can can
+  force an immediate return to NONMEM from PREDPP with a nonzero PRED
+  error return code and accompanying user message. The contents of GG
+  are ignored. See [[file:/docs/reference-manual/api/variables/#pred-exit][PRED EXIT code]].
+- Error-Recovery from ERROR: similarly ERROR can force an immediate
+  return to NONMEM from PREDPP with a nonzero PRED error return code
+  and accompanying user message. The contents of F, G, and HH are
+  ignored.
 
 ** PRIOR
 :PROPERTIES:
@@ -1134,24 +1805,23 @@ Output argument:
 Other Inputs are  available  to  PRIOR  in [[file:/docs/reference-manual/api/modules/][NONMEM read-only modules]].
 
 PRIOR  may  call   NONMEM   utility   routines  NWPRI   and   TNPRI:
-
 #+begin_src f90
-      SUBROUTINE PRIOR (ICALL,CNT)
-      USE SIZES, ONLY: DPSIZE,ISIZE
-      REAL (KIND=DPSIZE) :: CNT
-      REAL (KIND=DPSIZE) :: PLEV
-      INTEGER (KIND=ISIZE) :: ICALL
-      NTHETA=3
-      NETA=3
-      NEPS=1
-      NTHP=2
-      NETP=2
-      NEPP=1
-      PLEV=0
-      CALL NWPRI (NTHETA,NETA,NEPS,NTHP,NETP,NEPP,NPEXP,ITYP,PLEV, &
-                  NSAM,ISS,CNT)
-      RETURN
-      END
+  SUBROUTINE PRIOR (ICALL,CNT)
+    USE SIZES, ONLY: DPSIZE,ISIZE
+    REAL (KIND=DPSIZE) :: CNT
+    REAL (KIND=DPSIZE) :: PLEV
+    INTEGER (KIND=ISIZE) :: ICALL
+    NTHETA=3
+    NETA=3
+    NEPS=1
+    NTHP=2
+    NETP=2
+    NEPP=1
+    PLEV=0
+    CALL NWPRI (NTHETA,NETA,NEPS,NTHP,NETP,NEPP,NPEXP,ITYP,PLEV, &
+         NSAM,ISS,CNT)
+    RETURN
+  END SUBROUTINE PRIOR
 #+end_src
 NWPRI  and TNPRI compute particular types of penalty functions.  NWPRI
 computes a function based on a prior that has  a  multivariate  normal
@@ -1161,7 +1831,7 @@ used during a Simulation Step, it produces a random value of THETA and
 a random value of OMEGA from the  prior.   The  prior  information  is
 entered  manually  into  the control stream.  This prior is especially
 useful  for  a  subjective  specification  of  a   penalty   function.
-(See nwpri, tnpri).
+(See NWPRI, TNPRI below).
 
 Model parameters may be constrained in various ways.  Those parameters
 whose values are not fixed are transformed  to  new  parameters  whose
@@ -1179,7 +1849,604 @@ penalty  function. (See TNPRI).
 The $PRIOR statement can be used instead of a PRIOR subroutine.
 (See $prior.ctl).
 
-REFERENCES: Guide V, section 12.4.16
+*** NWPRI
+:PROPERTIES:
+:CUSTOM_ID: nwpri
+:END:
+#+begin_src f90
+    USE SIZES, ONLY: ISIZE,DPSIZE
+    INTEGER (KIND=ISIZE) :: NTHETA,NETA,NEPS,NTHP,NETP,NEPP,NPEXP
+    INTEGER (KIND=ISIZE) :: ITYP,NSAM,ISS
+    REAL (KIND=DPSIZE), ONLY: CNT
+    REAL (KIND=DPSIZE), ONLY: PLEV
+    INTEGER (KIND=ISIZE) :: ICALL
+    CALL NWPRI (NTHETA,NETA,NEPS,NTHP,NETP,NEPP,NPEXP,ITYP,PLEV, &
+         NSAM,ISS,CNT)
+#+end_src
+Use only with the new $ESTIMATION methods of NONMEM 7.
+
+The user-written PRIOR subroutine allows a penalty function based on a
+prior to be specified and  added  to  the  -2log  likelihood  function
+(Gisleskog et al, JPP, 2002, p. 473-505).  This serves as a constraint
+on THETA, OMEGA, and SIGMA estimates and thus  as  a  way  for  stable
+estimates  of  these parameters to be obtained with insufficient data.
+NWPRI  computes  a  function based  on  a  prior that has a multivariate normal form for THETA, and
+also, in the case of population data,  an  inverse  Wishart  form  for
+OMEGA  (independent  from  the  normal  for THETA).  The parameters of
+these forms are called "hyperparameters".
+
+Using NWPRI, several penalties functions, each with a different set of
+values for the hyperparameters, may be used simultaneously.  Each  set
+of  values  may  be thought to arise from a different prior experiment
+(study).  In actuality, there is a way to combine the  several
+penalties  functions into one (see above reference), and this is what
+NWPRI computes.
+
+When NWPRI is used during a Simulation Step,  it  produces  a  random
+value of THETA and a random value of OMEGA from the prior.  (See
+Simulation example). (See nwpri example). If NWPRI is used at ICALL=2,
+it need not be used at ICALL=4, and vice-versa.
+
+NWPRI should always be called at ICALL=0 or ICALL=1.
+
+Input arguments:
+
+  - NTHETA,NETA,NEPS:
+    + NTHETA=number of THETAs to be estimated;
+    + NETA=number of ETAs to be estimated;
+    + NEPS=number of EPS' to be estimated.
+    These are the dimensions of the THETA, OMEGA, and SIGMA arrays of
+    the parameters that enter into the model for the data.
+
+    Before NONMEM 7.3, NEPS was ignored.  With  odd-type  population
+    data  or with non-odd-type single-subject data, where OMEGA takes
+    the place of SIGMA, the input argument NETA must be set.
+
+  - NTHP,NETP,NEPP:
+    + NTHP=number of THETAs which have a prior;
+    + NETP=number of OMEGAs with prior;
+    + NEPP=Number of SIGMAs with prior.
+
+    The prior will only affect the  initial  subvector  of  THETA  of
+    dimension  NTHP  and  the initial submatrix of OMEGA of dimension
+    NETP (i.e. the submatrix consisting of the  intersection  of  the
+    first   NETP rows and the first NETP columns of OMEGA).  The
+    initial subvector and submatrix are called the prior-affected
+    parts of  THETA  and  OMEGA.   If  NTHP=0  (NETP=0), the prior
+    does not affect THETA (OMEGA) at all.  During the Simulation
+    Step,  simu- lated  values  for  the  affected  parts  of  THETA
+    and OMEGA are obtained according to the prior distribution, and
+    "the  simulated values"  for  the  unaffected parts of THETA and
+    OMEGA are simply taken to be the values given in  the  NONMEM
+    control  stream  or input  Model  Specification  record.  Before
+    NONMEM 7.3, NEPP was ignored.
+
+  - NPEXP: The number of prior experiments.
+
+  - ITYP:
+    Relevant only if NWPRI is called during a Simulation Step.
+
+    + ITYP=0:  The  value of the THETA vector is obtained from simple random sampling.
+
+    + ITYP=1: Within the given problem, NWPRI is to be  called  a
+      specified number  (NSAM) of times to obtain this number of
+      different values of the THETA vector.  These values are obtained
+      by  generating  a Latin  sample  of  size  NSAM  from
+      equiprobable partitions of an ellipsoid in THETA space
+      (hyper-ellipsoidal  sampling),  followed by sampling a point
+      "uniformly" from each partition.  This scheme may be used, for
+      example, when the problem has NSAM  subproblems, in  which
+      case, NWPRI would be called NSAM times, once each time during
+      the problem when ICALL=4, and at each of  these  calls,  a
+      different random value of THETA will be produced.
+
+    + ITYP=2: Just as with value 1, but the NSAM values are obtained
+      by generating a Latin sample of size NSAM from equiprobable
+      partitions of an ellipsoid in THETA space (hyper-ellipsoidal
+      sampling), followed by taking the "center point" of each
+      partition.
+
+    In all three cases,  each  new  value  of  the  OMEGA  matrix  is
+    obtained from simple random sampling.
+
+    After  each  call to NWPRI, the simulated values for THETA, OMEGA
+    and SIGMA may be found in global variables and thus they are
+    communicated  directly  to  NONMEM.   (See
+    PRIOR_Simulation:_Parameters).
+
+  - PLEV. When NWPRI is being used at ICALL=0 or 1, but NWPRI will
+    not  be used  at  ICALL=4  (i.e. during the Simulation Step), PLEV
+    can be set to 0.  When it is being used at ICALL=2, PLEV can also
+    be set to  0.   When  NWPRI is being used at ICALL=0 or 1 and it
+    will be used at ICALL=4, or when it is being used at ICALL=4,
+    then  PLEV must be set to a fraction strictly less than 1, e.g.
+    0.999.  PLEV is double precision with NONMEM 7, and is single
+    precision  with NONMEM VI.
+
+    A value of THETA will actually be obtained using a truncated
+    multivariate normal distribution, i.e. from an ellipsoidal region
+    R1 over  which  only  a fraction of mass of the normal occurs.
+    This fraction is given by PLEV.  The distribution is further
+    truncated to  R2,  the  subregion of R1 lying within the
+    rectangular boundaries defined on  the  $THETA  record.   Simple
+    random  sampling occurs  in  R2.   Latin  sampled partitions are
+    partitions of R1. However, when ITYP=1, if a uniformly sampled
+    point from a  partition  lies outside R2, it is replaced by a
+    point obtained by simple random sampling from R2.  When ITYP=2, if
+    the center point of a partition lies outside R2, an abort occurs.
+
+  - NSAM.
+    Relevant  only if NWPRI is called during a Simulation Step.
+    Consider two cases.  a) Latin hyper-ellipsoid sampling is used
+    with ITYP=1,  and  b) simple random sampling along with the
+    adjustment for small sample correlation effect is used (see next
+    input argument).   In  case  a) NSAM should equal the exact total
+    number of different values of THETA that must eventually be
+    produced  over the  entire  NONMEM  problem.   In case b) NSAM
+    should be no less than this number.
+
+  - ISS.
+    Relevant only if NWPRI is called during  a  Simulation  Step.   A
+    THETA value is obtained by transforming a value from the standard
+    multivariate normal distribution  -  called  here  "the  standard
+    value".   The  correlation  matrix  of the standard normal is the
+    identity matrix.  When NSAM is small, the  estimated  correlation
+    matrix  from the sampled standard values might not be quite close
+    to the identity matrix - this is here called  "the  small  sample
+    correlation effect".
+
+    + ISS=1: An adjustment is made for the small sample correlation
+      effect, by first transforming the NSAM standard  values
+      altogether  into new  values  which  are  very nearly standard
+      multivariate normal values and such that the sample correlation
+      matrix of  these  new values is exactly the identity matrix.
+
+    + ISS=0: No adjustment is made for the small sample correlation
+      effect.
+
+Output argument:
+
+  CNT Relevant only if NWPRI is called at ICALL=2.  CNT is the penalty.
+
+See PRIOR subroutine for using NWPRI. Below we discuss using it along with $THETA, $OMEGA, $SIGMA records.
+
+The first use is to specify the multivariate normal form for THETA
+(NTHP>0). After the usual set of $THETA records, add  a  second  set
+of  $THETA records  giving  the  mean  of the multivariate normal.
+The values on these records must be fixed.  They should number NTHP
+altogether. After the usual set of $OMEGA records, add  a  second  set
+of  $OMEGA records giving the variance-covariance matrix of the
+multivariate normal.  (If there are no etas in the model, there will
+not  be  a  usual set  of  $OMEGA  records.)  The values on these
+records must be fixed. They should number (NTHP+1)xNTHP/2 altogether,
+including implicit 0's, which  may  occur because the
+variance-covariance matrix of the normal may be block-diagonal.  If a
+(regular) theta is fixed, the corresponding  values  of  the mean and
+variance-covariance matrix of the normal are ignored.
+
+Another use is to specify the inverse Wishart form  for  OMEGA
+(NETAP>0; population data only). After  the second set of $OMEGA
+records (or if NTHP=0, after the first set of $OMEGA records), add
+another set of $OMEGA records  giving  the mode  of  the  inverse
+Wishart.   The values on these records must be fixed.   They  should
+number  (NETP+1)xNETP/2  altogether,  including implicit  0's, which
+may occur because the mode of the inverse Wishart may be
+block-diagonal.  If the prior-affected part of OMEGA  is  given as  a
+block-diagonal matrix, then the mode must conform to this structure.
+The SAME attribute can be used. With each diagonal block of (the
+prior-affected part of) OMEGA,  there corresponds  a  number of
+"degrees of freedom" of the inverse Wishart. All blocks of a given
+block set are constrained to be equal (by  using the SAME attribute),
+and therefore, to each of these blocks there cor- responds the same
+number of degrees of freedom.  After the second  set of  $THETA
+records  (or  if  NTHP=0,  after  the  first set of $THETA records),
+add another set of $THETA records, giving for each block set in  turn
+the  number of degrees of freedom for the blocks of the set. The
+values on these records must be fixed.  There should  be  as  many
+values as there are block sets with the prior-affected part of OMEGA.
+The inverse Wishart for a given block of OMEGA may be explicitly given
+as "perfectly flat" by specifying the number of degrees of freedom  to
+be  the negative of the dimension of the block, minus 1.  In this case
+the mode for the block may be simply taken to be the 0 matrix (or  any
+positive  definite  matrix).   If  a block is fixed, the corresponding
+values of the mode and number of degrees of freedom are ignored.
+
+With NONMEM 7.3 and higher, you can use more informative record  names
+instead of directly specifying NTHETA, NETA, et al:
+  - $THETAP for THETA priors
+  - $THETAPV for covariance matrix for THETA's
+  - $OMEGAP for OMEGA prior
+  - $OMEGAPD for degrees of freedom (or dispersion factor) for OMEGA prior
+  - $SIGMAP for SIGMA prior
+  - $SIGMAPD for degrees of freedom (or dispersion factor) for SIGMA prior
+
+If  the  informative  record names are used, the records may be in any
+ order, and the options of $PRIOR need not be specified.  Note that the
+ name  of the record describes the kind of information it gives, rather
+ than the structure of the information.  E.g., in  the  example  below,
+ $THETAPV  is  used  instead  of  an $OMEGA record and $OMEGAPV is used
+ instead of a $THETA record.
+ (See $THETAP, $OMEGAP, $SIGMAP)
+
+Below are three examples of extra $THETA and $OMEGA records specifying
+prior  information  from an experiment.  This information concerns all
+the regular elements of THETA and OMEGA.  All examples are shown  with
+a $PRIOR record although a PRIOR subroutine could be used instead.
+#+begin_src perl
+ $PRIOR NWPRI NTHETA=3 NETA=3 NTHP=3 NETP=3 NPEXP=1
+   ...
+ $THETA 3 FIX .08 FIX .04 FIX
+ $THETA 100 FIX
+ $OMEGA BLOCK (3) .494 .00207 .0000847 .000692 .0000471 .0000292 FIX
+ $OMEGA BLOCK (3) .7 .04 .05 .02 .06 .08 FIX
+#+end_src
+
+Perhaps it might be more perspicuous to organize the prior information thusly:
+
+#+begin_src perl
+ $PRIOR NWPRI NTHETA=3 NETA=3 NTHP=3 NETP=3 NPEXP=1
+   ...
+ ;prior information for THETA
+ $THETA 3 FIX .08 FIX .04 FIX
+ $OMEGA BLOCK (3) .494 .00207 .0000847 .000692 .0000471 .0000292 FIX
+
+ ;prior information for OMEGA
+ $OMEGA BLOCK (3) .7 .04 .05 .02 .06 .08 FIX
+ $THETA 100 FIX
+#+end_src
+
+With NONMEM 7.3 and higher, informative record names can be used:
+#+begin_src perl
+ $PRIOR NWPRI
+   ...
+ ;prior information for THETA
+ $THETAP 3 FIX .08 FIX .04 FIX
+ $THETAPV BLOCK (3) .494 .00207 .0000847 .000692 .0000471 .0000292 FIX
+
+ ;prior information for OMEGA
+ $OMEGAP BLOCK (3) .7 .04 .05 .02 .06 .08 FIX
+ $OMEGAPD 100 FIX
+#+end_src
+
+There may be prior information from a number of experiments, in  which
+case  the  $THETA  and  $OMEGA records specifying this information for
+each experiment may be stacked, e.g.
+
+#+begin_src perl
+ ;usual records
+ $THETA  (0,4,10) (0,.09,.5) (.004,.01,.9)
+ $OMEGA BLOCK (3) .7 .04 .05 .02 .06 .08
+
+ ;prior information from experiment 1
+ $THETA 3 FIX .08 FIX .04 FIX
+ $THETA 100 FIX
+ $OMEGA BLOCK (3) .494 .00207 .0000847 .000692 .0000471 .0000292 FIX
+ $OMEGA BLOCK (3) .7 .04 .05 .02 .06 .08 FIX
+
+ ;prior information from experiment 2
+ $THETA 2 FIX .05 FIX .04 FIX
+ $THETA 50 FIX
+ $OMEGA BLOCK (3) .6 .003 .0001 .0004 .00001 .00003 FIX
+ $OMEGA BLOCK (3) .9 .02 .05 .01 .06 .09 FIX
+#+end_src
+Blocking on the variance-covariance matrix  of  the  normal  form  for THETA need not be the same across experiments.
+
+Limitation: there  must be at least one THETA parameter and one OMEGA parameter in the model.
+
+*** TNPRI
+:PROPERTIES:
+:CUSTOM_ID: tnpri
+:END:
+#+begin_src f90
+  USE SIZES, ONLY: ISIZE,DPSIZE
+  INTEGER (KIND=ISIZE) :: IFND,MODE,ITYP,NSAM,ISS,IVAR
+  REAL (KIND=DPSIZE) :: PLEV
+  REAL (KIND=DPSIZE) :: CNT
+  REAL (KIND=ISIZE) :: ICALL
+  CALL TNPRI (IFND,MODE,ITYP,PLEV,NSAM,ISS,IVAR,CNT)
+#+end_src
+TNPRI provides as a constraint on the estimates of THETA,  OMEGA  and
+SIGMA for stable estimates from insufficient data.  It computes a penalty function based on a
+ multivariate normal prior for all the unconstrained parameters.
+
+TNPRI relies a prior NONMEM run's MSF to provide parameters (called "hyperparameters" in NONMEM guides)
+ and prior information. The prior problem should have the
+Covariance Step and the Estimation Step (could have been implemented in
+yet  an  earlier  problem).
+
+Alternatively, a NONMEM control stream may consist of multiple
+problems, where one problem  (A)  uses  TNPRI, and  the  prior
+problem appears as an earlier problem (B) in the same control stream.
+The prior information from problem B can be available to problem A
+without the need to use a model specification file.
+
+When  TNPRI  is  used  during  a Simulation Step, it produces a random
+value of the vector of all model  parameters  (whose  values  are  not
+fixed  in the parameter records) from the frequency prior.  (See
+Simulation example).  (See tnpri example).  If TNPRI  is  used during
+a given  problem at ICALL=2, it should not be used during the same
+problem at ICALL=4, and vice-versa.
+
+TNPRI may be used at ICALL=0 or ICALL=1, in which case only the values
+of  its  input arguments are checked.  If it is not used at ICALL=0 or
+ICALL=1, then the first time it is used at ICALL=2 or ICALL=4,
+checking will occur.
+
+Not to be used with the new $ESTIMATION methods of NONMEM 7.
+
+ Input argument:
+
+  - IFND
+    + IFND=0: indicates that a prior problem has been specified either
+      earlier in the current control stream or in a previously run
+      control stream,  and  that  this problem has output a model
+      specification file.  The prior information will have
+      automatically been  stored in  the  model specification file.
+      The prior problem should have implemented the  Covariance  Step
+      (which  should  have  computed either  the  default
+      variance-covariance matrix or two times the inverse of the R
+      matrix).  The current control stream should consist  of at least
+      two problems: the problem that uses TNPRI and a preceeding
+      problem that serves only to input the  prior  information from
+      the model specification file, such as the following:
+      #+begin_src perl
+	$PROB   READ THE MODEL SPECIFICATION FILE
+	$DATA data
+	$INPUT ID TIME AMT DV TYPE SS II
+	$MSFI msf1  ONLYREAD
+      #+end_src
+      This simple problem (B) should be the last problem in the
+      current control stream that appears before the problem using
+      TNPRI (problem  (A))  and  inputs  a  model specification file.
+      The problem specification should not include any task  records,
+      but  it  may include  e.g.  a  $SUBROUTINES record and/or
+      abbreviated code, if problem B is the first problem in the
+      control stream,  and  these elements  will  be needed for a
+      subsequent problem.  If problem A inputs a model specification
+      file msf2, any prior information  in msf2 will be ignored.  If
+      problem A outputs a model specification file msf3 and implements
+      the Covariance Step, the prior  information stored in msf3 is
+      based not only on the data being analyzed, but also on the prior
+      information in msf1.
+
+    + IFND=1: indicates that along with  the  current  problem  (with
+      which TNPRI  is being used), a prior problem has been specified
+      earlier in the same control stream.  The prior problem is taken
+      to be the last  problem  in the control stream that appears
+      before the current one and that implements the Covariance  Step.
+
+  - MODE.
+    In any NONMEM problem specification, all of the last contiguously
+    listed parameters on the $THETA record, whose values on this
+    record are fixed, and assuming the value of the very last
+    parameter  itself is fixed, are called the "terminal fixed THETA
+    parameters".  There may be  no  such  parameters.   E.g.  if  the
+    $THETA record is
+    #+begin_src perl
+      $THETA 3.1 FIX 6.3 .01 400 FIX 7 FIX 90 FIX
+    #+end_src
+    then THETA  4-6 are the terminal fixed THETA parameters.  If the record is
+    #+begin_src perl
+      $THETA 3.1 FIX 6.3 .01 400 FIX 7 FIX 90
+    #+end_src
+    then there are no terminal fixed THETA  parameters,  because the
+    value 90 of the very last parameter is not fixed.  Similarly, all
+    the last contiguous fixed parameters in OMEGA  (SIGMA),  assuming
+    the  values  in the very last block set are fixed, are called the
+    "terminal fixed OMEGA (SIGMA)  parameters".  (Recall  that  in  a
+    diagonal $OMEGA record, all the values form separate block sets.)
+
+    There are some rules concerning the parameter records of a NONMEM
+    control stream that relate the parameters of the prior problem to
+    those of the current problem:
+
+    + With  the exception of the terminal fixed THETA parameters in
+      the prior problem, which are altogether ignored  in  the
+      current problem,  the  THETA  parameters of the prior problem
+      must be the first THETA parameters listed in the $THETA record
+      of the current problem, whether or not their values are fixed in
+      the prior problem.
+    + The order of these  first  THETA  parameters  on  the  $THETA
+      record must be the same as that in the $THETA record of the
+      prior problem.   The initial estimates of these parameters need
+      not  be the same, but any upper or lower bounds must be the
+      same.
+    + Among the first THETA parameters, values that are fixed on the
+      $THETA record of the prior problem must also be fixed on  the
+      $THETA  record  of  the current problem, although the values
+      need not be the same, but not vice-versa; see  discussion  below
+      concerning parameter interpretation.
+    + THETA  parameters  peculiar  to  the current problem may be
+      listed at the end of the $THETA record of  the  current
+      problem, after  the  parameters that are shared between the
+      prior and current problems. E.g. if the $THETA record with the prior problem is
+      #+begin_src perl
+      $THETA 3.1 FIX 6.3 (0,.01) 400 FIX 7 FIX 90 FIX
+      #+end_src
+      then the $THETA record with the current problem may be
+      #+begin_src perl
+      $THETA 10  FIX 7.0 (0,.03) 80.2 100.8
+      #+end_src
+      in which case the values 80.2 and 100.8 are  the  values  of
+      the THETA  parameters  that are peculiar to the current problem.
+      The 2nd and 3rd parameters are used in both prior and  current
+      problems,  but  have different values in the two problems.  The
+      first parameter may be used in the current problem, in which
+      case  its value is fixed to 10.
+
+    The same rules apply to the $OMEGA and $SIGMA records of the current problem.
+
+    A model specification file from a previous instance of  the
+    current  problem  may  be used, as usual, providing that if with
+    the previous instance, parameter records were used, the  above
+    rules were followed.
+
+    Parameter  Interpretation:
+
+    The  prior  information concerns all parameters appearing in the
+    prior problem whose  values  are  not fixed  in  that  problem.
+    However,  a parameter with a nonfixed value in the prior problem
+    may have a fixed value in the  current problem, and this gives
+    rise to some ambiguity.  Such a parameter may have an
+    interpretation in  the  prior  problem  that  remains unchanged in
+    the current problem.  Then it needs to be identified as a "shared
+    parameter", in which case, because the value of  the parameter  is
+    fixed  with the current model, the frequency prior needs to be
+    adjusted in order to approximate the -2log likelihood  function
+    for  the  prior  data when the parameter value is regarded as
+    being fixed in the prior model.  (or  when  TNPRI  is being called
+    in the Simulated Step, in order to use a conditional prior
+    distribution,  given  the  parameter  value  is  the  fixed
+    value).   A shared parameter may not actually be used in the
+    current problem, but the salient point  is  that  with  the
+    current problem,  the interpretation of this parameter remains
+    unchanged. Alternatively, the parameter's interpretation may
+    change  in  the current problem.  Then it needs to be identified
+    as a "prior-specific" parameter, in which case if it is  actually
+    used  in  the current  model,  its  value  will be the fixed
+    value, but for the purpose of applying the prior information,
+    TNPRI will regard this parameter  as one specific to the prior
+    model.  The MODE argument concerns this distinction.
+
+  - MODE=0: all parameters with a nonfixed value in the prior
+    problem but a  fixed  value  in  the  current problem are
+    identified as being prior-specific parameters.  However, the
+    final estimates of these parameters are their fixed values.
+    + MODE=1: all parameters with a nonfixed value in the prior
+      problem but a fixed value in the current  problem  are
+      identified  as  being prior-specific  parameters.   If  the
+      Estimation  Step is implemented, the final estimate for such a
+      parameter is the  same  one that  would  result from not fixing
+      the value of the parameter in the current problem and letting it
+      be  estimated,  assuming  that the  parameter  is  not  at  all
+      used in the current model.  This value will be similar to the
+      final estimate of the  parameter  in the  prior  problem.   (A
+      difference from this prior estimate may result, reflecting the
+      fact that if there is a sequence  of  models, each a submodel of
+      the one succeeding it, then the data used to fit the last of the
+      models may bear on a parameter peculiar to the  first  model,
+      if only slightly.)  If indeed the parameter's value were not
+      fixed, but the parameter's estimate obtained along with the
+      estimates of the non-prior-specific parameters, then the latter
+      estimates and the minimum value of the objective  function would
+      be  unchanged, but the search for the parameter's estimate would
+      require additional computer time.   With the value  MODE=1, in
+      fact,  the  parameter's estimate is obtainable posthoc, after
+      the search, and this additional computer time is saved.  The
+      output  from  the  Covariance  Step  includes  all the usual
+      type of information about the estimators of the prior-specific
+      parameters along  with  that  about the estimators of the
+      non-prior-specific parameters.  However, note that  an  output
+      model  specification file  will  not  contain  any  information
+      about the estimates of prior-specific parameters.
+
+    + MODE=2: all parameters with a nonfixed value in the prior
+      problem but a  fixed  value  in  the  current problem are
+      identified as being shared parameters (i.e. the frequency prior
+      is  adjusted). The final estimates of these parameters are their
+      fixed values.
+  - ITYP: relevant only if TNPRI is called during a Simulation Step.
+    + ITYP=0: the value of  the  UCP  (unconstrained  parameter)
+      vector  is obtained from simple random sampling.
+
+    + ITYP=1: within  the  given problem, TNPRI is to be called a
+      specified number (NSAM) of times to obtain this number of
+      different  values of  the  UCP  vector.   These values are
+      obtained by generating a Latin sample of size NSAM  from
+      equiprobable  partitions  of  an ellipsoid  in UCP space
+      (hyper-ellipsoidal sampling), followed by sampling a point
+      "uniformly" from each  partition.   This  scheme may  be used,
+      for example, when the problem has NSAM subproblems, in which
+      case, TNPRI would be called NSAM times, once  each  time during
+      the  problem  when ICALL=4, and at each of these calls, a
+      different random value of the UCP vector will be produced.
+
+    + ITYP=2: same as ITYP=1, but the NSAM values are obtained by
+      generating  a Latin sample of size NSAM from equiprobable
+      partitions of an ellipsoid in UCP space (hyper-ellipsoidal
+      sampling),  followed by taking the "center point" of each
+      partition.
+
+   In all three cases, a value of the UCP vector is transformed into THETA-OMEGA-SIGMA space.
+
+   After each call to NWPRI, the simulated values for  THETA,  OMEGA
+    and SIGMA may be found in global variables and thus they are
+    communicated  directly  to  NONMEM.   (See
+    PRIOR_Simulation:_Parameters).
+
+
+  - PLEV. when  TNPRI  is being used at ICALL=0 or 1, but TNPRI will
+    not be used at ICALL=4 (i.e. during the Simulation Step), PLEV
+    should be set  to 0.  When it is being used at ICALL=2, PLEV
+    should also be set to 0.  When TNPRI is being used at ICALL=0 or 1
+    and will also be  used  at  ICALL=4,  or when it is being used at
+    ICALL=4, then PLEV must be set to a fraction strictly less than 1,
+    e.g.  0.999. PLEV  is  double precision with NONMEM 7, and is
+    single precision with NONMEM VI.
+
+    A UCP value will actually be obtained using  a  truncated
+    multivariate  normal  distribution, i.e. from an ellipsoidal
+    region R1 over which only a fraction of mass of the  normal
+    occurs.   This fraction  is given by PLEV.  Simple random sampling
+    occurs in R1. Latin sampled partitions are partitions of R1.
+
+  - NSAM. Relevant only if TNPRI is called during a Simulation Step.
+    Consider  two cases.  a) Latin hyper-ellipsoid sampling is used
+    with ITYP=1, or b) simple random sampling along  with  the
+    adjustment for small sample correlation effect is used (see next
+    input argument).  In case a) NSAM should equal the exact  total
+    number  of different  values of the parameter vector that must
+    eventually be produced over the entire NONMEM problem.  In case b)
+    NSAM  should be no less than this number.
+
+  - ISS. Relevant  only  if  TNPRI  is called during a Simulation
+    Step.  A value of the UCP vector is obtained by  first  sampling
+    a  value from  the standard multivariate normal distribution -
+    called here "the standard value" and then transforming this value
+    to one from the  appropriate  multivariate normal.  The
+    correlation matrix of the standard normal is the identity matrix.
+    When NSAM is  small, the estimated correlation matrix from the
+    sampled standard values might not be quite close to the identity
+    matrix -  this  is  here called "the small sample correlation
+    effect".
+
+    + ISS=1. An adjustment is made for the small sample correlation
+      effect, by first transforming the NSAM standard  values
+      altogether  into new  values  which  are  very nearly standard
+      multivariate normal values and such that the sample correlation
+      matrix of  these  new values is exactly the identity matrix.
+
+    + ISS=0: No adjustment is made for the small sample correlation effect.
+
+  - IVAR. Relevant  only if TNPRI is called during a Simulation Step.
+    When TNPRI simulates a parameter value, this value is that of an
+    estimate  of  the parameter from possible data under the prior
+    model, and this simulation is based on  asymptotic  statistical
+    theory. The  partial derivatives comprising the R and S matrices
+    referred to below are taken with respect to the UCP (See
+    covariance).
+    + IVAR=0:  The  variance-covariance matrix of the multivariate
+      normal on the UCP is taken to be two times the inverse  R
+      matrix  obtained from  the  prior problem.  This could be
+      appropriate if the estimated asymptotic variance-covariance
+      matrix from the prior  problem is also based only on the R
+      matrix.
+
+    + IVAR=1: the variance-covariance matrix of the multivariate
+      normal on the UCP is taken to be Rinv*S*Rinv matrix from the
+      prior problem.
+
+    + IVAR=2: the variance-covariance matrix of the multivariate
+      normal  on the UCP is taken to be S matrix from the prior
+      problem. (NM75)
+
+    In summary, IVAR=0 uses \(R^{-1}\) of a former problem; IVAR=1
+    uses \(R^{-1}SR^{-1}\) of a former problem; IVAR=2 uses \(S\) of a
+    former problem.
+
+ Output argument:
+
+  CNT Relevant only if TNPRI is called at ICALL=2.  CNT is the penalty.
 
 ** SPTWO
 :PROPERTIES:
@@ -1231,6 +2498,9 @@ Other Inputs:
  (See [[file:/docs/reference-manual/api/variables/#record-counters][Record_Counters:_NIREC,NDREC]])
 
 ** TRANS
+:PROPERTIES:
+:CUSTOM_ID: trans
+:END:
 #+begin_src f90
  USAGE:
  SUBROUTINE TRANS (ITRANS,IRGG,GG,NETAS)
@@ -1271,7 +2541,6 @@ Input/Output argument:
 
   + GG:  the array of [[file:/docs/reference-manual/api/subroutines/#PK][PK]] parameters and their eta derivatives.
 
-
 Input argument:
 
 - NETAS: the number of population ETAs in the problem.
@@ -1283,24 +2552,36 @@ Certain variables are available in modules.  Their use is optional.
 
 REFERENCES: Guide VI, section III.M
 
-
 ** TOL
-USAGE:
-
-Versions before NONMEM 7.4:
-
+:PROPERTIES:
+:CUSTOM_ID: tol
+:END:
 #+begin_src f90
-SUBROUTINE TOL(NRD)
-USE SIZES,     ONLY: ISIZE
-INTEGER(KIND=ISIZE) :: NRD
-DIMENSION :: NRD(*)
-#+end_src
-With NONMEM 7.4:
+  ! Versions before NONMEM 7.4:
+  SUBROUTINE TOL(NRD)
+  USE SIZES,     ONLY: ISIZE
+  INTEGER(KIND=ISIZE) :: NRD
+  DIMENSION :: NRD(*)
 
-#+begin_src f90
- SUBROUTINE TOL(NRD,ANRD,NRDC,ANRDC)
- USE SIZES,     ONLY: ISIZE
- INTEGER(KIND=ISIZE) :: NRD(0:*), ANRD(0:*), NRDC(0:*), ANRDC(0:*)
+  ! Example for versions before NONMEM 7.4:
+  SUBROUTINE TOL (NRD)
+  DIMENSION NRD(*)
+  NRD(1)=4
+  RETURN
+  END
+
+  ! NONMEM v7.4+
+  SUBROUTINE TOL(NRD,ANRD,NRDC,ANRDC)
+  USE SIZES,     ONLY: ISIZE
+  INTEGER(KIND=ISIZE) :: NRD(0:*), ANRD(0:*), NRDC(0:*), ANRDC(0:*)
+
+  ! Example
+  SUBROUTINE TOL(NRD,ANRD,NRDC,ANRDC)
+  USE SIZES, ONLY: ISIZE
+  INTEGER(KIND=ISIZE) :: NRD(0:*), ANRD(0:*), NRDC(0:*), ANRDC(0:*)
+  NRD(1)=5
+  RETURN
+  END
 #+end_src
 Optional declarations with NONMEM 7.4:
 
@@ -1336,7 +2617,6 @@ Output argument:
   option TOL. The value of NRD(0) can  also  be  specified  using
   $SUBROUTINES option SSTOL.
 
-
 - ANRD(I) (NM74): the  absolute  tolerance in the computation of the
   drug amount in compartment  I.   The  default  is  12  (that  is,
   accuracy   is 10**(-12)).   Used  by ADVAN 9, 13, 14, 15, 16, 17,
@@ -1344,13 +2624,11 @@ Output argument:
   for different compartments.   For  compartments  not  specified,
   the tolerance of the last compartment specified will be used.
 
-
   ANRD(0) is the absolute tolerance for the Steady  State
   computations.  If ANRD(0) is not specified, ANRD(1) is used. The
   value  of  ANRD(1)  can also be specified using $SUBROUTINES option
   ATOL. The value of ANRD(0) can also  be  specified  using
   $SUBROUTINES option SSATOL.
-
 
 - NRDC(I) (NM74): same  as  NRD(I),  but used for the FOCE/LAPLACE
   covariance step. Used with ADVAN 9, 13, 14, and 15, 16, 17, and 18.
@@ -1362,7 +2640,6 @@ Output argument:
   option TOLC. The  value  of  NRDC(0)  can also be specified using
   $SUBROUTINES option SSTOLC.
 
-
 - ANRDC(I) (NM74): Same as ANRD(I), but used for the FOCE/LAPLACE
   covariance  step. Used  with  ADVAN 9, 13, 14, and 15, 16, 17,
   and 18.  If not set, ANRDC defaults to the value of ANRD.  ANRDC(0)
@@ -1373,7 +2650,6 @@ Output argument:
   option ATOLC. The value of ANRDC(0) can also be  specified  using
   $SUBROUTINES option SSATOLC.
 
-
 When  NM-TRAN  is used, this information may be supplied by either the
 TOL option of the $SUBROUTINES record or the $TOL record.
 
@@ -1382,7 +2658,6 @@ specifically for the initial (base) setting and each NONMEM step
 (estimation, covariance, simulation, table/scatter  step,  simulation,
 initial  parameters  estimate,  nonparametric).  For example, create a
 toluser.f90 file,
-
 #+begin_src f90
   SUBROUTINE TOL(NRD,ANRD,NRDC,ANRDC)
     USE NMPRD_INT, ONLY: IPROB
@@ -1415,13 +2690,10 @@ and incorporate it using $SUBR
  $SUBROUTINES ADVAN13 TRANS1 TOL=toluser.f90
 #+end_src
 
-REFERENCES: Guide IV, section V.C.4
-
-REFERENCES: Guide VI, section VI.D , Figure 41
-
-REFERENCES: Guide VI, Appendix II
-
 ** Verbatim code
+:PROPERTIES:
+:CUSTOM_ID: verbatim
+:END:
 USAGE:
 #+begin_src perl
 "      verbatim line
@@ -1435,8 +2707,6 @@ is dropped  and  the  characters to the right are copied as-is to
 columns 1-72 of the generated subroutine.  Lines of verbatim code can
 include any  Fortran  statements: comment, declaration (e.g., INTEGER,
 COMMON, USE), I/O, CALL, assignment, continuation, DO,  GOTO,  etc.).
-Lower- case  characters  can  be used freely, if the FORTRAN compiler
-permits them.
 
 NM-TRAN makes some modifications to verbatim code:
 
@@ -1468,7 +2738,6 @@ NM-TRAN makes some modifications to verbatim code:
   then without this rule, when the statement is executed, the value of
   a local variable having the label is  modified,  whereas  with  the
   rule, an item in the data record is modified.
-
 
 The  character  @,  immediately  before  a  label,  can  be used as an
 "escape" to prevent the label from being replaced.  If the character @
@@ -1523,8 +2792,6 @@ If  any  lines  of verbatim code are present in a block of abbreviated
 code, NM-TRAN generates USE statements  appropriate  to  the  kind  of
 abbreviated code and allows variables undefined in abbreviated code to
 be used as right-hand quantities in abbreviated code.
-
-REFERENCES: Guide IV, section IV.I
 
 * FSUBS
 NM-TRAN generates a special Fortran file "FSUBS" that contains

@@ -1,47 +1,96 @@
-#+title: $THETAI
+#+title: $THETAI, $THETAR
 {{< katex >}}{{< /katex >}}
 
-* $THETAI
- Gives Instructions for Transforming Initial THETAS.
+* $THETAI, $THETAR
+Gives Instructions for transforming initial ($THETAI) and final
+($THETAR) THETAs (or $THETAP when $THETAI is used). Can also be encoded as $THI and $THR, respectively.
 
 #+begin_src perl
- $THETAI  Fortran statements
+   $THETAI  Fortran statements
+   $THETAR  Fortran statements
 
-;# EXAMPLE
- $THI
- THETA(1:NTHETA)=LOG(THETAI(1:NTHETA))
- THETAP(1:NTHP)=LOG(THETAPI(1:NTHP))
+  ;# EXAMPLE ($THETAI)
+   $THI
+   THETA(1:NTHETA)=LOG(THETAI(1:NTHETA))
+   THETAP(1:NTHP)=LOG(THETAPI(1:NTHP))
 
- THETA=LOG(THETA)
+   THETA=LOG(THETA)
+
+  ;# EXAMPLE ($THETAR)
+   $THETAR
+   THETAR=EXP(THETA)
+  ;# or
+   $THETAR
+   THETAR(1:NTHETA)=EXP(THETA(1:NTHETA))
+   THETAPR(1:NTHP)=EXP(THETAP(1:NTHP))
 #+end_src
 
-** DISCUSSION
+Initial THETAs in the $THETA record may be functionally transformed
+with the $THETAI record, and final THETAs may then be reverse
+transformed for report purposes using $THETAR.  This has particular
+value when it is desired that the THETAs by estimated within NONMEM in
+the log domain, but you want the convenience of inputting and
+outputting them in the natural domain, such as when performing linear
+MU referencing. In  the  above sample code, THETAs are estimated in
+the log domain but input and output are in the natural domain, as it
+is particularly convenient when performing linear MU referencing.
 
- The  purpose  of  $THETAI  is  to  transform the initial values in the
- $THETA and $THETAP records.  The record name  may  also  be  coded  as
- $THI.
+The following snippet from [[https://github.com/nmusers/docs/tree/master/examples/thetair]["example/thetair"]] shows how the transformations are used
+for a multiplicative ETA model.
+#+begin_src perl
+;#...
+$SUBROUTINES ADVAN3 TRANS4
 
- In  the  above sample code, it is desired that the thetas by estimated
- within NONMEM in the log domain, but the user wants the convenience of
- inputting and outputting them in the natural domain, such as when per-
- forming linear MU referencing.
+$THETAI
+THETA=DLOG(THETAI)
 
- The $THETAI record will convert any initial thetas in a $THETA record,
- or thetas obtained from a chain file, but will not convert thetas from
- an MSF file.  The variance to the theta priors will  be  appropriately
- converted when using $PRIOR NWPRI.
+$THETAR
+THETAR=DEXP(THETA)
 
- The  assignment statements may be any Fortran 95 statements.  They are
- copied unchanged to subroutine SUBROUTINE  THETAISUB  in  FSUBS  (also
- found in thetair.f90).
+$PK
+MU_1=THETA(1)
+MU_2=THETA(2)
+MU_3=THETA(3)
+MU_4=THETA(4)
+CL=DEXP(MU_1+ETA(1))
+V1=DEXP(MU_2+ETA(2))
+Q=DEXP(MU_3+ETA(3))
+V2=DEXP(MU_4+ETA(4))
+;#...
+#+end_src
+Note the use of informative names for the prior information. See
+Introduction to NONMEM 7 I.44 "A Note on Setting up Prior Information".
 
- They  may  include  array  assigment  statements  specifying the whole
- arrays or sections of arrays.
+*** $THETAI
+The $THETAI record will convert any initial thetas in a $THETA record,
+or thetas obtained from a chain file, but will not convert thetas from
+an MSF file.  The variance to the theta priors will  be  appropriately
+converted when using $PRIOR NWPRI.
 
- If the initial estimate for an element of theta is transformed, so  is
- the upper and lower bounds for that theta, if any.
+The  assignment statements may be any Fortran 95 statements.  They are
+copied unchanged to subroutine SUBROUTINE  THETAISUB  in  FSUBS  (also
+found in thetair.f90).
 
- Arguments of the subroutine are as follows.
+They  may  include  array  assigment  statements  specifying the whole arrays or sections of arrays.
+
+When using $THETAI, be aware that the any bounds described in the
+$THETA record are also submitted to the $THETAI transformations.
+Therefore, bounds that are likely to cause a domain error in the
+transformation process should not be included.  For example, When
+Theta is log transformed, the lower bound of 0 and its proximity
+should not be included.  The transformation itself will prevent
+reported THETAs from being less than 0.
+#+begin_src perl
+  $THI
+  THETA(1)=LOG(THETAI(1))
+  ;#...
+  $THETA
+  (0,5.0) ;# wrong
+  $THETA
+  (0.1,5.0) ;# OK.
+#+end_src
+
+Arguments of the subroutine are as follows.
 
   - THETAI
         Values of THETA specified on $THETA records.  Input.
@@ -68,22 +117,6 @@ Other reserved variables that may be used are as follows:
         These  can  be  tested  in  IF  statements  so that values may be
         assigned diffently for different problems.
 
-If the range is not specified, NONMEM to supply the range (which is by
- default NTHETA+NTHP).
-
- When appropriate, for reporting thetas, the inverse function should be
- supplied, e.g., with the samples above:
-
- #+begin_src perl
- $THR
- THETAR(1:NTHETA)=EXP(THETA(1:NTHETA))
- THETAPR(1:NTHP)=EXP(THETAP(1:NTHP))
- #+end_src
- or
- #+begin_src perl
- THETAR=EXP(THETA)
- #+end_src
-
 Note that the assignment occurs after the NONMEM  control  stream  has
  been processed, so that errors in assignment of THETA's are not found.
 E.g.
@@ -103,9 +136,7 @@ If  initial estimates of all or part of THETA are omitted, NONMEM performs a sea
  the $THETA/$THETAP records.  Values of THETA in the root.ext files are
  as set in $THI.
 
- $THI may be used with $THR, but not necessarily.
-
- Another example is rescaling thetas.  E.g., suppose in CONTROL5
+Another example is rescaling THETAs.  E.g., suppose in CONTROL5
 
  #+begin_src perl
  $THETA  (.1,3,5) (.008,.08,.5) (.004,.04,.9)
@@ -118,8 +149,61 @@ If  initial estimates of all or part of THETA are omitted, NONMEM performs a sea
  THETA=THETAI/10.
  $THETA  (1,30,50) (.08,.8,5) (.04,.4,9)
  #+end_src
- The  results will be identical, except for the values of INITIAL ESTIMATE OF THETA in the NONMEM report. The values in  .ext  will  not  be
- affected.
+ The  results will be identical, except for the values of INITIAL
+ ESTIMATE OF THETA in the NONMEM report. The values in  .ext  will
+ not  be affected. One can use
+#+begin_src perl
+  $THETAR
+  THETAR=THETA*10.
+#+end_src
+to report in the original domain.
 
-** REFERENCES
-Guide Introduction_7
+*** $THETAR
+Using $THETAR affects the following data in the output report:
+#+begin_src txt
+ NPARAMETR
+ FINAL PARAMETER ESTIMATE for THETA.
+ FIRST ORDER STANDARD ERROR OF ESTIMATE
+  THETA - VECTOR OF FIXED EFFECTS PARAMETERS
+ FIRST ORDER COVARIANCE MATRIX OF ESTIMATE
+  THETA - VECTOR OF FIXED EFFECTS PARAMETERS
+#+end_src
+Contents of additional output files such as .coi and .cov and .cor are
+ also affected.
+
+The  assignment statements may be any Fortran 95 statements.  They are
+ copied unchanged to subroutine SUBROUTINE  THETARSUB  in  FSUBS  (also
+ found in thetair.f90).
+
+ They  may  include  array  assigment  statements  specifying the whole
+ arrays or sections of arrays.
+
+ Arguments of the subroutine are as follows.
+
+  - THETA
+        Final estimates of theta.  Input.
+
+  - THETAP
+        Final estimates of thetas specified on $THETAP  records  (or,  if
+        the  informative names are not used, thetas corresponding to pri-
+        ors, if any).  Input.
+
+  - THETAR
+        New values of THETA.  Output
+
+  - THETAPR
+        New values of THETA's for priors.  Output.
+
+Other reserved variables that may be used are as follows:
+
+  - NTHETA
+      Number of thetas to be estimated.
+
+  - NTHP Number of theta priors.
+
+  - NPROB IPROB
+      These can be tested in  IF  statements  so  that  values  may  be
+      assigned diffently for different problems.
+
+If the range is not specified, NONMEM to supply the range (which is by
+ default NTHETA+NTHP).

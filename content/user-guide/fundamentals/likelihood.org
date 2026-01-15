@@ -1,2 +1,185 @@
-#+title: 3. Likelihood
+---
+title: "Likelihood and MLE"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: false
+weight: 3
+---
 {{< katex >}}{{< /katex >}}
+
+* Likelihood and MLE
+To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component
+$$
+y = f(x, \phi, t) + \epsilon,
+$$
+and a statistical component
+$$
+\phi = \mu(z, \theta, \eta).
+$$
+Another formulation is through the likelihood. Let \(p(y_i|\phi_i, \Sigma_i)\) be the
+likelihood function for individual /i/, as a function of the
+individual parameter \(\phi_i\) and residual covariance matrix
+\(\Sigma_i\). Then NONMEM's assumption that observation \(y_i\)
+follows a multivariate normal distribution can be expressed as
+$$
+p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[
+-\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t))
+\right].
+$$
+Assume \(\phi_i=\mu(z_i, \theta)+\eta_i\) and recall that \(\eta_i\)
+also has multivariate normal distribution:
+$$
+p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[
+-\frac{1}{2}\eta_i^T\Omega\eta_i
+\right],
+$$
+then the individual likelihood is
+$$
+p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega).
+$$
+In classical NONMEM methods, we only seek the likelihood of population
+parameters by /marginalizing/ \(\eta_i\), so that the individual
+likelihood of the population parameters is
+$$
+L_i\equiv p(y_i|\Sigma_i, \theta, \Omega) = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega)\,d\phi_i
+ = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\eta_i | \Omega)\,d\eta_i,
+$$
+The total likelihood for the population is
+$$
+L=\Pi_iL_i=L_1\times L_2\times\dots \times L_{N}.
+$$
+The reason that we use "proportional to" (\(\propto\)) instead of "equal
+to" (\(=\)) is that we fit the model by maximizing the likelihood /L/, and
+the normalizing coefficients are not relevant. In fact, we maximize
+the log-likelihood \(\mathcal{L}\) for its superior numerical statbility and
+being simpler to work with for common distributions (from the expontential family):
+$$
+\mathcal{L}=\sum_i\mathcal{L}_i=\sum_i\log(L_i).
+$$
+NONMEM's point estimating methods aim to adjust parameters
+to maximize \(\mathcal{L}\). These methods are called /maximized
+likelihood estimations/ (MLEs), and the corresponding
+"optimal" parameter values /maximized likelihood estimates/,
+denoted as \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\).
+In fact, NONMEM takes one step further by minimizing certain approximations of \(-2\mathcal{L}\),
+and call these approximations /objective function/ \(\mathcal{T}\) and /objective function for individual/
+\(\mathcal{T}_i\). Though different NONMEM MLE methods
+define \(\mathcal{T}\) differently, they all aim to simplify
+\(\mathcal{L}\) evaluation while keep the minimizer "close" to
+the MLE solution:
+$$
+\text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{T}\approx \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{-2L}=\text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L}.
+$$
+The approximation is unbiased in predicted individual mean responses.
+These predictions are obtained setting \(\hat{\eta}=0\) and
+\(\epsilon=0\). In other words, the prediction is for the mean
+reponses of individuals with same fixed effects. In addition, one can
+also use \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\) to
+calculate the covariance matrix (hence the standard error) of
+individual predictions.
+
+** Least-square method
+It is helpful to view the extended least-square (ELS) method used by
+classic NONMEM methods through the lens of MLE.
+To simplify presentation here we only consider the individual model
+$$
+y_{ij} = f(x_{ij}, \phi_i) + \epsilon_{ij},\quad j=1,\dots,N_i,
+$$
+and assume uncorrelated normal residual errors:
+$$
+\epsilon_{ij}\sim \mathcal{N}(0, \sigma_j^2)
+$$
+
+The individual OFV for ELS is then
+$$
+\mathcal{T}_i(\phi_i, \upsilon, \xi)=\sum_j\left(
+\frac{(y_{ij}-f(x_{ij},\phi_i))^2}{\sigma_j^2} + \log(\sigma^2_{j})
+\right)
+$$
+and the model OFV is
+$$
+\mathcal{T}(\theta, \Omega, \Sigma) = \sum_{i=1}^N \mathcal{T}_i(\phi_i, \upsilon, \xi).
+$$
+This is a weighted least square objective function with penalty:
+- for each observation, the squared difference between observation \(y\) and model
+  prediction \(f()\) is weighted by the inverse of the variance ("precision");
+- the Log term penalizes the weight so that the weight would not become
+  arbitrarily small.
+
+One can see that the above ELS formulation is exactly
+\(-2\mathcal{L}\), with \(\sigma_{ij}\) the diagonal elements of \(\Sigma_i\).
+The likelihood function \(p(\phi|\theta,\Omega)\) in the previous
+section shows that the
+depedence on \( (\theta, \Omega) \) is through the \(\mu()\) model of
+\(\phi\), \(\theta\) and \(\Omega\).
+
+In fact, the original ELS uses a particular form of \(\sigma_j\):
+$$
+\sigma_{j} = \upsilon f(x_{ij}, \phi_i)^{\xi},
+$$
+with \(\upsilon\) and \(\xi\) both as unknown parameters (that can be
+modeled as elements of THETA). We can see this is an extension of the
+proportional residual error model.
+
+** Covariance (standard error) estimation
+Let vector \(p=(p_1,p_2,\dots, p_n)\) be the collection of all the
+ entries of \( (\theta, \Omega, \Sigma) \), and
+\(\hat{p}=(\hat{p}_1,\hat{p}_2,\dots,\hat{p}_n)\) the corresponding estimate. To obtain error estimation of \(\hat{p}\), NONMEM calculates two matrices.
+
+- Matrix \(R\) with
+  $$
+  R_{kl}=\frac{\partial \mathcal{T}^2}{\partial p_kp_l}, \quad k,l=1,\dots,n,
+  $$
+  evaluated at \(\hat{p}\). \(R\) is an approximation of the observed
+  Fisher Information matrix except a constant coefficient (recall that
+  \(\mathcal{T}\) approximates \(-2\mathcal{L}\)).
+
+- Matrix \(S=\sum_iS_i\), where
+  $$
+  S_i=\nabla_i \nabla_i^T,\quad \nabla_i=\frac{\partial \mathcal{T}_i}{\partial p},
+  $$
+  evaluated at \(\hat{p}\). That is, \(S_i\) is the outer product of the gradient of individual
+  OFV with respect to \(p\). \(S\) is an approximation of the
+  empirical Fisher Information matrix except a constant coefficient.
+
+Under the assumption that the random effects are normally distributed, \(R/N\) and
+  \(S/N\) converge to a same matrix when \(N\rightarrow \infty\), and the
+inverse of either matrices serves as a covariance matrix estimate.
+  Without the normality
+assumption, matrix \(R^{-1}SR^{-1}\) is a covariance matrix estimate.
+This is the default estimation in NONMEM but users have option to
+  choose \(R^{-1}\) or \(S^{-1}\) in the $COVARIANCE record.
+
+** Goodness-of-Fit
+Three Goodness-of-Fit (GoF) quantities are always among the NONMEM
+output: prediction, residual, and weighted residual. One can also request additional quantities.
+
+The prediction ("PRED" in NONMEM output) is the result of \(f()\)
+based on /population estimates/. In other words, it is computed at the
+estimated population mean by setting \(\eta=0\):
+$$
+\text{PRED}_{ij} = f(x_{ij}, \mu(z_i, \hat{\theta}))
+$$
+
+The residual ("RES" in NONMEM output) is difference between observation and PRED:
+$$
+\text{RES}_{ij} = y_{ij} - \text{PRED}_{ij}
+$$
+
+Since in application RES is inevitably correlated,
+often the weighted residuals ("WRES" in NONMEM output) serves as an attempted alternative.
+$$
+\text{WRES}_{i}={\text{cov}^{-1/2}(y_i)}{\text{RES}_i}
+$$
+Here \(\text{cov}^{1/2}\) denotes the matrix square root of the
+covariance matrix, and \(\text{cov}^{-1/2}\) the inverse of the matrix
+square root. Note here we only have individual subscript,
+therefore the WRES and \(y\) in the definition are in general vectors
+(for multiple observation of subject /i/).
+
+
+# NONMEM provides the following additional GoF quantities.
+
+# *** CPRES, CRES, CWRES
+# Depends on the estimation method, one can obtain certain estimate of
+# \(\eta\)'s, denoted as \(\hat{\eta}\). Then CPRES is the linear prediction

@@ -5,7 +5,7 @@
  Provides instructions for the PRIOR subroutine.
 
 #+begin_src perl
-  $PRIOR subroutine  [(conditional" "clause1 ), (conditional" "clause2 ) ... ]
+  $PRIOR subroutine  [([ESTIMATION | SIMULATION | PROBLEM=n] ...) ... ]
           [DISPLAY[=ALL|CNT]]   [ICMAX=n]
           [argument1 , argument2 ...]
 
@@ -14,52 +14,30 @@
 #+end_src
 
 ** DISCUSSION
- Optional. Specifies the use of the PRIOR feature of NONMEM.  Note that
- $PRIOR is a control record, not a block of  abbreviated  code.  There-
- fore,  only those options that are listed here may be used. E.g., ver-
- batim code may not be used. Options and arguments may be in any order,
- and may be on more than one line.
+Optional. Specifies the use of the PRIOR feature of NONMEM. $PRIOR
+control record does not support abbreviated code block. $PRIOR relies
+on subroutine [[file:/docs/reference-manual/api/subroutines/#tnpri][TNPRI]] or [[file:/docs/reference-manual/api/subroutines/#nwpri][NWPRI]] to specify the source of prior
+information: TNPRI uses a previous run's MSF, and NWPRI uses
+user-specification. Use only NWPRI for the new $ESTIMATION methods of NONMEM 7.
+
+One can specify which PROBLEM to apply the given prior, and/or whether
+to apply the prior to ESTIMATION or SIMULATION. By default PRIOR is
+used for all tasks (i.e., for  all values of ICALL). Alternatively one
+can use ICALL=2 for ESTIMATION and ICALL=4 for SIMULATION. In addition
+to "=", problems can also be selected using .NE., .LT., .LE., .GT., and .GE.
+Multiple selection can be specified such that a task that meets any of the
+specification will be imposed with the prior. See examples below.
 
 ** OPTIONS
+*** arguments
+~[argument1 , argument2 ...]~ are the arguments to NWPRI or  TNPRI. All have default 0.
+  - ITYP, NSAM, ISS, PLEV, CNT: arguments for both NWPRI and TNPRI.
+  - NTHETA, NETA, NEPS, NTHP, NETP, NEPP, NPEXP: arguments unique to NWPRI.
+  - IFND, MODE, IVAR: arguments unique to for TNPRI.
 
-*** subroutine
-
-   Required.  Either  TNPRI  or NWPRI.  The following options and argu-
-   ments apply to calls to this subroutine.  Another subroutine  option
-   (or another $PRIOR record) may follow, with a new set of options and
-   arguments.  Use only NWPRI for the new $ESTIMATION methods of NONMEM 7.
-
-*** conditional clause
-
-   Optional.   One  or more conditions, within parentheses.  The condi-
-   tions are "AND"ed together, i.e., the subroutine is called when  all
-   conditions  in  the  conditional  clause are true.  If there is more
-   than one conditional clause, the clauses are "OR"ed together,  i.e.,
-   the  subroutine  is  called  if all the conditions in any one condi-
-   tional clause are true. See the Examples, below.  Conditions may  be
-   one or more of:
-
-****  ESTIMATION or SIMULATION
-     Specifies  the  NONMEM  task  for  which  the  subroutine is to be
-     called.  If omitted, PRIOR is called for all tasks (i.e., for  all
-     values of ICALL).  ESTIMATION and SIMULATION may not both be spec-
-     ified in the same conditional clause.  ESTIMATION may  be  spelled
-     ESTIMATE or ESTM; SIMULATION may be spelled SIMULATE or SIML.
-
-     May  also  be specified as ICALL=n, ICALL.EQ.n, or ICALLn, where n
-     is 2 (ESTIMATION) or 4 (SIMULATION).
-
-****    PROBLEM=n
-     Specifies the problem for which the subroutine is  to  be  called.
-     May  also  be  specified as PROBLEM=n or PROBLEM.EQ.n or PROBLEMn.
-     PROBLEM may also be coded as IPROB.  Instead of  =,  .EQ.  may  be
-     used. Other permitted tests are .NE., .LT., .LE., .GT., and .GE.
-
-****  DISPLAY[=ALL|CNT]
-
-   Optional.   The PRIOR subroutine will contain code to print items of
-   interest in the NONMEM report.  This is to assist the user in check-
-   ing that the $PRIOR record is working correctly.
+***  DISPLAY[=ALL|CNT]
+Optional.   The PRIOR subroutine will contain code to print items of
+   interest in the NONMEM report.  This is to assist the user in checking that the $PRIOR record is working correctly.
 
    DISPLAY=ALL  is the default when only DISPLAY is present. Lines such
    as the following are printed with every call to PRIOR:
@@ -73,25 +51,13 @@
    PRIOR CNT:    -41.898951681785
    #+end_src
 
-****  ICMAX=n
+***  ICMAX=n
 
    Optional.   The  PRIOR  subroutine will set the given value in ICMAX
    prior to calling the subroutine.  (See [[file:/docs/reference-manual/api/variables/#prior-simulation-icmax][PRIOR Simulation: ICMAX]]).
 
-***  Subroutine arguments
-
-   Optional.  The arguments are described in the help entries for NWPRI
-   and  TNPRI.  They must be coded excatly as shown, i.e., no abbrevia-
-   tions.  Any argument that is omitted defaults to 0.
-
-  - ITYP, NSAM, ISS, PLEV, CNT: arguments for both NWPRI and TNPRI.
-
-  - NTHETA, NETA, NEPS, NTHP, NETP, NEPP, NPEXP: arguments unique to NWPRI.
-
-  - IFND, MODE, IVAR: arguments unique to for TNPRI.
 
 **  EXAMPLES
-
 #+begin_src perl
  $PRIOR TNPRI (ESTIMATION, PROB .GE.3 ) IFND=1
 #+end_src
@@ -103,10 +69,7 @@
   $PRIOR TNPRI IFND=1
   (EST, PROB 3) (EST,PROB 4) (EST,PROB 5)
 #+end_src
-   Same  as  the preceding example, if the run consists of exactly five
-   problems.  TNPRI is called with the Estimation step of problems 3, 4
-   and  5.   IFND is set to 1 with these calls; all other arguments are
-   0.
+Same  as  the preceding example, if the run consists of exactly five problems.  TNPRI is called with the Estimation step of problems 3, 4 and  5.   IFND is set to 1 with these calls; all other arguments are 0.
 
 #+begin_src perl
   $PRIOR TNPRI (EST, PROB 3) IFND=1
@@ -119,20 +82,192 @@
    4 and 5.  Note that IFND must be specified independently  each  time
    to be 1.  With re-specification of the subroutine, all arguments are
    reset to 0.  This permits identical or different arguments with each
-   usage of the subroutine.  NM-TRAN will warn if no argument is speci-
-   fied in a subsequent specification of TNPRI or NWPRI,  in  case  the
+   usage of the subroutine.  NM-TRAN will warn if no argument is specified in a subsequent specification of TNPRI or NWPRI,  in  case  the
    arguments  have been omitted by error.  One or more arguments may be
    set explicitly to 0 to prevent the warning.  When the subroutine  is
-   specified  more  than  once,  then all specifications must be condi-
-   tional, i.e., conditional clauses are requrired.
+   specified  more  than  once,  then all specifications must be conditional, i.e., conditional clauses are requrired.
 
    Within the same run, one may use TNPRI with some tasks or  problems,
    and  NWPRI  with  other  tasks or problems.  There may be at most 10
    $PRIOR records per problem.
 
- (See TNPRI, [[file:/docs/reference-manual/api/subroutines/#prior][PRIOR]]).
+ (See [[file:/docs/reference-manual/api/subroutine/#tnpri][TNPRI]], [[file:/docs/reference-manual/api/subroutines/#prior][PRIOR]]).
 
- (See tnpri example,  nwpri example).
+* Priors control records
+NONMEM v7.3+ provides more informative record names
+so that users do not have to directly specifying $PRIOR parameters
+such as NTHETA, NETA, etc. These control records are intended to be
+used with $PRIOR [[file:/docs/reference-manual/api/subroutines/#nwpri][NWPRI]]. If given, options in $PRIOR NWPRI override
+the prior control record settings listed below.
 
-** REFERENCES
-Guide Introduction_VI
+Similar to $OMEGA, the BLOCK and VALUES options are used to specify
+the prior covariance matrices.
+
+(See also NWPRI example).
+** $THETAP, $THETAPV
+#+begin_src perl
+ $THETAP  value1  [value2]  [value3] ...
+ $THETAPV  value1  [value2]  [value3] ...
+
+;# EXAMPLE
+ $PRIOR NWPRI
+ ;#...
+ ;# Prior information of THETAS (NTHP=4 of them)
+ $THETAP (2.0 FIX) (2.0 FIX) (2.0 FIX) (2.0 FIX)
+ ;# Variance to prior information of THETAS (NTHPxNTHP=4x4 of them).
+ $THETAPV BLOCK(4)
+ 10000 FIX
+ 0.00 10000
+ 0.00  0.00 10000
+ 0.00  0.00 0.0 10000
+#+end_src
+
+$THETAP and $THETAPV are for THETA prior's mean and covariance matrix, respectively.
+By default the prior uses the (multivariate) normal distribution. For
+the NUTS algorithm ($EST METHOD=NUTS) one can also specify the /t/-distribution using $TTDF.
+
+** $TTDF (NM75)
+Specifies /t/-distribution degrees of freedom for \(\theta\).
+
+#+begin_src perl
+ $TTDF 0 (default)
+ $TTDF [value ... ]
+ $TTDF [(value)[xn]] ...
+
+;# Example
+ $TTDF (2.0)x2 (3.0)x2
+#+end_src
+The example sets /t/-distribution degrees of freedom for \(\theta_1\) and  \(\theta_2\) to value of
+ 2.0, and degrees of freedom for \(\theta_3\) and  \(\theta_4\) to value of 3.0.
+
+#+begin_src perl
+$ESTIMATION METHOD=NUTS
+#+end_src
+and
+#+begin_src perl
+$SIMULATION
+#+end_src
+These values will be used in estimation and simulation unless $EST TTDF or $SIM TTDF is set, respectively, which set the degrees of freedom to a same value for all THETA's for that step.
+
+By default $TTDF value is 0 and the multivariate normal distribution is used.
+
+** $OMEGAP, $OMEGAPD
+#+begin_src perl
+ $OMEGAP  value1  [value2]  [value3] ...
+ $OMEGAPD  value1  [value2]  [value3] ...
+
+;# Example
+ $PRIOR NWPRI
+ ;#...
+;# Prior to OMEGA (NETPxNETP=4x4 of them)
+ $OMEGAP BLOCK(4)
+ 0.2 FIX
+ 0.0  0.2
+ 0.0  0.0 0.2
+ 0.0  0.0 0.0 0.2
+;# Set degrees of freedom of OMEGA Prior (one value per OMEGA block)
+ $OMEGAPD (4 FIX)
+#+end_src
+By default, the prior for OMEGA follows the inverse Wishart
+distribution. $OMEGAP specifies the prior for elements, and $OMEGAPD
+specifies degrees of freedom (also known as the dispersion factor).
+Note that $OMEGAPD specifies a vector, similar to $THETA.
+
+For NUTS algorithm ($EST METHOD=NUTS), one can also use LKJ prior for OMEGA using $OLKJDF.
+See below.
+
+In addition, one can use  the ~source/OMEGA_STD_PRIORU.f90~ file as a
+template to provide the prior density function. Set $SUBR
+OTHER=OMEGA_STD_PRIORU.f90 to use the user modified template.
+
+** $OLKJDF, $OVARDF
+Specifies LKJ decorrelation degrees of freedom for each OMEGA block.
+
+#+begin_src perl
+ $OLKJDF 0 ;# default
+ $OLKJDF [value ... ]
+ $OLKJDF [(value)[xn]] ...
+
+;# EXAMPLE
+ $OLKJDF 4.5 3.5 -2.0
+#+end_src
+The example shows that the first OMEGA block has degrees of freedom
+4.5, the second has 3.5, and the third has -2.0.
+
+The default 0 specifies the inverse Wishart as OMEGA prior.
+
+$OVARF specifies the weighting (inverse variance) to the standard
+deviations of the LKJ decorrelation degrees of freedom for each OMEGA block.
+#+begin_src perl
+   $OVARF 0 ;# default
+   $OVARF [value ... ]
+   $OVARF [(value)[xn]] ...
+
+  ;# EXAMPLE
+   $OVARF 2.0 5.0
+#+end_src
+The example specifies 2.0 for the first OMEGA block, 5.0 for the
+second.
+
+If the corresponding [[file:/docs/reference-manual/control-records/olkjdf/][$OLKJDF]] value is
+negative $OVARF  is  argument STDSSP in user-defined
+OMEGA_STD_PRIORU.f90.
+
+$OVARF  separate records that allow the user to specify
+the weighting  to the standard deviations LKJ
+decorrelation degrees of freedom for each OMEGA block and SIGMA block.
+Used with the NUTS algorithm.
+
+See also [[file:/docs/reference-manual/control-records/estimation/#estm-olkjdf][OLKJDF]] and [[file:/docs/reference-manual/control-records/estimation/#ovarf][OVARF]] option of $ESTIM. These options
+override the control records.
+
+** $SIGMAP, $SIGMAPD
+#+begin_src perl
+ $SIGMAP  value1  [value2]  [value3] ...
+ $SIGMAPD  value1  [value2]  [value3] ...
+
+;# EXAMPLE
+ ;# Prior to SIGMA (NEPPxNEPP=1x1 of them)
+ $SIGMAP 0.05 FIX
+ ;# Set degrees of freedom of SIGMA Prior (one value per SIGMA block)
+ $SIGMAPD (1 FIX)
+#+end_src
+By default, the prior for SIGMA follows the inverse Wishart
+distribution, with $SIGMAP specifying the prior for elements, and $SIGMAPD
+the degrees of freedom (also known as the dispersion factor).
+Note that $SIGMAPD specifies a vector, similar to $THETA.
+
+For NUTS algorithm ($EST METHOD=NUTS), one can also use LKJ prior for SIGMA using $SLKJDF.
+See below.
+
+In addition, one can use  the ~source/SIGMA_STD_PRIORU.f90~ file as a
+template to provide the prior density function. Set $SUBR
+OTHER=SIGMA_STD_PRIORU.f90 to use the user modified template.
+
+** $SLKJDF, $SVARF
+Similarly to OMEGA, SIMGA has corresponding LKJ prior specification
+control records for the NUTS algorithm.
+
+$SLKJDF Specifies LKJ decorrelation degrees of freedom for each SIGMA block.
+#+begin_src perl
+ $SLKJDF 0 ;# default
+ $SLKJDF [value ... ]
+ $SLKJDF [(value)[xn]] ...
+
+;# Example
+ $SLKJDF 4.5 3.5 -2.0
+#+end_src
+One can also use the ~source/SIGMA_STD_PRIORU.f90~ file as template to
+provide the desired probability density function.
+
+$SVARF specifies the weighting to the weighting (inverse variance) to the standard deviations LKJ decorrelation degrees of freedom for each SIGMA block.
+#+begin_src perl
+  $SVARF 0 ;# default
+  $SVARF [value ... ]
+  $SVARF [(value)[xn]] ...
+
+  ;# EXAMPLE
+  $SVARF 2.0 5.0
+#+end_src
+
+The SLKJDF and SVARF option of $ESTIM override the control records.

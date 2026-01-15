@@ -8,22 +8,26 @@ https://github.com/alex-shpak/hugo-book
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="">
+<meta name="description" content=" Likelihood and MLE To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component $$ y = f(x, \phi, t) &#43; \epsilon, $$ and a statistical component $$ \phi = \mu(z, \theta, \eta). $$ Another formulation is through the likelihood. Let \(p(y_i|\phi_i, \Sigma_i)\) be the likelihood function for individual i, as a function of the individual parameter \(\phi_i\) and residual covariance matrix \(\Sigma_i\). Then NONMEM&#39;s assumption that observation \(y_i\) follows a multivariate normal distribution can be expressed as $$ p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[ -\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t)) \right]. $$ Assume \(\phi_i=\mu(z_i, \theta)&#43;\eta_i\) and recall that \(\eta_i\) also has multivariate normal distribution: $$ p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[ -\frac{1}{2}\eta_i^T\Omega\eta_i \right], $$ then the individual likelihood is $$ p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega). $$ In classical NONMEM methods, we only seek the likelihood of population parameters by marginalizing \(\eta_i\), so that the individual likelihood of the population parameters is $$ L_i\equiv p(y_i|\Sigma_i, \theta, \Omega) = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega)\,d\phi_i = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\eta_i | \Omega)\,d\eta_i, $$ The total likelihood for the population is $$ L=\Pi_iL_i=L_1\times L_2\times\dots \times L_{N}. $$ The reason that we use &#34;proportional to&#34; (\(\propto\)) instead of &#34;equal to&#34; (\(=\)) is that we fit the model by maximizing the likelihood L, and the normalizing coefficients are not relevant. In fact, we maximize the log-likelihood \(\mathcal{L}\) for its superior numerical statbility and being simpler to work with for common distributions (from the expontential family): $$ \mathcal{L}=\sum_i\mathcal{L}_i=\sum_i\log(L_i). $$ NONMEM&#39;s point estimating methods aim to adjust parameters to maximize \(\mathcal{L}\). These methods are called maximized likelihood estimations (MLEs), and the corresponding &#34;optimal&#34; parameter values maximized likelihood estimates, denoted as \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\). In fact, NONMEM takes one step further by minimizing certain approximations of \(-2\mathcal{L}\), and call these approximations objective function \(\mathcal{T}\) and objective function for individual \(\mathcal{T}_i\). Though different NONMEM MLE methods define \(\mathcal{T}\) differently, they all aim to simplify \(\mathcal{L}\) evaluation while keep the minimizer &#34;close&#34; to the MLE solution: $$ \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{T}\approx \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{-2L}=\text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L}. $$ The approximation is unbiased in predicted individual mean responses. These predictions are obtained setting \(\hat{\eta}=0\) and \(\epsilon=0\). In other words, the prediction is for the mean reponses of individuals with same fixed effects. In addition, one can also use \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\) to calculate the covariance matrix (hence the standard error) of individual predictions.
+">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:url" content="https://nmusers.github.io/docs/user-guide/fundamentals/likelihood/">
   <meta property="og:site_name" content="NONMEM Documentation">
-  <meta property="og:title" content="3. Likelihood">
+  <meta property="og:title" content="Likelihood and MLE">
+  <meta property="og:description" content="Likelihood and MLE To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component $$ y = f(x, \phi, t) &#43; \epsilon, $$ and a statistical component $$ \phi = \mu(z, \theta, \eta). $$ Another formulation is through the likelihood. Let \(p(y_i|\phi_i, \Sigma_i)\) be the likelihood function for individual i, as a function of the individual parameter \(\phi_i\) and residual covariance matrix \(\Sigma_i\). Then NONMEM&#39;s assumption that observation \(y_i\) follows a multivariate normal distribution can be expressed as $$ p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[ -\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t)) \right]. $$ Assume \(\phi_i=\mu(z_i, \theta)&#43;\eta_i\) and recall that \(\eta_i\) also has multivariate normal distribution: $$ p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[ -\frac{1}{2}\eta_i^T\Omega\eta_i \right], $$ then the individual likelihood is $$ p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega). $$ In classical NONMEM methods, we only seek the likelihood of population parameters by marginalizing \(\eta_i\), so that the individual likelihood of the population parameters is $$ L_i\equiv p(y_i|\Sigma_i, \theta, \Omega) = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega)\,d\phi_i = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\eta_i | \Omega)\,d\eta_i, $$ The total likelihood for the population is $$ L=\Pi_iL_i=L_1\times L_2\times\dots \times L_{N}. $$ The reason that we use &#34;proportional to&#34; (\(\propto\)) instead of &#34;equal to&#34; (\(=\)) is that we fit the model by maximizing the likelihood L, and the normalizing coefficients are not relevant. In fact, we maximize the log-likelihood \(\mathcal{L}\) for its superior numerical statbility and being simpler to work with for common distributions (from the expontential family): $$ \mathcal{L}=\sum_i\mathcal{L}_i=\sum_i\log(L_i). $$ NONMEM&#39;s point estimating methods aim to adjust parameters to maximize \(\mathcal{L}\). These methods are called maximized likelihood estimations (MLEs), and the corresponding &#34;optimal&#34; parameter values maximized likelihood estimates, denoted as \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\). In fact, NONMEM takes one step further by minimizing certain approximations of \(-2\mathcal{L}\), and call these approximations objective function \(\mathcal{T}\) and objective function for individual \(\mathcal{T}_i\). Though different NONMEM MLE methods define \(\mathcal{T}\) differently, they all aim to simplify \(\mathcal{L}\) evaluation while keep the minimizer &#34;close&#34; to the MLE solution: $$ \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{T}\approx \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{-2L}=\text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L}. $$ The approximation is unbiased in predicted individual mean responses. These predictions are obtained setting \(\hat{\eta}=0\) and \(\epsilon=0\). In other words, the prediction is for the mean reponses of individuals with same fixed effects. In addition, one can also use \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\) to calculate the covariance matrix (hence the standard error) of individual predictions.">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="user-guide">
-    <meta property="article:modified_time" content="2025-12-15T10:37:17-08:00">
+    <meta property="article:modified_time" content="2026-01-10T10:04:09-08:00">
 
 
-  <meta itemprop="name" content="3. Likelihood">
-  <meta itemprop="dateModified" content="2025-12-15T10:37:17-08:00">
+  <meta itemprop="name" content="Likelihood and MLE">
+  <meta itemprop="description" content="Likelihood and MLE To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component $$ y = f(x, \phi, t) &#43; \epsilon, $$ and a statistical component $$ \phi = \mu(z, \theta, \eta). $$ Another formulation is through the likelihood. Let \(p(y_i|\phi_i, \Sigma_i)\) be the likelihood function for individual i, as a function of the individual parameter \(\phi_i\) and residual covariance matrix \(\Sigma_i\). Then NONMEM&#39;s assumption that observation \(y_i\) follows a multivariate normal distribution can be expressed as $$ p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[ -\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t)) \right]. $$ Assume \(\phi_i=\mu(z_i, \theta)&#43;\eta_i\) and recall that \(\eta_i\) also has multivariate normal distribution: $$ p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[ -\frac{1}{2}\eta_i^T\Omega\eta_i \right], $$ then the individual likelihood is $$ p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega). $$ In classical NONMEM methods, we only seek the likelihood of population parameters by marginalizing \(\eta_i\), so that the individual likelihood of the population parameters is $$ L_i\equiv p(y_i|\Sigma_i, \theta, \Omega) = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega)\,d\phi_i = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\eta_i | \Omega)\,d\eta_i, $$ The total likelihood for the population is $$ L=\Pi_iL_i=L_1\times L_2\times\dots \times L_{N}. $$ The reason that we use &#34;proportional to&#34; (\(\propto\)) instead of &#34;equal to&#34; (\(=\)) is that we fit the model by maximizing the likelihood L, and the normalizing coefficients are not relevant. In fact, we maximize the log-likelihood \(\mathcal{L}\) for its superior numerical statbility and being simpler to work with for common distributions (from the expontential family): $$ \mathcal{L}=\sum_i\mathcal{L}_i=\sum_i\log(L_i). $$ NONMEM&#39;s point estimating methods aim to adjust parameters to maximize \(\mathcal{L}\). These methods are called maximized likelihood estimations (MLEs), and the corresponding &#34;optimal&#34; parameter values maximized likelihood estimates, denoted as \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\). In fact, NONMEM takes one step further by minimizing certain approximations of \(-2\mathcal{L}\), and call these approximations objective function \(\mathcal{T}\) and objective function for individual \(\mathcal{T}_i\). Though different NONMEM MLE methods define \(\mathcal{T}\) differently, they all aim to simplify \(\mathcal{L}\) evaluation while keep the minimizer &#34;close&#34; to the MLE solution: $$ \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{T}\approx \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{-2L}=\text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L}. $$ The approximation is unbiased in predicted individual mean responses. These predictions are obtained setting \(\hat{\eta}=0\) and \(\epsilon=0\). In other words, the prediction is for the mean reponses of individuals with same fixed effects. In addition, one can also use \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\) to calculate the covariance matrix (hence the standard error) of individual predictions.">
+  <meta itemprop="dateModified" content="2026-01-10T10:04:09-08:00">
+  <meta itemprop="wordCount" content="940">
 
-<title>3. Likelihood | NONMEM Documentation</title>
+<title>Likelihood and MLE | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
 <link rel="manifest" href="/docs/manifest.json">
 <link rel="canonical" href="https://nmusers.github.io/docs/user-guide/fundamentals/likelihood/">
@@ -31,7 +35,7 @@ https://github.com/alex-shpak/hugo-book
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.bcb82d6949b51c4d0a6634fc10b966fd3bb2dbb8f6cc6d28027d63fd567f9004.js" integrity="sha256-vLgtaUm1HE0KZjT8ELlm/Tuy27j2zG0oAn1j/VZ/kAQ=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.7be99fe1c48c426b84531c662b4b601a55b76b71c49acf3a6afa3692d6115c58.js" integrity="sha256-e&#43;mf4cSMQmuEUxxmK0tgGlW3a3HEms86avo2ktYRXFg=" crossorigin="anonymous"></script>
 
 
 
@@ -147,7 +151,7 @@ https://github.com/alex-shpak/hugo-book
 
   
     <a href="/docs/user-guide/fundamentals/population/" class="">
-      1. Population models</a>
+      Population models</a>
   
 
         </li>
@@ -161,7 +165,7 @@ https://github.com/alex-shpak/hugo-book
 
   
     <a href="/docs/user-guide/fundamentals/pkode/" class="">
-      2. PK and ODEs</a>
+      PK and ODEs</a>
   
 
         </li>
@@ -175,21 +179,7 @@ https://github.com/alex-shpak/hugo-book
 
   
     <a href="/docs/user-guide/fundamentals/likelihood/" class="active">
-      3. Likelihood</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/user-guide/fundamentals/model-fitting/" class="">
-      4. Model fitting</a>
+      Likelihood and MLE</a>
   
 
         </li>
@@ -283,6 +273,42 @@ https://github.com/alex-shpak/hugo-book
           
   <ul>
     
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-b4d635c55a90184dd9eaba68b950d9ca" class="toggle"  />
+    <label for="section-b4d635c55a90184dd9eaba68b950d9ca" class="flex">
+      <a href="/docs/user-guide/predpp/population_model/" class="">
+        PK parameter model</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-0491f18d5682fdcb9c07f795c3b0e97d" class="toggle"  />
+    <label for="section-0491f18d5682fdcb9c07f795c3b0e97d" class="flex">
+      <a href="/docs/user-guide/predpp/general_linear_model/" class="">
+        General linear model</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+        </li>
+      
+    
   </ul>
 
         </li>
@@ -329,6 +355,34 @@ https://github.com/alex-shpak/hugo-book
   
     <a href="/docs/user-guide/advanced/abbr_block/" class="">
       Code blocks</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/mu_model/" class="">
+      MU referencing</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/theta_trans/" class="">
+      THETA transformation</a>
   
 
         </li>
@@ -804,7 +858,7 @@ https://github.com/alex-shpak/hugo-book
 
   
     <a href="/docs/reference-manual/control-records/ovarf/" class="">
-      $OVARF</a>
+      $OVARF, $SVARF</a>
   
 
         </li>
@@ -1042,7 +1096,7 @@ https://github.com/alex-shpak/hugo-book
 
   
     <a href="/docs/reference-manual/control-records/thetai/" class="">
-      $THETAI</a>
+      $THETAI, $THETAR</a>
   
 
         </li>
@@ -1057,20 +1111,6 @@ https://github.com/alex-shpak/hugo-book
   
     <a href="/docs/reference-manual/control-records/thetap/" class="">
       $THETAP, $THETAPV</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/reference-manual/control-records/thetar/" class="">
-      $THETAR</a>
   
 
         </li>
@@ -1299,7 +1339,7 @@ https://github.com/alex-shpak/hugo-book
 
   
     <a href="/docs/cookbook/steady_state/" class="">
-      Empirical state state</a>
+      Empirical steady state</a>
   
 
         </li>
@@ -1328,20 +1368,6 @@ https://github.com/alex-shpak/hugo-book
   
     <a href="/docs/cookbook/etabar_mix/" class="">
       Mixture model: ETABAR</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/cookbook/mu_model/" class="">
-      MU referencing</a>
   
 
         </li>
@@ -1499,7 +1525,7 @@ https://github.com/alex-shpak/hugo-book
     <img src="/docs/icons/menu.svg" class="book-icon" alt="Menu" />
   </label>
 
-  <h3>3. Likelihood</h3>
+  <h3>Likelihood and MLE</h3>
 
   <label for="toc-control">
     
@@ -1513,7 +1539,20 @@ https://github.com/alex-shpak/hugo-book
   <aside class="hidden">
     
   
-
+<nav id="TableOfContents">
+<ul>
+<li><a href="#headline-1">Likelihood and MLE</a>
+<ul>
+<li><a href="#headline-2">Least-square method</a>
+</li>
+<li><a href="#headline-3">Covariance (standard error) estimation</a>
+</li>
+<li><a href="#headline-4">Goodness-of-Fit</a>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
 
 
 
@@ -1524,7 +1563,198 @@ https://github.com/alex-shpak/hugo-book
 
       
       
-  <article class="markdown book-article"><link rel="stylesheet" href="/docs/katex/katex.min.css" /><script defer src="/docs/katex/katex.min.js"></script><script defer src="/docs/katex/auto-render.min.js" onload="renderMathInElement(document.body, {&#34;delimiters&#34;:[{&#34;left&#34;:&#34;$$&#34;,&#34;right&#34;:&#34;$$&#34;,&#34;display&#34;:true},{&#34;left&#34;:&#34;\\(&#34;,&#34;right&#34;:&#34;\\)&#34;,&#34;display&#34;:false},{&#34;left&#34;:&#34;\\[&#34;,&#34;right&#34;:&#34;\\]&#34;,&#34;display&#34;:true}]});"></script>
+  <article class="markdown book-article">
+<link rel="stylesheet" href="/docs/katex/katex.min.css" /><script defer src="/docs/katex/katex.min.js"></script><script defer src="/docs/katex/auto-render.min.js" onload="renderMathInElement(document.body, {&#34;delimiters&#34;:[{&#34;left&#34;:&#34;$$&#34;,&#34;right&#34;:&#34;$$&#34;,&#34;display&#34;:true},{&#34;left&#34;:&#34;\\(&#34;,&#34;right&#34;:&#34;\\)&#34;,&#34;display&#34;:false},{&#34;left&#34;:&#34;\\[&#34;,&#34;right&#34;:&#34;\\]&#34;,&#34;display&#34;:true}]});"></script>
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Likelihood and MLE
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component
+$$
+y = f(x, \phi, t) + \epsilon,
+$$
+and a statistical component
+$$
+\phi = \mu(z, \theta, \eta).
+$$
+Another formulation is through the likelihood. Let \(p(y_i|\phi_i, \Sigma_i)\) be the
+likelihood function for individual <em>i</em>, as a function of the
+individual parameter \(\phi_i\) and residual covariance matrix
+\(\Sigma_i\). Then NONMEM&#39;s assumption that observation \(y_i\)
+follows a multivariate normal distribution can be expressed as
+$$
+p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[
+-\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t))
+\right].
+$$
+Assume \(\phi_i=\mu(z_i, \theta)+\eta_i\) and recall that \(\eta_i\)
+also has multivariate normal distribution:
+$$
+p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[
+-\frac{1}{2}\eta_i^T\Omega\eta_i
+\right],
+$$
+then the individual likelihood is
+$$
+p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega).
+$$
+In classical NONMEM methods, we only seek the likelihood of population
+parameters by <em>marginalizing</em> \(\eta_i\), so that the individual
+likelihood of the population parameters is
+$$
+L_i\equiv p(y_i|\Sigma_i, \theta, \Omega) = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega)\,d\phi_i
+ = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\eta_i | \Omega)\,d\eta_i,
+$$
+The total likelihood for the population is
+$$
+L=\Pi_iL_i=L_1\times L_2\times\dots \times L_{N}.
+$$
+The reason that we use &#34;proportional to&#34; (\(\propto\)) instead of &#34;equal
+to&#34; (\(=\)) is that we fit the model by maximizing the likelihood <em>L</em>, and
+the normalizing coefficients are not relevant. In fact, we maximize
+the log-likelihood \(\mathcal{L}\) for its superior numerical statbility and
+being simpler to work with for common distributions (from the expontential family):
+$$
+\mathcal{L}=\sum_i\mathcal{L}_i=\sum_i\log(L_i).
+$$
+NONMEM&#39;s point estimating methods aim to adjust parameters
+to maximize \(\mathcal{L}\). These methods are called <em>maximized
+likelihood estimations</em> (MLEs), and the corresponding
+&#34;optimal&#34; parameter values <em>maximized likelihood estimates</em>,
+denoted as \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\).
+In fact, NONMEM takes one step further by minimizing certain approximations of \(-2\mathcal{L}\),
+and call these approximations <em>objective function</em> \(\mathcal{T}\) and <em>objective function for individual</em>
+\(\mathcal{T}_i\). Though different NONMEM MLE methods
+define \(\mathcal{T}\) differently, they all aim to simplify
+\(\mathcal{L}\) evaluation while keep the minimizer &#34;close&#34; to
+the MLE solution:
+$$
+\text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{T}\approx \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{-2L}=\text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L}.
+$$
+The approximation is unbiased in predicted individual mean responses.
+These predictions are obtained setting \(\hat{\eta}=0\) and
+\(\epsilon=0\). In other words, the prediction is for the mean
+reponses of individuals with same fixed effects. In addition, one can
+also use \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\) to
+calculate the covariance matrix (hence the standard error) of
+individual predictions.</p>
+<div id="outline-container-headline-2" class="outline-3">
+<h3 id="headline-2">
+Least-square method
+</h3>
+<div id="outline-text-headline-2" class="outline-text-3">
+<p>It is helpful to view the extended least-square (ELS) method used by
+classic NONMEM methods through the lens of MLE.
+To simplify presentation here we only consider the individual model
+$$
+y_{ij} = f(x_{ij}, \phi_i) + \epsilon_{ij},\quad j=1,\dots,N_i,
+$$
+and assume uncorrelated normal residual errors:
+$$
+\epsilon_{ij}\sim \mathcal{N}(0, \sigma_j^2)
+$$</p>
+<p>
+The individual OFV for ELS is then
+$$
+\mathcal{T}_i(\phi_i, \upsilon, \xi)=\sum_j\left(
+\frac{(y_{ij}-f(x_{ij},\phi_i))^2}{\sigma_j^2} + \log(\sigma^2_{j})
+\right)
+$$
+and the model OFV is
+$$
+\mathcal{T}(\theta, \Omega, \Sigma) = \sum_{i=1}^N \mathcal{T}_i(\phi_i, \upsilon, \xi).
+$$
+This is a weighted least square objective function with penalty:</p>
+<ul>
+<li>for each observation, the squared difference between observation \(y\) and model
+prediction \(f()\) is weighted by the inverse of the variance (&#34;precision&#34;);</li>
+<li>the Log term penalizes the weight so that the weight would not become
+arbitrarily small.</li>
+</ul>
+<p>One can see that the above ELS formulation is exactly
+\(-2\mathcal{L}\), with \(\sigma_{ij}\) the diagonal elements of \(\Sigma_i\).
+The likelihood function \(p(\phi|\theta,\Omega)\) in the previous
+section shows that the
+depedence on \( (\theta, \Omega) \) is through the \(\mu()\) model of
+\(\phi\), \(\theta\) and \(\Omega\).</p>
+<p>
+In fact, the original ELS uses a particular form of \(\sigma_j\):
+$$
+\sigma_{j} = \upsilon f(x_{ij}, \phi_i)^{\xi},
+$$
+with \(\upsilon\) and \(\xi\) both as unknown parameters (that can be
+modeled as elements of THETA). We can see this is an extension of the
+proportional residual error model.</p>
+</div>
+</div>
+<div id="outline-container-headline-3" class="outline-3">
+<h3 id="headline-3">
+Covariance (standard error) estimation
+</h3>
+<div id="outline-text-headline-3" class="outline-text-3">
+<p>Let vector \(p=(p_1,p_2,\dots, p_n)\) be the collection of all the
+ entries of \( (\theta, \Omega, \Sigma) \), and
+\(\hat{p}=(\hat{p}_1,\hat{p}_2,\dots,\hat{p}_n)\) the corresponding estimate. To obtain error estimation of \(\hat{p}\), NONMEM calculates two matrices.</p>
+<ul>
+<li>Matrix \(R\) with
+$$
+R_{kl}=\frac{\partial \mathcal{T}^2}{\partial p_kp_l}, \quad k,l=1,\dots,n,
+$$
+evaluated at \(\hat{p}\). \(R\) is an approximation of the observed
+Fisher Information matrix except a constant coefficient (recall that
+\(\mathcal{T}\) approximates \(-2\mathcal{L}\)).</li>
+<li>Matrix \(S=\sum_iS_i\), where
+$$
+S_i=\nabla_i \nabla_i^T,\quad \nabla_i=\frac{\partial \mathcal{T}_i}{\partial p},
+$$
+evaluated at \(\hat{p}\). That is, \(S_i\) is the outer product of the gradient of individual
+OFV with respect to \(p\). \(S\) is an approximation of the
+empirical Fisher Information matrix except a constant coefficient.</li>
+</ul>
+<p>Under the assumption that the random effects are normally distributed, \(R/N\) and
+  \(S/N\) converge to a same matrix when \(N\rightarrow \infty\), and the
+inverse of either matrices serves as a covariance matrix estimate.
+  Without the normality
+assumption, matrix \(R^{-1}SR^{-1}\) is a covariance matrix estimate.
+This is the default estimation in NONMEM but users have option to
+  choose \(R^{-1}\) or \(S^{-1}\) in the $COVARIANCE record.</p>
+</div>
+</div>
+<div id="outline-container-headline-4" class="outline-3">
+<h3 id="headline-4">
+Goodness-of-Fit
+</h3>
+<div id="outline-text-headline-4" class="outline-text-3">
+<p>Three Goodness-of-Fit (GoF) quantities are always among the NONMEM
+output: prediction, residual, and weighted residual. One can also request additional quantities.</p>
+<p>
+The prediction (&#34;PRED&#34; in NONMEM output) is the result of \(f()\)
+based on <em>population estimates</em>. In other words, it is computed at the
+estimated population mean by setting \(\eta=0\):
+$$
+\text{PRED}_{ij} = f(x_{ij}, \mu(z_i, \hat{\theta}))
+$$</p>
+<p>
+The residual (&#34;RES&#34; in NONMEM output) is difference between observation and PRED:
+$$
+\text{RES}_{ij} = y_{ij} - \text{PRED}_{ij}
+$$</p>
+<p>
+Since in application RES is inevitably correlated,
+often the weighted residuals (&#34;WRES&#34; in NONMEM output) serves as an attempted alternative.
+$$
+\text{WRES}_{i}={\text{cov}^{-1/2}(y_i)}{\text{RES}_i}
+$$
+Here \(\text{cov}^{1/2}\) denotes the matrix square root of the
+covariance matrix, and \(\text{cov}^{-1/2}\) the inverse of the matrix
+square root. Note here we only have individual subscript,
+therefore the WRES and \(y\) in the definition are in general vectors
+(for multiple observation of subject <em>i</em>).</p>
+</div>
+</div>
+</div>
+</div>
 </article>
  
       
@@ -1534,9 +1764,9 @@ https://github.com/alex-shpak/hugo-book
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/ebe16ccb4da09af0ae15259f50ae6bad5ba24ffe" title='Last modified by Yi Zhang | 2025 Dec 15' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/47a2dce4db66bc16a96ea6a9286fa17b7fd5061a" title='Last modified by Yi Zhang | 2026 Jan 10' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2025 Dec 15</span>
+    <span>2026 Jan 10</span>
   </a>
 
 </div>
@@ -1561,14 +1791,14 @@ https://github.com/alex-shpak/hugo-book
     
       <a href="/docs/user-guide/fundamentals/pkode/" class="flex align-center">
         <img src="/docs/icons/backward.svg" class="book-icon" alt="Backward" />
-        <span>2. PK and ODEs</span>
+        <span>PK and ODEs</span>
       </a>
     
     </span>
     <span>
     
-      <a href="/docs/user-guide/fundamentals/model-fitting/" class="flex align-center">
-        <span>4. Model fitting</span>
+      <a href="/docs/user-guide/nmtran/" class="flex align-center">
+        <span>Data and model</span>
         <img src="/docs/icons/forward.svg" class="book-icon" alt="Forward" />
       </a>
     
@@ -1606,7 +1836,20 @@ https://github.com/alex-shpak/hugo-book
     <div class="book-toc-content">
       
   
-
+<nav id="TableOfContents">
+<ul>
+<li><a href="#headline-1">Likelihood and MLE</a>
+<ul>
+<li><a href="#headline-2">Least-square method</a>
+</li>
+<li><a href="#headline-3">Covariance (standard error) estimation</a>
+</li>
+<li><a href="#headline-4">Goodness-of-Fit</a>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
 
 
 

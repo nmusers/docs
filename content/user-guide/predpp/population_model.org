@@ -1,0 +1,149 @@
+---
+title: "PK parameter model"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: true
+weight: 14
+---
+{{< katex >}}{{< /katex >}}
+
+# examples from Guide VI, III. L
+
+* PK parameter model
+Consider the following extension of the population model from
+introduction. Each of 59 neonates was given some loading dose of the
+drug, had a plasma drug level measured about 2 hours later, was given
+maintenance doses about every 12 hours thereafter, had possibly one
+trough level measured during maintenance dosing, and certainly one
+level measured some time after the last maintenance dose. Due to the
+long half-life of the drug, for the purposes of analysis all doses can
+be regarded as intravenous bolus doses. The weight and APGAR score of
+each individual are available as concomitant information. The APGAR
+score (1-10) is a measure of a neonate’s health at birth.
+
+The one compartment linear model is implemented using ADVAN1. TRANS2,
+thus Cl and Vd are used for PK parameters and are described using an
+exponential model, with typical values proportional to weight. For Vd,
+the proportionality constant takes two possibly values depending on
+the APGAR score with threshold APGAR=2.
+
+#+begin_src perl
+  $PROB PHENOBARB POPULATION DATA
+  $DATA DATA1 (6F7.0)
+  $INPUT ID TIME AMT WT APGR CP=DV
+  $SUBROUTINES ADVAN1 TRANS2
+  $PK
+  ;# CLEARANCE AND VOLUME PROPORTIONAL TO WEIGHT
+  ;# PROPORTIONALITY CONSTANT FOR VOLUME DEPENDS ON APGAR
+  CALLFL=1
+  CL=THETA(1)*WT*EXP(ETA(1))
+  TVVD=THETA(2)*WT
+  IF (APGR.LE.2) TVVD=THETA(3)*TVVD
+  V=TVVD*EXP(ETA(2))
+  S1=V
+  $ERROR
+  Y=F*EXP(EPS(1))
+  $THETA (0,.0047) (0,.99) (0,1.0)
+  $OMEGA .05 .03
+  $SIGMA .02
+  $ESTIM MAXEVAL=500 PRINT=5
+  $COVAR
+  $TABLE ID TIME AMT WT APGR
+#+end_src
+Note that the reserved variable assignment ~CALLFL=1~ denotes that
+the PK routine is called only once for each individual record, at the
+first event record of the individual. This is sufficient as the weight
+is constant for each individual, and more efficient than the default
+setting that evaluates $PK for every data record. This is an
+example of /calling protocol/. A more verbose alternative is to
+specify
+#+begin_src perl
+ $PK (ONCE PER INDIVIDUAL RECORD)
+;#...
+#+end_src
+
+*** A mixture model
+:PROPERTIES:
+:CUSTOM_ID: mixture
+:END:
+Consider the same data set above, and assume the weight is not
+measured. Without weight the
+model fitting will be unsatisfactory as Cl and Vd are poorly
+described. To remedy the problem we can postulate that the 59 neonates constitute a
+random sample from a population comprised of two subpopulations, one with one set of typical values of
+Cl and Vd, and a second with another set of typical values. This can
+be described by a mixture model that
+assumes that some fraction /p/ of the population has one set of typical values, and
+the remaining fraction /1-p/ has another set, specifically,
+$$
+\text{CL}=\theta_1e^{\eta_1}, \quad \text{Vd}=\theta_3e^{\eta_2}
+$$
+for subpopulation 1, and
+$$
+\text{CL}=\theta_2\theta_1e^{\eta_3}, \quad \text{Vd}=\theta_4\theta_3e^{\eta_4}
+$$
+for subpopulation 2. \(\theta_2\) and \(\theta_4\)
+are the fractional adjustments in the typical values for subpopulation 2. With a mixture model, different
+η variables on the same PK parameter must be used with different
+subpopulations.
+
+NONMEM provides control record $MIX for mixture models.
+#+begin_src perl
+  $PROB PHENOBARB POPULATION DATA MIXTURE MODEL
+  $DATA DATA2 (6F7.0)
+  $INPUT ID TIME AMT WT APGR CP=DV
+  $SUBROUTINES ADVAN1 TRANS2
+  $MIX
+  NSPOP=2
+  P(1)=THETA(5)
+  P(2)=1.-THETA(5)
+  $PK
+  CALLFL=1
+  EST=MIXEST
+  CL1=THETA(1)*EXP(ETA(1))
+  V1=THETA(3)*EXP(ETA(2))
+  CL2=THETA(2)*THETA(1)*EXP(ETA(3))
+  V2=THETA(4)*THETA(3)*EXP(ETA(4))
+  IF (MIXNUM.EQ.1) THEN
+    CL=CL1
+    V=V1
+  ELSE
+    CL=CL2
+    V=V2
+  ENDIF
+  S1=V
+  $ERROR
+  Y=F*EXP(EPS(1))
+  $THETA (0,.0047) (0,2.0) (0,.99) (0,2.0) (0,.5,1)
+  $OMEGA BLOCK(2) .05 .01 .03
+  $OMEGA BLOCK(2) SAME
+  $SIGMA .02
+  $ESTM MAXEVAL=500 PRINT=5 INTERACTION METHOD=1
+#+end_src
+~NSPOP=2~ in the $MIX record specifies that there are two
+subpopulations, and the vector P contains the fractions of the
+subpopulations. Reserved variables ~MIXNUM~ contains the subpopulation
+index and is used to select CL and V. By fitting the above model we
+estimate both sets of typical values and the mixing fraction /p/.
+
+Alternatively, one can supply a [[file:/docs/reference-guide/api/subroutines/#mix][MIX routine]] instead of $MIX
+record. With the Fortran implementation
+#+begin_src f90
+! filename: mix.f90
+
+  SUBROUTINE MIX (ICALL,NSPOP,P)
+    USE SIZES, ONLY: DPSIZE,ISIZE
+    USE ROCM_REAL, ONLY: THETA=>THETAC,DATA=>RDATA
+    IMPLICIT REAL(KIND=DPSIZE) (A-Z)
+    INTEGER(KIND=ISIZE) :: ICALL,NSPOP
+    REAL(KIND=DPSIZE) :: P(*)
+    NSPOP=2
+    P(1)=THETA(5)
+    P(2)=1.-THETA(5)
+    RETURN
+  END SUBROUTINE MIX
+#+end_src
+one can replace the $SUBROUTINE and $MIX records in the above model as
+#+begin_src perl
+  $SUBROUTINES ADVAN1 TRANS2 MIX=mix.f90
+#+end_src

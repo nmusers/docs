@@ -2,27 +2,58 @@
 {{< katex >}}{{< /katex >}}
 
 * $LDFOLD
-  Revert to pre NONMEM 7.5.1 interpretation of loss of degrees
- of freedom (LDF).
+Revert to pre-NONMEM 7.5.1 interpretation of loss of degrees of freedom (LDF).
 
-** USAGE
+In pre-7.5.1 version, for EM methods and MCMC Bayesian methods,
+NONMEM's default correction for degrees of freedom was \(N/(N-\text{LDF})\),
+where N is the number of subjects, and LDF is the loss of degrees of freedom.  The LDF for EM/BAYES methods was 1 by default. Such a correction was not used in FOCE/Laplace analysis.  Normally, this correction is very small, as M should be at least 10 for a proper population analysis.  However, a difference in FOCE versus EM analysis may be noticed if the number of subjects is less than 10.
 
+Because the correction is very small, for most problems, the LDF need
+not be adjusted.  On the occasions with very few subjects, it would be
+more accurate to have LDF(I) be the number of to-be-estimated THETAs
+corresponding to MU_I.  For example, you could enter the following (note the LDF must be accessed with verbatim code):
+
+#+begin_src f90
+“ LDF(3)=2.0
+MU_3=THETA(4)+LOG(BWT)*THETA(5)
+CL=EXP(MU_3+ETA(3))
+#+end_src
+In NM v751+, by default LDF=0 for EM/BAYES. When user modifies degrees
+of freedom with LDF, and the change will be made to all analysis methods.
+Alternatively, one can request NONMEM to evaluate the most appropriate LDF for you by setting the LDF to a negative value, e.g.
+#+begin_src f90
+“ LDF(1:4)=-1.0
+#+end_src
+This will specify LDF according to the number of non-fixed THETAs associated with a particular MU reference.  Therefore, when setting LDF=-1, it is necessary to have proper mu referencing, even for FOCE/Laplace.  If you are curious about what the NONMEM assessed LDF values are, you can access them with:
 #+begin_src perl
-$LDFOLD
+$PK
+Include nonmem_reserved_general
+…
+“ write(*,*) TLDF(1),TLDF(2)
+#+end_src
+The LDF=-1 will correct for all analysis methods.  If you set LDF>0, this will use that degrees of freedom for all methods.  You can of course filter as follows:
+
+#+begin_src f90
+Include nonmem_reserved_general
+LDF(3)=2.0
+If(IBMETHOD==EST_BAYES) LDF(3)=0.0
 #+end_src
 
-      If there is a reason that you need your problem to handle LDFs in
-      the  manner of previous NONMEM versions, insert $LDFOLD after the
-      first $PROBLEM:
+In summary, for vNM751+, to correct for degrees of freedom loss, let
+NONMEM determine the best values and for which methods, and make sure
+THETAs are MU referenced. Thus
+#+begin_src perl
+$PK
+LDF=-1
+MU_1=THETA(1)+THETA(2)*LOG(AGE)
+MU_2=THETA(3)
+#+end_src
+will determine the correct degrees of freedom loss, and impose this correction for EM/FOCE/Laplace.
 
-      #+begin_src perl
-      $PROB My problem
-      $LDFOLD
-      #+end_src
+On the other hand, to handle LDF’s in the manner of previous NONMEM versions, insert the following after $PROBLEM:
+#+begin_src perl
+  $PROB My problem
+    $LDFOLD
+#+end_src
 
-      and this will revert to the old default handling of  LDFs.   Only
-      the  new methods (ITS/IMP/SAEM/BAYES) are affected by a change in
-      default behavior regarding LDFs of NONMEM version 7.5.0 to 7.5.1.
-
-** REFERENCES
-Guide Introduction_7
+Only the new methods (ITS/IMP/SAEM/BAYES) are affected by a change in default behavior regarding LDF’s of NONMEM version 7.5.0 to 7.5.1.

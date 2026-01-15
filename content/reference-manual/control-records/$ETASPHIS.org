@@ -86,7 +86,7 @@ information transfer for resuming an analysis.
  then  various  starting  etas  are tested, including a set from $ETAS,
  when available.
 
- In Bayes, SAEM, IMP MAPITER=0 they are used as the starting etas.
+ In Bayes, SAEM, IMP MAPITER=0 they are used as the starting ETAs.
 
  In MAP estimation methods, such as METHOD=1, or ITS, or IMP MAPITER>0,
  or  IMPMAP, and if MCETA>0, then these etas are one of the initial eta
@@ -97,8 +97,17 @@ In  cases  where  FNLETA=2,  the  estimation step is skipped, and etas
  inputted from $ETAS are treated as if they were the final result of an
  estimation.
 
-See INTRODUCTION  TO  NONMEM  7,  "$ETAS and $PHIS Record For Inputting
- Specific ETA or PHI values" for examples and discussion.
+One purpose to bringing initial eta/phi and etc/phc values is you can
+readily resume an analysis, if an MSF file was not set up in the
+previous analysis (but note that the MSF file system is still the most complete
+information transfer for resuming an analysis).
+#+begin_src perl
+$PHIS FILE=etafile3_phi.phm FORMAT=S1PE15.7  TBLN=3
+#+end_src
+Or, use FNLETA=2 to use the etas that were brought in to evaluate
+predicted values, without performing a new population estimation:
+#+begin_src perl
+$ETAS FILE=etafile_phi.phi FORMAT=S1PE15.7  TBLN=6
 
-** REFERENCES
-Guide Introduction_7
+$EST METHOD=1 INTERACTION NSIG=3 PRINT=1 FNLETA=2
+#+end_src

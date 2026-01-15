@@ -14,6 +14,21 @@ DADT(2)=P(3)*A(1)-P(1)*A(2)
 #+end_src
 
 ** DISCUSSION
+In general, a system of differential equations has the form
+
+$$
+\frac{dA(t)}{dt}=g(A(t), x, p, t).
+$$
+Here both left-hand-side (LHS) and right-hand-size (RHS) are vectors
+of dimention \(n\): \(A=[A_1, \dots, A_n]^T\), \(g=[g_1, \dots, g_n]^T\).
+/A/ denotes the drug amount in all compartments, other than the output
+compartment, \(p\) the internal PK parameters and \(t\) the time.
+For example, for the one compartment model with linear elimination and
+absorption from a drug depot we have
+$$
+n=2,\quad p=[K_e, K_a]^T,\quad g_1=-K_aA_1,\quad g_2=K_aA_1-K_eA_2
+$$
+
 The $DES record is used to compute the right-hand-side of differential equations.  It is used
 with  PREDPP's  general  non-linear  models  (ADVAN6,  ADVAN8, ADVAN9,
 ADVAN13, ADVAN14, ADVAN15, ADVAN16, ADVAN17,ADVAN18).
@@ -58,9 +73,9 @@ See [[file:/docs/reference-manual/abbr/][abbreviated code]] for general rules fo
 
 Fortran  functions  that  are  continuous, such as SIN and COS.
 Functions that introduce  a discontinuity, such as INT, MOD, and ABS,
-should not be used. Instead, use model event times MTIME in the $PK
+should not be used. Instead, use [[file:/docs/reference-manual/api/variables/#mtime][model event times MTIME]] in the $PK
 block, and  either  set  flag variables  in $PK that can be tested in
-$DES, or use MPAST in the $DES block.  See Appendix 3 of  Guide VI
+$DES, or use MPAST in the $DES block.
 PREDPP.  Several  examples  are available for the use of MTIME with
 $DES. (See mtime, model time examples). (See Examples Using MTIME to
 Model Periodic Discontinuities in $DES).
@@ -126,6 +141,3 @@ is  set  by PREDPP  to  1  on  this  final call to DES.  ISFINL can be
 tested on a WRITE statement if such statements are used in DES.
 
 (See [[file:/docs/reference-manual/api/subroutines/#des-ref][DES]], [[file:/docs/reference-manual/control-records/subroutines/#advan6-8][ADVAN6, ADVAN8]], [[file:/docs/reference-manual/control-records/subroutines/#advan9-15-17][ADVAN9]])
-
-** REFERENCES
-Guide VI, section VI.C

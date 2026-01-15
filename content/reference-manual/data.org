@@ -7,14 +7,13 @@ weight: 13
 ---
 
 * Data
-** Data items
-Unless specified otherwise, all items can be used in the $INPUT record as
+Unless specified otherwise, all data items can be used in the $INPUT record as
 #+begin_src perl
 $INPUT ... ITEM_NAME ...
 #+end_src
 and correspondingly in the input data file named in $DATA record.
 
-*** ADDL
+** ADDL
 ADDL labels PREDPP's additional dose (ADDL) data item.  The additional
  dose data item is optional.  In a dose or reset-dose event  record  it
  describes how many additional doses, exactly like the present ("initiating") dose, should be given.  The interdose interval ([[file:/docs/reference-manual/data][II data item]]) gives the time between the additional doses.
@@ -35,8 +34,6 @@ ADDL labels PREDPP's additional dose (ADDL) data item.  The additional
  which  there is no SS data item, and a negative value of ADDL requests
  the computation.  This is described separately.
  (See [[file:/docs/techniques/steady_state/][empirical steady state]]).
-
- (See Guide Introduction_7 "An Empirical  Method  of  Achieving  Steady State")
 
  For  observation,  other-type  and reset event records, ADDL should be
  zero.
@@ -67,9 +64,7 @@ ADDL labels PREDPP's additional dose (ADDL) data item.  The additional
  There is a discussion of user (concomitant) data items used to compute
  PK parameters that are relevant to ADDL doses; (See [[file:/docs/reference-manual/control-records/bind/][$BIND]]).
 
- REFERENCES: Guide VI, section V.K
-
-*** AMT and RATE
+** AMT and RATE
  AMT labels PREDPP's dose amount (AMT) data item.  The dose amount data
  item is optional.
 
@@ -104,11 +99,7 @@ RATE  labels  PREDPP's dose rate (RATE) data item.  The dose rate data
 
  RATE must be 0 for observation, other-type, and reset event records.
 
- REFERENCES: Guide VI, section V.D
-
- REFERENCES: Guide V, section 6.8
-
-**** Dose specification
+*** Dose specification
 :PROPERTIES:
 :CUSTOM_ID: trans-dose-spec
 :END:
@@ -156,28 +147,17 @@ RATE  labels  PREDPP's dose rate (RATE) data item.  The dose rate data
 |     |       |
 |     |       | If RATE=-1, the infusion rate is computed  by PK.  The parameter is coded Rn in abbreviated code, e.g., R1 models the rate of  zero-order bolus doses to compartment 1.  The rate which applies during the advance from a  particular state  time to a later state time is given by the value of Rn in effect for the  the  later time, and may change during the course of the infusion.  The duration at any state time  is computed  as amount/rate, where amount repre- sents the remaining dose amount and rate rep- resents  the  value  of Rn at the state time. The infusion continues until the entire  dose amount has been introduced into the system.|
 
- CAUTION:   If  PREDPP  is used without using NM-TRAN as a preprocessor
+CAUTION:   If  PREDPP  is used without using NM-TRAN as a preprocessor
  then any user-supplied negative values for these data  items  will  be
  passed to PREDPP.  For a discussion of the circumstances such that the
  data file used by NONMEM and PREDPP is FDATA (in  which  case  NM-TRAN
- has  preprocessed  it)  or is the file named in the $DATA record,  see
- NONMEM Users Guide, Part IV.
+ has  preprocessed  it)  or is the file named in the $DATA record.
 
  (See multiple dose example, exogenous supplementation example).
 
- REFERENCES: Guide VI, section III.B.2 , V.F  ,  V.G  , V.H
-
- REFERENCES: Guide V, section 6.8
-
- REFERENCES: Guide IV, section III.B.5
-
 (See [[file:/docs/reference-manual/data/#trans-dose-spec][dose]], [[file:/docs/reference-manual/data/#ss-dose][SS dose]]).
 
-REFERENCES: Guide VI, section V.E
-
-REFERENCES: Guide V, section 6.8
-
-*** CALL
+** CALL
  CALL  labels  PREDPP's  call  (CALL) data item.  The call data item is
  optional.  It is used to force calls to PK  and/or  ERROR  subroutines
  with  event  records  for  which  such calls would not normally occur.
@@ -224,9 +204,7 @@ REFERENCES: Guide V, section 6.8
  CALL=10  may  be  used to force calls to the ADVAN routine for records
  subsequent to the first.
 
- REFERENCES: Guide IV, section V.C.1
-
-*** CMT, PCMT
+** CMT, PCMT
 :PROPERTIES:
 :CUSTOM_ID: cmt-pcmt
 :END:
@@ -284,7 +262,7 @@ separately or  together. Their meanings depend on the event record:
   - Reset-Dose Event:
     CMT and PCMT are the same as for dose events.
 
-**** Default compartments
+*** Default compartments
 :PROPERTIES:
 :CUSTOM_ID: default_compartment
 :END:
@@ -311,18 +289,7 @@ The  models  for  which  default  designations are built-in are listed here.  Th
 
  (See [[file:/docs/reference-manual/data/#cmt-pcmt][CMT]], [[file:/docs/reference-manual/control-records/model/][$MODEL]], [[file:/docs/reference-manual/api/subroutines/#model][MODEL]]).
 
- REFERENCES: Guide VI, section V.H , VI.B , VII.C
- REFERENCES: Guide IV, section V.C.4
-
- Guide  V  (Introductory Guide) has an example of how urine collections
- and observations of urine concentration can be described in  the  data
- file,  along  with observations of plasma concentrations.  See Chapter
- 6, Section 9, The Output Compartment: Urine Collections  and  Observations
-
- REFERENCES: Guide VI, section V.H
- REFERENCES: Guide V, section 6.9
-
-*** CONT
+** CONT
  CONT  labels PREDPP's continuation (CONT) data item.  The continuation
  data item is optional.  The CONT  data  item  allows  a  PREDPP  event
  record to span several data records.  It is useful when more than NONMEM's maximum number of data items per record are needed to describe a
@@ -347,73 +314,9 @@ The  models  for  which  default  designations are built-in are listed here.  Th
  of  each event record.  (It would be possible to reference such values
  using verbatim code, however).  When NM-TRAN performs time translation
  or ii conversion, it does so only for the event records having CONT=0.
- (See [[file:/docs/reference-manual/data/#data-date][DATE]], [[file:/docs/reference-manual/data/#data-time][TIME]], [[file:/docs/reference-manual/data/#data-ii][II]]).
+ (See [[file:/docs/reference-manual/data/#data-time][DATE]], [[file:/docs/reference-manual/data/#data-time][TIME]], [[file:/docs/reference-manual/data/#data-ii][II]]).
 
- REFERENCES: Guide VI, section II , V.A , V.I
-
- REFERENCES: Guide IV, section V.B , V.C.5
-
-*** DATE
-:PROPERTIES:
-:CUSTOM_ID: data-date
-:END:
-
- USAGE:
- #+begin_src perl
- $INPUT ... DATE[=DROP] ...
- #+end_src
-
- DATE,  DAT1,  DAT2,  and  DAT3 are labels for the date data item.  The
- date data item is optional.  When it is present, NM-TRAN performs time
- translation  for the time data item (to relative times starting at 0),
- whether or not any time values contain the character ":".
-
- The label given to the date data item describes its format:
-
-      | DATE | month day year |
-      | DAT1 | day month year |
-      | DAT2 | year month day |
-      | DAT3 | year day month |
-
- When the date represents a calendar date, components are separated  by
- any  nonnumeric  character, such as - or / (e.g., 12-3-90 or 12/3/90).
- DATE=DROP should be specified in this case because the NONMEM data set
- must not contain non-numeric characters.
-
- If  only one component is present, it is assumed to be the day (and it
- may be 0 or negative).   If  two  components  are  present,  they  are
- assumed  to  be the day and month, and they must not exceed 31 and 12,
- respectively.
-
- EXAMPLE:
-
- NM-TRAN data set
-#+begin_src sh
-      ID     DATE          TIME
-      1      10-1-86       9:15
-      1      10-1-86       14:40
-      1      10-2-86       8:30
-      2      10-12         8
-      2      10-14         10
-#+end_src
-
-NONMEM data set
-#+begin_src sh
-ID         TIME
-1          0.00
-1          5.42
-1         23.25
-2          0.00
-2         50.00
-#+end_src
-
- If present, the year component may consist of one to four digits.  The
- value  of  NM-TRAN's LAST20 constant determines the assumed century of
- one and two digit years: 1900's or 2000's.
-
- REFERENCES: Guide IV, section II.C.2 , III.B.2
-
-*** DV, MDV
+** DV, MDV
  DV  and  MDV label NONMEM's dependent variable (DV) and missing dependent variable (MDV) data items, respectively.
 
  The dependent variable (DV) data item is required by  NONMEM.   It  is
@@ -447,13 +350,7 @@ ID         TIME
  MDV=1.  NM-TRAN will append the MDV data item if PREDPP  is  used  and
  MDV is not present on the $INPUT record.
 
- REFERENCES: Guide I, section B.1 , C.4.3
-
- REFERENCES: Guide VI, section II , V.A
-
- REFERENCES: Guide IV, section III.B.2 , V.B
-
-*** EVID
+** EVID
 :PROPERTIES:
 :CUSTOM_ID: evid
 :END:
@@ -524,10 +421,7 @@ EVID labels PREDPP's event identification (EVID) data item.  The event
  that record occurs.
  (See stochastic differential equation example)
 
- REFERENCES: Guide IV, section V.B
- REFERENCES: Guide VI, section V.B
-
-*** ID
+** ID
  ID, .ID. and L1 are labels for NONMEM's identification data item.
 
   - ID
@@ -563,10 +457,7 @@ EVID labels PREDPP's event identification (EVID) data item.  The event
       if  the data are single-subject data, the automatic generation of
       the identification data items is suppressed.
 
- REFERENCES: Guide I, section B.1
- REFERENCES: Guide IV, section II.C.4 , III.B.2
-
-*** II
+** II
 :PROPERTIES:
 :CUSTOM_ID: data-ii
 :END:
@@ -613,11 +504,7 @@ NONMEM data set
 
  (See exogenous supplementation example).
 
- REFERENCES: Guide VI, section V.G
-
- REFERENCES: Guide IV, section V.B
-
-*** L2
+** L2
  L2  labels  level-two  (L2)  data  items.   The level two data item is
  optional.
 
@@ -633,30 +520,30 @@ NONMEM data set
  level-one observation, the level-two random effects can be made to  be
  correlated between level-two observations.)
 
- Here  is  an  example of a fragment of a data set using L2 data items.
+Here  is  an  example of a fragment of a data set using L2 data items.
  There are two types of observations, designated by the  two  different
  values  of  the  user data item TYPE.  Note that the L2 data items are
  the same for both of the observations at TIME=2, and they are also the
  same for both of the observations at TIME=112.5.
 
- #+begin_src perl
-      ID   TIME    AMT   APGR     WT     DV TYPE L2
-       1    0.    25.0    1.4      7      .   .   1
-       1    2.0      .    1.4      7    6.0   1   1
-       1    2.0      .    1.4      7   17.3   2   1
-       1   12.5    3.5    1.4      7      .   2   2
-       1   24.5    3.5    1.4      7      .   2   2
-       1   37.0    3.5    1.4      7      .   2   2
-       1   48.0    3.5    1.4      7      .   2   2
-       1   60.5    3.5    1.4      7      .   2   2
-       1   72.5    3.5    1.4      7      .   2   2
-       1   85.3    3.5    1.4      7      .   2   2
-       1   96.5    3.5    1.4      7      .   2   2
-       1  108.5    3.5    1.4      7      .   2   2
-       1  112.5      .    1.4      7    8.0   1   2
-       1  112.5      .    1.4      7   31.0   2   2
- #+end_src
- When  the  data  are single-subject and the L2 data item is defined to
+#+begin_src r
+  ID   TIME    AMT   APGR     WT     DV TYPE L2
+   1    0.    25.0    1.4      7      .   .   1
+   1    2.0      .    1.4      7    6.0   1   1
+   1    2.0      .    1.4      7   17.3   2   1
+   1   12.5    3.5    1.4      7      .   2   2
+   1   24.5    3.5    1.4      7      .   2   2
+   1   37.0    3.5    1.4      7      .   2   2
+   1   48.0    3.5    1.4      7      .   2   2
+   1   60.5    3.5    1.4      7      .   2   2
+   1   72.5    3.5    1.4      7      .   2   2
+   1   85.3    3.5    1.4      7      .   2   2
+   1   96.5    3.5    1.4      7      .   2   2
+   1  108.5    3.5    1.4      7      .   2   2
+   1  112.5      .    1.4      7    8.0   1   2
+   1  112.5      .    1.4      7   31.0   2   2
+#+end_src
+When  the  data  are single-subject and the L2 data item is defined to
  NM-TRAN in a $INPUT record, the ID data item is taken  to  be  the  L2
  data  item.   The  ID  item may be defined, but then it is not in turn
  identified to NONMEM as such.  The labels L2 and ID (if  defined)  may
@@ -668,10 +555,10 @@ NONMEM data set
  ID data items, and the items labeled L2 are taken to be  the  L2  data
  items.
 
- REFERENCES: Guide II, section D.3.3
- REFERENCES: Guide V, section 12.4.2 , 12.5
+See [[file:/docs/reference-manual/control-records/error/#two-obs][$ERROR control record]] on how to use L2 data to model the above
+data for two types of observations.
 
-*** MRG_
+** MRG_
 :PROPERTIES:
 :CUSTOM_ID: mrg
 :END:
@@ -717,7 +604,7 @@ NONMEM data set
 
  (See expectation example, expectation block).
 
-*** RATE
+** RATE
 :PROPERTIES:
 :CUSTOM_ID: rate
 :END:
@@ -747,7 +634,7 @@ four kinds of values.
 
  RATE must be 0 for observation, other-type, and reset event records.
 
-*** RAW_
+** RAW_
 :PROPERTIES:
 :CUSTOM_ID: data-raw_
 :END:
@@ -797,41 +684,103 @@ four kinds of values.
 
  (See data average example, [[file:/docs/user-guide/advanced/abbr_block/#data-average-block][data average block]]).
 
-*** REPL_
+** REPL_
 :PROPERTIES:
 :CUSTOM_ID: REPL_
 :END:
 
- REPL_  labels NONMEM's replication (REPL_) data item.  The
- replication data item is optional.  When the REPL_ data item is
- listed in  $INPUT, the  NONMEM  data set is considered to be a
- template data set.  NONMEM itself replicates subjects from the
- template data set at the start  of the problem to create an expanded
- NONMEM data set.
+REPL_  labels NONMEM's replication (REPL_) data item.  The replication
+data item is optional.  When the REPL_ data item is listed in  $INPUT,
+the  NONMEM  data set is considered to be a template data set.  NONMEM
+itself replicates subjects from the template data set at the start  of
+the problem to create an expanded NONMEM data set. (Note  that  the
+NONMEM data set is typically the file FDATA generated by NM-TRAN,
+unless there is nothing for NM-TRAN to change and the format  is
+supplied on the $DATA record, in which case the file named on the
+$DATA record is the NONMEM data set.) The REPL_ data item and REPL option are meant to be used with $SIMULATION or $DESIGN.
 
- (Note  that  the NONMEM data set is typically the file FDATA
- generated by NM-TRAN, unless there is nothing for NM-TRAN to change
- and the format  is  supplied on the $DATA record, in which case the
- file named on the $DATA record is the NONMEM data set.  See NONMEM Users Guide, Part IV.)
+The  value of REPL_ is the replication number for that subject. If the
+value is fractional, it will be  truncated  to  the  nearest integer.
+Only  the  REPL_  value of the first record of each individual will be
+used to determine its replication number.  If  for some  subject  the
+value of  REPL_ is 0, the subject is deleted from the NONMEM data set.
 
- The  value of REPL_ is the replication number for that subject. If
- the value is fractional, it will be  truncated  to  the  nearest
- integer. Only  the  REPL_  value of the first record of each
- individual will be used to determine its replication number.  If  for
- some  subject  the value of  REPL_ is 0, the subject is deleted from
- the NONMEM data set.
+For clinical trial simulations, typically one creates a data file
+containing template subjects, which are to be replicated a number of
+times.  The replication of the template subjects was often done in R
+or Excel, as NONMEM could not expand the data file in this way.  As of
+NM75, NONMEM will replicate each subject REPL=n times, and then
+utilize this expanded data set.  (Note that the NONMEM data set is
+typically the file FDATA generated by NM-TRAN, unless there is nothing
+for NM-TRAN to change and the format is supplied on the $DATA record,
+in which case  the file named on the $DATA record is the NONMEM data
+set.)  For example, suppose a data
+file, called template.csv, contains 3 subjects, each one representing
+a particular covariate type, dosing type, and/or sample time pattern.
+The desire is that each of these subjects be replicated 100 times in
+the data set.  This is done with the following record.
+#+begin_src perl
+$DATA template.csv ignore=@ REPL=100
+#+end_src
+Make sure that the ID values of the template are integer valued.  If
+the number of replications is greater than the difference between two
+consecutive ID values in the template, NONMEM will add a fractional
+value to each replicate subject, so that the integer portion of the ID
+is the original ID, and the fractional portion represents the
+replication number (NONMEM does not require integer valued ID’s, only
+unique ID numbers that have no more than 14 significant digits).
+Otherwise, the replicate ID’s will be integer incremented.  To assure
+only integer ID’s are created, make sure the template ID’s are spaced
+by an amount greater than the number of replications desired for each
+subject.
 
- REPL_ may be used with the [[file:/docs/reference-manual/control-records/data/#repl][REPL option]] of $DATA to replicate
- the entire data set REPL=n times.  If both are used the REPL_  data
- item applies first, and the REPL option applies second. The REPL_
- data item and
- REPL option are meant to be used with $SIMULATION or $DESIGN.
+To specify a different replication for each subject, a reserved data
+item has been introduced in NM75, called REPL_, the value of which
+will be used as the replication number for that subject.  If the value
+is fractional, it will be truncated to the nearest integer.  Only the
+REPL_ value of the first record of each individual will be used to
+determine its replication.  For example,
+#+begin_src perl
+$INPUT ID TIME  AMT  RATE EVID MDV DV  REPL_
+$DATA warfarin.dat ignore=C
+#+end_src
+with "warfarin.dat"
+#+begin_src r
+CID TIME    AMT  RATE EVID MDV DV    REPL_
+1.0 0.0    70.0  0.0  1    1   0.0   2
+1.0 0.5     0.0  0.0  0    0   1.0   .
+1.0 1.0     0.0  0.0  0    0   1.0   .
+1.0 2.0     0.0  0.0  0    0   1.0   .
+1.0 6.0     0.0  0.0  0    0   1.0   .
+1.0 24.0    0.0  0.0  0    0   1.0   .
+1.0 36.0    0.0  0.0  0    0   1.0   .
+1.0 72.0    0.0  0.0  0    0   1.0   .
+1.0 120.0   0.0  0.0  0    0   1.0   .
+2.0 0.0    70.0  0.0  1    1   0.0   3
+2.0 0.5     0.0  0.0  0    0   1.0   .
+2.0 1.0     0.0  0.0  0    0   1.0   .
+2.0 2.0     0.0  0.0  0    0   1.0   .
+2.0 6.0     0.0  0.0  0    0   1.0   .
+2.0 24.0    0.0  0.0  0    0   1.0   .
+2.0 36.0    0.0  0.0  0    0   1.0   .
+2.0 72.0    0.0  0.0  0    0   1.0   .
+2.0 120.0   0.0  0.0  0    0   1.0   .
+#+end_src
+shows that data of subject 1 will be replicated 2 times within NONMEM,
+and data of subject 2 will be replicated 3 times.  The ID values of
+the replicates will be 1.00, 1.01, 2.0, 2.01, 2.02.
 
- For important information, see Guide Introduction_7 Section $DATA REPL.
+REPL_ may be used with the [[file:/docs/reference-manual/control-records/data/#repl][REPL option]] of $DATA to replicate the
+entire data set REPL=n times. For the same data set above,
+#+begin_src perl
+$INPUT ID TIME  AMT  RATE EVID MDV DV  REPL_
+$DATA warfarin.dat ignore=C REPL=100
+#+end_src
+will result in 200 replications for subject 1, and 300 replications
+for subject 2. If both REPL_ and $DATA REPL are used, the REPL_  data item
+applies first, and the REPL option applies second.
 
- REFERENCES: Guide Introduction_7
-
-*** RPT_
+** RPT_
 :PROPERTIES:
 :CUSTOM_ID: rpt_
 :END:
@@ -849,7 +798,7 @@ four kinds of values.
 
  (See Repetition_Variables).
 
-*** SS
+** SS
 The optional SS labels PREDPP's Steady State data item.  It can take
 one  of  the following  values  in  any  event record.
 
@@ -887,9 +836,7 @@ When  the  SS  data  item  is used, one or more of the data items AMT,
 RATE, and II must be present in the event record to specify the steady
 state dosing pattern.
 
- REFERENCES: Guide VI, section V.F
-
-**** Steady-state dose
+*** Steady-state dose
 :PROPERTIES:
 :CUSTOM_ID: ss-dose
 :END:
@@ -897,12 +844,9 @@ state dosing pattern.
  PREDPP  recognizes two varieties of doses, transient and steady-state.
  Transient doses are described  separately.   Steady-state doses are described here.
 
- (With  NM75  there  is a new way of computing SS, the Empirical steady
- state method, in which there is no SS data item, and a negative  value
- of ADDL requests the computation.  This is described separately.)
- (See [[file:/docs/techniques/steady_state/][empirical steady state]]).
-
- (See Guide Introduction_7)
+ With  NM75  there is a new way of computing SS, the [[file:/docs/cookbook/steady_state/][Empirical steady
+ state method]]. That method does not use SS data item but negative ADDL
+ values to indicate steady state.
 
  A  steady-state  dose  is  a dose that is imagined to be the last of a
  series of implied doses, each exactly like the dose in question, given
@@ -921,14 +865,32 @@ state dosing pattern.
  rates  (Rn)  and modeled durations (Dn) apply to steady-state doses as
  they do to transient doses, except as noted.
 
- When absorption lag applies, it is understood to apply to all  implied
- doses.   Steady-state  is  computed as if there were no ALAG, and then
- there is an advance to the appropriate point in the steady-state cycle
- (II-ALAG).
- See Guide VI, Section V.F.4, Note 4
+When absorption lag applies, it is understood to apply to all
+ implied doses.   Steady-state  is  computed as if there were no ALAG,
+ and then there is an advance to the appropriate point in the
+ steady-state cycle (II-ALAG). Model event time MTIME is not a
+ dose-related feature and has no effect on steady-state doses. Even if
+ PK computes MTIME < II, this does not apply retroactively to the
+ preceding implied doses. For example, if MTIME is used to model EHC
+ (enterohepatic circulation), then steady-state doses should not be
+ used because they will give inappropriate results. Instead, EHC can
+ be mod- elled with continuous terms in the differential equations. An
+ example is provided using a smooth step model with Hill terms in a
+ sigmoid emax model. With such models, steady-state doses may be used.
+ See "Enterhepatic circulation examples" in on-line help, and
+ mtimess.ctl and hillss.ctl in the examples directory.
 
- MTIME parameters do not apply to steady-state doses.
- See Guide VI, Section V.F.4, Note 3
+As stated in chapter III, if an absorption lag parameter ALAGn is defined for the compartment
+receiving a steady-state multiple dose, it applies not only to this dose, but also to all the preceding
+implied doses. The lag time should not exceed the interdose interval. Steady-state amounts are
+computed as usual, then the state vector is advanced to time II − ALAG.
+For example, suppose II=24 and ALAG=8. First, steady-state is computed as if there were no lag
+time, so that the most recent implied doses were given at times -72, -48, -24, 0. Because ALAG=8,
+they were actually given at times -64, -40, -16. Thus, 16 units of time have passed since the last of
+the implied doses. The steady-state amounts are adjusted to time II − ALAG = 24 − 8 = 16. Event
+records with times up to (but not including) time 8 will have appropriate steady-state amounts in
+the compartments. A transient dose at time 8 will maintain steady-state from time 8 until the next
+transient dose is needed at time 24 + 8 = 32.
 
  When bioavailability applies, it is understood to apply to all implied
  doses.
@@ -942,11 +904,9 @@ state dosing pattern.
 |  >0 | -1,-2   | >0 | Steady-state with multiple zero-order bolus doses. The final infusion is started at the event time of the  SS dose record and continues beyond its event time.  (More than one infusion continues when  the duration  of  the steady-state infusion is greater than II.)                                                                                                                                                                                        |
 |   0 | 0,>0,-1 |  0 | Steady-state with constant infusion. The infusion terminates at the event time  of  the SS dose record.  The ADDL data item cannot be used to specify additional transient doses.  Doses with rate  0 are useful when the differential equations coded by the user explicitly provide  for  endoge- nous drug production. (The  Initial  Steady  State feature (I_SS) may be specified in the model instead of using a  steady- state dose record with rate 0.) |
 
- REFERENCES: Guide VI, section V.F
- REFERENCES: Guide V, section 6.8
+See also [[fie:/docs/reference-manual/data/#ss-dose][stead-state doses]].
 
-
-*** TIME
+** TIME, DATE
 :PROPERTIES:
 :CUSTOM_ID: data-time
 :END:
@@ -971,7 +931,7 @@ state dosing pattern.
  (hh.fr)  starting at time 0.  Specifically, the time of the first data
  record of an individual record (if the data are  population  data)  or
  the  first data record of the data set (if the data are single-subject
- data) is set to 0.  Subsequent times in the NONMEM data set are calculated relative to that time.  (See [[file:/docs/reference-manual/data/#data-date][DATE]]).
+ data) is set to 0.  Subsequent times in the NONMEM data set are calculated relative to that time.  (See [[file:/docs/reference-manual/data/#data-time][DATE]]).
 
  Example:
 
@@ -993,11 +953,63 @@ TIME
 
  NM-TRAN permits negative clock times.
 
- The  [[file:docs/reference-manual/control-records/data/][$DATA]] record may include the option TRANSLATE=(TIME/24), in which case all relative times (obtained after  clock  time  conversion)  are divided by 24.
+The  [[file:docs/reference-manual/control-records/data/][$DATA]] record may include the option TRANSLATE=(TIME/24), in which case all relative times (obtained after  clock  time  conversion)  are divided by 24.
 
- REFERENCES: Guide VI, section V.C
+In addition to relative (elapsed) time, TIME data item can be used
+together with DATE data to specify actual dates:
+#+begin_src perl
+ $INPUT ... DATE[=DROP] ...
+#+end_src
 
- REFERENCES: Guide IV, section II.C.2 , III.B.2
+DATE,  DAT1,  DAT2,  and  DAT3 are labels for the date data item.  The
+ date data item is optional.  When it is present, NM-TRAN performs time
+ translation  for the time data item (to relative times starting at 0),
+ whether or not any time values contain the character ":".
+
+ The label given to the date data item describes its format:
+
+      | DATE | month day year |
+      | DAT1 | day month year |
+      | DAT2 | year month day |
+      | DAT3 | year day month |
+
+ When the date represents a calendar date, components are separated  by
+ any  nonnumeric  character, such as - or / (e.g., 12-3-90 or 12/3/90).
+ DATE=DROP should be specified in this case because the NONMEM data set
+ must not contain non-numeric characters.
+
+ If  only one component is present, it is assumed to be the day (and it
+ may be 0 or negative).   If  two  components  are  present,  they  are
+ assumed  to  be the day and month, and they must not exceed 31 and 12,
+ respectively.
+
+ EXAMPLE:
+
+ NM-TRAN data set
+#+begin_src sh
+      ID     DATE          TIME
+      1      10-1-86       9:15
+      1      10-1-86       14:40
+      1      10-2-86       8:30
+      2      10-12         8
+      2      10-14         10
+#+end_src
+
+NONMEM data set
+#+begin_src sh
+ID         TIME
+1          0.00
+1          5.42
+1         23.25
+2          0.00
+2         50.00
+#+end_src
+
+ If present, the year component may consist of one to four digits.  The
+ value  of  NM-TRAN's LAST20 constant determines the assumed century of
+ one and two digit years: 1900's or 2000's.
+
+
 
 ** FINISH record
 
@@ -1033,6 +1045,3 @@ TIME
       - All FORTRAN records of the input data file except the FINISH record must have blank characters in positions 77-80.
 
       - The  total number of A, E, and F codes on the FORMAT record, including their multiplicities, must equal, not exceed,  the number of data items specified on the DATA record.
-
- REFERENCES: Guide II, section D.2.3
- REFERENCES: Guide IV, section III.B.5

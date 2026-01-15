@@ -20,8 +20,8 @@ diagnostic information is printed on lines with dummy iteration id's "-100000000
 # For example, the line with ITERATION "-100"
 
 NONMEM provides a utility routine "format_draws.f90" to format the
-the draw files for future csv parsing. So if one builds the utility
-and applies it to the .ext file
+the draw files for future csv parsing. So by building
+and running the standalone tool on the .ext file
 #+begin_src bash
   # compiles the fortran utility
   gfortran format_draws.f90 -o format_draws
@@ -29,10 +29,10 @@ and applies it to the .ext file
   # save the output as csv
   ./format_draws w15.ext w15.ext.csv
 #+end_src
-The new ~w15.ext.csv~ file would contain the original draw but with
+one obtains a new ~w15.ext.csv~ file with the original draw but
 title and summary lines commented out:
 #+INCLUDE: "/examples/nuts-post/w15_head_tail.ext.csv" src r
-so that one can read it in R:
+Then we can read this file in R:
 #+begin_src r
   data <- read.csv("w15.ext.csv", comment.char="#")
 #+end_src
@@ -42,10 +42,16 @@ and summary lines:
 #+begin_src r
   data <- read.csv(text = head(readLines("w15.ext"), -6), skip=1)
 #+end_src
+Note that the "-6" argument here is ad hoc, in that the [[file:/docs/reference-manual/files/#raw-output][raw output
+files]] may contain a different number of summary and diagnostic lines.
+Alternatively one can simply remove the
+lines with ~ITERATION<=-1000000000~.
 
-Now we can postprocess the draws using R package [[https://mc-stan.org/posterior/index.html][posterior]]. We first
-read in the ~data~ object as draws, and we skip the warmup (burn-in)
-draws, the ones with ITERATION < 0.
+Now we can do postprocessing through the R package [[https://mc-stan.org/posterior/index.html][posterior]]. We first
+read in the ~data~ object as draws. We also skip the warmup (burn-in)
+draws, the ones with ITERATION < 0 (the code shows ligatures so it may
+not be the same as how it is typed, e.g. the R pipe "|>" is shown as
+triangle ~|>~).
 #+begin_src r
   library(posterior)
   d <- as_draws(data[data$ITERATION>=0, ])
@@ -74,9 +80,11 @@ We first examine the summary of the draws.
   #> 15 OMEGA.4.4.     0.284      0.278   0.0554   0.0543      0.208      0.379   1.000     350.     755.
   #> 16 MCMCOBJ    -2670.     -2669.     46.9     45.3     -2750.     -2596.      1.01      200.     276.
 #+end_src
-We can see that the standard deviation is exactly what is reported on
+Note that the file read converts subscript notation to
+dots, e.g. "SIGMA(1,1)" to "SIGMA.1.1." and "PHI(1)" to "PHI.1.".
+The standard deviation in the summary is exactly what is reported on
 dummy ITERATION "-1000000001" in the original raw output. Details of
-rhat, ess_bulk, and ess_tail can be found [[https://mc-stan.org/rstan/reference/Rhat.html ][here]].
+~rhat~, ~ess_bulk~, and ~ess_tail~ can be found [[https://mc-stan.org/rstan/reference/Rhat.html ][here]].
 
 We can visulize the draws using the [[https://mc-stan.org/bayesplot/][bayesplot package]]. For example,
 #+begin_src r
@@ -92,8 +100,8 @@ and
 #+begin_src r
   mcmc_pairs(d, regex_pars="THETA*")
 #+end_src
-
-visulizes the correlation between THETAs. We can see that the
+visulizes the correlation between THETAs (~regex_pars~ option selects
+the parameters by regular expression, here all the THETA variables). We can see that the
 clearance and the volume of distribution V1 & V2 are weakly correlated.
 #+ATTR_HTML: :width 600
 [[/docs/examples/nuts-post/theta_pairs.png]]
@@ -106,14 +114,14 @@ data_ind <- read.csv("w15.iph", skip=1)
 d_ind <- as_draws(data_ind[data_ind$ITERATION>=0, ])
 #+end_src
 This draw object is much bigger than the population parameters, as it
-contains the draws of PHIs and ETAs for each of the 100 subjects. The
-posterior package provides many functions to manipulate draws. For
+contains the draws of PHIs and ETAs for each of the 100 subjects.
+
+The posterior package provides many functions to manipulate draws. For
 example, we can extract the individual parameters for subject 1, and
-combine them with the population parameter draws.
+~bind_draws~ with the population parameter draws.
 #+begin_src r
-  library(dplyr)
-  d1 <- bind_draws(d_ind |> filter(SUBJECT_NO==1) |> select(-"MCMCOBJ"),
-                   d |> select(-"MCMCOBJ"),
+  d1 <- bind_draws(d_ind |> dplyr::filter(SUBJECT_NO==1) |> dplyr::select(-"MCMCOBJ"),
+                   d |> dplyr::select(-"MCMCOBJ"),
                    along='variable')
 #+end_src
 The following pair plot shows that PHI and ETA are indeeded
@@ -124,3 +132,6 @@ d1 |> mcmc_pairs(pars=c("PHI.1.","ETA.1.","SIGMA.1.1."))
 
 #+ATTR_HTML: :width 600
 [[/docs/examples/nuts-post/phi1_sigma_pairs.png]]
+
+We encourage users to explore the mentioned R packages for additional
+features.

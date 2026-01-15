@@ -96,5 +96,69 @@ Forbidden Variable Names: IDEF IREV EVTREC NVNT INDXS G HH DADT(n) E(n) P(n).
    - Follows $SUBROUTINES and $INPUT
    - Follows $MODEL (if a general model such as ADVAN6 is used)
    - Follows $PK (if present)
-** REFERENCES
-Guide VI, section IV
+** Observations of Two Different Types
+:PROPERTIES:
+:CUSTOM_ID: two-obs
+:END:
+Here we use an example to illustrate how
+concentration and effect data can be fit simultaneously (see also L2, SIGMA).
+Suppose that the data set for the phenobarbital example of Chapter 2 is modified to
+include both concentration and effect observations, and that a data item called TYPE is
+used to distinguish between them. When TYPE is 1, DV contains an effect measurement.
+When TYPE is 2, DV contains a concentration. A fragment of the data set
+for one individual is shown below.
+#+begin_src perl
+  ID   TIME    AMT   APGR     WT     DV TYPE L2
+   1    0.    25.0    1.4      7      .   .   1
+   1    2.0      .    1.4      7    6.0   1   1
+   1    2.0      .    1.4      7   17.3   2   1
+   1   12.5    3.5    1.4      7      .   2   2
+   1   24.5    3.5    1.4      7      .   2   2
+   1   37.0    3.5    1.4      7      .   2   2
+   1   48.0    3.5    1.4      7      .   2   2
+   1   60.5    3.5    1.4      7      .   2   2
+   1   72.5    3.5    1.4      7      .   2   2
+   1   85.3    3.5    1.4      7      .   2   2
+   1   96.5    3.5    1.4      7      .   2   2
+   1  108.5    3.5    1.4      7      .   2   2
+   1  112.5      .    1.4      7    8.0   1   2
+   1  112.5      .    1.4      7   31.0   2   2
+#+end_src
+Note that the L2 data items have different values for each multivariate observation within the individual record. The values 1 and 2 are chosen arbitrarily and may be re-used for the L2 data items in the next individual’s data.
+
+We use the following control stream for analysis.
+#+begin_src perl
+  $PROBLEM COMBINED PK/PD MODEL
+  $INPUT ID TIME AMT WT APGR DV TYPE L2
+  $DATA COMBDATA
+  $SUBROUTINE ADVAN1
+  $PK
+  TVCL=THETA(1)+THETA(3)*WT
+  CL=TVCL+ETA(1)
+  TVVD=THETA(2)+THETA(4)*WT
+  V=TVVD+ETA(2)
+  ;# THE FOLLOWING ARE REQUIRED BY PREDPP
+  K=CL/V
+  S1=V
+  $ERROR
+  EMAX=THETA(5)+ETA(3)
+  C50=THETA(6)+ETA(4)
+  E=EMAX*F/(C50+F)
+  Y1=E+ERR(1)
+  Y2=F+ERR(2)
+  Q=1
+  IF (TYPE.EQ.2) Q=0
+  Y=Q*Y1+(1-Q)*Y2
+  $THETA (0,.0027) (0,.70) .0018 .5 100 20
+  $OMEGA .000007 .3 400 16
+  $SIGMA BLOCK(2) 4 2.8 8
+  $ESTIMATION
+#+end_src
+Note that the L2 data indicates which ERR random variable is used for
+the residual error of the data record. Specifically, L2=1 data record on
+line 2-4, thus the residual errors for these record have variance \(\Sigma_{11}=4\),
+as shown in the $SIGMA record; L2=2 for the rest
+data reocrds and the residual errors have variance
+\(\Sigma_{22}=8\). The two residual error random
+variables, ERR(1) and ERR(2), are correlated, with correlation
+coefficient \(\rho=2.8/\sqrt{4\times 8}=0.5\).

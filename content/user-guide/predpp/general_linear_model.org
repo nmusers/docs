@@ -1,0 +1,63 @@
+---
+title: "General linear model"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: true
+weight: 15
+---
+{{< katex >}}{{< /katex >}}
+Recall that NONMEM supports general linear ODE model
+$$
+\frac{dA(t)}{dt}=K^TA(t).
+$$
+Here \(K\) is a \(n\times n\) matrix that could depend on \(x\). \(K_{ij}\)
+\((i, j)\) entry of \(K\), quantifies the first-order distribution of drug
+from compartment number /i/ to compartment number /j/. NONMEM provides
+ADVAN5 and ADVAN7 for this type of model. In particular, ADVAN7
+targets problems in which \(K\) has real eigenvalues, suitable for
+most PK applications.
+
+In $PK block, reserved variable Kmn denotes the rate constant that
+quantifies the first-order distribution of drug from compartment
+number m to compartment number n is Kmn. The variable Km0 may be used instead of Kmn, where n is the
+number of the output compartment. When the number of compartments
+exceeds 10, the syntax Kmn=k may be ambiguous. The letter T may be
+used to separate the two compartment numbers KmTn. The rate constants
+are numbered (these numbers are used internally by the ADVAN)
+according to the order in which they appear in the abbreviated code.
+
+See [[file:/docs/reference-manual/control-records/model/][$MODEL]] record for a description of compartment numbering.
+
+In the following example we use ADVAN7 to replicate the
+one-compartment model ADVAN2.
+#+begin_src perl
+$PROB THEOPHYLLINE POPULATION DATA
+$INPUT ID DOSE=AMT TIME CP=DV WT
+$DATA THEOPP
+$SUBROUTINES ADVAN7
+$MODEL COMP=(DEPOT,INITIALOFF,DEFDOSE) COMP=(CENTRAL,DEFOBS,NOOFF)
+$PK
+;THETA(1)=MEAN ABSORPTION RATE CONSTANT (1/HR)
+;THETA(2)=MEAN ELIMINATION RATE CONSTANT (1/HR)
+;THETA(3)=SLOPE OF CLEARANCE VS WEIGHT RELATIONSHIP (LITERS/HR/KG)
+;SCALING PARAMETER=VOLUME/WT SINCE DOSE IS WEIGHT-ADJUSTED
+CALLFL=1
+K12=THETA(1)+ETA(1)
+K20=THETA(2)+ETA(2)
+CL=THETA(3)*WT+ETA(3)
+S2=CL/K20/WT
+$THETA (.1,3,5) (.008,.08,.5) (.004,.04,.9)
+$OMEGA BLOCK(3) 6 .005 .0002 .3 .006 .4
+$ERROR
+Y=F+EPS(1)
+$SIGMA .4
+$EST MAXEVAL=450 PRINT=5
+$COV
+$TABLE ID DOSE WT TIME
+#+end_src
+Note
+- ~CALLFL=1~ indicates $PK block is only evaluated once per subject,
+  at the first record of each subject.
+- Subscript "0" for /K/ is for output compartment, thus \(K_{20}\)
+  is the rate of drug transport from central to a virtual output
+  compartment, representing elimination rate constant.

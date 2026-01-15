@@ -20,12 +20,11 @@ In  the  above  example,  initial  values  of  OMEGA(1,1), OMEGA(2,2),
 OMEGA(3,3), and OMEGA(5,5) are set to 0.3,  while  initial  OMEGA(6,6)
 and OMEGA(7,7) are set to 1.0.
 
-A number-list may contain a single integer, a range of integers (with
- -), or a series of integers and ranges separated by comma. Required.
+A number-list may contain a single integer, a range of integers (with "-"), or a series of integers and ranges separated by comma. Required.
 
- A value may be any numeric value. Optional; default is 0.
+A value may be any numeric value. Optional; default is 0.
 
- When $EST CONSTRAIN>=4, an algorithm  in  subroutine  CONSTRAINT  will
+When $EST CONSTRAIN>=4, an algorithm  in  subroutine  CONSTRAINT  will
  initially  set the omegas to these values, and then shrink these OMEGA
  values more and more with each iteration, and eventually  shrinks  the
  OMEGA's  to  0,  the  intended target value for that Omega.  This is a
@@ -43,5 +42,17 @@ A number-list may contain a single integer, a range of integers (with
 
  NONMEM's default CONSTRAINT.f90 is identical to Subroutine source/CONSTRAINT.f90.
 
-** REFERENCES
-Guide Introduction_7, $ANNEAL to facilitate EM search methods
+Consider the following example ("examples/anneal"), for an Emax model
+in which the Hill coefficient does not have inter-subject variance
+(its OMEGA is fixed to zero).
+
+#+INCLUDE: "/examples/anneal/anneal.ctl" src perl
+
+The user may modify the subroutine CONSTRAINT that performs the
+simulated annealing algorithm.  The source code to the CONSTRAINT
+subroutine is available from the ..\source directory as constraint.f90
+, and the user may copy this to their run directory, and as
+convenient, to rename it.  Then, specify OTHER=name_of_source.f90 in
+the $SUBROUTINE record, as shown in example 9.  The subroutine
+CONSTRAINT may also be used to provide any kind of constraint pattern
+on any parameters.

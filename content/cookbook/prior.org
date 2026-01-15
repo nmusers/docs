@@ -4,15 +4,12 @@ author: ["Yi Zhang"]
 draft: false
 bookCollapseSection: false
 ---
+{{< katex >}}{{< /katex >}}
 
 * Setting up Prior Information
-Prior information is important for MCMC Bayesian analysis, but not
-necessary for maximization methods.  Of greatest importance are priors
-to the OMEGAs. As a general rule, if your data set consists of fewer
-subjects than 100 times the dimension of the Omega matrix to be
-estimated, then you should have at least uninformative OMEGA prior
-information.  Priors to THETAS are assumed multivariate normal, and
-priors to OMEGAS and SIGMAS are assumed inverse Wishart distributed.
+Prior information is important for Bayesian analysis.
+By default, priors to THETAS are multivariate normal, and
+to OMEGAS and SIGMAS are inverse Wishart distributed.
 Alternatively,  a residual variance in the form of its square root,
 may be modeled via THETA (a sigma-like Theta parameters is set up in
 example 2). See [[file:/docs/reference-manual/control-records/prior/][$PRIOR]] for prior specifications. Here we discuss the setup
@@ -261,4 +258,71 @@ is used in the present study as:
 $SIGMAP (5.28E-02 FIXED)
 #+end_src
 
-** TODO Degrees of freedom
+** Degrees of freedom
+The degrees of freedom to the omega priors of the present analysis are
+at most the total number of subjects in the previous study. We use the
+following formula for selecting degrees of freedom (justification is described in appendix G of the NONMEM7
+Technical Guide), which is appropriate when the previous analysis was
+an NLME (maximum likelihood) form:
+
+$$
+\text{DF}=2\left[
+\frac{\hat{\Omega}_{\text{previous analysis}}}{\text{SE}(\hat{\Omega}_{\text{previous analysis}})}
+\right]^2
+$$
+
+Or
+
+$$
+\text{DF}=2\left[
+\frac{\hat{\Omega}_{\text{previous analysis}}}{\text{SE}(\hat{\Omega}_{\text{previous analysis}})}
+\right]^2 + 1
+$$
+
+to adjust for degrees of freedom loss in the estimate of OMEGA of the previous study.
+
+For an OMEGA block, use the smallest DF calculated among the OMEGA diagonal estimates in that block.
+
+A similar formula would apply for SIGMA priors, with the proviso that the DF be no larger than the total number of data points that apply for that sigma in the previous study (for example, if there are two SIGMAs, one for PK data, and another for PD data, then the sigma for PK data gets no more than total number of PK data points in the previous study).
+
+If the previous analysis is Bayesian, the estimated OMEGAs (or SIGMAs)
+are expanded relative to the modal values from a MLE, and the ratio of
+estimated OMEGAs to the SE of OMEGAs from a Bayesian analysis is
+smaller that from an MLE (using Fisher information).  As a result, the recommended transformation when incorporating results from a previous Bayesian analysis are as follows (where /p/ is the dimension of the OMEGA, /Q/ the covariance matrix from the previous analysis):
+
+OMEGAPD:
+$$
+\text{DF}=2\left[
+\frac{\hat{\Omega}_{\text{previous analysis}}}{\text{SE}(\hat{\Omega}_{\text{previous analysis}})}
+\right]^2 + p + 3
+$$
+
+OMEGAP:
+$$
+R=((\text{DF}-p-1)/\text{DF})*Q
+$$
+
+where are is the matrix that you would place as OMEGAP.  The justification of the above  is based on the mean and variance formulas for an inverse Wishart (see appendix G of the NONMEM7 Technical Guide).
+
+The SCALE option available for $OMEGA(P) and $SIGMA(P) records allows the user to conveniently input a re-scaling of the input matrix without having to hand calculate every element (see SCALE option for $OMEGA and $SIGMA (NM760) in section I.9 Expansions on Abbreviated and Verbatim Code and Other Items (NM72,NM73,NM74,NM75).
+
+For convenient transfer of the entire information from a previous analysis to prior information for a subsequent analysis, see section I.101 priorget: Transfer Results of an Analysis to NMTRAN Prior Information (NM75).
+
+As yet another alternative, the mean of the inverse OMEGAS or SIGMAS
+from MCMC Bayesian samples and their variances are such that they are
+similar to those obtained from an nlme analysis. Therefore, the
+inverse of the mean inverse OMEGA can be used as the input $OMEGAP
+without re-scaling, and the effective DF for $OMEGAPD would be similar
+to that of an NLME analysis:
+
+$$
+\text{DF}=2\left[
+\frac{\bar{\Omega}^{-1}_{\text{previous analysis}}}{\text{SE}(\bar{\Omega}^{-1}_{\text{previous analysis}})}
+\right]^2
+$$
+Here \(\bar{\Omega}\) denotes average.
+
+The priorget utility will calculate the inverse of the average omega inverse from the non-negative iterations in the .ext file of an MCMC Bayesian analysis, and provide the appropriate prior information from these.
+
+
+As of nm74, the degrees of freedom to the inverse wishart algorithms used for OMEGAS and SIGMAS may be any real number greater than 0.  Thus, the inverse wishart matrix distribution can substitute for inverse gamma matrix distribution as follows.  The parameter beta is the rate parameter (with inverse units of the variable), and alpha is the shape parameter, to a gamma distribution.  This gamma distribution to the inverse residual variance can be expressed with an equivalent Wishart distribution to the inverse residual variance. Set 2alpha for the $SIGMAPD, and beta/alpha for $SIGMA.  The gamma distribution to the inverse residual variance is equivalent to the inverse gamma distribution of the residual variance.

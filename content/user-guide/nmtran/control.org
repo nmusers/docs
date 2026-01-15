@@ -207,7 +207,7 @@ $SUBROUTINES [subname = name] ...
 $SUBROUTINES ADVAN3 TRNAS2
 #+end_src
 
-Recall that NONMEM requires a PRED routine for model predictions, with
+NONMEM requires a PRED routine for model predictions, with
 built-in ADVAN routines for common models and matching TRANS routines
 for parameterization. The $SUBROUTINES record is used to specify them:
 it describes which pharmacokinetic model is to be used.
@@ -670,6 +670,9 @@ numerically, therefore it must be used along with AVDANs for numerical
 ODE solvers (ADVAN6, ADVAN8, ADVAN13, ADVAN14, ADVAN16, ADVAN18).
 
 ** $ERROR
+:PROPERTIES:
+:CUSTOM_ID: error
+:END:
 $ERROR record with its code block ("$ERROR block") specifies the
 error structure of the model. Since the residual error is directly
 associated to the likelihood, $ERROR block basically describes the
@@ -680,17 +683,21 @@ to reserved variable F, ERR (or EPS), and Y, respectively.
 *** Error models
 For example, the following blocks define different error structures.
 #+begin_src f90
-  ; Additive error
+  ;! Additive error
   Y=F+ERR(1)
 
-  ; proportional error
-  Y=F+F*ERR(1) ; equivalently Y=F*(1+ERR(1))
+  ;! proportional error
+  Y=F+F*ERR(1) ;! equivalently Y=F*(1+ERR(1))
 
-  ; exponential error (proportional error in log-scale)
+  ;! exponential error (proportional error in log-scale)
   Y=F*EXP(ERR(1))
 
-  ; combined additive and proportional error
+  ;! combined additive and proportional error
   Y=F+F*ERR(1)+ERR(2)
+
+  ;! power error model
+  ;! variable P must be assigned a value, typically identified as a THETA element.
+  Y=F+F**P*ERR(1)
 #+end_src
 
 *** Two types of observations
@@ -857,8 +864,6 @@ $SIGMA 4
 $ESTIMATION
 #+end_src
 
-
-
 **  $ESTIMATION
 This record requests Estimation Step. In the step, NONMEM fits the
 model using either maximum likelihood estimation (MLE) or Bayesian
@@ -880,6 +885,7 @@ $ESTIMATION METHOD=1 INTERACTION
 #+end_src
 the method is called the "FOCE with INTERACTION method" (FOCEI). It is
 recommended for continuous variables unless the data are very sparse. These methods are discussed in Guide VII, Conditional Estimation Methods.
+- INTERACTION: assess residual error terms EPS using conditional (non-zero) ETAs.
 - SIGDIGITS=n: By default, the search continues until the estimates of all elements of
 (THETA, OMEGA, SIGMA) have been determined to at least 3 significant figures. Because only 3 significant
 digits are used to print parameter estimates in the output, and for other reasons as

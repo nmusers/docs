@@ -794,6 +794,32 @@ permitted with INTERACTION.
 NOCENTERING requests that the average conditional estimates of each ETA  not be
 constrained.  This is the default.
 
+By default model fitting assumes the ETAs are centered at 0. When
+results such as ETABAR and corresponding P-value show otherwise, it is
+possible that the fit using the noncentering conditional estimation
+method is not the best desirable, and a centering method might be
+tried. Using centering FOCE or centering Laplacian, one should
+noticethat the P-values are greater (although perhaps some are still
+less than 0.05), and often the fit is improved. Centering methods
+should be used to examine model bias, when the noncentering method is
+suspected to be misspecified. Even when a model is well-specified, it
+may be so complicated (e.g. it uses difficult differential equa-
+tions) that to use it with a conditional estimation method requires a
+great amount of computer time. In this case, if indeed a conditional
+estimation method is needed, one might use centering FOCE with the
+first-order model, even though centering per se may not be needed. In
+this situation, use of centering, along with the first-order model, is
+just a device allowing a conditional estimation method to be
+implemented with less of a computational burden. A compromise is
+achieved; the fit should appear to be an improvement over that
+obtained with the FO fit, but it may not be quite as good as one
+obtained with the noncentering FOCE or Laplacian methods. Because the
+first-order model is automatically obtained from the given model, the
+final form of the given model (obtained after completing model
+development) is readily available, and with this model, one might try
+to implement one run using either the noncentering FOCE or Laplacian
+methods and compare results.
+
 *** CINTERVAL=n
 Every n  iterations is submitted to the convergence test system. If
 CINTERVAL=0, then a best CINTERVAL will be found, then used.
@@ -1014,19 +1040,12 @@ MAXEVAL=0, then set EVALSHRINK=1 on the $EST record.
       $TABLE items based on those etas, rather than from a new  estimation.
       FNLETA=3  (as  of  nm74) Like FNLETA=1, will call FNLETA, and all
       table outputs (diagnostics and  user  selected  items)  will  use
-      EBE's from the FNLETA step (eta modes).
+      EBE's from the FNLETA step (ETA modes).
 
-*** FORMAT=s
-      Format  for  the raw output file and all additional output files.
-      s defines the delimiter [,|s(pace)|t(ab)] followed by  a  Fortran
-      format   specification.   The  default  is  s1PE12.5.   For  more
-      details, see the [[file:/docs/reference-manual/control-records/#format-ref][format help]].
-
-      May also be coded DELIM.
-
-*** DELIM=s
-      Same as FORMAT option.
-      See INTRODUCTION TO NONMEM 7, $EST: Format of Raw Output File
+*** DELIM, FORMAT
+Format  for  the raw output file and all additional output files. s
+defines the delimiter [,|s(pace)|t(ab)] followed by  a  Fortran format
+specification. The default is s1PE12.5. For more details, see [[file:/docs/reference-manual/control-records/#format-ref][FORMAT]]. May also be coded DELIM.
 
 *** FO | NOFO
 FO: requests that the First-Order Model be  used  with  METHOD=1  and CENTERING.  Cannot be used with LAPLACIAN.
@@ -1999,6 +2018,9 @@ Note  that  the  ORDER  option does not affect the NONMEM report file,
       density at the present OMEGA position and degrees of freedom
 
 *** OVARF=x (NM74)
+:PROPERTIES:
+:CUSTOM_ID: ovarf
+:END:
       Used  with  NUTS  method  and OLKJDF option.  OVARF is the weight
       factor to STD prior to the log sqrt OMEGA diagonal elements,  the
       normal density of the log square root of OMEGA centered about log
@@ -2332,7 +2354,7 @@ NOSLOW requests a faster method of computation.   This  is  the  default.
 
 FAST(NM74): the option  is  available  for  FOCE/ITS methods. The FAST
 method allows use of analytical theta derivatives  to  facilitate FOCE
-analysis.  All THETAs should be [[file:/docs/cookbook/mu_model/][MU-referenced]]. For  THETAs
+analysis.  All THETAs should be [[file:/docs/user-guide/mu_model/][MU-referenced]]. For  THETAs
 that  should  not have inter-subject variability, or should not be MU
 referenced, do  it  anyway  by  adding addional ETAs and
 assigning them to these THETAs through MU referencing, but with the
@@ -2445,9 +2467,14 @@ $SUBR  OTHER=USERPRIORT.f90
 See also [[file:/docs/reference-manual/control-records/olkjdf/][$OLKJDF]] and [[file:/docs/reference-manual/control-records/slkjdf/][$SLKJDF]] for OMEGA and SIMGA, respectively. Default is 0.
 
 *** TTDF=n (NM74)
-TTDF stands for Theta t-density degrees of freedom.  It  is  used with  NUTS  method.  Default is 0.  When 0, the usual normal density prior is used as a prior density for thetas.  When TTDF>0, a t-distributed  prior  is  used.   TTDF  may  be set >0 when using METHOD=BAYES as well, but thetas will then be M-H  sampled  using the PSAMPLE_M1, PSAMPLE_M2, and PSAMPLE_M3 settings.  TTDF may be a real number.
+TTDF stands for THETA t-density degrees of freedom, used only for
+METHOD=NUTS and METHOD=BAYES. TTDF can be a real number. The default
+TTDF=0 indicates the (multivariate) normal distribution prior is used
+for THETAs, and TTDF>0 indicates a t-distributed prior. With TTDF>0,
+METHOD=BAYES uses M-H sampler for THETAs, using the PSAMPLE_M1,
+PSAMPLE_M2, and PSAMPLE_M3 settings.
 
-See also [[file:/docs/reference-manual/control-records/ttdf/][$TTDF]] control record to specify degrees of  freedom for each theta.  The value of TTDF overrides $TTDF.
+See also [[file:/docs/reference-manual/control-records/ttdf/][$TTDF]] control record to specify degrees of  freedom for each THETA. The value of TTDF overrides $TTDF.
 
 *** ZERO=list
       Required  with  METHOD=HYBRID.   A list of indices for etas which

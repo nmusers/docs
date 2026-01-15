@@ -68,11 +68,129 @@ General rules for abbreviated code  are documented elsewhere (See @@html: <a hre
 *** Forbidden Variable Names
 DATREC INDXS G H DADT(n) A(n) E(n) P(n)
 
+*** Error recovery
+:PROPERTIES:
+:CUSTOM_ID: error
+:END:
+
+When PRED exits with a nonzero PRED error return code, either the
+NONMEM run is immediately aborted or an error-recovery procedure is
+implemented. An error-recovery procedure entails continued calls to
+PRED, but with values for the THETA’s or ETA’s different from those
+with previous calls which resulted in nonzero return codes. There are
+two error-recovery procedures: one with which different values for
+ETA’s are tried, the ETA-recovery , a second with which different
+values for THETA’s (and possibly ETA’s) are tried, the THETA-recovery
+. Whenever it is possible to implement the ETA-recovery, this is done.
+If this procedure fails, or if it is not possible to implement the
+ETA-recovery, and the error return code is obtained during either the
+search in the Estimation Step or the search in the Initial Estimation
+Step, then a choice exists between an abort and implementation of the
+THETA-recovery. If the THETA- recovery fails, or if it is not actually
+possible to implement the THETA-recovery, the NONMEM run is aborted.
+
+A PRED error return code can have values 0, 1, or 2. The value 0 means
+that the return is a normal return. The value 1 means that if the
+choice exists between an abort or implementation of the
+THETA-recovery, then this choice is to be made using control stream
+information. The value 2 means that if the choice exists between an
+abort or implementation of the THETA-recovery, then the abort should
+be chosen.
+
+When an abort occurs, an error message will appear in the NONMEM
+output, in the intermediate output file (if such a file exists), and
+in the PRED Error file. When the THETA-recovery is implemented, an
+error message appears in the intermediate output file (if such a file
+exists), in the PRED Error file, and if recovery is not possible, in
+the NONMEM output. The error message is called a PRED error message .
+When the PRED error return code is 1, and a choice exists between
+implementation of the THETA-recovery and an abort, the THETA-recovery
+is implemented if the NOABORT option is used on the $ESTIMATION
+($THETA) record. If the NOABORT option is not used, then the run is
+aborted. Often, the most appropriate response to an abort occuring
+during the Initial Estimate Step, or during the Estimation Step after
+the 0th iteration summary has been output, is to rerun the problem
+requesting that the THETA-recovery procedure be implemented. Warning:
+If the NOABORT option is used before an actual abort has occured, be
+sure to check the PRED Error file for possibly useful diagnostic
+information that is otherwise available in NONMEM output when an abort
+occurs.
+
+The NOABORTFIRST option of $THETA is the same as NOABORT, but also
+applies to the first value of the theta vector that is tried. With
+NONMEM 7 and the NOABORT option of $ESTIMATION, NONMEM will force most
+non-positive Hessian matrices to be positive definite, allowing NONMEM
+to continue. With NONMEM 72 and option NOHABORT of $ESTIMATION,
+positive definite corrections are made at all levels of the
+estimation. But note this can hide a serious ill-posed problem.
+
+An quick exit from PRED with a nonzero return code can be implemented in abbreviated code for PRED
+(or in abbreviated code for PK, or ERROR, in which case the exit is from PREDPP) with this statement:
+#+begin_src f90
+EXIT n k
+#+end_src
+Here n is the return code (1 or 2) and k a user code (1-999). If the user code is used, it can be any
+value the user wishes in the indicated range. In this case a part (shown here) of the PRED error message
+gives the user code:
+#+begin_src
+PRED SUBROUTINE: USER ERROR CODE = k
+#+end_src
+The user code can be omitted. In that case the return code can also be omitted, and then the return
+code is 1 by default.
+
+The ~EXIT~ statement can be used to reject simulated results and/or
+simulation error Forgiveness. To have the simulation immediately
+terminated, one can do
+#+begin_src f90
+IF(ICALL==4.and.IPRED<0.1 .and. TIME>20.0) EXIT 2
+#+end_src
+Alternatively one may wish to check a prediction and potentially
+request a new set of ETAs and EPSILONs, by using ~EXIT 1~:
+#+begin_src perl
+;# in $ERROR block
+IF(ICALL==4.and.IPRED<0.01 .and. TIME>20.0) EXIT 1 2300
+#+end_src
+Then when the condition evaluated true, NONMEM will try another random
+ETA and EPS sample.
+
+Note that if you wish to simply create a truncated normal distribution that only requires testing the eta value directly, this can be done with:
+#+begin_src perl
+  $P
+  ;#...
+  DO WHILE (ETA(1).GT.5)
+    CALL SIMETA(ETA)
+  ENDDO
+#+end_src
+
+With versions of NONMEM prior to 7.2, the "EXIT 1" statement in the Simulation step also caused
+NONMEM to abort. As of NONMEM 7.2, if an error occurs in PREDPP during simulation such as
+#+begin_src
+PK PARAMETER FOR KA IS NON-POSITIVE
+#+end_src
+or a user-implemented EXIT 1 is issued during simulation, then PRED will be called with a new ETA
+and EPS. This feature is referred to as Simulation Error Forgiveness. NONMEM describes this as
+"PRED SIMULATION REDO" in the NONMEM report file. It writes to the NONMEM report file a
+description of the data record and THETA and ETA values, for example
+#+begin_src
+PRED SIMULATION REDO
+PRED EXIT CODE = 1
+INDIVIDUAL NO. 1 ID= 1.00000000000000E+00 (WITHIN-INDIVIDUAL) DATA REC NO. 1
+THETA=
+3.00E+00 8.00E-02 4.00E-02
+ETA=
+4.66E-01 2.91E-03 9.95E-01
+MESSAGE ISSUED FROM SIMULATION STEP
+#+end_src
+If ten(10) such errors occur in the same subject, NONMEM considers that the cause of the simulation error is
+not due to an occasional bad random sample but by a systematic error in the control stream.
+The simulation step is terminated with the message
+#+begin_src
+PRED ERROR OCCURRED TOO OFTEN ON SIMULATION
+#+end_src
+
+See also [[file:/docs/reference-manual/api/variables/#pred-exit][PRED EXIT code]].
+
 ** PSEUDO ASSIGNMENT STATEMENTS
   - COMRES=-1
 ** RECORD ORDER:
-
- Follows $SUBROUTINES and $INPUT
-
-** REFERENCES
-Guide I, section C.2
+Follows $SUBROUTINES and $INPUT

@@ -23,15 +23,15 @@ Consider the following example. The model uses ITS to position the initial draws
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="cookbook">
-    <meta property="article:modified_time" content="2026-01-02T10:29:06-08:00">
+    <meta property="article:modified_time" content="2026-01-07T08:46:30-08:00">
 
 
   <meta itemprop="name" content="Postprocessing MCMC draws">
   <meta itemprop="description" content="Postprocessing MCMC draws Each MCMC run generates posterior draws (samples) in .ext and .iph, as described in output files. In this article we show how to postprocess these draws in R.
 Consider the following example. The model uses ITS to position the initial draws, followed by NUTS sampler that draws.
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 $PROB RUN# Example 1 (from samp5l) $INPUT C SET ID JID TIME DV=CONC AMT=DOSE RATE EVID MDV CMT $DATA w15.csv IGNORE=@ $SUBROUTINES ADVAN3 TRANS4 ;# Two compartment Model $PK MU_1=THETA(1) MU_2=THETA(2) MU_3=THETA(3) MU_4=THETA(4) ;# ETAs: normally distruted with mean 0, variance OMEGA(). ;# PHI=MU&#43;ETA: normally distruted with mean MU, and variance OMEGA() ;# thus individual parameters CL,V1,Q,V2 follow log-normal distribution. CL=DEXP(MU_1&#43;ETA(1)) V1=DEXP(MU_2&#43;ETA(2)) Q=DEXP(MU_3&#43;ETA(3)) V2=DEXP(MU_4&#43;ETA(4)) S1=V1 ;# Y is normally distributed, with sd is F*SQRT(SIGMA(1,1)) $ERROR Y = F &#43; F*EPS(1) ;# Initial values of THETA, OMEGA, SIGMA $THETA 2.0 ;# [LN(CL)] 2.0 ;# [LN(V1)] 2.0 ;# [LN(Q)] 2.0 ;# [LN(V2)] $OMEGA BLOCK(4) 0.15 ;# [P] 0.01 ;# [F] 0.15 ;# [P] 0.01 ;# [F] 0.01 ;# [F] 0.15 ;# [P] 0.01 ;# [F] 0.01 ;# [F] 0.01 ;# [F] 0.15 ;# [P] $SIGMA (0.6 ) ;# [P] $PRIOR NWPRI ;# THETA Priors follow normal distribution (use $TTDF for t-distriution). ;# This normal prior is specfied by $THETAP (mean) and $THETAPV (covariance) $THETAP (2.0 FIX) (2.0 FIX) (2.0 FIX) (2.0 FIX) ;# uninformative prior with large variance $THETAPV BLOCK(4) FIXED VALUES(50.0,0.0) ;# Inverse Wishart dist for OMEGA&#39;s prior, unless $OLKJDF, $OVARF used. $OMEGAP BLOCK(4) FIXED VALUES(0.15,0.0) ;# Uninformative prior: low degrees of freedom, equivalent to block dimension. $OMEGAPD (4 FIX) ;# Inverse Wishart dist for SIGMA&#39;s prior, unless $SLKJDF, $SVARF used $SIGMAP (0.06 FIXED) $SIGMAPD (1 FIXED) $EST METHOD=ITS INTERACTION NITER=0 NOABORT NOPRIOR=1 file=w15_its.ext $EST METHOD=NUTS AUTO=1 PRINT=100 NITER=1000 NOPRIOR=0 BAYES_PHI_STORE=1 file=w15.ext delim=q The raw output file contains the draws for THETA, OMEGA, and SIGMA:">
-  <meta itemprop="dateModified" content="2026-01-02T10:29:06-08:00">
-  <meta itemprop="wordCount" content="1144">
+  <meta itemprop="dateModified" content="2026-01-07T08:46:30-08:00">
+  <meta itemprop="wordCount" content="1242">
 
 <title>Postprocessing MCMC draws | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -41,7 +41,7 @@ Consider the following example. The model uses ITS to position the initial draws
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.bcb82d6949b51c4d0a6634fc10b966fd3bb2dbb8f6cc6d28027d63fd567f9004.js" integrity="sha256-vLgtaUm1HE0KZjT8ELlm/Tuy27j2zG0oAn1j/VZ/kAQ=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.7be99fe1c48c426b84531c662b4b601a55b76b71c49acf3a6afa3692d6115c58.js" integrity="sha256-e&#43;mf4cSMQmuEUxxmK0tgGlW3a3HEms86avo2ktYRXFg=" crossorigin="anonymous"></script>
 
 
 
@@ -157,7 +157,7 @@ Consider the following example. The model uses ITS to position the initial draws
 
   
     <a href="/docs/user-guide/fundamentals/population/" class="">
-      1. Population models</a>
+      Population models</a>
   
 
         </li>
@@ -171,7 +171,7 @@ Consider the following example. The model uses ITS to position the initial draws
 
   
     <a href="/docs/user-guide/fundamentals/pkode/" class="">
-      2. PK and ODEs</a>
+      PK and ODEs</a>
   
 
         </li>
@@ -185,21 +185,7 @@ Consider the following example. The model uses ITS to position the initial draws
 
   
     <a href="/docs/user-guide/fundamentals/likelihood/" class="">
-      3. Likelihood</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/user-guide/fundamentals/model-fitting/" class="">
-      4. Model fitting</a>
+      Likelihood and MLE</a>
   
 
         </li>
@@ -293,6 +279,42 @@ Consider the following example. The model uses ITS to position the initial draws
           
   <ul>
     
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-b4d635c55a90184dd9eaba68b950d9ca" class="toggle"  />
+    <label for="section-b4d635c55a90184dd9eaba68b950d9ca" class="flex">
+      <a href="/docs/user-guide/predpp/population_model/" class="">
+        PK parameter model</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-0491f18d5682fdcb9c07f795c3b0e97d" class="toggle"  />
+    <label for="section-0491f18d5682fdcb9c07f795c3b0e97d" class="flex">
+      <a href="/docs/user-guide/predpp/general_linear_model/" class="">
+        General linear model</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+        </li>
+      
+    
   </ul>
 
         </li>
@@ -339,6 +361,34 @@ Consider the following example. The model uses ITS to position the initial draws
   
     <a href="/docs/user-guide/advanced/abbr_block/" class="">
       Code blocks</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/mu_model/" class="">
+      MU referencing</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/theta_trans/" class="">
+      THETA transformation</a>
   
 
         </li>
@@ -814,7 +864,7 @@ Consider the following example. The model uses ITS to position the initial draws
 
   
     <a href="/docs/reference-manual/control-records/ovarf/" class="">
-      $OVARF</a>
+      $OVARF, $SVARF</a>
   
 
         </li>
@@ -1052,7 +1102,7 @@ Consider the following example. The model uses ITS to position the initial draws
 
   
     <a href="/docs/reference-manual/control-records/thetai/" class="">
-      $THETAI</a>
+      $THETAI, $THETAR</a>
   
 
         </li>
@@ -1067,20 +1117,6 @@ Consider the following example. The model uses ITS to position the initial draws
   
     <a href="/docs/reference-manual/control-records/thetap/" class="">
       $THETAP, $THETAPV</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/reference-manual/control-records/thetar/" class="">
-      $THETAR</a>
   
 
         </li>
@@ -1309,7 +1345,7 @@ Consider the following example. The model uses ITS to position the initial draws
 
   
     <a href="/docs/cookbook/steady_state/" class="">
-      Empirical state state</a>
+      Empirical steady state</a>
   
 
         </li>
@@ -1338,20 +1374,6 @@ Consider the following example. The model uses ITS to position the initial draws
   
     <a href="/docs/cookbook/etabar_mix/" class="">
       Mixture model: ETABAR</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/cookbook/mu_model/" class="">
-      MU referencing</a>
   
 
         </li>
@@ -1753,8 +1775,8 @@ The <code>NITER=1000</code> option requests 1000 draws. Their summary and
 diagnostic information is printed on lines with dummy iteration id&#39;s &#34;-100000000x&#34;.</p>
 <p>
 NONMEM provides a utility routine &#34;format_draws.f90&#34; to format the
-the draw files for future csv parsing. So if one builds the utility
-and applies it to the .ext file</p>
+the draw files for future csv parsing. So by building
+and running the standalone tool on the .ext file</p>
 <div class="src src-bash">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1773,7 +1795,7 @@ and applies it to the .ext file</p>
 </div>
 </div>
 </div>
-<p>The new <code>w15.ext.csv</code> file would contain the original draw but with
+<p>one obtains a new <code>w15.ext.csv</code> file with the original draw but
 title and summary lines commented out:</p>
 <div class="src src-r">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
@@ -1811,7 +1833,7 @@ title and summary lines commented out:</p>
 </div>
 </div>
 </div>
-<p>so that one can read it in R:</p>
+<p>Then we can read this file in R:</p>
 <div class="src src-r">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1835,10 +1857,16 @@ and summary lines:</p>
 </div>
 </div>
 </div>
+<p>Note that the &#34;-6&#34; argument here is ad hoc, in that the <a href="/docs/reference-manual/files/#raw-output">raw output
+files</a> may contain a different number of summary and diagnostic lines.
+Alternatively one can simply remove the
+lines with <code>ITERATION&lt;=-1000000000</code>.</p>
 <p>
-Now we can postprocess the draws using R package <a href="https://mc-stan.org/posterior/index.html">posterior</a>. We first
-read in the <code>data</code> object as draws, and we skip the warmup (burn-in)
-draws, the ones with ITERATION &lt; 0.</p>
+Now we can do postprocessing through the R package <a href="https://mc-stan.org/posterior/index.html">posterior</a>. We first
+read in the <code>data</code> object as draws. We also skip the warmup (burn-in)
+draws, the ones with ITERATION &lt; 0 (the code shows ligatures so it may
+not be the same as how it is typed, e.g. the R pipe &#34;|&gt;&#34; is shown as
+triangle <code>|&gt;</code>).</p>
 <div class="src src-r">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1902,9 +1930,11 @@ draws, the ones with ITERATION &lt; 0.</p>
 </div>
 </div>
 </div>
-<p>We can see that the standard deviation is exactly what is reported on
+<p>Note that the file read converts subscript notation to
+dots, e.g. &#34;SIGMA(1,1)&#34; to &#34;SIGMA.1.1.&#34; and &#34;PHI(1)&#34; to &#34;PHI.1.&#34;.
+The standard deviation in the summary is exactly what is reported on
 dummy ITERATION &#34;-1000000001&#34; in the original raw output. Details of
-rhat, ess_bulk, and ess_tail can be found <a href="https://mc-stan.org/rstan/reference/Rhat.html ">here</a>.</p>
+<code>rhat</code>, <code>ess_bulk</code>, and <code>ess_tail</code> can be found <a href="https://mc-stan.org/rstan/reference/Rhat.html ">here</a>.</p>
 <p>
 We can visulize the draws using the <a href="https://mc-stan.org/bayesplot/">bayesplot package</a>. For example,</p>
 <div class="src src-r">
@@ -1935,8 +1965,8 @@ and</p>
 </div>
 </div>
 </div>
-<p>
-visulizes the correlation between THETAs. We can see that the
+<p>visulizes the correlation between THETAs (<code>regex_pars</code> option selects
+the parameters by regular expression, here all the THETA variables). We can see that the
 clearance and the volume of distribution V1 &amp; V2 are weakly correlated.</p>
 <img src="/docs/examples/nuts-post/theta_pairs.png" alt="/docs/examples/nuts-post/theta_pairs.png" title="/docs/examples/nuts-post/theta_pairs.png" width="600"/>
 <p>
@@ -1956,22 +1986,21 @@ Note that .iph file does not contain the summary lines.</p>
 </div>
 </div>
 <p>This draw object is much bigger than the population parameters, as it
-contains the draws of PHIs and ETAs for each of the 100 subjects. The
-posterior package provides many functions to manipulate draws. For
+contains the draws of PHIs and ETAs for each of the 100 subjects.</p>
+<p>
+The posterior package provides many functions to manipulate draws. For
 example, we can extract the individual parameters for subject 1, and
-combine them with the population parameter draws.</p>
+<code>bind_draws</code> with the population parameter draws.</p>
 <div class="src src-r">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>  <span style="color:#57c7ff">library</span>(dplyr)
-</span></span><span style="display:flex;"><span>  d1 <span style="color:#ff6ac1">&lt;-</span> <span style="color:#57c7ff">bind_draws</span>(d_ind <span style="color:#ff6ac1">|&gt;</span> <span style="color:#57c7ff">filter</span>(SUBJECT_NO<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">|&gt;</span> <span style="color:#57c7ff">select</span>(<span style="color:#ff6ac1">-</span><span style="color:#5af78e">&#34;MCMCOBJ&#34;</span>),
-</span></span><span style="display:flex;"><span>                   d <span style="color:#ff6ac1">|&gt;</span> <span style="color:#57c7ff">select</span>(<span style="color:#ff6ac1">-</span><span style="color:#5af78e">&#34;MCMCOBJ&#34;</span>),
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>  d1 <span style="color:#ff6ac1">&lt;-</span> <span style="color:#57c7ff">bind_draws</span>(d_ind <span style="color:#ff6ac1">|&gt;</span> dplyr<span style="color:#ff6ac1">::</span><span style="color:#57c7ff">filter</span>(SUBJECT_NO<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">|&gt;</span> dplyr<span style="color:#ff6ac1">::</span><span style="color:#57c7ff">select</span>(<span style="color:#ff6ac1">-</span><span style="color:#5af78e">&#34;MCMCOBJ&#34;</span>),
+</span></span><span style="display:flex;"><span>                   d <span style="color:#ff6ac1">|&gt;</span> dplyr<span style="color:#ff6ac1">::</span><span style="color:#57c7ff">select</span>(<span style="color:#ff6ac1">-</span><span style="color:#5af78e">&#34;MCMCOBJ&#34;</span>),
 </span></span><span style="display:flex;"><span>                   along<span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#39;variable&#39;</span>)</span></span></code></pre></td></tr></table>
 </div>
 </div>
@@ -1989,6 +2018,9 @@ correlated, and the residual error is likely not associated with them.</p>
 </div>
 </div>
 <img src="/docs/examples/nuts-post/phi1_sigma_pairs.png" alt="/docs/examples/nuts-post/phi1_sigma_pairs.png" title="/docs/examples/nuts-post/phi1_sigma_pairs.png" width="600"/>
+<p>
+We encourage users to explore the mentioned R packages for additional
+features.</p>
 </div>
 </div>
 </article>
@@ -2000,9 +2032,9 @@ correlated, and the residual error is likely not associated with them.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/b93da036c02228160022b7c8808042d89babcddb" title='Last modified by Yi Zhang | 2026 Jan 2' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/1edebba7406d3772d46555457e7f4ab37275ce72" title='Last modified by Yi Zhang | 2026 Jan 7' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Jan 2</span>
+    <span>2026 Jan 7</span>
   </a>
 
 </div>

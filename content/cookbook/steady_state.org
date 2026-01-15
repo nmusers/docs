@@ -1,4 +1,4 @@
-#+title: Empirical state state
+#+title: Empirical steady state
 
 * Empirical Method of Achieving Steady State
 :PROPERTIES:
@@ -7,21 +7,128 @@
 
 With NONMEM 7.5, an Empirical method of Achieving Steady
 State may be used. This method does not use the SS data item, but
-does use ADDL and II.
+does use ADDL and II, prescribing a large number of doses sufficient
+to have all subjects reach steady state.
 
-With  some systems, steady state cannot be computed by the usual meth-
- ods requested by the SS data item.  The Empirical steady state  method
- computes  steady  state  by  giving  a large number of doses until the
- state variables no longer change according to the SSTOL/SSATOL  toler-
- ance specified in $SUBROUTINES.  The SS data item is not used.  A neg-
- ative value of ADDL requests the computation, and also  specifies  the
- maximum  number of doses (ABS(ADDL)+1).  Interdose interval II is used
- as usual.
+As of nm75, the user may enter a negative valued ADDL to the data set, whose absolute value represents the maximum number of dose inputs to be given, followed by records with times relative to this last maximum dose.  PREDPP will then determine, as it simulates each added dose, when the state variables no longer change according to the SSTOL/SSATOL tolerance specified in $SUBROUTINES, and stop adding doses when this is reached, up to the maximal ABS(ADDL).  In addition, PREDPP will adjust the times of the subsequent records so it retains the same time after last dose relationship according to the actual number of doses given.  The actual additional doses used is recorded in a reserved variable called ADDL_ACTUAL, accessible from $PK, $ERROR, $DES, and $AES.  If ADDL_ACTUAL remains 0 for all records, this means the maximal number of doses ABS(ADDL) was reached before steady state occurred. The adjusted times are recorded in reserved variable ADDL_TIME, and the time difference between TIME (which is not altered) and ADDL_TIME is recorded in reserved variable ADDL_TIMEDIFF.  The time of integration T for the ODE’s, TSTATE, DOSTIM, MTIME() are in reference to ADDL_TIME, not TIME, and the user’s model should be aware of this adjustment.  When outputting results to a table, the relevant times displayed should be ADDL_TIME, not TIME.  A user defined variable defined in $PK or $ERROR may store the ADDL_TIME value, such as
+#+begin_src f90
+ADDLTIME=ADDL_TIME
+#+end_src
+and then ADDLTIME can be outputted to the table.  IF $PK is given limited calls (such as with CALLFL=1), then ADDLTIME should be defined in $ERROR.  Similarly, if $ERROR is given limited calls (such as OBS ONLY or CALLFL=0), then ADDLTIME should be defined in $PK.  In this way, the user-defined variable ADDLTIME is updated for each outputted record.  There is no harm in defining ADDLTIME in both $PK and $ERROR.
 
- Reserved variables ADDL_ACTUAL and  ADDL_TIME  and  ADDL_TIMEDIFF  are
- given useful values.
+Consider the following example, ..\examples\simpledii16_2d, which consists of a DDE problem, using ADVAN16, and records are set up for a maximum of 100 additional doses (designated as ADDL=-100) given every II=8 hours (data file simpledii16_2d.csv):
+#+begin_src r
+ CID   TIME  AMT  RATE  II  ADDL  CMT  EVID  MDV  DV
+ 100      0  100     0   8  -100    1     1    1   0
+ 100  799.9    0     0   0     0    1     0    0   1
+ 100    800    0     0   0     0    1     0    0   1
+ 100    801    0     0   0     0    1     0    0   1
+ 100    802    0     0   0     0    1     0    0   1
+ 100    803    0     0   0     0    1     0    0   1
+ 100    804    0     0   0     0    1     0    0   1
+ 100    805    0     0   0     0    1     0    0   1
+ 100    806    0     0   0     0    1     0    0   1
+ 100    807    0     0   0     0    1     0    0   1
+ 100  807.9    0     0   0     0    1     0    0   1
+ 100    808    0     0   0     0    1     0    0   1
+ 100    809    0     0   0     0    1     0    0   1
+ 100    810    0     0   0     0    1     0    0   1
+ 100    811    0     0   0     0    1     0    0   1
+ 100    812    0     0   0     0    1     0    0   1
+ 100    813    0     0   0     0    1     0    0   1
+ 100    814    0     0   0     0    1     0    0   1
+ 100    815    0     0   0     0    1     0    0   1
+ 100    816    0     0   0     0    1     0    0   1
+ 100    818    0     0   0     0    1     0    0   1
+ 100    820    0     0   0     0    1     0    0   1
+ 100    822    0     0   0     0    1     0    0   1
+ 100    824    0     0   0     0    1     0    0   1
+ 100    826    0     0   0     0    1     0    0   1
+ 100    828    0     0   0     0    1     0    0   1
+ 100    830    0     0   0     0    1     0    0   1
+#+end_src
+Note that the times after the multi-dose record are in accordance to
+the maximum doses to be given (ABS(ADDL)+1=101), and that the
+observation records begin just before the last maximum number of doses
+(at 799.9 hours), to capture the trough value, followed by the peak of
+the last maximum number of bolus doses (at 800 hours), with hourly
+observations thereafter.
 
- (See Guide Introduction_7  "An  Empirical  Method  of Achieving Steady
- State")
+The pertinent information is captured for table output as follows
+(..\examples\simpledii16_2d.ctl):
+#+begin_src perl
+$SUBROUTINES ADVAN16 TOL=10 ATOL=10 SSTOL=6 SSATOL=6
+…
+…
+$PK
+ADDLA=ADDL_ACTUAL ; may be set in $PK and/or $ERRROR
+ADDLTIME=ADDL_TIME; may be set in $PK and/or $ERRROR
+…
+…
+$TABLE ID TIME ADDLTIME A1 A4 A5 ADDL ADDLA
+NOAPPEND NOPRINT ONEHEADER FILE=simpledii16_2d.tab
+…
+…
+$ERROR
+ADDLA=ADDL_ACTUAL  ; may be set in $PK and/or $ERRROR
+ADDLTIME=ADDL_TIME ; may be set in $PK and/or $ERRROR
+#+end_src
 
- REFERENCES: Guide Introduction_7
+The resulting output (simpledii16_2d.tab) is shown as follows:
+#+begin_src r
+  ID          TIME        ADDLTIME    A1          A4          A5          ADDL        ADDLA
+  1.000E+02   0.000E+00   0.000E+00   1.000E+02   0.000E+00   0.000E+00  -1.000E+02   0.000E+00
+  1.000E+02   7.999E+02   3.199E+02   4.867E+01   2.983E+02   6.525E+01   0.000E+00   4.000E+01
+  1.000E+02   8.000E+02   3.200E+02   1.484E+02   2.981E+02   6.461E+01   0.000E+00   4.000E+01
+  1.000E+02   8.010E+02   3.210E+02   1.068E+02   2.956E+02   5.919E+01   0.000E+00   4.000E+01
+  1.000E+02   8.020E+02   3.220E+02   8.484E+01   2.923E+02   5.499E+01   0.000E+00   4.000E+01
+  1.000E+02   8.030E+02   3.230E+02   7.238E+01   2.884E+02   5.148E+01   0.000E+00   4.000E+01
+  1.000E+02   8.040E+02   3.240E+02   6.461E+01   2.841E+02   4.838E+01   0.000E+00   4.000E+01
+  1.000E+02   8.050E+02   3.250E+02   5.919E+01   2.946E+02   1.068E+02   0.000E+00   4.000E+01
+  1.000E+02   8.060E+02   3.260E+02   5.499E+01   2.987E+02   8.484E+01   0.000E+00   4.000E+01
+  1.000E+02   8.070E+02   3.270E+02   5.148E+01   2.994E+02   7.238E+01   0.000E+00   4.000E+01
+  1.000E+02   8.079E+02   3.279E+02   4.867E+01   2.983E+02   6.525E+01   0.000E+00   4.000E+01
+  1.000E+02   8.080E+02   3.280E+02   4.838E+01   2.981E+02   6.461E+01   0.000E+00   4.000E+01
+  1.000E+02   8.090E+02   3.290E+02   4.555E+01   2.956E+02   5.919E+01   0.000E+00   4.000E+01
+  1.000E+02   8.100E+02   3.300E+02   4.294E+01   2.923E+02   5.499E+01   0.000E+00   4.000E+01
+  1.000E+02   8.110E+02   3.310E+02   4.049E+01   2.884E+02   5.148E+01   0.000E+00   4.000E+01
+  1.000E+02   8.120E+02   3.320E+02   3.820E+01   2.841E+02   4.838E+01   0.000E+00   4.000E+01
+  1.000E+02   8.130E+02   3.330E+02   3.604E+01   2.794E+02   4.555E+01   0.000E+00   4.000E+01
+  1.000E+02   8.140E+02   3.340E+02   3.400E+01   2.744E+02   4.294E+01   0.000E+00   4.000E+01
+  1.000E+02   8.150E+02   3.350E+02   3.208E+01   2.691E+02   4.049E+01   0.000E+00   4.000E+01
+  1.000E+02   8.160E+02   3.360E+02   3.027E+01   2.637E+02   3.820E+01   0.000E+00   4.000E+01
+  1.000E+02   8.180E+02   3.380E+02   2.695E+01   2.523E+02   3.400E+01   0.000E+00   4.000E+01
+  1.000E+02   8.200E+02   3.400E+02   2.400E+01   2.405E+02   3.027E+01   0.000E+00   4.000E+01
+  1.000E+02   8.220E+02   3.420E+02   2.137E+01   2.285E+02   2.695E+01   0.000E+00   4.000E+01
+  1.000E+02   8.240E+02   3.440E+02   1.903E+01   2.164E+02   2.400E+01   0.000E+00   4.000E+01
+  1.000E+02   8.260E+02   3.460E+02   1.694E+01   2.044E+02   2.137E+01   0.000E+00   4.000E+01
+  1.000E+02   8.280E+02   3.480E+02   1.508E+01   1.927E+02   1.903E+01   0.000E+00   4.000E+01
+  1.000E+02   8.300E+02   3.500E+02   1.343E+01   1.812E+02   1.694E+01   0.000E+00   4.000E+01
+#+end_src
+Notice that ADDLTIME is the appropriate adjusted time when relating to the actual number of additional doses (ADDLA=40) given.
+
+If you have code that involves MTIME(), the MTIME should be adjusted with ADDL_TIMEDIFF.  For example, if you want MTIME(1) to be at TIME=812.5 hours (relative to maximal number of doses), then MTIME should be set to the adjusted time value, after ADDL_TIMEDIFF becomes non-zero (which is after PREDPP has assessed the appropriate number of additional doses):
+#+begin_src f90
+    IF(ADDL_TIMEDIFF/=0.0.AND.MTIME(1)==0.0) THEN
+       MTIME(1)=812.5+ADDL_TIMEDIFF
+       MTDIFF=1
+    ELSE
+       MTIME(1)=MTIME(1)
+    ENDIF
+#+end_src
+The above code is written for efficiency, so that MTIME(1) is set once.
+
+Only the first negative ADDL is recognized as an indicator to adjust the number of doses. However, if you have a cluster of doses together, with the same starting time (although they may have different lag times), II, and ADDL, these will be treated as a composite steady state dosing strategy. For example, in method of steps problems, you may want a second dose record for the delay compartment (which may have an ALAG modeled in the control stream):
+#+begin_src r
+CID	TIME	AMT	RATE	II	ADDL	CMT	EVID	MDV	DV
+100	0	100	0	8	-100	1	1	1	0
+100	0	100	0	8	-100	5	1	1	0
+100	799.9	0	0	0	0	1	0	0	1
+100	800	0	0	0	0	1	0	0	1
+100	801	0	0	0	0	1	0	0	1
+#+end_src
+A steady state continuous infusion problem would also be modeled with
+II and negative valued ADDL.  For this case, set the II equal to
+AMT/RATE, so that when one infusion period ends, the next one begins.
+See ..\examples\simpledii16_2e.ctl.  Do not use the SS item with the
+negative valued ADDL method.

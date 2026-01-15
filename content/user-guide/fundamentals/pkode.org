@@ -1,15 +1,21 @@
-#+title: 2. PK and ODEs
+---
+title: "PK and ODEs"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: false
+weight: 2
+---
+
 {{< katex >}}{{< /katex >}}
 
 * Pharmacokinetics and ordinary differential equations
 Since pharmacokinetics (PK) always involves time \(t\), we make it explicit
 in the population data formulation from the last chapter. To simplify
-notation we also remove the subscripts for the moment:
-
+notation we also assume homoscedasticity and hide the subscripts for the moment:
 $$
 y = f(x, \phi, t) + \epsilon.
 $$
-Here \(x\), \(y\), \(\phi\), and \(\epsilon\) can be vectors.
+In general the \(x\), \(y\), \(\phi\), and \(\epsilon\) are vectors.
 
 For example, let us consider \(x=D\),
 \(D\) being the single bolus dose amount, and \(\theta=(V, k)\) with \(V\)
@@ -28,18 +34,29 @@ Here \(F\) denotes the model /prediction/, the return of \(f\) that
 depends on dose, subject parameters, and time.
 
 ** PRED routine
-In general, the user must provide a function \(f()\), called the
+In general the user must provide function \(f()\), called the
 PRED routine in NONMEM. It takes THETA and each data record (encoding
 covariates and time), computes the prediction, and stores it in the
 reserved variable F.
 
-We can specify any PRED as long as the above /signature/ [fn:1] is
-followed. For example, we can use PRED to describe a logistic \(f\):
+We can specify any PRED by following the above /signature/. [fn:1]
+For example, we can use PRED to describe a logistic \(f()\):
 $$
 f(x, \theta, t) = f(t_0, (\alpha, \beta, \gamma), t) = \frac{\gamma}{1+\alpha e^{-\beta(t-t_0)}},
 $$
-and supply it to a disease progression model in which the clinical
-outcome follows an S‑shaped time course.
+and use it in a disease progression model to describe clinical
+outcomes that follow an S‑shaped time course.
+
+In a NONMEM population model, we often encounter two types of
+predictions.
+  - Evaluation of \(f(x_{ij}, \phi_i, t)\) in which \(\phi_i\)
+    is modeled by \(\mu(z_i, \theta, \eta_i)\). NONMEM calls this
+    value individual prediction and denotes it IPRED.
+  - Evaluation of \(f(x_{ij}, \phi_i, t)\) at \(\eta_i=0\): \(\phi_i=\mu(z_i, \theta, \eta_i=0)\). That is, the
+    prediction does not incorporate the inter-individual variation, by
+    assuming identical prediction for subjects with same covariates.
+    NONMEM calls this value PRED (not to be confused with the PRED
+    routine). PRED is among NONMEM's default output.
 
 ** Ordinary differential equations
 Ordinary differential equations (ODEs) are often used in mechanistic
@@ -77,18 +94,21 @@ Here \(A_0\),  \(A_1\), \(A_2\) are the drug amount in depot (gut),
 central, and peripheral compartments, respectively, and the system has four
 coefficients: \(k_a\), \(k_{12}\), \(k_{21}\), \(k_e\), to quantify
 the absorption, the transfer between the central and peripheral compartments,
-as well as the elimination. In general, the system can be formulated
-as
+as well as the elimination.
+
+In general, the system can be formulated as
 
 $$
-\frac{dA(t)}{dt}=g(A(t), x, \theta, t).
+\frac{dA(t)}{dt}=g(A(t), x, p, t).
 $$
+Here both left-hand-side (LHS) and right-hand-size (RHS) are vectors
+of dimention \(n\): \(A=[A_1, \dots, A_n]^T\), \(g=[g_1, \dots, g_n]^T\).
 
 We can keep increasing the complexity of the system, by increasing the
 dimenion of \(A()\), and/or the complexity of the right-hand-size
 (RHS) function \(g\), then translate it into PRED, to account for more
 complicated models. But it quickly becomes intractable because the solution
-can be either too long to write out, or more likely does not exist
+can be either too complicated to write out, or (most likely) does not exist
 in close form to begin with.
 
 NONMEM tackles this problem by allowing user to specify the RHS \(g()\)
@@ -96,7 +116,28 @@ directly, so that it can solve the ODEs /numerically/. That way we do not have t
 write out the solution \(A\) (or \(f\)) manually. In fact, NONMEM
 provides a library of commonly-used PK models. For those models we do
 not even have to specify \(g()\). Since these models describe how
-\(A(t)\) /advances/ in time, in NONMEM they called ADVAN routines.
+\(A(t)\) /advances/ in time, NONMEM calls them ADVAN routines, and
+allows users to specify in the $SUBROUTINE control record.
+
+** General linear ODE model
+A special case of the ODE models is when \(g()\) is linear with
+respect to \(A\):
+$$
+\frac{dA(t)}{dt}=K^TA(t).
+$$
+Here \(K\) is a \(n\times n\) matrix that could depend on \(x\). \(K_{ij}\)
+\((i, j)\) entry of \(K\), quantifies the first-order distribution of drug
+from compartment number /i/ to compartment number /j/. For example,
+the above two-compartment model with first-order absorption can be
+cast this way:
+$$
+A=[A_0, A_1, A_2]^T,\\
+K_{11}=-k_a,\\
+K_{21}=k_a,\quad K_{22}=-(k_{12}+k_e),\quad K_{23}=k_{21},\\
+K_{31}=k_{12},\quad K_{33}=k_{21}.
+$$
+NONMEM provides special subroutine ADVAN5 and ADVAN7 for this type of
+systems, and uses the above numbering scheme for matrix \(K\).
 
 ** Parameterization
 Another way to write the above two-compartment models is to use PK
@@ -109,7 +150,8 @@ $$
 This /TRANSformation/ of parameters does not change the ODE model, but
 merely /reparameterizes/ it, and NONMEM
 provides routines called TRANS for the built-in PK models. User can choose
-between different TRANS routines for a given PK model.
+between different TRANS routines for a given PK model. Like ADVAN
+routines, users specify TRANS in the $SUBROUTINE control record.
 
 ** Dose
 It is helpful to see doses in PK studies from the pespective of ODEs,
@@ -140,10 +182,8 @@ $$
 $$
 
 
-** TODO Covariates and PK modeling
-
-
 [fn:1] A function signature specifies the
 function's input (arguments) and output (return). NONMEM's
 implementation of PRED actually involves
-additional arguments, but they are not essential here.
+additional arguments, but they are not essential here. In NONMEM
+Guides function signature is called function preface.

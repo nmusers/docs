@@ -8,29 +8,29 @@ https://github.com/alex-shpak/hugo-book
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content=" Empirical Method of Achieving Steady State With NONMEM 7.5, an Empirical method of Achieving Steady State may be used. This method does not use the SS data item, but does use ADDL and II.
-With some systems, steady state cannot be computed by the usual meth- ods requested by the SS data item. The Empirical steady state method computes steady state by giving a large number of doses until the state variables no longer change according to the SSTOL/SSATOL toler- ance specified in $SUBROUTINES. The SS data item is not used. A neg- ative value of ADDL requests the computation, and also specifies the maximum number of doses (ABS(ADDL)&#43;1). Interdose interval II is used as usual.
+<meta name="description" content=" Empirical Method of Achieving Steady State With NONMEM 7.5, an Empirical method of Achieving Steady State may be used. This method does not use the SS data item, but does use ADDL and II, prescribing a large number of doses sufficient to have all subjects reach steady state.
+As of nm75, the user may enter a negative valued ADDL to the data set, whose absolute value represents the maximum number of dose inputs to be given, followed by records with times relative to this last maximum dose. PREDPP will then determine, as it simulates each added dose, when the state variables no longer change according to the SSTOL/SSATOL tolerance specified in $SUBROUTINES, and stop adding doses when this is reached, up to the maximal ABS(ADDL). In addition, PREDPP will adjust the times of the subsequent records so it retains the same time after last dose relationship according to the actual number of doses given. The actual additional doses used is recorded in a reserved variable called ADDL_ACTUAL, accessible from $PK, $ERROR, $DES, and $AES. If ADDL_ACTUAL remains 0 for all records, this means the maximal number of doses ABS(ADDL) was reached before steady state occurred. The adjusted times are recorded in reserved variable ADDL_TIME, and the time difference between TIME (which is not altered) and ADDL_TIME is recorded in reserved variable ADDL_TIMEDIFF. The time of integration T for the ODE’s, TSTATE, DOSTIM, MTIME() are in reference to ADDL_TIME, not TIME, and the user’s model should be aware of this adjustment. When outputting results to a table, the relevant times displayed should be ADDL_TIME, not TIME. A user defined variable defined in $PK or $ERROR may store the ADDL_TIME value, such as
 ">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:url" content="https://nmusers.github.io/docs/cookbook/steady_state/">
   <meta property="og:site_name" content="NONMEM Documentation">
-  <meta property="og:title" content="Empirical state state">
-  <meta property="og:description" content="Empirical Method of Achieving Steady State With NONMEM 7.5, an Empirical method of Achieving Steady State may be used. This method does not use the SS data item, but does use ADDL and II.
-With some systems, steady state cannot be computed by the usual meth- ods requested by the SS data item. The Empirical steady state method computes steady state by giving a large number of doses until the state variables no longer change according to the SSTOL/SSATOL toler- ance specified in $SUBROUTINES. The SS data item is not used. A neg- ative value of ADDL requests the computation, and also specifies the maximum number of doses (ABS(ADDL)&#43;1). Interdose interval II is used as usual.">
+  <meta property="og:title" content="Empirical steady state">
+  <meta property="og:description" content="Empirical Method of Achieving Steady State With NONMEM 7.5, an Empirical method of Achieving Steady State may be used. This method does not use the SS data item, but does use ADDL and II, prescribing a large number of doses sufficient to have all subjects reach steady state.
+As of nm75, the user may enter a negative valued ADDL to the data set, whose absolute value represents the maximum number of dose inputs to be given, followed by records with times relative to this last maximum dose. PREDPP will then determine, as it simulates each added dose, when the state variables no longer change according to the SSTOL/SSATOL tolerance specified in $SUBROUTINES, and stop adding doses when this is reached, up to the maximal ABS(ADDL). In addition, PREDPP will adjust the times of the subsequent records so it retains the same time after last dose relationship according to the actual number of doses given. The actual additional doses used is recorded in a reserved variable called ADDL_ACTUAL, accessible from $PK, $ERROR, $DES, and $AES. If ADDL_ACTUAL remains 0 for all records, this means the maximal number of doses ABS(ADDL) was reached before steady state occurred. The adjusted times are recorded in reserved variable ADDL_TIME, and the time difference between TIME (which is not altered) and ADDL_TIME is recorded in reserved variable ADDL_TIMEDIFF. The time of integration T for the ODE’s, TSTATE, DOSTIM, MTIME() are in reference to ADDL_TIME, not TIME, and the user’s model should be aware of this adjustment. When outputting results to a table, the relevant times displayed should be ADDL_TIME, not TIME. A user defined variable defined in $PK or $ERROR may store the ADDL_TIME value, such as">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="cookbook">
-    <meta property="article:modified_time" content="2025-12-27T11:36:44-08:00">
+    <meta property="article:modified_time" content="2026-01-10T13:29:39-08:00">
 
 
-  <meta itemprop="name" content="Empirical state state">
-  <meta itemprop="description" content="Empirical Method of Achieving Steady State With NONMEM 7.5, an Empirical method of Achieving Steady State may be used. This method does not use the SS data item, but does use ADDL and II.
-With some systems, steady state cannot be computed by the usual meth- ods requested by the SS data item. The Empirical steady state method computes steady state by giving a large number of doses until the state variables no longer change according to the SSTOL/SSATOL toler- ance specified in $SUBROUTINES. The SS data item is not used. A neg- ative value of ADDL requests the computation, and also specifies the maximum number of doses (ABS(ADDL)&#43;1). Interdose interval II is used as usual.">
-  <meta itemprop="dateModified" content="2025-12-27T11:36:44-08:00">
-  <meta itemprop="wordCount" content="140">
+  <meta itemprop="name" content="Empirical steady state">
+  <meta itemprop="description" content="Empirical Method of Achieving Steady State With NONMEM 7.5, an Empirical method of Achieving Steady State may be used. This method does not use the SS data item, but does use ADDL and II, prescribing a large number of doses sufficient to have all subjects reach steady state.
+As of nm75, the user may enter a negative valued ADDL to the data set, whose absolute value represents the maximum number of dose inputs to be given, followed by records with times relative to this last maximum dose. PREDPP will then determine, as it simulates each added dose, when the state variables no longer change according to the SSTOL/SSATOL tolerance specified in $SUBROUTINES, and stop adding doses when this is reached, up to the maximal ABS(ADDL). In addition, PREDPP will adjust the times of the subsequent records so it retains the same time after last dose relationship according to the actual number of doses given. The actual additional doses used is recorded in a reserved variable called ADDL_ACTUAL, accessible from $PK, $ERROR, $DES, and $AES. If ADDL_ACTUAL remains 0 for all records, this means the maximal number of doses ABS(ADDL) was reached before steady state occurred. The adjusted times are recorded in reserved variable ADDL_TIME, and the time difference between TIME (which is not altered) and ADDL_TIME is recorded in reserved variable ADDL_TIMEDIFF. The time of integration T for the ODE’s, TSTATE, DOSTIM, MTIME() are in reference to ADDL_TIME, not TIME, and the user’s model should be aware of this adjustment. When outputting results to a table, the relevant times displayed should be ADDL_TIME, not TIME. A user defined variable defined in $PK or $ERROR may store the ADDL_TIME value, such as">
+  <meta itemprop="dateModified" content="2026-01-10T13:29:39-08:00">
+  <meta itemprop="wordCount" content="1402">
 
-<title>Empirical state state | NONMEM Documentation</title>
+<title>Empirical steady state | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
 <link rel="manifest" href="/docs/manifest.json">
 <link rel="canonical" href="https://nmusers.github.io/docs/cookbook/steady_state/">
@@ -38,7 +38,7 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.bcb82d6949b51c4d0a6634fc10b966fd3bb2dbb8f6cc6d28027d63fd567f9004.js" integrity="sha256-vLgtaUm1HE0KZjT8ELlm/Tuy27j2zG0oAn1j/VZ/kAQ=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.7be99fe1c48c426b84531c662b4b601a55b76b71c49acf3a6afa3692d6115c58.js" integrity="sha256-e&#43;mf4cSMQmuEUxxmK0tgGlW3a3HEms86avo2ktYRXFg=" crossorigin="anonymous"></script>
 
 
 
@@ -154,7 +154,7 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
 
   
     <a href="/docs/user-guide/fundamentals/population/" class="">
-      1. Population models</a>
+      Population models</a>
   
 
         </li>
@@ -168,7 +168,7 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
 
   
     <a href="/docs/user-guide/fundamentals/pkode/" class="">
-      2. PK and ODEs</a>
+      PK and ODEs</a>
   
 
         </li>
@@ -182,21 +182,7 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
 
   
     <a href="/docs/user-guide/fundamentals/likelihood/" class="">
-      3. Likelihood</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/user-guide/fundamentals/model-fitting/" class="">
-      4. Model fitting</a>
+      Likelihood and MLE</a>
   
 
         </li>
@@ -290,6 +276,42 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
           
   <ul>
     
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-b4d635c55a90184dd9eaba68b950d9ca" class="toggle"  />
+    <label for="section-b4d635c55a90184dd9eaba68b950d9ca" class="flex">
+      <a href="/docs/user-guide/predpp/population_model/" class="">
+        PK parameter model</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-0491f18d5682fdcb9c07f795c3b0e97d" class="toggle"  />
+    <label for="section-0491f18d5682fdcb9c07f795c3b0e97d" class="flex">
+      <a href="/docs/user-guide/predpp/general_linear_model/" class="">
+        General linear model</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+        </li>
+      
+    
   </ul>
 
         </li>
@@ -336,6 +358,34 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
   
     <a href="/docs/user-guide/advanced/abbr_block/" class="">
       Code blocks</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/mu_model/" class="">
+      MU referencing</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/theta_trans/" class="">
+      THETA transformation</a>
   
 
         </li>
@@ -811,7 +861,7 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
 
   
     <a href="/docs/reference-manual/control-records/ovarf/" class="">
-      $OVARF</a>
+      $OVARF, $SVARF</a>
   
 
         </li>
@@ -1049,7 +1099,7 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
 
   
     <a href="/docs/reference-manual/control-records/thetai/" class="">
-      $THETAI</a>
+      $THETAI, $THETAR</a>
   
 
         </li>
@@ -1064,20 +1114,6 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
   
     <a href="/docs/reference-manual/control-records/thetap/" class="">
       $THETAP, $THETAPV</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/reference-manual/control-records/thetar/" class="">
-      $THETAR</a>
   
 
         </li>
@@ -1306,7 +1342,7 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
 
   
     <a href="/docs/cookbook/steady_state/" class="active">
-      Empirical state state</a>
+      Empirical steady state</a>
   
 
         </li>
@@ -1335,20 +1371,6 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
   
     <a href="/docs/cookbook/etabar_mix/" class="">
       Mixture model: ETABAR</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/cookbook/mu_model/" class="">
-      MU referencing</a>
   
 
         </li>
@@ -1506,7 +1528,7 @@ With some systems, steady state cannot be computed by the usual meth- ods reques
     <img src="/docs/icons/menu.svg" class="book-icon" alt="Menu" />
   </label>
 
-  <h3>Empirical state state</h3>
+  <h3>Empirical steady state</h3>
 
   <label for="toc-control">
     
@@ -1545,24 +1567,251 @@ Empirical Method of Achieving Steady State
 <p>
 With NONMEM 7.5, an Empirical method of Achieving Steady
 State may be used. This method does not use the SS data item, but
-does use ADDL and II.</p>
+does use ADDL and II, prescribing a large number of doses sufficient
+to have all subjects reach steady state.</p>
 <p>
-With  some systems, steady state cannot be computed by the usual meth-
- ods requested by the SS data item.  The Empirical steady state  method
- computes  steady  state  by  giving  a large number of doses until the
- state variables no longer change according to the SSTOL/SSATOL  toler-
- ance specified in $SUBROUTINES.  The SS data item is not used.  A neg-
- ative value of ADDL requests the computation, and also  specifies  the
- maximum  number of doses (ABS(ADDL)+1).  Interdose interval II is used
- as usual.</p>
+As of nm75, the user may enter a negative valued ADDL to the data set, whose absolute value represents the maximum number of dose inputs to be given, followed by records with times relative to this last maximum dose.  PREDPP will then determine, as it simulates each added dose, when the state variables no longer change according to the SSTOL/SSATOL tolerance specified in $SUBROUTINES, and stop adding doses when this is reached, up to the maximal ABS(ADDL).  In addition, PREDPP will adjust the times of the subsequent records so it retains the same time after last dose relationship according to the actual number of doses given.  The actual additional doses used is recorded in a reserved variable called ADDL_ACTUAL, accessible from $PK, $ERROR, $DES, and $AES.  If ADDL_ACTUAL remains 0 for all records, this means the maximal number of doses ABS(ADDL) was reached before steady state occurred. The adjusted times are recorded in reserved variable ADDL_TIME, and the time difference between TIME (which is not altered) and ADDL_TIME is recorded in reserved variable ADDL_TIMEDIFF.  The time of integration T for the ODE’s, TSTATE, DOSTIM, MTIME() are in reference to ADDL_TIME, not TIME, and the user’s model should be aware of this adjustment.  When outputting results to a table, the relevant times displayed should be ADDL_TIME, not TIME.  A user defined variable defined in $PK or $ERROR may store the ADDL_TIME value, such as</p>
+<div class="src src-f90">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>ADDLTIME<span style="color:#ff6ac1">=</span>ADDL_TIME</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>and then ADDLTIME can be outputted to the table.  IF $PK is given limited calls (such as with CALLFL=1), then ADDLTIME should be defined in $ERROR.  Similarly, if $ERROR is given limited calls (such as OBS ONLY or CALLFL=0), then ADDLTIME should be defined in $PK.  In this way, the user-defined variable ADDLTIME is updated for each outputted record.  There is no harm in defining ADDLTIME in both $PK and $ERROR.</p>
 <p>
- Reserved variables ADDL_ACTUAL and  ADDL_TIME  and  ADDL_TIMEDIFF  are
- given useful values.</p>
+Consider the following example, ..\examples∼pledii16_2d, which consists of a DDE problem, using ADVAN16, and records are set up for a maximum of 100 additional doses (designated as ADDL=-100) given every II=8 hours (data file simpledii16_2d.csv):</p>
+<div class="src src-r">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span> CID   TIME  AMT  RATE  II  ADDL  CMT  EVID  MDV  DV
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>      <span style="color:#ff9f43">0</span>  <span style="color:#ff9f43">100</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">8</span>  <span style="color:#ff9f43">-100</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">1</span>    <span style="color:#ff9f43">1</span>   <span style="color:#ff9f43">0</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>  <span style="color:#ff9f43">799.9</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">800</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">801</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">802</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">803</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">804</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">805</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">806</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">807</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>  <span style="color:#ff9f43">807.9</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">808</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">809</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">810</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">811</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">812</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">813</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">814</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">815</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">816</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">818</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">820</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">822</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">824</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">826</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">828</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">100</span>    <span style="color:#ff9f43">830</span>    <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">0</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">1</span>     <span style="color:#ff9f43">0</span>    <span style="color:#ff9f43">0</span>   <span style="color:#ff9f43">1</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>Note that the times after the multi-dose record are in accordance to
+the maximum doses to be given (ABS(ADDL)+1=101), and that the
+observation records begin just before the last maximum number of doses
+(at 799.9 hours), to capture the trough value, followed by the peak of
+the last maximum number of bolus doses (at 800 hours), with hourly
+observations thereafter.</p>
 <p>
- (See Guide Introduction_7  &#34;An  Empirical  Method  of Achieving Steady
- State&#34;)</p>
+The pertinent information is captured for table output as follows
+(..\examples∼pledii16_2d.ctl):</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$SUBROUTINES</span> ADVAN16 TOL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">10</span> ATOL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">10</span> SSTOL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">6</span> SSATOL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">6</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">…</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">…</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
+</span></span><span style="display:flex;"><span>ADDLA<span style="color:#ff6ac1">=</span>ADDL_ACTUAL ; may be set in <span style="color:#ff5c57">$PK</span> <span style="color:#ff6ac1">and</span><span style="color:#ff6ac1">/</span><span style="color:#ff6ac1">or</span> <span style="color:#ff5c57">$ERRROR</span>
+</span></span><span style="display:flex;"><span>ADDLTIME<span style="color:#ff6ac1">=</span>ADDL_TIME; may be set in <span style="color:#ff5c57">$PK</span> <span style="color:#ff6ac1">and</span><span style="color:#ff6ac1">/</span><span style="color:#ff6ac1">or</span> <span style="color:#ff5c57">$ERRROR</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">…</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">…</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$TABLE</span> ID TIME ADDLTIME A1 A4 A5 ADDL ADDLA
+</span></span><span style="display:flex;"><span>NOAPPEND NOPRINT ONEHEADER FILE<span style="color:#ff6ac1">=</span>simpledii16_2d<span style="color:#ff6ac1">.</span>tab
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">…</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">…</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ERROR</span>
+</span></span><span style="display:flex;"><span>ADDLA<span style="color:#ff6ac1">=</span>ADDL_ACTUAL  ; may be set in <span style="color:#ff5c57">$PK</span> <span style="color:#ff6ac1">and</span><span style="color:#ff6ac1">/</span><span style="color:#ff6ac1">or</span> <span style="color:#ff5c57">$ERRROR</span>
+</span></span><span style="display:flex;"><span>ADDLTIME<span style="color:#ff6ac1">=</span>ADDL_TIME ; may be set in <span style="color:#ff5c57">$PK</span> <span style="color:#ff6ac1">and</span><span style="color:#ff6ac1">/</span><span style="color:#ff6ac1">or</span> <span style="color:#ff5c57">$ERRROR</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
 <p>
- REFERENCES: Guide Introduction_7</p>
+The resulting output (simpledii16_2d.tab) is shown as follows:</p>
+<div class="src src-r">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>  ID          TIME        ADDLTIME    A1          A4          A5          ADDL        ADDLA
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">0.000E+00</span>  <span style="color:#ff9f43">-1.000E+02</span>   <span style="color:#ff9f43">0.000E+00</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">7.999E+02</span>   <span style="color:#ff9f43">3.199E+02</span>   <span style="color:#ff9f43">4.867E+01</span>   <span style="color:#ff9f43">2.983E+02</span>   <span style="color:#ff9f43">6.525E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.000E+02</span>   <span style="color:#ff9f43">3.200E+02</span>   <span style="color:#ff9f43">1.484E+02</span>   <span style="color:#ff9f43">2.981E+02</span>   <span style="color:#ff9f43">6.461E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.010E+02</span>   <span style="color:#ff9f43">3.210E+02</span>   <span style="color:#ff9f43">1.068E+02</span>   <span style="color:#ff9f43">2.956E+02</span>   <span style="color:#ff9f43">5.919E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.020E+02</span>   <span style="color:#ff9f43">3.220E+02</span>   <span style="color:#ff9f43">8.484E+01</span>   <span style="color:#ff9f43">2.923E+02</span>   <span style="color:#ff9f43">5.499E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.030E+02</span>   <span style="color:#ff9f43">3.230E+02</span>   <span style="color:#ff9f43">7.238E+01</span>   <span style="color:#ff9f43">2.884E+02</span>   <span style="color:#ff9f43">5.148E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.040E+02</span>   <span style="color:#ff9f43">3.240E+02</span>   <span style="color:#ff9f43">6.461E+01</span>   <span style="color:#ff9f43">2.841E+02</span>   <span style="color:#ff9f43">4.838E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.050E+02</span>   <span style="color:#ff9f43">3.250E+02</span>   <span style="color:#ff9f43">5.919E+01</span>   <span style="color:#ff9f43">2.946E+02</span>   <span style="color:#ff9f43">1.068E+02</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.060E+02</span>   <span style="color:#ff9f43">3.260E+02</span>   <span style="color:#ff9f43">5.499E+01</span>   <span style="color:#ff9f43">2.987E+02</span>   <span style="color:#ff9f43">8.484E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.070E+02</span>   <span style="color:#ff9f43">3.270E+02</span>   <span style="color:#ff9f43">5.148E+01</span>   <span style="color:#ff9f43">2.994E+02</span>   <span style="color:#ff9f43">7.238E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.079E+02</span>   <span style="color:#ff9f43">3.279E+02</span>   <span style="color:#ff9f43">4.867E+01</span>   <span style="color:#ff9f43">2.983E+02</span>   <span style="color:#ff9f43">6.525E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.080E+02</span>   <span style="color:#ff9f43">3.280E+02</span>   <span style="color:#ff9f43">4.838E+01</span>   <span style="color:#ff9f43">2.981E+02</span>   <span style="color:#ff9f43">6.461E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.090E+02</span>   <span style="color:#ff9f43">3.290E+02</span>   <span style="color:#ff9f43">4.555E+01</span>   <span style="color:#ff9f43">2.956E+02</span>   <span style="color:#ff9f43">5.919E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.100E+02</span>   <span style="color:#ff9f43">3.300E+02</span>   <span style="color:#ff9f43">4.294E+01</span>   <span style="color:#ff9f43">2.923E+02</span>   <span style="color:#ff9f43">5.499E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.110E+02</span>   <span style="color:#ff9f43">3.310E+02</span>   <span style="color:#ff9f43">4.049E+01</span>   <span style="color:#ff9f43">2.884E+02</span>   <span style="color:#ff9f43">5.148E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.120E+02</span>   <span style="color:#ff9f43">3.320E+02</span>   <span style="color:#ff9f43">3.820E+01</span>   <span style="color:#ff9f43">2.841E+02</span>   <span style="color:#ff9f43">4.838E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.130E+02</span>   <span style="color:#ff9f43">3.330E+02</span>   <span style="color:#ff9f43">3.604E+01</span>   <span style="color:#ff9f43">2.794E+02</span>   <span style="color:#ff9f43">4.555E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.140E+02</span>   <span style="color:#ff9f43">3.340E+02</span>   <span style="color:#ff9f43">3.400E+01</span>   <span style="color:#ff9f43">2.744E+02</span>   <span style="color:#ff9f43">4.294E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.150E+02</span>   <span style="color:#ff9f43">3.350E+02</span>   <span style="color:#ff9f43">3.208E+01</span>   <span style="color:#ff9f43">2.691E+02</span>   <span style="color:#ff9f43">4.049E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.160E+02</span>   <span style="color:#ff9f43">3.360E+02</span>   <span style="color:#ff9f43">3.027E+01</span>   <span style="color:#ff9f43">2.637E+02</span>   <span style="color:#ff9f43">3.820E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.180E+02</span>   <span style="color:#ff9f43">3.380E+02</span>   <span style="color:#ff9f43">2.695E+01</span>   <span style="color:#ff9f43">2.523E+02</span>   <span style="color:#ff9f43">3.400E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.200E+02</span>   <span style="color:#ff9f43">3.400E+02</span>   <span style="color:#ff9f43">2.400E+01</span>   <span style="color:#ff9f43">2.405E+02</span>   <span style="color:#ff9f43">3.027E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.220E+02</span>   <span style="color:#ff9f43">3.420E+02</span>   <span style="color:#ff9f43">2.137E+01</span>   <span style="color:#ff9f43">2.285E+02</span>   <span style="color:#ff9f43">2.695E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.240E+02</span>   <span style="color:#ff9f43">3.440E+02</span>   <span style="color:#ff9f43">1.903E+01</span>   <span style="color:#ff9f43">2.164E+02</span>   <span style="color:#ff9f43">2.400E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.260E+02</span>   <span style="color:#ff9f43">3.460E+02</span>   <span style="color:#ff9f43">1.694E+01</span>   <span style="color:#ff9f43">2.044E+02</span>   <span style="color:#ff9f43">2.137E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.280E+02</span>   <span style="color:#ff9f43">3.480E+02</span>   <span style="color:#ff9f43">1.508E+01</span>   <span style="color:#ff9f43">1.927E+02</span>   <span style="color:#ff9f43">1.903E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">1.000E+02</span>   <span style="color:#ff9f43">8.300E+02</span>   <span style="color:#ff9f43">3.500E+02</span>   <span style="color:#ff9f43">1.343E+01</span>   <span style="color:#ff9f43">1.812E+02</span>   <span style="color:#ff9f43">1.694E+01</span>   <span style="color:#ff9f43">0.000E+00</span>   <span style="color:#ff9f43">4.000E+01</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>Notice that ADDLTIME is the appropriate adjusted time when relating to the actual number of additional doses (ADDLA=40) given.</p>
+<p>
+If you have code that involves MTIME(), the MTIME should be adjusted with ADDL_TIMEDIFF.  For example, if you want MTIME(1) to be at TIME=812.5 hours (relative to maximal number of doses), then MTIME should be set to the adjusted time value, after ADDL_TIMEDIFF becomes non-zero (which is after PREDPP has assessed the appropriate number of additional doses):</p>
+<div class="src src-f90">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>    <span style="color:#ff6ac1">IF</span>(ADDL_TIMEDIFF<span style="color:#ff6ac1">/=</span><span style="color:#ff9f43">0.0</span>.<span style="color:#ff5c57">AND</span>.MTIME(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">0.0</span>) <span style="color:#ff6ac1">THEN</span>
+</span></span><span style="display:flex;"><span>       MTIME(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">81</span><span style="color:#ff9f43">2.5</span><span style="color:#ff6ac1">+</span>ADDL_TIMEDIFF
+</span></span><span style="display:flex;"><span>       MTDIFF<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">ELSE</span>
+</span></span><span style="display:flex;"><span>       MTIME(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>MTIME(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">ENDIF</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>The above code is written for efficiency, so that MTIME(1) is set once.</p>
+<p>
+Only the first negative ADDL is recognized as an indicator to adjust the number of doses. However, if you have a cluster of doses together, with the same starting time (although they may have different lag times), II, and ADDL, these will be treated as a composite steady state dosing strategy. For example, in method of steps problems, you may want a second dose record for the delay compartment (which may have an ALAG modeled in the control stream):</p>
+<div class="src src-r">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>CID	TIME	AMT	RATE	II	ADDL	CMT	EVID	MDV	DV
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">100</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">100</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">8</span>	<span style="color:#ff9f43">-100</span>	<span style="color:#ff9f43">1</span>	<span style="color:#ff9f43">1</span>	<span style="color:#ff9f43">1</span>	<span style="color:#ff9f43">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">100</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">100</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">8</span>	<span style="color:#ff9f43">-100</span>	<span style="color:#ff9f43">5</span>	<span style="color:#ff9f43">1</span>	<span style="color:#ff9f43">1</span>	<span style="color:#ff9f43">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">100</span>	<span style="color:#ff9f43">799.9</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">1</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">100</span>	<span style="color:#ff9f43">800</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">1</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">100</span>	<span style="color:#ff9f43">801</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">1</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">0</span>	<span style="color:#ff9f43">1</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>A steady state continuous infusion problem would also be modeled with
+II and negative valued ADDL.  For this case, set the II equal to
+AMT/RATE, so that when one infusion period ends, the next one begins.
+See ..\examples∼pledii16_2e.ctl.  Do not use the SS item with the
+negative valued ADDL method.</p>
 </div>
 </div>
 </article>
@@ -1574,9 +1823,9 @@ With  some systems, steady state cannot be computed by the usual meth-
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/1fd264aaf0b0216dd828d03f47646e40decac149" title='Last modified by Yi Zhang | 2025 Dec 27' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/d5052f96d2ee9e33f322443f03f7ff65f64faa6c" title='Last modified by Yi Zhang | 2026 Jan 10' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2025 Dec 27</span>
+    <span>2026 Jan 10</span>
   </a>
 
 </div>

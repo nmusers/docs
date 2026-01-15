@@ -19,45 +19,44 @@ $OMEGA BLOCK(3)  6. .005 .3 .0002 .006 .4
 #+end_src
 
 ** DISCUSSION
-This record gives initial estimates and constraints for elements of one or several
- blocks of the OMEGA matrix, i.e., the matrix of variances and  covari-
- ances  of  the  eta  variables  in the statistical model.  This record
- should appear only if the statistical model  contains  eta  variables.
- Multiple  $OMEGA  records  may  be  used  to define multiple blocks of
- OMEGA.  The order of the appearance of all  blocks  over  all  records
- corresponds to the order of the blocks in OMEGA.
+This record gives initial estimates and constraints for elements of
+one or several blocks of the OMEGA matrix, i.e., the matrix of
+variances and  covariances  of  the  ETA  variables  in the
+statistical model.  This record should appear only if the statistical
+model  contains  ETA  variables. Multiple  $OMEGA  records  may  be
+used  to define multiple blocks of OMEGA.  The order of the appearance
+of all  blocks  over  all  records corresponds to the order of the
+blocks in OMEGA.
 
- If the initial estimates are omitted for any element(s) of OMEGA, then
- NONMEM will try to obtain the initial estimates.
+If the initial estimates are omitted for any element(s) of OMEGA, then
+NONMEM will try to obtain the initial estimates.
 
- See also the SPECIAL CASE below for the analysis type POPULATION  WITH
- UNCONSTRAINED ETAS.
+See also the SPECIAL CASE below for the analysis type POPULATION  WITH
+UNCONSTRAINED ETAS.
 
 ** OPTIONS
 
  There are seven forms:
 
 *** DIAGONAL(n)
+This  gives  the  initial estimates of the diagonal elements of a diagonal block of OMEGA,  e.g.,
 #+begin_src perl
 $OMEGA [DIAGONAL(n)] [ v11 v22 v33 ... vnn ]
-#+end_src
-This  gives  the  initial estimates of the diagonal elements of a diagonal block of OMEGA.  E.g.,
-#+begin_src perl
+
+;# Example:
+
+;# Initial estimate of variance of eta(1) = .04
+;# Initial estimate of variance of eta(2) = .12
   $OMEGA .04 .12
 #+end_src
-Initial estimate of variance of eta(1) = .04
-
-Initial estimate of variance of eta(2) = .12
-
 Each initial estimate may optionally be coded  with  one  of  the forms:
 #+begin_src perl
   init options      (init options)        (options init)
 #+end_src
-With NONMEM 7.3 "(value,value...)xn" is permitted, so that repeated
-inputs of $OMEGA may be entered easily.   Any  initial  value  or
+NONMEM v7.3+ supports ~(value,value...)xn~ for repeated
+entries of $OMEGA may be entered easily.   Any  initial  value  or
 group  of  initial values may be enclosed in parentheses and followed
-by "xn", which means to replicate the values within  parentheses n
-times ("repeated value").
+by ~xn~ to indicate ~n~ replications of the values.
 
 The  following  options  apply  only to a single initial estimate
 (i.e., a single 1x1 block) and must follow the  initial  estimate
@@ -83,14 +82,12 @@ unless within parentheses.
 *** BLOCK(n)
 #+begin_src perl
 $OMEGA BLOCK(n) [ v11 v21 v22 v31 v32 v33 ... vn1 vn2 ... vnn ]
+
+;# example
+$OMEGA BLOCK(2) .04 .002 .12
 #+end_src
-This  gives the initial estimates of all the elements of a nondiagonal ("full") block of OMEGA.  E.g.,
-#+begin_src perl
-  $OMEGA BLOCK(2) .04 .002 .12
-#+end_src
-Initial estimate of variance of eta(1) = .04; initial estimate of
-covariance of eta(2), eta(1) = .002; initial estimate of variance of
-eta(2) = .12.
+This  gives the initial estimates of all the elements of a nondiagonal ("full") block of OMEGA.
+The example gives initial estimates var(ETA(1)) = .04, cov(ETA(2), ETA(1)) = .002, and var(ETA(2)) = .12.
 
 Any initial value or group of initial values may be  enclosed  in
       parentheses  and  followed  by "xn", which means to replicate the
@@ -123,7 +120,7 @@ The following options apply to the entire block  and  may  appear
 
   - CHOLESKY: indicates that the block is specified  in  its  Cholesky form.
 
-Options  VARIANCE  or STANDARD may be combined with COVARIANCE or CORRELATON.
+Options VARIANCE or STANDARD may be combined with COVARIANCE or CORRELATON.
 
 Note that NONMEM converts all initial estimates to  variance  and
       covariances.   The  values  desplayed in the NONMEM report and in
@@ -204,6 +201,9 @@ With  NONMEM  7.3 (m) is permitted.  If (m) is present, then this
       #+end_src
 
 *** BLOCK(n) VALUES(diag,odiag)
+:PROPERTIES:
+:CUSTOM_ID: block-values
+:END:
 #+begin_src perl
   $OMEGA BLOCK(n) VALUES(diag,odiag)
 #+end_src
@@ -374,12 +374,4 @@ is equivalent to
 The  SCALE is most useful when it is desired to scale an informed
       prior OMEGA from a previous analysis that  differs  from  NONMEMs
       normal  treatment.   For example, you may wish to scale the omega
-      prior by (df-p-1)/df, where df=degrees of freedom,  and  p=dimension  of  omega  block.  Rather than always re-calculate by hand,
-      you can change the scale on the fly.
-
-** REFERENCES
-Guide I, section C.3.4.6 , D.5.2 , D.5.3
-
-Guide IV, section III.B.10 , V.C.6
-
-Guide V, section 9.3
+      prior by (df-p-1)/df, where df=degrees of freedom,  and  p=dimension  of  omega  block.  Rather than always re-calculate by hand, you can change the scale on the fly.

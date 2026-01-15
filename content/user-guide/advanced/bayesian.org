@@ -1,0 +1,165 @@
+---
+title: "Bayesian methods"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: false
+weight: 154
+---
+{{< katex >}}{{< /katex >}}
+
+* Bayesian methods
+Recall that the classic NONMEM MLE methods seek parameters \((\theta, \Omega,
+\Sigma)\) that maximize the log-likelihood \(\mathcal{L}=\log(L)\).
+With Bayesian methods we instead seek the parameters using
+the prior information in addition to the likelihood, based on the
+Bayes' theorem:
+$$
+p(\theta, \Omega, \Sigma | y) \propto L(\theta, \Omega, \Sigma)p_0(\theta, \Omega, \Sigma).
+$$
+Here the left-hand size \(p(\cdot|y)\) is called /posterior/
+distribution of the parameters, and \(p_0(\cdot)\) the /prior/
+distribution. Note that similar to the MLE approach presentation
+the \(\propto\) sign is used because the normalization factor is
+omitted [fn:1].
+
+In practice we mostly approach the Bayesian inference on the log
+scale:
+$$
+\log(p(\theta, \Omega, \Sigma | y)) = C + \mathcal{L} + \log(p_0(\theta, \Omega, \Sigma))
+$$
+with constant /C/ from the normalization factor.
+
+The prior distribution is often solicited from literature and previous studies.
+
+** Maximum a posteriori estimation
+Similar to that the MLE seeks the parameters that maximize the log-likelihood
+$$
+(\hat{\theta}, \hat{\Omega}, \hat{\Sigma})_{\text{MLE}} = \text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L},
+$$
+the maximum a posteriori (MAP) estimation seeks to maximize the
+log posterior distribution:
+$$
+(\hat{\theta}, \hat{\Omega}, \hat{\Sigma})_{\text{MAP}} = \text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\log(p(\theta, \Omega, \Sigma|y)) = \text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,(\mathcal{L}+\log(p_0(\theta, \Omega, \Sigma))).
+$$
+
+In other words, the approach seeks the mode of \(p(\cdot|y)\). This is
+why MAP can also be interpreted as "mode a posteriori" estimation. The
+above equation shows that MAP is in effect MLE with an additional term
+in the objective function. The additional term represents prior
+knowledge of the parameters. To see its action, consider a
+a case with fixed \((\Omega, \Sigma)\) and only one unknown
+\(\theta\), and \(p_0(\theta)\) follows a normal distribution
+$$
+\theta \sim \mathcal{N}(\xi, \sigma_0^2).
+$$
+Then the MAP is equivalent to maximize the objective function
+$$
+\mathcal{L} - \frac{1}{2} \left(\frac{\theta-\xi_0}{\sigma_0}\right)^2.
+$$
+That is, the prior term penalizes the objective function by decreasing itself
+when \(\theta\) moves away from the mean \(\xi\), thus in order to maximize the objective
+function we must seek a balance between the prior term and the
+likelihood term. This is why the prior term is also referred to as
+penalty or regularization for MLE.
+
+NONMEM provides $PRIOR control record to specify the prior. For
+example, one can use
+#+begin_src perl
+$PRIOR TNPRI
+#+end_src
+to specify using prior information
+from a previously run model's MSF. The model example below obtains
+parameter estimates from population data, using a two-compartment PK
+model and incorporating a prior of transformed normal form for all of
+THETA, OMEGA and SIGMA.  The  prior information is found in MSF msf1.
+
+#+begin_src perl
+   $PROB   READ THE MODEL SPECIFICATION FILE
+   $DATA data
+   $INPUT ID DOSE TIME DV WT
+   $PRIOR TNPRI (PROBLEM 2)
+   $MSFI msf1 ONLYREAD
+   $PRED
+         IF (NEWIND.NE.2) THEN
+            AMT=DOSE*WT
+            W=WT
+         ENDIF
+         T0=THETA(1)*EXP(ETA(1))
+         T2=THETA(2)*EXP(ETA(2))
+         T1=T2+T0
+         T3=THETA(3)*W*EXP(ETA(3))
+         A=EXP(-T2*TIME)
+         B=EXP(-T1*TIME)
+         C=T1-T2
+         D=A-B
+         E=T3*C
+         Y=AMT*T1*T2/E*D+EPS(1)
+
+   $PROB POPULATION DATA WITH PRIOR ON THETA, OMEGA AND SIGMA
+   $INPUT ID DOSE TIME DV WT
+   $DATA data  REWIND
+
+   $THETA  (0,4,5) (0,.09,.5) (.004,.01,.9)
+   $OMEGA BLOCK (3) .7 .04 .05 .02 .06 .08
+   $SIGMA  .4
+
+   $EST
+#+end_src
+In the above model ~TNPRI (PROBLEM 2)~ indicates that the prior based
+on ~msf1~ will be imposed on PROBLEM 2, the second problem in the
+control stream that uses default FO for estimation.
+
+** MCMC sampling
+As another Bayesian approach, sampling does not perform point
+estimation. Instead, it utilizes certain algorithm, aka
+/sampler/, to sample from the posterior distribution \(p(\cdot|y)\).
+With enough samples, we can have an approximation of the
+posterior probability distribution density (PDF) of \((\theta, \Omega,
+\Sigma)\), and calculate all the statistics therein.
+
+Markov Chain Monte Carlo (MCMC) samplers are the most commonly used samplers.
+NONMEM provides three flavours of them:
+- Metropolis-Hasting (M-H) algorithm;
+- Gibbs algorithm;
+- No-U-Turn Sampler (NUTS) algorithm.
+Specifically,
+#+begin_src perl
+$EST BAYES
+#+end_src
+uses M-H and/or Gibbs samplers, and
+#+begin_src perl
+$EST NUTS
+#+end_src
+uses the NUTS algorithm.
+
+Compared to point estimation, in general the MCMC approach obtains more
+information (entire distribution rather than mean/mode estimation)
+by paying a computation premium. This trade-off should be examined on a case-by-case basis.
+
+Regardless which sampler to use, prior information is
+still required for the MCMC methods. Consider the following
+two-compartment model example
+
+#+INCLUDE: "/examples/bayes_twocpt/w15.ctl" src perl
+
+We use [[file:/docs/reference-manual/api/subroutines/#nwpri][NWPRI]] in $PRIOR to indicate that
+the priors will be given manually through prior-specification control
+records. Specifically, the $THETAP specifies that all elements of \(\theta\)
+has a normally-distributed prior with mean at 2.0. Note that this is
+not the prior mean for the individual PK parameters as they follow
+log-normal distribution. The $THETAPV record specifies an diagonal covariance matrix
+for the \(\theta\) prior, and each \(\theta\) has a very large prior
+variance, showing the lack of prior information on \(\theta\) [fn:2].
+
+See [[file:/docs/cookbook/mcmc-post/][postprocessing MCMC draws]] on how to examine and interepret the
+sampling results.
+
+[fn:1] The normalization factor is a constant with respect to the
+parameters so the posterior distribution has integral 1. In Bayes'
+theorem it is in fact \(p(y)\), the /marginal/ distribution of the data,
+aka "evidence".
+[fn:2] In practice one may want to consider different variance for
+different \(\theta\) elements, as they correspond to different PK
+parameters, incorporating the transformation used. For example, based
+on the given prior mean and variance, CL has a very large prior mean of
+\(e^{2.0+10.0/2}\).

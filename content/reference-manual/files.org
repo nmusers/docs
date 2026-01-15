@@ -181,7 +181,7 @@ and Guide I, section B.2.
  |#TBLN (NM72) | This  tag  specifies that following it, on the same line, will be found an integer that refers to the  number  of  this  estimation method.  This number is also the table number listed in the title to tables in the various output files  (raw  output  file,  .cov, .cor, etc).  The table number is incremented for each $EST statement, across all problems in the control stream file.|
  |#METH        | This tag specifies that following it, on the same line,  will  be found  a  text that describes the method, for example First Order Conditional Estimation Method with Interaction.|
  |#TERM        | This tag  indicates  that  beginning  on  the  next  lines,  text describes the termination status of the analysis.|
- |#TERE        | This  tag  indicates the end of the lines describing the termina- tion status of the analysis.  Thus, a software program may trans- fer all lines between #TERM: and #TERE: to a summary file.|
+ |#TERE        | This  tag  indicates the end of the lines describing the termination status of the analysis.  Thus, a software program may trans- fer all lines between #TERM: and #TERE: to a summary file.  |
  |#OBJT        | Indicates  that  following  it,  on  the  same  line, is the text describing the objective  function,  such  as  Minimal  Value  Of Objective Function.|
  |#OBJV        | Indicates  that  following it, on the same line, is the objective function value.|
  |#OBJS        | Indicates that following it, on the same line, is  the  objective function standard deviation (MCMC Bayesian analysis only).|
@@ -397,12 +397,35 @@ root.iph file can become quite large, so it should be used only on the
 final analysis.
 
 *** .phm (NM72)
-Individual PHI/ETA/OBJi parameters per sub-population.  This file is
-only  produced  in  $MIXTURE  problems.  As of nm75, for MCMC Baysian
-analysis, the items listed in this table consist  of  the average
-values  among  all  the iterations during the stationary distribution
-phase. Before nm75, the values consisted  of  values from the last
-MCMC iteration.
+These vaues have similar meaning as the results in root.phi, but
+individual phi/eta/obji parameters per sub-population are recorded.
+This file is only produced in $MIXTURE problems.
+
+The PHITYPE option also acts on this file.
+
+As of nm75, for MCMC Bayesian analysis, the items listed in this table
+consist of the average values among all the iterations during the
+stationary distribution phase.  Before nm75, the values consisted of
+values from the last MCMC iteration.
+
+The conditional variances in the root.phi and root.phm files can
+represent the information content provided by a subject for a given
+eta or phi.  For example, if data supplied by the subject is rich,
+then the variance tends to be smaller.  If little data is supplied by
+the subject for that eta, then the conditional variance will approach
+its omega.  In fact, a subject’s shrinkage can be evaluated as
+follows:
+
+In accordance with the SD formula (subscript /i/ for subject ID, /j/
+for ETA/PHI numbering):
+$$
+\text{ETA shrinkage}=1-\sqrt{1-\text{PHC}_i(j, j)/\Omega(j, j)},
+$$
+or by the variance formula:
+$$
+\text{ETA shrinkage}=\text{PHC}_i(j, j)/\Omega(j, j).
+$$
+
 
 *** .shk, .shm
 File root.shk (NM72) presents composite eta shrinkage and epsilon shrinkage
@@ -456,13 +479,67 @@ Produced if the user selects importance sampling with option IACCEPT=0.0.  Conta
 
 *** .npd, .npe, .npi, .npl
 For  NONPARAMETRIC method.  Each row of "root.npd" contains
-information about a support point. "root.npe" contains the expected
-value ETAs  and  expected value  ETA  covariances (ETC) are listed for
-each problem or subproblem. In "root.npi" (NM73) the  individual
-probabilities  are listed.  Each row contains information about a
-support point. In "root.npl" (NM74) the individual data likelihoods
-(not including the parameter density) are listed.
+information about a support point: the support point number, the ID
+from which the support point was obtained as an EBE of that subject
+(ID is -1 if this support point was randomly generated because
+NSUPP/NSUPPE was greater than number of subjects).  The eta values of
+the support point are listed, followed by the cumulative probability
+(CUM) associated with each eta, followed by the joint density
+probability of that support point, if default or MARGINALS was
+selected.  If ETAS was selected, then instead of cumulative
+probabilities, the support point eta vector that best fits that
+subject (ETM) is listed.
 
+"root.npe" contains the expected value etas and expected value ETA
+covariances (ETC) for each problem or sub-problem.  Because
+only one line is written per problem or sub-problem, the column header
+is displayed (unless NOLABEL=1) only once for the entire NONMEM run.
+However, each line contains information of table number, problem
+number, sub-problem number, super problem and iteration number.
+
+"root.npi" (NM73) contains the individual probabilities.  The header
+line (unless NOLABEL=1) is written only once, at the beginning of the
+file, per NONMEM run.  Each line contains information of table number,
+problem number, sub-problem number, super problem, iteration number,
+subject number, and ID.  This is followed by the individual
+probabilities at each support point (of which there are NSUPP/NSUPPE
+or NIND of them, whichever is greater).  The line with Subject
+number=0 contains the sum of the probabilities of all the subjects,
+and is similar or exactly equal to the joint probability of each
+support point listed in root.npd under the column PROBABILITY.  That
+they are not equal is due to the convergence limit of the
+non-parametric analysis.  Row of subject number I, column of support
+K, contains the individual probability IPROB(I,K).   The sum of the
+individual probabilities over all support points for any given line
+(subject), is equal to 1/NIND.  Thus, the sum of all items across rows
+and columns (not including subject 0) sums to 1.  The format of the
+file is fixed at (,1PE22.15), and cannot be changed.  It is intended
+for use in further analysis by analytical software, and is designed to
+report the full double-precision information of each probability.
+
+"root.npl" contains the individual data likelihoods (not including the
+parameter density). The header line (unless NOLABEL=1) is written only
+once, at the beginning of the file, per NONMEM run.  Each line
+contains information of table number, problem number, sub-problem
+number, super problem, iteration number, subject number, and ID.  This
+is followed by the individual likelihoods at each support point (of
+which there are NSUPP/NSUPPE or NIND of them, whichever is greater).
+Unlike the .npi file, there is no line with Subject number=0.  The row
+of subject number I, column of support K, contains the individual
+likelihood LIK(I,K).   The format of the file is fixed at (,1PE22.15),
+and cannot be changed.  It is intended for use in further analysis by
+analytical software, and is designed to report the full
+double-precision information of each probability.
+
+The LIK(i, k) of the .npl file and the IPROB(i, k) are related to each
+other as follows:
+$$
+\text{IPROB}(i, k)=\text{PI}(k)\text{LIK}(i, k)/\exp(-1/2\text{OBJ}(i))/N.
+$$
+where \(N\) is number of subjects, PI(k) is the probability of a
+support point (found as item PROBABILITY in the .npd file), and
+OBJ((I) is the objective function contribution of subject i (found
+under OBJ column of the .npl or .npi file).
 
 *** .fgh (NM73)
 This file is produced  if  the  user  selects  $EST  NUMDER=1  or
@@ -500,11 +577,32 @@ of H are from calls to PRED with the same values of eta if INTERACTION
 is  specified;  otherwise,  they  are  from calls to PRED with ETA=0,
 regardless of the Estimation method.
 
-*** .vpd (NM74)
-This file is produced if the $TABLE file option VARCALC=1 or VARCALC=2
+*** .vpd, .vpt (NM74)
+"root.vpd" is produced if the $TABLE file option VARCALC=1 or VARCALC=2
 is used.  It is the full variances-covariances among  all user-defined
 and  PREDPP  parameters.   The FORMAT used for this file is that
 defined in the $EST record.
+
+"root.vpt" contains variance-covariance among user-defined parameters
+and PREDPP parameters, associated with conditional individual
+variances of the .phi file, as well as the variance-covariance of the
+fixed effects parameters (THETAS, SIGMAS, OMEGAS) of the .cov file.
+The COMACT column value is 1 to indicate the record contains the
+values during a COMACT=1 pass, that is with ETAs set to 0.  Thus, an
+individual predicted value (IPRED) on this record would in fact by the
+population predicted value (PRED).  The subsequent columns contain the
+values of user-defined table items, followed by variance-covariance of
+these items (labled VAR1_VAR2, wher VAR1 and VAR2 are the particular
+table items).  The variance IPRED_IPRED for a record with COMACT=1
+would then have essentially the statistical error associated with the
+variance-covariance of the appropriate THETAs.  When COMACT=2, table
+variables are evaluated having the etas set to the empirical bayes
+estimates (depending on the last estimation method used, and what the
+FNLETA value is set to), variance-covariance of these items are
+evaluated based on conditional individual variances of the .phi table,
+and variance-covariance of the appropriate THETAs, SIGMAs, and OMEGAs,
+as applicable.  If COMACT=3, then non-parametric estimated etas are
+used.
 
 *** .ets (NM74)
 As of NM74, one can obtain random samples of individual ETAs, and uses
@@ -522,7 +620,37 @@ the -1000000000 line, during an optimization. The RAW file (by default
 named root.ext) which shows only  the  starting,  and final  values of
 the standard errors of population parameters, as extra information.
 
-REFERENCES: Guide Introduction_7
+*** msfroot_ETAS
+When MSF or MSFO option is used to specify an MSFO file in the $EST record:
+#+begin_src perl
+$EST … MSFO=msfroot.msf
+#+end_src
+then in addition to the main MSF file msfroot.msf, file
+msfroot_ETAS.msf containing individual etas and phis generated during
+estimation (except FO, which does not generate non-zero etas during
+estimation), will also be produced, and provide additional information
+when a $MSFI record is used in a subsequent problem or control stream.
+In addition, this files stores information useful for resuming an
+interrupted EM/BAYES estimation.  The _ETAS file does not contain
+POSTHOC evaluated etas, only estimated (during $EST) evaluated etas.
+Also, ensure that the ordering of subjects in the present problem
+matches that of the problem when the msf file was generated (for
+example, do not change the data file structure or IGNORE/ACCEPT
+filtering between the two problems).
+
+*** msfroot_RMAT, msfroot_SMAT (NM73)
+When MSF or MSFO option is used to specify an MSFO file in the $EST record:
+#+begin_src perl
+$EST … MSFO=msfroot.msf
+#+end_src
+then in addition to the main MSF file msfroot.msf and
+msfroot_ETAS.msf, files msfroot_RMAT.msf and msfroot_SMAT.msf
+containing intermediate information on the R matrix and S matrix will
+also be produced if a $COV record was implemented.  These files
+provide information when a $MSFI record along with a $COV … RESUME
+record is used in a subsequent problem or control stream.  See RESUME
+(NM73) in INTRODUCTION TO NONMEM 7: section I.59 $COV: Additional
+Options and Behavior.
 
 ** Output quantities
 *** PRED-defined items
@@ -1188,7 +1316,7 @@ See also the error message section below.
 :PROPERTIES:
 :CUSTOM_ID: output-etabar
 :END:
-ETABAR (\(\bar{\eta}\)) is output when a conditional population estimation  method  is used.
+ETABAR (\(\bar{\eta}\)) is output from a conditional population estimation method.
 #+begin_src txt
   ETABAR IS THE ARITHMETIC MEAN OF THE ETA-ESTIMATES,
   AND THE P-VALUE IS GIVEN FOR THE NULL HYPOTHESIS THAT THE TRUE MEAN IS 0.
@@ -1200,7 +1328,7 @@ ETABAR (\(\bar{\eta}\)) is output when a conditional population estimation  meth
   P VAL.:         9.1763E-01  9.8175E-01  9.8946E-01
 #+end_src
 The  ith  number  listed  after "ETABAR" is the sample average (across
-individuals) of the conditional estimates of the ith eta, and the  ith
+individuals) of the conditional estimates of the ith ETA, and the  ith
 number  listed  after  "SE"  is  the  standard error for this average.
 Under the assumed model, the population average of the the conditional
 estimates  is approximately zero.  If the model is well-specified, the
@@ -1227,7 +1355,6 @@ with an eta that influences  some  individual's  data  under  the  mth
 submodel, and (ii) that individual is classified to be in the mth
 subpopulation.
 
-
 The population average of the conditional estimates is  only
 approximately  zero  because a conditional estimate is a (Bayesian)
 posterior mode, and not a posterior expectation.  However with a
@@ -1237,7 +1364,6 @@ individual is classified, and due to possible missclassification the
 expectation of the estimate may be even "further from" zero than with
 a  nonmixture  model.   For this  reason  too,  the  centered FOCE
 method may not work well with a mixture model.
-
 
 With a mixture model, or with a nonmixture model, one may implement  a
 second  Estimation  Step  (in a subsequent problem), and then a second
@@ -1261,7 +1387,6 @@ the population parameter estimates from these data.  It may cost
 considerable CPU  time  to  obtain  this second  set of parameter
 estimates, and so it may not always be feasible to compute EB2.
 
-
 One proceeds by constructing a problem specification that
 1. includes the same $INPUT record as was used with a previous  problem wherein EB1 was obtained;
 2. includes  an  $MSFI  record specifying a model specification file from that previous problem, so that in particular, EB1 is available;
@@ -1277,8 +1402,6 @@ A  data  set  will  be  simulated, and EB2 will be obtained.  With the
  for EB2 will be  output).   The  numbers  of  data  and/or  individual
  records in the simulated data set may differ from those for the previous problem; so if desired, this data set can be much larger than  the
  real data set.
-
-REFERENCES: Guide VII, section II.A , III.D
 
 *** Final parameter estimate
 :PROPERTIES:
@@ -1373,10 +1496,6 @@ Model Time examples
 
 (See Enterhepatic circulation examples).
 
-REFERENCES: Guide I, section C.3.5.1
-
-REFERENCES: Guide V, section 5.5
-
 *** Inferential statistics
 Confidence intervals for parameters, testing hypotheses about
 parameters, and building models all need reasonable ranges for
@@ -1443,12 +1562,6 @@ and this average.
 
 (See [[file:/docs/reference-manual/files/#output-pred-defined-items][PRED-defined items output]]).
 
-
-REFERENCES: Guide I, section C.3.5.3 , C.3.5.4
-
-REFERENCES: Guide IV, section III.B.16 , III.B.17
-
-REFERENCES:  Guide V, section 9.5 , 10.7 , 11.4.4.2
 
 *** Shrinkage
 Shrinkage are output between #TERM and #TERE entries. Inter-subject
@@ -1574,7 +1687,7 @@ an MSF was written, a later run can read that MSF and resume the
 parameter search from the last successfully saved iteration.
 
 With  NM-TRAN, specification that an existing Model Specification File
-is to be input is done by placing the file's name on the $MSFI record.
+is to be input is done by placing the file's name on the [[file:/docs/reference-manual/control-records/msfi/][$MSFI record]].
 
 With NONMEM 7.3, when MSF or MSFO option is used to  specify  an  MSFO file in the $EST record e.g.,
  #+begin_src perl
@@ -1604,10 +1717,6 @@ For an example see the fragment of the control stream for the first run below.  
  $COV
  $TABLE ID TIME
  #+end_src
-
- REFERENCES: Guide I, section B.3
-
- REFERENCES: Guide IV, section III.B.12
 
 ** Error messages
 This  is  not  a  complete list.  It includes only commonly seen error messages.

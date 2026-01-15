@@ -118,7 +118,7 @@ CRAY/CTSS).
 The number n2 is the number of characters in the NONMEM data
 records.
 
-*** IGNORE=c1 [fn:1]
+*** IGNORE=c1
       Specifies that any data record having the character c1 in  column
       1  should be ignored, i.e., these records are not included in the
       NONMEM data set.  This allows comment records to be  included  in
@@ -129,17 +129,15 @@ records.
       is omitted, records beginning with "#" is treated as a comment record.
 
       IGNORE=@  signifies  that  any  data  record having an alphabetic
-      character or @ as its first non-blank character (not just in col-
-      umn  1) should be ignored.  Alphabetic characters are the letters
+      character or @ as its first non-blank character (not just in column  1) should be ignored.  Alphabetic characters are the letters
       A-Z and a-z.  This permits a table file having header lines to be
       used as an NM-TRAN data set.
 
-*** IGNORE=(list)
+*** IGNORE | ACCEPT=(list)
       "List"  is  a  list of one or more data item labels, with logical
       operators   and    values,    of    the    form    "label=value",
       "label.EQ.value",       "label.NE.value",       "label.GT.value",
-      "label.GE.value", "label.LT.value", and "label.LE.value".   (For-
-      tran  90  logical operators such as '==' '/=' '<' '<=' '>' '>=' "
+      "label.GE.value", "label.LT.value", and "label.LE.value".   (Fortran  90  logical operators such as '==' '/=' '<' '<=' '>' '>=' "
       may  also  be  used.)   Thus,  the   following   are   identical:
       "label=value","label==value","label.EQ.value".   With NONMEM 7.3,
       "label.NEN.value" and "label.EQN.value" are permitted.  (There is
@@ -153,14 +151,12 @@ records.
       ".NE.", the value in the data record and the value  in  the  list
       are  compared as character strings. Otherwise, they are converted
       to numeric and compared numerically.   (This  is  the  case  with
-      .NEN.  and .EQN.)  This comparison is made prior to time transla-
-      tion. Hence, the TIME item cannot be compared numerically  if  it
+      .NEN.  and .EQN.)  This comparison is made prior to time translation. Hence, the TIME item cannot be compared numerically  if  it
       contains non-numeric characters such as ":".
 
       Note:  if  the  data  file is a table file from a previous NONMEM
       run, values that had been integers (0,1,..) in the original  data
-      file will be real values (0.0000E+00, 1.0000E+00, ...) in the ta-
-      ble file.  A comparison for equality or inequality should now  be
+      file will be real values (0.0000E+00, 1.0000E+00, ...) in the table file.  A comparison for equality or inequality should now  be
       for the real value. E.g.
       #+begin_src perl
       IGNORE=(OCC==1.0000E+00).
@@ -209,26 +205,20 @@ records.
       Records having GEN equal to 1 or AGE greater than 60 are dropped.
       All others are accepted.
 
-*** ACCEPT=(list)
-      The  ACCEPT  list  option is identical to the IGNORE list option,
-      except that it specifies conditions for  acceptance  of  records.
-      An ACCEPT list cannot be used together with an IGNORE list.  However, it may be used with IGNORE=c, where c is a character.
-      E.g.
-      #+begin_src f90
-        ACCEPT=(GEN.EQ.1,AGE.GT.60).
-      #+end_src
-      Records having GEN  equal  to  1  or  AGE  greater  than  60  are
-      accepted.  All others are dropped.
+Opposite to IGNORE, the ACCEPT option specifies conditions for
+acceptance of records. For example,
+#+begin_src f90
+  ACCEPT=(GEN.EQ.1,AGE.GT.60)
+#+end_src
+means records with GEN=1 /or/ AGE>60 are accepted, and all others are dropped. On the other hand
+#+begin_src f90
+  ACCEPT=(GEN.NE.0,AGE.LE.60)
+#+end_src
+means records with GEN
+means records with GEN=1 /and/ AGE>60 are accepted, and all others are dropped.
 
-      Suppose  it  is  desired that records be dropped that satisfy the
-      logical ".AND." of several conditions.  This can  be  implemented
-      by  using  an  ACCEPT  list with the negations of the conditions.
-      For example, suppose that records to be ignored are those  having
-      GEN=1 .AND. AGE > 60.  This may be done as follows:
-      #+begin_src f90
-      ACCEPT=(GEN.NE.1,AGE.LE.60)
-      #+end_src
-
+An ACCEPT list cannot be used together with an
+IGNORE list but may be used with the IGNORE=c option.
 *** PRED_IGNORE_DATA (NM75)
 :PROPERTIES:
 :CUSTOM_ID: pred_ignore_data_option
@@ -413,9 +403,7 @@ is used, the replicated form of the data will appear in FDATA.csv.
       defaults to 2.  The maximum value of D is 12.  The number of digits that may be requested in F is limited by the precision of the
       computer.
 
-      For example, either of the following can be used to request  val-
-      ues of TIME in FDATA that have 4 digits to the right of the deci-
-      mal point:
+      For example, either of the following can be used to request  values of TIME in FDATA that have 4 digits to the right of the decimal point:
       #+begin_src f90
       TIME/1.0000
       TIME/1/4
@@ -537,8 +525,7 @@ to subsequently create the unique DV patterns for each replicated
 subject.
 
 *** NOFDATACSV (NM760)
-      An  additional  file, FDATA.csv is produced that outputs the con-
-      tents of its input data file (typically FDATA) in a  comma  input
+      An  additional  file, FDATA.csv is produced that outputs the contents of its input data file (typically FDATA) in a  comma  input
       data.  The records in FDATA.csv may differ from those in FDATA in
       the following cases.  If REPL/REPL_ is used, the replicated  form
       of  the data will appear in FDATA.csv.  Also, records excluded by
@@ -562,11 +549,6 @@ subject.
  translation  of  TIME  or  II  values. These values must have the form
  hh:mm or hh:mm:ss (NM73).
 
-[fn:1] The two options, IGNORE  and  ACCEPT  allow  the user  to drop
-records from the NM-TRAN data set prior to the run. With NONMEM 7.5,
-it is also possible to  drop  records  from  the NONMEM  data  set
-using abbreviated code, which is more flexible than the criteria that
-can be specified in the $DATA record. See [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]].
 [fn:2] Note that the NONMEM data set is typically the file FDATA
 generated  by  NM-TRAN.  If there is nothing for NM-TRAN to change and
 the format is supplied on the $DATA record, the file named on the

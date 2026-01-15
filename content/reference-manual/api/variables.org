@@ -40,14 +40,39 @@ the value of COMACT may remain the same or increase.  The values used
 in tables and scatterplots  are  those copied from NMPRD4 with the
 last copying pass.
 
-  - COMACT=0: This is not a copying pass.
-  - COMACT=1:  This is a copying pass with final thetas and zero-valued etas.
-  - COMACT=2: This is a copying pass with  final  thetas  and  conditional estimates of etas.
-  - COMACT=3: This is a copying pass with conditional (nonparametric) estimates of etas.
+  - COMACT=0: not a copying pass.
+  - COMACT=1: a copying pass with final thetas and zero-valued etas.
+  - COMACT=2: a copying pass with  final  thetas  and  conditional estimates of etas.
+  - COMACT=3: a copying pass with conditional (nonparametric) estimates of etas.
 Such a pass takes place when the  control  stream  includes  this record:
 #+begin_src perl
   $NONPARAMETRIC ETAS
 #+end_src
+
+If a mixture model is used, with each value of [[file:/docs/reference-manual/api/variables/#mixnum-mixest-mixp][MIXNUM]] there are more
+than two sets of calls. With ETA=0, there is a set of calls for each
+distinct value of MIXNUM with COMACT=1. If conditional estimates are
+used, then with ETA’s set to these estimates, there is a set of calls
+for each distinct value of MIXNUM with COMACT=2. Note that
+nonparametric estimates cannot be obtained with a mixture model.
+
+[[file:/docs/reference-manual/api/variables/#pred-defined-variables][PRED-defined items]] are stored in variables defined in PRED (PK or
+ERROR if PREDPP is used). Normally, these items may change from call
+to call. Therefore if an item is computed at a call with a particular
+data record (of the individual record) when COMACT=1, it may no longer
+be available at another call with the same data record when COMACT=2,
+due to there being (in general) multiple calls to PRED (PK and ERROR)
+with different data records of the individual record. In order to
+access an item  across the PRED calls, we can put the item in the
+/save region/ of NONMEM MODULE NMPRD4. All items stored in this region
+at a call to PRED (PK or ERROR) with a particular data record when
+COMACT=1 are available at a call with the same data record when
+COMACT=2. In fact, with mixture models in mind, if at any call to PRED
+(PK or ERROR) with a particular data record (when COMACT=1 or 2 and
+MIXNUM has any value), an item is stored in a variable listed in the
+save region, then the item is available at any subsequent call with
+the same data record (when COMACT=1 or 2 and MIXNUM has any value).
+See COMSAV for more about save regions.
 
 ** COMRES, COMSAV
 :PROPERTIES:
@@ -96,8 +121,6 @@ COMSAV=n2 (in user written code):
 
  (See [[file:/docs/reference-manual/api/variables/#pred-defined-variables][PRED-Defined Variables]], [[file:/docs/reference-manual/abbr][abbreviated code]]).
 
-REFERENCES: Guide IV, section III.B.7 , IV.E.2
-
 ** CONTR: Y DATA NOBS
 #+begin_src f90
  USAGE:
@@ -110,8 +133,9 @@ REFERENCES: Guide IV, section III.B.7 , IV.E.2
       INTEGER(KIND=ISIZE) :: NOBSIND2
 #+end_src
 
-These  variables  change values with each individual record.  They may
-be used by a user-written CONTR subroutine.
+These variables define data items from the
+$INPUT record that are accessible to subroutine [[file:/docs/reference-manual/api/subroutines/#contr][CONTR]], [[file:/docs/reference-manual/api/subroutines/#ccontr][CCONTR]], and
+[[file:/docs/reference-manual/api/subroutines/#mix][MIX]] in the DATA array.
 
 -  Y(k)
       DV data item on the kth data record  of  the  individual  record,
@@ -124,10 +148,6 @@ be used by a user-written CONTR subroutine.
 
 -  NOBS
       Number of observations in the individual record.
-
-Data is used also in [[file:/docs/reference-manual/api/variables/#mix-data][MIX]].
-
-REFERENCES: Guide IV, section III.B.4
 
 ** CTLO CTUP probability: PR_CT
 :PROPERTIES:
@@ -246,6 +266,7 @@ PRINFN  is  a module for INFN-defined variables.  It contains an array
 At  ICALL=6,  (the  final  estimate of) the mixture probabilities
 associated with the individual  record  containing  the  template data
 record are stored in MIXPT.
+
 ** MIX CONTR: THETA
 :PROPERTIES:
 :CUSTOM_ID: contr-mix-theta
@@ -258,12 +279,13 @@ record are stored in MIXPT.
       USE SIZES, ONLY: LTH,DPSIZE
       REAL(KIND=DPSIZE) :: THETAC(LTH)
 #+end_src
-- THETA:
-      The current value of theta, made available by NONMEM for the MIX,
-      CONTR and CCONTR routines.  THETA is a reserved varible  in  $MIX
-      abbreviated code.
+- THETA: the current value of theta, made available by NONMEM for the
+  MIX, CONTR and CCONTR routines. THETA is a reserved varible in $MIX
+  abbreviated code.
 
- REFERENCES: Guide VI, section III.L.2 , Figure 6
+For an example, see the [[file:/docs/user-guide/predpp/population_model/#mixture][mixture model]]. In that model, the current value of THETA is
+loaded from module ROCM_REAL, and same for data items DATA if required.
+
 ** MIX: DATA
 :PROPERTIES:
 :CUSTOM_ID: mix-data
@@ -286,9 +308,7 @@ record are stored in MIXPT.
 DATA is also used in CONTR
 (See [[file:/docs/reference-manual/api/subroutines/#ccontr][CCONTR]])
 
-REFERENCES: Guide IV, section III.B.4
-
-** NINDR INDR1 INDR2
+** NINDR, INDR1, INDR2
 #+begin_src f90
  USAGE:
       USE ROCM_INT,  ONLY: NINDR=>NINDOBS,INDR1=>IDXOBSF,INDR2=>IDXOBSL
@@ -445,8 +465,6 @@ and in an $INFN block in conjunction with PASS.
 - NWIND
       The  NEWIND  value  at  ICALL 0, 1 and 3.  NWIND changes value in
       conjunction with calls to PASS.  (See [[file:/docs/reference-manual/api/subroutines/#pred][PRED]], [[file:/docs/reference-manual/api/variables/#newind][NEWIND]]).
-
- REFERENCES: Guide I, section C.3.5.2
 
 ** Parameter dimensions
 :PROPERTIES:
@@ -903,7 +921,7 @@ The NSIG and SIG values should only be used with ICALL = 3.
      PREDPP, not by generated FSUBS.
 
 - IFIRSTEM: with  NONMEM  7.2  and  higher, first-partial
-  eta-derivatives are computed by generated code in FSUBS for
+  ETA-derivatives are computed by generated code in FSUBS for
   classical NONMEM methods, but  not  for  IMP,  SAEM,  and BAYES
   methods.  This improves the speed at which the problem is evaluated.
   However,  on  occasion such  derivatives are needed, for example,
@@ -927,12 +945,7 @@ The NSIG and SIG values should only be used with ICALL = 3.
   the  first  test of FIRSTEM.  Thus, the local variable FIRSTEM is
   changed by the user, not the global variable IFIRSTEM.
 
-  In order to implement this feature, NM-TRAN rearranges the  order of
-  statements  in  FSUBS.  Statements that compute first-partial
-  eta-derivatives are collected together into blocks of  first  derivative  code  to  be  executed  only with FIRSTEM is 1.  Option
-  NOFASTDER of the [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]] record prevents NM-TRAN from  doing
-  this and restores the order of statements in FSUBS to what it was in
-  previous versions.
+  In order to implement this feature, NM-TRAN rearranges the order of statements in FSUBS. Statements that compute first-partial ETA-derivatives are collected together into blocks of first derivative code to be executed only with FIRSTEM is 1. Option NOFASTDER of the [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]] record prevents NM-TRAN from doing this and restores the order of statements in FSUBS to what it was in previous versions.
 
 REFERENCES: Guide VI, section III.E.4 , IV.B.2
 
@@ -944,18 +957,18 @@ Variables used with mixture models.
 
 USAGE:
 #+begin_src perl
-      IF (MIXNUM.EQ.1) THEN
-        ...
-      ENDIF
-      IF (MIXNUM.EQ.2) THEN
-        ...
-      ENDIF
-      IF (MIXNUM.EQ.3) THEN
-        ...
-      ENDIF
+  IF (MIXNUM.EQ.1) THEN
+    ...
+  ENDIF
+  IF (MIXNUM.EQ.2) THEN
+    ...
+  ENDIF
+  IF (MIXNUM.EQ.3) THEN
+    ...
+  ENDIF
 #+end_src
 With mixture models, MIXNUM, MIXEST and MIXP are global variables that
-may be used as right-hand quantities (or  in  logical  conditions)  in
+may be used as right-hand quantities (or in logical conditions)  in
 abbreviated code or user-supplied routines. In general: MIXNUM is an
 input to PRED (or PREDPP) set by NONMEM. MIXEST is an output (result)
 or consequence from the estimation set by NONMEM.
@@ -963,7 +976,7 @@ or consequence from the estimation set by NONMEM.
 - MIXNUM: the index of the subpopulation for which variables are  to
   be computed.
 
-  During  ICALL=4,  MIXNUM  is  the index of the sub-population that
+  During  ICALL=4, MIXNUM is the index of the sub-population that
   was randomly selected to simulate the subject's data.   When
   ICALL=3  and the PASS subroutine used, or when ICALL=5 or 6, MIXNUM
   is the index of the subpopulation estimated to be that  from  which
@@ -996,14 +1009,7 @@ or consequence from the estimation set by NONMEM.
 
  (See [[file:/docs/reference-manual/api/variables/#mixnum-mixest-mixp][MIXNUM,MIXEST,MIXP]])
 
- (See [[file:/docs/reference-manual/api/subroutines/#mix][MIX]], mixture model example).
-
- REFERENCES: Guide IV, section III.B.4 , III.B.6
-
- REFERENCES: Guide IV, section IV.E.1 , 4.E.2
-
- REFERENCES: Guide VI, section III.L.2 , Figure 6
-
+ (See [[file:/docs/reference-manual/api/subroutines/#mix][MIX]], [[file:/docs/user-guide/predpp/population_model/#mixture][mixture model example]]).
 
 ** Parameter values: initial and final
 :PROPERTIES:
@@ -1065,25 +1071,19 @@ or consequence from the estimation set by NONMEM.
       USE SIZES, ONLY: LTH,LVR,DPSIZE
       REAL(KIND=DPSIZES) :: SETH(LTH),SEOM(LVR,LVR),SESIG(LVR,LVR)
 #+end_src
-- SETHET
-      SETHET(i) = the standard error of THETA(i) estimate.
+- SETHET(i): the standard error of THETA(i) estimate.
 
-- SETHETR
-      SETHETR(i)  =  the  standard  error  of  the estimate of reported
+- SETHETR(i): the  standard  error  of  the estimate of reported
       theta(i).  If record $THETAR is not used, SETHET and SETHETR  are
       equal.   If  record  $THETAR is used, then SETHET is the standard
       error of the internal theta as used in $PK/$PRED, and SETHETR  is
       the standard error of the theta reported in the report file.
 
-- SEOMEG
-      SEOMEG(i,j) = the standard error of the estimate of omega(i,j).
+- SEOMEG(i, j): the standard error of the estimate of OMEGA(i,j).
 
-- SESIGM
-      SESIGM(i,j) = the standard error of the estimate of sigma(i,j).
+- SESIGM(i, j): the standard error of the estimate of SIGMA(i,j).
 
 These values should only be used with ICALL = 3.
-
- REFERENCES: Guide I, section C.3.5.2
 
 ** Prior simulation: ICMAX
 :PROPERTIES:
@@ -1158,7 +1158,7 @@ univariate, L2 data items need not appear, and when L2 data items do
 not  appear,  NONMEM assumes that each data record is a distinct L2
 record.)
 
-By  default,  the values of a given epsilon are statistically
+By default, the values of a given epsilon are statistically
 independent across  L2  observations  within  an  individual  record.
 Using CORRL2,  however, these values may be correlated.  More
 precisely, the values of the epsilons associated with the mth diagonal
@@ -1303,14 +1303,14 @@ called, NM-TRAN omits the usual default call to SIMEPS.
  ENDIF
 #+end_src
 
- RESTRICTIONS:
+RESTRICTIONS:
 
- With  versions  of  NONMEM  before  7.3,  C should be used rather than
- CORRL2.  Because C is not recognized by NM-TRAN, and because of  other
- restrictions  regarding  abbreviated  code,  a  specification of C, as
+With  versions  of  NONMEM  before  7.3,  ~C~ should be used rather than
+ ~CORRL2~.  Because ~C~ is not recognized by NM-TRAN, in addition to other
+ restrictions regarding  abbreviated  code,  a  specification of ~C~, as
  above, within a block of abbreviated code, must be done using verbatim
- code.  Since NM-TRAN generated code has a call to SIMEPS in its second
- section (see Guide IV), this means that correlations must be  computed
+ code. Since NM-TRAN generated code has a call to SIMEPS in its second
+ section, this means that correlations must be computed
  and  stored  using  verbatim code in the "FIRST block. (Details can be
  supplied on request.)
 
@@ -1323,7 +1323,6 @@ called, NM-TRAN omits the usual default call to SIMEPS.
  to be 0.
 
  (See [[file:/docs/reference-manual/api/variables/#simeps-error][Simulation:_SIMEPS_Error_Code]]).
-
 
 ** PRED EXIT code
 :PROPERTIES:
@@ -1371,18 +1370,10 @@ With versions of NONMEM starting with 7.4.2:
 - With  NONMEM 7.5 and later, values of k between 1000 and 9999 are
   permitted.  E.g., "EXIT 1 2000" is stored in IERPRDU as 12000.
 
-- PREDPP will not set these values; only the EXIT statement in
+- PREDPP will not set these values; only the [[file:/docs/reference-manual/abbr/#exit][EXIT statement]] in
   abbreviated  code can do this.  IERPRDU is ignored if it is not the
   Simuation Step.  For NONMEM 7.5 use of the error code during
-  simulation, (See [[file:/docs/user-guide/advanced/abbr_block/#simulation-block][Simulation Block]]) and look for "Simulation Error Forgiveness".
-
-REFERENCES: Guide V, section 12.4.15
-
-REFERENCES: Guide VI, section III.K.2 , IV.F
-
-REFERENCES: Guide IV, section IV.G
-
-REFERENCES: Guide Introduction_7
+  simulation, see [[file:/docs/user-guide/advanced/abbr_block/#simulation-block][Simulation Block]] and [[file:/docs/reference-manual/control-records/pred/#error][$PRED error recovery]].
 
 ** NPD,NPDE,NPDE_MODE,DV_LOQ,CDF_L,DV_LAQ_CDF_LA
 #+begin_src f90
@@ -1435,15 +1426,144 @@ REFERENCES: Guide Introduction_7
   F_FLAG=1, and Y must be defined as the integral of the normal
   density from  -inf to LOQ.
 
-- New in nm74, for use with NPD, the user may supply the cumulative
-  distribution function using the reserved variable CDF_L; New in
-  nm743, you can specify an above  quantifiable  limit  with  the
-  reserved  parameter DV_LAQ as well.  The CDF reserved variable
-  associated with above quantitation level DV_LAQ is CDF_LA. The
-  DV_LOQ/CDF_L and DV_LAQ/CDF_LA reserved variables may be also used
-  for evaluating NPD diagnostics for categorical data.
+- New in NM743, you can specify an above-quantifiable limit  with  the
+  reserved  parameter DV_LAQ as well. For example,
+  (..\examples\loq\ad3tr4a_loq0):
+  #+begin_src perl
+    $ERROR
+    SD = THETA(5)
 
-REFERENCES: Guide Introduction_7
+    IPRED = LOG(F)
+    DUM = (LOQ - IPRED) / SD ; LOQ=lower level of quantifiable level
+    CUMD = PHI(DUM)+1.0E-10
+    DUMA = (LAQ - IPRED) / SD ; LAQ=Upper (above) quantifiable level
+    CUMDA = PHI(DUMA)-1.0E-10
+    IF(TYPE.EQ.2) DV_LOQ=LOQ ; Type=2 is concentration below LOQ
+    IF(TYPE.EQ.3) DV_LAQ=LAQ ; Type=3 is concentration above LAQ
+    IF (TYPE .EQ. 1.OR.NPDE_MODE==1) THEN
+          F_FLAG = 0
+          Y = IPRED + SD * ERR(1)
+    ENDIF
+    IF (TYPE .EQ. 2.AND.NPDE_MODE==0) THEN
+          F_FLAG = 1
+          Y = CUMD
+          MDVRES=1
+    ENDIF
+    IF (TYPE .EQ. 3.AND.NPDE_MODE==0) THEN
+          F_FLAG = 1
+          Y = (1.0-CUMDA)
+          MDVRES=1
+    ENDIF
+  #+end_src
+  New in nm74, for use with NPD, the user may supply the cumulative
+  distribution function using the reserved variable CDF_L: For
+  example, in a general likelihood modeled problem, essentially the
+  previous example, but the Y values of all data are returned in their
+  -2LL form (..\examples\loq\ad3tr4_loq6):
+  #+begin_src perl
+    $ERROR
+    SD = THETA(5)
+    IPRED = LOG(F)
+    DUM2 = (DV - IPRED) / SD
+    DUM = (LOQ - IPRED) / SD
+    CUMD = PHI(DUM)+1.0E-30
+    CUMD2 = PHI(DUM2)+1.0E-30
+    IF(TYPE.EQ.1) THEN
+    Y=2.0*LOG(SD)+DUM2*DUM2
+    CDF_L=CUMD2
+    ENDIF
+    IF(TYPE.EQ.2) THEN
+    Y = -2.0*LOG(CUMD)
+    CDF_L=CUMD
+    DV_LOQ=LOQ
+    ENDIF
+    …
+    $EST METHOD=COND LAPLACE -2LL MAXEVAL=9999 NSIG=3 SIGL=9 SIGLO=9 PRINT=5 NOABORT MCETA=5
+    $TABLE ID TIME DV IPRED NPD NOAPPEND ONEHEADER ESAMPLE=1000
+     FILE=ad3tr4_loq6.TAB NOPRINT
+  #+end_src
+  Note that only NPD can be evaluated without consideration of EWRES
+  and EPRED constructs.  NPDE, EWRES and EPRED cannot be evaluated for
+  general non-normal likelihood data, or when normal data are modeled
+  in a general log-likelihood manner, rather than assumed normal in
+  the usual way. The CDF reserved variable associated with above
+  quantitation level DV_LAQ is CDF_LA.
+
+  The DV_LOQ/CDF_L and DV_LAQ/CDF_LA reserved variables may be also
+  used for evaluating NPD diagnostics for categorical data.  In such
+  cases, the DV_LAQ/CDF_LA variables must define the lower bound of a
+  categorical level, while the DV_LOQ/CDF_L defines the upper boundary
+  of a level, which is counter-intuitive, and its use is demonstrated
+  as follows.  In the following example, some data are normally
+  distributed, and others are binomial (categorical).  The NPDE will
+  be evaluated only for those that are normal, while NPD are evaluated
+  for both types of data.  The CDF_L indicates to the diagnostics
+  routine that this datum is to be treated as non-normal, with a
+  cumulative distribution value of CDF_L, which it can use for
+  evaluating the NPD.  Because the probability is categorical, the
+  lower bound CDF_LA needs also to be given, to map the probability of
+  having data value DV (=0 or 1) be between CDF_LA and CDF_L for a
+  random uniform variable (..\examples\loq\example10lcdf).
+  #+begin_src perl
+    $ERROR
+    EXCL2=1.0-TYPE
+    EXCL=TYPE
+    EXCL3=0.0
+    IF(EVID/=0) EXCL=1.0
+    IF(EVID/=0) EXCL2=1.0
+    IF(EVID/=0) EXCL3=1.0
+        EXPP=THETA(4)+F*THETA(5)
+    IPRED=F
+    ; Use protected exponent PEXP, to avoid numerical overflow
+    A=PEXP(EXPP)
+    B=1.0+A
+    IF (TYPE.EQ.0.OR.NPDE_MODE==1) THEN
+    ; PK Data
+        F_FLAG=0
+        Y=F+F*ERR(1) ; a prediction
+     ELSE
+    ; Categorical data
+        F_FLAG=1
+        Y=DV*A/B+(1.0-DV)/B      ; a likelihood
+        MDVRES=1
+     ENDIF
+    IF(TYPE==1)  THEN
+    CDF_L=(1.0-DV)*1.0/B + DV
+    CDF_LA=DV*1.0/B
+    DV_LOQ=DV
+    DV_LAQ=DV-1.0
+    ENDIF
+  #+end_src
+  For DV=0 the lower bound of its value is DV_LAQ=-1 with a cumulative
+  probability of CDF_LA=0 (that is, it is impossible for DV to have a
+  value of -1), and upper bound  DV_LOQ=0 has probability of CDF_L of
+  1/B (that is, the probability of it being 0 is 1/B, which is
+  consistent with how the likelihood Y is defined).  When DV=1, then
+  range of its value is from lower bound DV_LAQ=0 with cumulative
+  probability CDF_LA=1/B (which is consistent with the upper bound
+  interpretation for DV=0), to upper bound DV_LOQ=1 with cumulative
+  probability CDF_L= of 1 (consistent with the idea that the highest
+  DV can be is 1).
+
+  In summary, we have the following:
+  | DV | Lowe bound (DV_LAQ) | Upper bound (DV_LOQ) | Lower cumulative (CDF_LA) | Upper cumulative (CDF_LOQ) |
+  |----+---------------------+----------------------+---------------------------+----------------------------|
+  |  0 |                  -1 |                    0 | 0                         | 1/B                        |
+  |  1 |                   0 |                    1 | 1/B                       | 1                          |
+  The rationale is to direct the NPD algorithm to create random
+  positioned NPD values for any data that are below DV_LOQ, and or
+  above DV_LAQ.  For continuous data, values are accurately known as
+  the observed value DV between DV_LOQ and DV_LAQ, but are not known
+  below DV_LOQ, or above DV_LAQ, and so, the NPD should create a
+  scrambled DV value whenever it is below DV_LOQ and/or above DV_LAQ.
+  Categorical data have discrete values, so in order to turn them into
+  continuous, normally distributed equivalents for NPD, scrambled
+  values must be created, for values above DV_LAQ, and/or below
+  DV_LOQ, that is, for all legitimate discrete values.   Thus, when
+  DV_LOQ<DV_LAQ, the DV_LOQ and DV_LAQ serve as the boundaries for the
+  outer distribution region for scrambling, and when DV_LAQ<DV_LOQ,
+  the DV_LAQ and DV_LOQ serve as boundaries for the inner distribution
+  region for scrambling.
 
 ** ETASXI
 :PROPERTIES:
@@ -1488,8 +1608,6 @@ ETA(1) is excluded for subject 1, and ETA(3) included for subject 23.
 The additional output file root.shm ("shrinkage  map") contains
 information which ETAs are excluded in the ETA shrinkage assessment.
 
-REFERENCES: Guide Introduction_7
-
 ** PRED error message
 :PROPERTIES:
 :CUSTOM_ID: pred-error
@@ -1508,11 +1626,6 @@ REFERENCES: Guide Introduction_7
   NETEXT. (See [[file:/docs/reference-manual/api/variables/#pred-exit][PRED Exit Code]])
 
 When  abbreviated  code is used, the EXIT statement causes appropriate text to be stored in ETEXT.
-
-
-REFERENCES: Guide VI, section III.K.2 , IV.F
-
-REFERENCES: Guide IV, section IV.G
 
 ** CTUP
 :PROPERTIES:
@@ -1921,11 +2034,9 @@ This is the case for PREDPP.
   problem to  problem. For a problem with population data I_REC is
   always reset to 0.
 
-
 - When I_REC=1 while PRED does not use repetition, the  SPECIAL option  needs
   not  appear on the $COVARIANCE record, as the special computation is
   automatically applied.
-
 
 - PREDPP sets I_REC to 1 at ICALL=1.
 
@@ -2012,11 +2123,7 @@ Now the code can be written as
  X=CL/V
 #+end_src
 
-REFERENCES: Guide III, section V.3.3
-
-REFERENCES: Guide IV, section  III.B.7  ,  III.B.16  , III.B.17 , IV.H , V.C.5-9
-
-REFERENCES: Guide VI, section III.J , III.L.2 , IV.E , IV.G.4  Figures 5, 14
+See also: Guide IV, $ABBREVIATED, $TABLE, $SCATTERPLOT, and [[file:/docs/reference-manual/abbr/#abbreviated-code][abbreviated code]].
 
 ** Simulation: ETA, EPS
 #+begin_src f90
@@ -2094,7 +2201,7 @@ different set of observations.
 
 Values must be stored before PRED calls SIMETA (SIMEPS).  NM-TRAN
 generated or Library code has a call to SIMETA  (SIMEPS)  in  its
-second section  (see  Guide IV).  If this call is to be affected,
+second section.  If this call is to be affected,
 values must be stored using verbatim code in the FIRST block.
 ** MDVRES
 #+begin_src f90
@@ -2107,7 +2214,17 @@ values must be stored using verbatim code in the FIRST block.
 MDVRES stands for missing dependent variable (MDV) for residual (RES).
 Setting MDVRES=1 temporarily declares an observation  as  missing
 during  the  computation  of residuals and weighted residuals.
-MDVRES=0 by default.
+MDVRES=0 by default. Set MDVRES to 1 in the $ERROR or $PRED routine if
+you do not want to include a particular value for weighted residual
+assessment.  This may be useful when, for example, this data point is
+assessed by a non-normal distribution likelihood such as the PHI()
+function for below detection limit values, in which F_FLAG is set.  By
+default, if at least one data value of a given subject is fitted with
+a non-normal distribution likelihood, then population weighted
+residual diagnostics are not assessed for any of the data for that
+subject.  By setting MDVRES=1 to these particular below detection
+values, the weighted residual algorithm can assess the remaining
+normally distributed values for that subject.
 
 - MDVRES can be set in $ERROR or $PRED.
 
@@ -2143,61 +2260,381 @@ MDVRES=0 by default.
   ENDIF
   #+end_src
 
-REFERENCES: Guide Introduction_7
-
-
 ** MTIME
 :PROPERTIES:
 :CUSTOM_ID: mtime
 :END:
-Model event times are additional PK parameters defined in the PK
-routine or $PK block, related to the model event time feature of PREDPP.  A model event time is not associated with any
-compartment, but, like an absorption lag time, defines a  time  to
-which the system is advanced.  When the time is reached, indicator
-variables are set and a call to PK is made.  At this call (and/or
-subsequent  to this  call)  PK or DES or AES or ERROR can use the
-indicator variables to change some aspect of the system, e.g., a term
-in  a  differential equation,  or  the rate of an infusion.  This
-feature may be used with any ADVAN routine.  Model times  are
-independent  of  non-event  dose times.   The following are reserved
-variables when used in abbreviated code.
-
-
-MTIME(i) is the i-th model event time.  The maximum  number  of  model  event
-times is given by constant PCT in file SIZES (See [[file:/docs/reference-manual/api/memory/][SIZES]]).
-
-MTIME(i)  may be less than, equal to, or greater than MTIME(i+1). Any
-MTIME(i) may be negative or have the value 0 (in  which  case
-MPAST(i)=1  always  and  MNEXT(i)=0  always;  see  below).  If PK
-defines MTIME(i) and MTIME(i+2) but not MTIME(i+1), then this has the
-same  effect  as  defining  MTIME(i+1)=0.   PK  may redefine MTIME(i).
-An ETA may be used in the definition of MTIME(i).
-
-Example:
-#+begin_src perl
-  MTIME(1)=THETA(1)
-#+end_src
-
-- Fortran usage and definition
-  #+begin_src f90
+#+begin_src f90
   ! USAGE:
   USE PKERR_REAL, ONLY :: MTIME
 
   ! GLOBAL DECLARATION:
   USE SIZES, ONLY: PCT,DPSIZE
   REAL(KIND=DPSIZE) :: MTIME(PCT)
+
+  ! in the generated PK routine from FSUBS:
+  USE PKERR_REAL,ONLY: MTIME
+#+end_src
+Model event times are additional PK parameters defined in the PK
+routine or $PK block. A model event time is not associated with any
+compartment, but, like an absorption lag time, defines a time to which
+the system is advanced. When the time is reached, certain new
+indicator variables are set and a call to PK is made. At this call
+(and/or subsequent to this call) PK or DES or AES or ERROR can use the
+indicator variables to change some aspect of the system, e.g., a term
+in a differential equation, or the rate of an infusion. This feature
+may be used with any ADVAN routine and does not require that extra
+compartments be added to the model or that dummy doses be included in
+the data set. There may be up to PCT model event times, where PCT is
+defined in PSIZES and TSIZES. Its current value is 30.
+
+PK routine contains code to copy MTIME parameters and their eta derivatives to GG. If there are gaps in the
+sequence of MTIME parameters, the corresponding positions in GG are left as-is. Since GG is initialized
+to 0 before calls to PK, the effective value of omitted MTIME parameters is 0.
+The MTIME array is never listed in NMPRD4. Therefore, if an MTIME parameter is to be displayed in
+a table or scatter it must be copied to a PK-defined variable in NMPRD4, e.g.,
+#+begin_src f90
+  MTIME(1)=...
+  MT1=MTIME(1)
+  ...
+  $TABLE MT1
+#+end_src
+Another reason for defining MTIME in a MODULE is to make it available
+to the ERROR routine via the same USE statement. All other basic and
+additional parameters are available to ERROR only if listed in NMPRD4.
+If MTIME is defined in ERROR, then the values of the MTIME parameters
+are available as well. However, eta derivatives are not included in
+MTIME, only in GG. (This is done to save space and compute time.)
+Hence the ERROR routine should not use MTIME parameters in such a way
+as to influence the value of Y if those parameters have eta
+derivatives. NM-TRAN gives an appropriate warning if an MTIME variable
+is used in the $ERROR block. Values of MTIME may be used in DES and
+AES, where they are obtained from the subroutine argument P (which is
+really GG) and may have eta derivatives
+
+Model times are independent of non-event dose times. See below (Rules
+for coincidence of times) when model times happen to coincide with
+other times.
+
+In abbreviated code, the model event times have reserved names
+MTIME(i), where i is an integer from 1 to PCT.
+
+The indicator variables currently implemented have reserved names
+MNEXT(i) and MPAST(i), each corresponding to the MTIME(i) variable
+with the same index i. An indicator variable may be used in the PK,
+ERROR, DES, or AES routine (as a right-hand quantity in abbreviated
+codes). An indicator variable may not be used on the right (other than
+in a write/ print statement) unless the corresponding MTIME has
+already been defined. It is not required that one or more indicator
+variables be used.
+
+There is no requirement that the MTIME(i) be in ascending order. That
+is, MTIME(i) may be less than, equal to, or greater than MTIME(i+1).
+Any MTIME(i) may be negative or have the value 0, in which case
+MPAST(i)=1 always and MNEXT(i)=0 always.
+
+There may be gaps in the sequence of any length. E.g., PK may define MTIME(i) and MTIME(i+2) but
+not MTIME(i+1). This has the same effect as including the code MTIME(i+1)=0.
+
+PK may redefine MTIME(i). See "Example 3" below.
+
+An ETA may be used in the definition of MTIME(i).
+
+PREDPP sets all indicator variables to 0 at start of an IR and at RESET events.
+
+MNEXT(i)=1 when PREDPP calls PK prior to the advance to MTIME(i), and
+remains 1 during the advance from the previous time to MTIME(i).
+Otherwise, MNEXT(i)=0. (The previous time may be an event time,
+non-event time, or model event time).
+
+MPAST(i)=0 until the call to PK subsequent to the one for which
+MNEXT(i)=1. At that call MPAST(i)=1. It then retains this value,
+unless MTIME is redefined, in which case MPAST will be appropriately
+redefined as another step function.
+
+Another related variable is MNOW. MNOW=i if this is a call to PK such
+that MNEXT(i)=1 for some i. MNOW=0 otherwise.
+
+Model event time MTIME is not a dose-related feature and has no effect on steady-state doses. See Note
+3 of chapter V.
+
+For example, assume MTIME(1)<MTIME(2)<MTIME(3), then the relevant
+values assume the following sequence.
+#+begin_src
+         MTIME(1)       MTIME(2)       MTIME(3)
+............|..............|..............|..................
+011111111111100000000000000000000000000000000000000 MNEXT(1)
+000000000000011111111111111100000000000000000000000 MNEXT(2)
+000000000000000000000000000011111111111111100000000 MNEXT(3)
+000000000000011111111111111111111111111111111111111 MPAST(1)
+000000000000000000000000000011111111111111111111111 MPAST(2)
+000000000000000000000000000000000000000000011111111 MPAST(3)
+#+end_src
+Event times (both dose and non-dose) can occur anywhere above. See
+below the rules for coincidence of times. If model event times depend on
+ETAS, so do the values of indicator variables. However, the effect of
+the model event times or of the indicator variables on the
+eta-derivatives of the state vector is handled by PREDPP in such a way
+that the indicator variables are /not/ random variables, and their
+ETA-derivatives are always 0.
+
+For another example,  assume an infusion with rate
+  - ~400*EXP(ETA(1))~ from time 0 to 1.5;
+  - ~300*EXP(ETA(2))~ from time 1.5 to 2.5;
+  - ~200*EXP(ETA(3))~ from time 2.5 till end of infusion.
+One can write $PK as
+#+begin_src perl
+MTIME(1)=1.5
+MTIME(2)=2.5
+R1= 400*EXP(ETA(1))*(1-MPAST(1))
+R1=R1+300*EXP(ETA(2))*(MPAST(1)-MPAST(2))
+R1=R1+200*EXP(ETA(3))*MPAST(2)
+WRITE (82,*) TIME,MNOW,MNEXT(1),MNEXT(2),MPAST(1),MPAST(2),R1,TSTATE
+#+end_src
+with events at time 0, 1, 3. Then the MTIME output (file fort.82) is
+#+begin_src r
+TIME    MNOW    MNEXT1  MNEXT2  MPAST1  MPAST2  R1        TSTATE
+0.00    0.00    0.00    0.00    0.00    0.00    400.00    0.00
+1.00    0.00    0.00    0.00    0.00    0.00    400.00    0.00
+3.00    1.00    1.00    0.00    0.00    0.00    400.00    1.00
+3.00    2.00    0.00    1.00    1.00    0.00    300.00    1.50
+3.00    0.00    0.00    0.00    1.00    1.00    200.00    2.50
+#+end_src
+
+For another example, consider an Enterohepatic Recycling (EHC) model,
+with drug transfer from compartment 4 to 1 controlled by "FLAG":
+#+begin_src f90
+  DADT(1)=-KA*A(1)+K41*A(4)*FLAG
+  DADT(4)=K1G*A(2)-K41*A(4)*FLAG
+#+end_src
+The approaches below are equivalent.
+  - No use of model event times but define two dummy compartments (5
+    and 6) and dummy doses with lag times
+    #+begin_src r
+      CID    DOSE  TIME DV   EVID CMT
+      101    10    0    0    1    2
+      101    1     0    0    1    5
+      101    1     0    0    1    6
+      101    0     2.0  0    0    2
+    #+end_src
+    and define FLAG in $DES:
+    #+begin_src perl
+      $PK
+      ;#...
+      ALAG5=THETA(8)*EXP(ETA(8))
+      DELTA=THETA(9)*EXP(ETA(9))
+      ALAG6=ALAG5+DELTA
+      ;#...
+      $DES
+      FLAG=0.0
+      IF (T.GE.ALAG5) FLAG=1
+      IF (T.GE.ALAG5.AND.DOSTIM.EQ.ALAG5) FLAG=0
+      IF (T.GE.ALAG5.AND.DOSTIM.EQ.0.AND.TIME.EQ.ALAG5) FLAG=0
+      IF (T.GE.ALAG6) FLAG=0
+      IF (T.GE.ALAG6.AND.DOSTIM.EQ.ALAG6) FLAG=1
+      IF (T.GE.ALAG6.AND.DOSTIM.EQ.0.AND.TIME.EQ.ALAG6) FLAG=1
+    #+end_src
+  - Using the same data setup as the above, but instead define FLAG in $PK:
+    #+begin_src perl
+      $PK
+      ;#...
+      ALAG5=THETA(8)*EXP(ETA(8))
+      DELTA=THETA(9)*EXP(ETA(9))
+      ALAG6=ALAG5+DELTA
+
+      IF (NEWIND.LT.2) THEN
+      FLAG=0.0
+      OLDTIM=0
+      ENDIF
+      IF (OLDTIM.EQ.ALAG5) FLAG=1
+      IF (OLDTIM.EQ.ALAG6) FLAG=0
+      OLDTIM=DOSTIM
+    #+end_src
+  - Use model event times, no dummy compartments or doses,
+    #+begin_src r
+      CID    DOSE  TIME DV   EVID CMT
+      101    10    0    0    1    2
+      101    0     2.0  0    0    2
+    #+end_src
+    and define MTIMES and FLAG in $PK
+    #+begin_src perl
+      $PK
+      MTIME(1)=THETA(8)*EXP(ETA(8))
+      DELTA=THETA(9)*EXP(ETA(9))
+      MTIME(2)=MTIME(1)+DELTA
+      FLAG=MPAST(1)-MPAST(2)
+    #+end_src
+    Note that here FLAG is considered by NMTRAN to be an implicit
+    basic PK parameter hence its ETA derivatives (always 0) are
+    included in the calculations.
+
+  - Use same model event times as above, and define FLAG in $DES:
+    #+begin_src perl
+      $PK
+      MTIME(1)=THETA(8)*EXP(ETA(8))
+      DELTA=THETA(9)*EXP(ETA(9))
+      MTIME(2)=MTIME(1)+DELTA
+      $DES
+      FLAG=MPAST(1)-MPAST(2)
+    #+end_src
+    Unlike the previous approach here FLAG is known not to
+    have derivatives because it is DES-defined.
+
+For an example of modifying MTIME, consider
+events at times 0 and 10 but one wants to advance
+in increments of 1 with stops at times 1, 2, 3, .... , 9, 10.
+Intead of writing
+#+begin_src f90
+  IF (TIME.EQ.0) THEN
+    MTIME(1)=0
+  ELSE
+    MTIME(1)=MTIME(1)+1
+  ENDIF
+#+end_src
+one should use
+#+begin_src f90
+    IF (TIME.EQ.0) THEN
+       TEMP=0
+    ELSE
+       TEMP=TEMP+1
+    ENDIF
+    MTIME(1)=TEMP
+#+end_src
+This is because if a basic or additional PK parameters is set
+conditionally in the $PK block, NM-TRAN inserts statements setting it
+to 0 so that, if it is not set by the $PK block, its value is 0. In
+the code that does not work, MTIME(1) does not retain its value from
+one call to the next. In the code that does work, TEMP (being a
+PK-defined item that does not depend on etas) does retain its value.
+
+The above examples can be found in Guide VIII. "Using MTIME to Model Periodic Discontinuities in
+$DES" Contains important examples of modelling circadian rhythm. In
+Guide VIII and in on-line help entry for examples. This help entry
+also describes the following control streams. Indirect response model
+idr_circexa.ctl in the NONMEM examples directory. Step Function model
+step_circexa.ctl in the NONMEM examples directory. See ehc.exa
+(Enterhepatic circulation example). This gives a fully worked-out
+example for EHC. It cannot be used with Steady-State doses. This
+example also gives an alternative model, a smooth step model using
+Hill terms in a sigmoid emax model. This may be used with Steady-State
+doses.
+
+When MTIME values contains coincidence of times, the following rules apply.
+- MTIME(i)=MTIME(j), i < j. There will be two calls to PK:
+  #+begin_src r
+    call     MNEXT(i) MNEXT(j) MPAST(i) MPAST(j) MNOW
+    1        1        0        0        0        1
+    2        0        1        1        0        2
   #+end_src
-
-  Model time parameters MTIME are stored in MTIME if they are defined in
- $PK abbreviated code or if verbatim code  is  present  in  $PK.   This
- makes  them  also  available to the ERROR routine.  However, their eta
- derivatives (if any) are not included.  Hence the ERROR routine should
- not  use model time parameters in such a way as to influence the value
- of Y if those parameters have eta derivatives.
-
-  A user-written PK routine need not define these variables unless  perhaps the model time parameter values are used in the ERROR routine.
-
- (See model time examples).
+- MTIME(i)=AFLAGj. MNEXT(i) and DOSTIM are set on separate calls to
+  PK. First, MNEXT(i). Then, DOSTIM. For example
+  #+begin_src perl
+    $PK
+    ;# ...
+    ALAG1=.5
+    MTIME(1)=ALAG1
+    WRITE (82,*) TIME,MNOW,MNEXT(1),MPAST(1),DOSTIM,TSTATE
+  #+end_src
+  Events at times 0, 1, 3. Values in fort.82 are
+  #+begin_src r
+    TIME      MNOW      MNEXT     MPAST     DOSTIM    TSTATE
+    0.00      0.00      0.00      0.00      0.00      0
+    1.00      1.00      1.00      0.00      0.00      0
+    1.00      0.00      0.00      1.00      0.50      .5
+    1.00      0.00      0.00      1.00      0.00      .5
+    3.00      0.00      0.00      1.00      0.00      1.0
+  #+end_src
+- MTIME(i)=event time. There will be two calls: first MTIME(i),
+  followed by event time. For example,
+  #+begin_src perl
+    $PK
+    ;# ...
+    MTIME(1)=1
+    WRITE (82,*) TIME,MNOW,MNEXT(1),MPAST(1),TSTATE
+  #+end_src
+  Events at times 0, 1, 3. Values in fort.82 are
+  #+begin_src r
+    TIME      MNOW      MNEXT     MPAST     TSTATE
+    0.00      0.00      0.00      0.00      0
+    1.00      1.00      1.00      0.00      0
+    1.00      0.00      0.00      1.00      1
+    3.00      0.00      0.00      1.00      1
+  #+end_src
+  With the above output in mind, consider ALAGj=event time. In this
+  case there will be two calls: first, at ALAG1, followed by at the
+  event time. For example,
+  #+begin_src perl
+    $PK
+    ;#
+    ALAG1=1
+    WRITE (72,*) TIME,DOSTIM,TSTATE
+  #+end_src
+  Events at times 0, 1, 3. Values in fort.72 are
+  #+begin_src perl
+    TIME      DOSTIM    TSTATE
+    0.00      0.00      0
+    1.00      1.00      0
+    1.00      0.00      1
+    3.00      0.00      1
+  #+end_src
+- MTIME(i)=additional dose time
+  MNEXT(i) and DOSTIM are set on separate calls to PK: first, MNEXT(i)
+  is set, folowed by DOSTIM. For example,
+  #+begin_src perl
+    $PK
+    ;#...
+    MTIME(1)=.5
+    WRITE (82,*) TIME,MNOW,MNEXT(1),MPAST(1),DOSTIM,TSTATE
+  #+end_src
+  Events at times 0, 1, 3. Dose at time 0 specifies ADDL=1, II=.5.
+  Values in fort.82 are
+  #+begin_src r
+    TIME      MNOW      MNEXT     MPAST     DOSTIM    TSTATE
+    0.00      0.00      0.00      0.00      0.00      0.00
+    1.00      1.00      1.00      0.00      0.00      0.00
+    1.00      0.00      0.00      1.00      0.50      0.50
+    1.00      0.00      0.00      1.00      0.00      0.50
+    3.00      0.00      0.00      1.00      0.00      1.00
+  #+end_src
+- MTIME(i)=additional dose time = event time. There will be three
+  calls to PK: MNEXT(i) and DOSTIM are set on separate calls to PK.
+  First, MNEXT(i). Then, DOSTIM. Finally, a call at event time. For example,
+  #+begin_src perl
+    $PK
+    ;#...
+    MTIME(1)=1
+    WRITE (82,*) TIME,MNOW,MNEXT(1),MPAST(1),DOSTIM,TSTATE
+  #+end_src
+  Events at times 0, 1, 3. Dose at time 0 specifies ADDL=1, II=1. Values in fort.82 are
+  #+begin_src r
+    TIME      MNOW      MNEXT     MPAST     DOSTIM    TSTATE
+    0.00      0.00      0.00      0.00      0.00      0.00
+    1.00      1.00      1.00      0.00      0.00      0.00
+    1.00      0.00      0.00      1.00      1.00      1.00
+    1.00      0.00      0.00      1.00      0.00      1.00
+    3.00      0.00      0.00      1.00      0.00      1.00
+  #+end_src
+  Now compare the above situation with MTIME(i)= lagged dose time =
+  event time. There will be three calls to PK: MNEXT(i) and DOSTIM are
+  set on separate calls to PK. First, MNEXT(i). Then, DOSTIM. Finally,
+  a call at event time. For example,
+  #+begin_src perl
+    $PK
+    ;#...
+    MTIME(1)=1
+    ALAG1=1
+    WRITE (82,*) TIME,MNOW,MNEXT(1),MPAST(1),DOSTIM,TSTATE
+  #+end_src
+  Events at times 0, 1, 3. Dose at time 0 specifies ADDL=1, II=1. Values in fort.82 are
+  #+begin_src r
+    TIME      MNOW      MNEXT     MPAST     DOSTIM    TSTATE
+    0.00      0.00      0.00      0.00      0.00      0.00
+    1.00      1.00      1.00      0.00      0.00      0.00
+    1.00      0.00      0.00      1.00      1.00      1.00
+    1.00      0.00      0.00      1.00      0.00      1.00
+    3.00      0.00      0.00      1.00      2.00      1.00
+    3.00      0.00      0.00      1.00      0.00      2.00
+  #+end_src
 
 ** MTDIFF
 The value of MTDIFF is 0 when PK is called.  If PK sets MTDIFF to
@@ -2262,7 +2699,7 @@ Read-only indicator variables, not to be set by PK.
 
  (See Circadian Example: Examples Using MTIME to Model Periodic Discontinuities in $DES)
 
- REFERENCES: Guide VI, section III.F.9
+ (See MTIME for details).
 
 * PREDPP variables
 PREDPP modules contain values that are (for the most part)
@@ -2349,8 +2786,7 @@ These modules contain values that are communicated from subroutines to PREDPP.
 
 Each has its own entry in the Help document.
 
-REFERENCES: Guide VI, section III.I , IV.D , Figure 14
-
+For an example, see Guide VI, Figure 14.
 
 ** Active ETAs: NACTIV
 #+begin_src f90
@@ -2623,6 +3059,9 @@ ADVAN17, ADVAN18, SS6, and SS9.
    Again, this message cannot occur unless the source code of PREDPP is changed incorrectly.
 
 ** Event record: EVTREC
+:PROPERTIES:
+:CUSTOM_ID: evtrec
+:END:
 #+begin_src f90
  USAGE:
       USE PROCM_REAL, ONLY: EVTREC
@@ -2635,11 +3074,14 @@ ADVAN17, ADVAN18, SS6, and SS9.
 #+end_src
 For user-supplied DES and AES routines.
 
-- EVTREC: same as EVTREC passed by PREDPP to PK and ERROR routine
+Passed by PREDPP to PK and ERROR routines,
+EVTREC(I,J) is the Jth data item of the Ith data
+record of the event record.
+
+- EVTREC: same as EVTREC;
 
 - NVNT: same as NVNT passed by PREDPP to PK  and  ERROR routines.
 
-REFERENCES: Guide VI, section III.C
 ** Dose time non-event: DOSTIM
 :PROPERTIES:
 :CUSTOM_ID: dostim
@@ -2670,7 +3112,6 @@ When DOSTIM>0, TIME and all user (concomitant) data  items  in  EVTREC
 are from the next event record.  All other NONMEM/PREDPP reserved data
 items are from the initiating dose event record.   (The  [[file:/docs/reference-manual/control-records/bind/][$BIND]]  record may be used to override this)
 
-REFERENCES: Guide VI, section III.I
 ** Dose record: DOSREC
 :PROPERTIES:
 :CUSTOM_ID: dose-record-dosrec
@@ -2693,7 +3134,6 @@ For user-supplied PK, DES, AES routines.
 
 (See [[file:/docs/reference-manual/api/variables/#dostim][Dose Time Non-Event: DOSTIM]]).
 
-REFERENCES: Guide VI, section III.I
 ** New individual indicator: NEWIND
 :PROPERTIES:
 :CUSTOM_ID: newind
@@ -2708,8 +3148,6 @@ REFERENCES: Guide VI, section III.I
 For user-supplied PK and ERROR routines.
 NEWIND  is  of interest only when ICALL=2, 4, 5, or 6.  It is the same
 as the NEWIND argument passed by NONMEM to PREDPP.
-
-REFERENCES: Guide VI, section III.I
 
 ** Write formats
 #+begin_src f90
@@ -2778,7 +3216,7 @@ time  - the  latest  time  at which the amounts are computed - is
 given in the variable TSTATE, which may also be used in $PK
 abbreviated code.
 
- REFERENCES: Guide VI, section IV.D , Figure 14
+For an example, see Guide VI, Figure 14.
 
 ** DES AES: ISFINL
 #+begin_src f90
@@ -2949,6 +3387,9 @@ value.   For example,
 #+end_src
 
 ** MXSTEP
+:PROPERTIES:
+:CUSTOM_ID: mxstep
+:END:
 #+begin_src f90
   USAGE:
     USE PRDATA, ONLY: MXSTEP=>MXSTP0  ! (ADVAN9)
