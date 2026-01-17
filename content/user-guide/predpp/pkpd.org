@@ -1,0 +1,99 @@
+---
+title: "PKPD model"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: false
+weight: 17
+---
+{{< katex >}}{{< /katex >}}
+
+* PKPD model
+PKPD model can be performed either sequentially or simultaneously. Let
+us first consider sequential models in which PD is based on PK
+results.
+** PK/PD sequentially modeled
+Assume a previous PK model run provides elimination rate constant and volume of
+distribution prediction as data item ~KK~ and ~V1~, then we can use them in
+the Emax PD model with an effect compartment. We see the
+virtual effect compartment acts just like the peripheral compartment
+in two-compartment model, so we can promptly use ADVAN3 to
+describe this model. The data item DV from the data set is for the effect observations.
+#+begin_src perl
+;# ...
+$DATA data
+$INPUT ID TIME DV AMT=DOSE CMT KK V1
+$SUBROUTINES ADVAN3
+$PK
+K = KK
+K12= .001*K ;# TRIVIAL LOSS TO EFFECT COMPT.
+K21= THETA(1)*EXP(ETA(1))
+EMAX=THETA(2)*EXP(ETA(2))
+C50= THETA(3)*EXP(ETA(3))
+S2= V1*K12/K21 ;# so that CESS = CPSS
+$ERROR
+Y =EMAX*F/(C50+F)*EXP(ERR(1))
+;# ...
+#+end_src
+Note that the transfer rate constant \(K_{12}\) is /assumed/ to be
+small compared to elimination.
+
+Assume instead /K/ and /V1/ are not given in data but merely point
+estimations based on previous PK model, we can introduce them as FIXed
+parameters. Then the above model becomes
+
+#+begin_src perl
+  $DATA data
+  $INPUT ID TIME DV AMT=DOSE CMT
+  $SUBROUTINES ADVAN3
+  $PK
+  K = THETA(1)*EXP(ETA(1))
+  K12= .001*K ;# TRIVIAL LOSS TO EFFECT COMPT.
+  K21= THETA(2)*EXP(ETA(2))
+  V1= THETA(3)*EXP(ETA(3))
+  EMAX=THETA(4)*EXP(ETA(4))
+  C50= THETA(5)*EXP(ETA(5))
+  S2= V1*K12/K21 ;# SO THAT CESS = CPSS
+  $ERROR
+  Y= EMAX*F/(C50+F)*EXP(ERR(1))
+  $THETA
+  .124 FIXED	;# K - FIXED TO PREV EST
+  .1		;# KEO - ESTIMATED
+  28.6 FIXED	;# V1 - FIXED TO PREV EST
+  100		;# EMAX- ESTIMATED
+  50		;# C50 - ESTIMATED
+  $OMEGA
+  .113 FIXED ;# OMEGA(K) - FIXED TO PREV EST
+  .04
+  .627 FIXED ;# OMEGA(V1)- FIXED TO PREV EST
+  .04
+  .04
+  $SIGMA .16
+#+end_src
+
+** PK/PD simultaneous modeled
+Also assumed an effect compartment model, we now describe PK and PD in a
+single NONMEM model. In this case, data item DV can be either
+concentration in the central compartment (CMT=1), or the drug effect in the
+effect compartment (CMT=2).
+#+begin_src perl
+  ;# ...
+  $DATA data
+  $INPUT ID TIME DV AMT=DOSE CMT
+  $SUBROUTINES ADVAN3
+  $PK
+  K = THETA(1)*EXP(ETA(1))
+  K12= .001*K ;# TRIVIAL LOSS TO EFFECT CMPT
+  K21= THETA(2)*EXP(ETA(2))
+  S1= THETA(3)*EXP(ETA(3))
+  EMAX=THETA(4)*EXP(ETA(4))
+  C50= THETA(5)*EXP(ETA(5))
+  S2= S1*K12/K21 ;# SO THAT CESS = CPSS
+  $ERROR
+  IF (CMT.EQ.2) THEN
+    Y = EMAX*F/(C50+F)*EXP(ERR(2)) ;# DV = EFFECT IF CMT=2
+  ELSE
+    Y = F*EXP(ERR(1)) ;# DV = CP IF CMT=1 (OR 0)
+  ENDIF
+  ;# ...
+#+end_src
+Note that the SIGMA should be specified for dimension 2.

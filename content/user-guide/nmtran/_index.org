@@ -6,9 +6,76 @@ bookCollapseSection: true
 weight: 14
 ---
 
-* Data and model [fn:1]
+* Data and model
 In this part we go through NONMEM's data and model specification, as
-well as interpret sample outputs.
-
-[fn:1] Almost all modern NONMEM models are specified using NM-TRAN (NONMEM
+well as interpret sample outputs. Almost all modern NONMEM models are specified using NM-TRAN (NONMEM
 TRANslator), a NONMEM component in charge of parsing and resourcing.
+
+NM-TRAN is a stand-alone program that preprocess input control
+stream and data, so that they can be used by NONMEM for model fitting.
+In NONMEM applications almost all model specification is done through
+NM-TRAN, including all the examples in this documentation. It converts them into
+three things: a /NONMEM data set/, a /NONMEM control stream/ [fn:1], and needed subroutines.
+
+NM-TRAN takes its input from two files:
+- NM-TRAN control stream,
+- NM-TRAN data set.
+
+The first file uses control record entry $DATA to specify the path to the second.
+
+NM-TRAN modifies (see
+next section) its data file input and generates the data file FDATA
+for NONMEM [fn:2]. This FDATA file is among the several NM-TRAN output
+files, including
+| FILE    | Content                        | Usage            |
+|---------+--------------------------------+------------------|
+| FDATA   | NONMEM data set                | NONMEM input     |
+| FCON    | NONMEM control stream          | NONMEM input     |
+| FSUBS   | generated and user subroutines | build executible |
+| FSTREAM | NONMEM file stream             | NONMEM input     |
+| FREPORT | report file                    | Informational    |
+
+See @@html:<a href="/docs/reference-manual/files/">reference manual</a>@@ for additional
+files and details.
+
+NONMEM consumes the input files created by NM-TRAN, and generates  a number of files during the run.
+
+If an Model Specification File (MSF) is output, and intermediate output with iteration summaries
+is requested (i.e., $ESTIM options MSFI and PRINT are used), then
+NONMEM also writes the parameter estimates of these summaries to
+the console and to file INTER, which now exists after the run
+terminates.  INTER now include lines giving the parameter  estimates
+in their natural unscaled space  (NPARAMETR) as well as the UCP
+values (PARAMETER).
+
+Additional output files include
+files with  extensions  (suffixes)  .ext,  .cov,  .coi,
+ .cor,  .phi,  .phm,  .grd,  .shk,  .shm, .cnv, smt, .rmt, etc.
+The names of the files start with "root", where root is the root name of the NM-TRAN control stream file.
+The file root.ext is called the raw output file.
+The root name may be specified by $ESTIMATION record option FILE.
+
+NM-TRAN also supports NONMEM's pre-built population PK models (PREDPP) by generating its
+subroutines. It also handles additional model inputs such mixture
+models (MIX) and Bayesian inference (PRIOR and BAYES). We will cover
+PREDPP in the next part.
+
+Unless specified, hereon in this document by "PREDPP reocords/entries"
+we always refer to when they are used in NM-TRAN.
+
+
+[fn:1] Before NM-TRAN was developed NONMEM requires input files in a
+less intuitive fashion. These files consist "NONMEM control stream". Nowadays almost all NONMEM models are based on input
+files using NM-TRAN. Therefore in this document unless specified we
+use "NM-TRAN control stream" and "NONMEM control stream"
+interchangeably, to mean input files based on NM-TRAN syntax. See next
+section and
+@@html:<a href="/docs/reference-manual/files/#nm_control_stream/">Reference Manual</a>@@
+for details of the old NONMEM control input files.
+
+[fn:2] With NONMEM 7.5, an additional file, FDATA.csv is produced that
+outputs the contents of its input data file (typically FDATA) in a
+comma delimited file format, so you can check how NONMEM interprets
+the input data. The records in FDATA.csv may differ from those in
+FDATA in the following cases. If REPL/REPL_ is used, the replicated
+form of the data will appear in FDATA.csv.

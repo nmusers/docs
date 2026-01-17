@@ -63,9 +63,16 @@ Permissible right-hand quantities =B= are expressions consisting of :
   - operators =+= (add), =-= (substract,) =*= (multiply), =/=
     (divide), =**= (exponentiate);
   - parentheses (), may  be  nested.
-  - built-in  functions:  LOG (natural log), LOG10, EXP, SQRT, SIN, COS,
+  - Fortran functions:  LOG (natural log), LOG10, EXP, SQRT, SIN, COS,
    ABS, TAN, ASIN, ACOS, ATAN, INT, MIN, MAX, MOD;
-  - NONMEM functions: PHI, GAMLN.
+  - NONMEM function: PHI;
+  - NONMEM function: GAMLN for the logarithm of the gamma function. It
+    can be used to evaluate factorials:
+    #+begin_src f90
+      exp(gamln(x+1.0)) ;! equals to X! = X(X-1)(X-2)...
+    #+end_src
+  - NONMEM function: RANDMT and RANDMTU that return a random variables
+    (See Introduction to NONMEM 7 for details).
 
 If a Fortran function has  random  variable  arguments,  NONMEM
 computes the cooresponding partial derivatives.  The partial
@@ -131,16 +138,99 @@ COMRES=-1
 #+end_src
 This statement indicates no variables defined in the abbreviated code are listed in NMPRD4.
 
-** Loop
-#+begin_src f90
-  DO WHILE( condition )
-  ...
-  ENDDO
+** Loop (DO-WHILE)
+~DO-WHILE~ may be used  in  all  blocks  of  abbreviated
+code:
+#+begin_src perl
+ $ABBR DECLARE DOWHILE ILOOP $PK
+ ILOOP=1
+ DOWHILE (condition)
+  .. statements ..
+ ILOOP=ILOOP+1
+ ENDDO
 #+end_src
-With NONMEM 7, =DO-WHILE= may be used  in  all  blocks  of  abbreviated
-code.   =DO-WHILE=  marks the beginning of a set of statements that are
-executed repeatedly until the condition becomes false. The non-FORTRAN
-syntax DO WHILE(DATA)  is  permitted  in  $PRED  initialization  and
+Previously, they were permitted only in initialization-finalization,
+simulation, data  average,  and  expectation blocks.  See the separate
+descriptions of these blocks.  With NONMEM 7.3, DOWHILE may also be
+used  in  data-analytic blocks (i.e., in code that is executed at
+ICALL=2).
+
+When  it  is  used  in  data-anlytic code, DOWHILE must be used with a
+looping variable.  Such a variable meets three criteria:
+
+- It is declared as such, e.g. $ABBR DECLARE DOWHILE ILOOP
+- It is given a value in the statement immediately before DOWHILE
+- It is given a value in the statement immediately before ENDDO.
+
+Usually, the looping variable will be tested  in  the  condition,  but this is not necessary.
+
+- DOWHILE blocks may be nested.
+
+- DOWHILE  blocks  may  not  include IF/THEN/ENDIF blocks.  Only
+  single-statement IF statements are permitted.  E.g., IF (condition)
+  statement
+
+- Subscripted variables may be used within the block.  These  are  variables  that  have  been  declared arrays using the $ABBR statement, or subscripted reserved variables such as THETA.  Subscripts may be integer  expressions  using declared integer variables and integer values. E.g.
+  #+begin_src perl
+    $ABBR DECLARE X(10)
+    $ABBR DECLARE DOWHILE ILOOP
+     ...
+    $PK
+    ILOOP=1
+    DOWHILE (condition)
+    X(ILOOP)=THETA(ILOOP+1)
+    ILOOP=ILOOP+1
+    ENDDO
+  #+end_src
+
+- A DOWHILE loop may compute  recursive  random  variables.   These
+  are variables  that  are modified recursively in a dowhile block and
+  which have eta derivatives. For example,
+
+  #+begin_src perl
+    TERM=THETA(1)*EXP(ETA(1))
+    SUM=0
+    ILOOP=1
+    DO WHILE(ILOOP<=IMAX)
+    SUM=SUM+TERM
+    ILOOP=ILOOP+1
+    ENDDO
+  #+end_src
+
+- The DOWHILE recursive variable must be  initialized  to  a
+  non-random variable  outside  the loop and must appear on both sides
+  of the equal sign only once within the DOWHILE loop: V= ... V ...
+
+- The syntax is limited, for example the following are not permitted:
+  #+begin_src perl
+    ILOOP=1
+    DO WHILE(ILOOP<=IMAX)
+    IF (ILOOP == 1) SUM=0  ; initialization within the loop
+    SUM=SUM+TERM
+    ILOOP=ILOOP+1
+    ENDDO
+
+    ILOOP=1
+    DO WHILE(ILOOP<=IMAX)
+    IF (ILOOP == 1) THEN
+    SUM=0                  ; initialization within the loop
+    ELSE                   ; else statement
+    SUM=SUM+TERM
+    ENDIF
+    ILOOP=ILOOP+1
+    ENDDO
+  #+end_src
+
+- The looping variable ILOOP may also be set and tested and incremented with different integers than shown.
+
+Several examples are present in the examples directory:
+
+  - Auto-correlation (~examples/ar1mod.ctl~)
+  - Auto-correlation with Simulation (~exmaples/ar1newsim.ctl~).
+  - Dose Superposition (~examples/sumdosetn.ctl~)
+  - Summing elements of THETA (~examples/superid3_6.ctl~)
+
+The non-FORTRAN syntax DO WHILE(DATA) is permitted  in  $PRED  initialization  and
 finalization blocks, and in the $INFN record. (See [[file:/docs/user-guide/advanced/abbr_block/#initialization-finalization-block][Initialization-Finalization block]]).
 
 ** Conditional
@@ -272,254 +362,6 @@ is  also  possible, as are other ways the dowhile recursive variable
    can be used, so long as the variable appears on both  sides  of  the
    equal sign within the DOWHILE loop: V= ... V ...
 
-** =EXIT=
-:PROPERTIES:
-:CUSTOM_ID: exit
-:END:
-
-EXIT statement has three forms:
-   #+begin_src f90
-     EXIT
-     EXIT n
-     EXIT n k
-   #+end_src
-   n  is  called  the  "PRED error return code"; (also called the "PRED
-   exit code.")  It must be 1 or 2.  Default is 1.
-   k is the user error code.  It may be omitted; if present, it must be
-   integer-valued  in the range 0-999.  With NONMEM 7.5, it may also be
-   in the range 1000-9999  when  issued  during  the  Simulation  Step.
-   Default is 0.
-
-   With  all  versions  of  NONMEM, the value of k is part of the error
-   message in ETEXT, which is reported in the NONMEM output report  and
-   in  file  PRDERR.   With NONMEM 7.5 and later, k tells NONMEM how to
-   handle EXIT statements during the Simulation Step.
-
-   (See [[file:/docs/user-guide/advanced/abbr_block/#simulation-block][Simulation block]]).
-
-   (See [[file:/docs/reference-manual/api/variables/#pred-exit][PRED EXIT code]]).
-
-The EXIT statement causes an immediate exit from the routine and, if
-PREDPP  is being used, a subsequent immediate exit from PREDPP, with a
-return to NONMEM.  It is typically used  in  an  IF  statement  to
-avoid  further  computation  of  the  users  code when the values of
-theta/eta's set by NONMEM are inappropriate  or  would  lead  to  an
-arithmetic  exception.   If such an exit occurs during a Covariance,
-Table or Scatterplot Step, or  during  computation  of  the  initial
-value  of  the  objective  function, NONMEM will abort.  If the exit
-occurs during an Estimation  or  Initial  Estimates  Step,  NONMEM's
-action depends on the error return code value:
-
-  - n=1. Suppose  first  that  a  search  for  eta is not underway.
-    Then a search for theta is underway, and when a search  is
-    underway  for THETA. If the NOABORT option
-    is used then NONMEM will try to continue using different values for
-    THETA. If THETA recovery also fails, NONMEM will aborts. Without the
-    NOABORT option, NONMEM will simply abort.
-    Similarly, if a search for ETA is underway.  NONMEM  will  try  to continue  using  different
-    values for ETA. If this ETA recovery fails,
-    and a search for  THETA  is  not also underway, NONMEM will abort.
-    Otherwise, the above procedure regarding THETA-recovery applies.
-    See also [[file:/docs/reference-manual/api/subroutines/#error-recovery][Error recovery]].
-
-  - n=2. NONMEM aborts immediately.
-
-If NONMEM aborts, and k>0, a user message such as the  following  is
-   printed in the output:
-   "PK SUBROUTINE: USER ERROR CODE = k"
-   This  message  is  intended  to help the user distinguish which EXIT
-   statement caused NONMEM to abort when more than one  EXIT  statement
-   is present in the abbreviated code.
-
-** =WRITE= and =PRINT=
-Example:
-#+begin_src f90
-   WRITE (50,*) 99,ID,CL,THETA(1),ETA(1)
-
-   IF (ICALL.EQ.3) THEN
-     WRITE (55,2) BIAS
-   ENDIF
-#+end_src
-
-Certain  forms of Fortran WRITE, PRINT, OPEN, CLOSE, and REWIND
-statements may be used anywhere in $PRED, $INFN, $PK, $ERROR,  $DES,
-$AES, $AESINITIAL blocks.
-
-#+begin_src f90
-   PRINT list ...
-   PRINT *,list ...
-   WRITE (unit,format) list ...
-   WRITE (*,format) list ...
-   WRITE (unit,*) list ...
-   WRITE (*,*) list ...
-   OPEN(unit)
-   OPEN(unit,FILE=filename)
-   CLOSE(unit)
-   REWIND(unit)
-#+end_src
-Single or double quotes around the filename are optional.  However,
-if the filename contains commas, semicolons, or parentheses, then it
-must be  surrounded  by  single  quotes ' or double quotes ".
-Filename may also contain equal signs if it is enclosed in quotes.
-
-If the file is opened by NM-TRAN, filename may contain embedded spaces
-if  it  is  enclosed in quotes, and may contain at most 80 characters.
-If the file is opened by NONMEM, filename  may  not  contain  embedded
-spaces, and may contain at most 71 characters.
-
-  - unit 6, n or *
-    + "6" indicates the unit connected to the NONMEM output file.
-    + "n" indicates the number of an alternative unit (40<n<2000).
-    + "*"  indicates  a FORTRAN system-dependent output (with most systems, this is equivalent to using unit 6, but see  the  FORTRAN documentation) With OPEN, CLOSE and REWIND, the unit may not be 6 or *.
-
-  - format *, 1, 2, 991, or 992  [fn:1] [fn:2]
-    + "*" indicates list-directed  output.  (FORTRAN  library
-      routines will select a format appropriate for the current
-      run-time value of the quantity when displayed.)
-    + 1 or 991 requests the built-in format specification: 991  FORMAT (35F14.4)
-    + 2 or 992 requests the built-in format specification: 992  FORMAT (35E15.7)
-
-  - list. A  list  of one or more right-hand quantities, i.e.,
-    variables or constants that may appear on the right in abbreviated
-    code.   May not  include expressions or names of abbreviated
-    functions.  When subscripts are appropriate,  these  must  be
-    integer  constants, declared  integer  variables,  or expressions
-    involving such constants and variables.
-
-    With a PRINT statement, a list may also  include  character
-    constants.   A  character  constant is delimited by single or
-    double quotes (' or ").  As with any Fortran character constant, a
-    pair of  adjacent  delimiters  within the constant represents a
-    single character.  E.g.,
-    #+begin_src f90
-    PRINT *,'A isn''t B'
-    #+end_src
-    will output
-    #+begin_src txt
-    A isn't B
-    #+end_src
-
-    In  an  [[file:/docs/user-guide/advanced/abbr_block/#initialization-finalization-block][Initialization or Finalization block]], a list may include
-    elements of the OMEGA and SIGMA arrays.  In a finalization block,
-    a  list  may  include  elements  of  the  standard  error  arrays
-    (SETHET,SETHETR,SEOMEG and SESIGM).
-
-    Any array whose elements may be listed individually in a WRITE or
-    PRINT  statement  may also be written in its entirety, by listing
-    it without any subscripts.  Specifically, one or more of the
-    following may be included in a list:
-
-  #+begin_src f90
-        THETA THETAFR SETHET  SETHETR
-         THSIMP ETA  THSIMPR
-        OMEGA(BLOCK) OMEGA(DIAG) SEOMEG(BLOCK) SEOMEG(DIAG)
-        OMSIMP(BLOCK) OMSIMP(DIAG)
-        SIGMA(BLOCK) SIGMA(DIAG) SESIGM(BLOCK) SESIGM(DIAG)
-        SGSIMP(BLOCK) SGSIMP(DIAG)
-        IIDX CNTID IIDX,CNTID
-  #+end_src
-
-  Note that IIDX and CNTID are arrays in a module; (See [[file:/docs/reference-manual/api/variables/#ofv-indi][Objective Function Value Individual]]). When  "IIDX"  or "CNTID" is listed, then
-  only that array is written.  When "IIDX,CNTID" is specified, then
-  pairs  of  values  are written, one pair per line, one pair for each
-  individual record.
-
-  The  option  BLOCK  requests  that the entire array be written in
-  full symmetric form.  The option  DIAG  requests  that  only  the
-  diagonal  elements  be written.  DIAG may also be coded DIAGONAL.
-  Arrays of possibly different sizes (e.g., OMEGA  and  SIGMA)  may
-  not  be  listed together in the same WRITE statement.  If a WRITE
-  statement requests that an entire array be written, then the only
-  other  items  that  may  be  listed  with the statement are other
-  entire arrays.
-
-  When entire arrays are written, the format specification with a
-  WRITE statement  must  be  *.   With  either  a WRITE or PRINT
-  statement, an appropriate format is created by the NONMEM system.
-  With  these  for mats, elements of the standard error arrays that do
-  not exist have the value 1E10 and are printed as 0.1000000E+11.
-  (Such elements appear in NONMEM  output  as dots (.........).)  If
-  the covariance step fails or is not requested, all elements of the
-  standard error arrays are 0  and are printed as 0.0000000E+00. For
-  example, to write the omega matrix and its standard errors in
-  symmetric form code the following.  (Only as many elements will  be
-  written as are appropriate for the dimension of omega in the
-  problem.)
-
-  #+begin_src f90
-       IF (ICALL.EQ.3) WRITE (99,*) OMEGA(BLOCK),SEOMEG(BLOCK)
-  #+end_src
-
- A  list  may  also  include  a vector element or the entire vector (by listing the vector without a subscript).
-
- The OPEN, CLOSE, and REWIND statements are part of  the  FORTRAN
- language.  For  details  (i.e.,  the  relationship  of  external
- files to units), see the Language Reference Manual and the Users
- Guide for your compiler.
-
-** =PASS=
-#+begin_src f90
-CALL PASS(MODE)
-#+end_src
-may be used only in $PRED
-[[file:/docs/user-guide/advanced/abbr_block/#initialization-finalization-block][Initialization-Finalization blocks]], and in $INFN records.  If present,
-MODE becomes a reserved variable with type INTEGER, and may not  be
-used outside the block(s).
-
-** =SUPP=
-#+begin_src f90
-CALL SUPP(ie,ic)
-#+end_src
-=ie= and =ic= are of integer values 0 or 1.  Value 1 of =ie= / =ic=  suppresses  output  from  the
-Estimation/Covariance step.  A value 0 does not suppress the output
-from the step.  May be used only in $PRED  initialization-finalization
-blocks, and in $INFN records.  The =ie= / =ic= value remains in effect
-until changed by a call to SUPP.
-
-** =RANDOM=
-#+begin_src f90
-CALL RANDOM(n,R)
-#+end_src
-=n=: integer 1-10.  It is the number of the random source. =R=: a
-random number from this source.  May be used only in Simulation and
-Expectation  blocks.  If present, R becomes a reserved variable with
-type REAL, and may not be used outside the block(s).
-
-** =SIMETA=, =SIMEPS=
-#+begin_src f90
-CALL SIMETA(ETA)
-
-CALL SIMEPS(EPS)
-#+end_src
-May  only  be  used  in  Simulation
-blocks.   Note  that  NM-TRAN  itself provides the minimum necessary
-call to SIMETA/SIMEPS.  This statement is used in abbreviated code only  to
-obtain  a different value of ETA/EPS, e.g., so that the ETA distribution
-may be truncated:
-#+begin_src f90
-  DO WHILE (ETA(1).GT.5)
-     CALL SIMETA(ETA)
-  ENDDO
-#+end_src
-
-** =RETURN=
-#+begin_src f90
-   RETURN
-#+end_src
-may  be  used in all special blocks.  RETURN statements must be used
-with caution because they by-pass certain normal  final  actions  of
-the routine.
-
-** =PRED_IGNORE_DATA= block
-Another  kind  of special block is the pred_ignore_data block, which
-may be part of $PRED,$PK, or $INFN blocks.   It  uses  the  reserved
-variables  PRED_IGNORE_DATA_TEST  and  PRED_IGNORE_DATA.  By setting
-values of PRED_IGNORE_DATA=1 for certain  data  records,  it  causes
-these records to be dropped from the NONMEM data set.  Ordinary
-Fortran syntax is used in such blocks.
-
-(See [[file:/docs/user-guide/advanced/abbr_block/#pred_ignore_data_block][PRED_IGNORE_DATA]] block)
-
 ** Vectors
 The $ABBR FUNCTION and $ABBR  VECTOR  feature  allows  the  user  to
 declare the names of user-defined functions and  the names and sizes
@@ -578,7 +420,7 @@ If the abbreviated code uses one of these reserved function names, but
  the  user  does  not  supply the code via $SUBR OTHER, the NONMEM
  executable will be created with an  error  message  in  the
  report file such as:
- #+begin_src txt
+ #+begin_src
  FUNCA WAS CALLED, BUT NO CODE WAS SUPPLIED.
  #+end_src
 
@@ -696,21 +538,6 @@ Where a subscript is permitted or necessary, it may  be  an  integer
    character string that is replaced by an integer constant  using  the
    $ABBR REPLACE feature.
 
-** Reserved and other functions
-   The nonmem_reserved_general  file  contains  function  declarations,
-   such  as  TFI and TFD, which are convenient functions to easily
-   convert an integer to text ("text from integer" TFI) or  double
-   precision value to text ("text from double" TFD).
-
-   If  you wish to define your own function for use in abbreviated
-   code and have the information about its proper use of arguments  be
-   conveyed  upon  its  execution, so the compiler may detect errors,
-   then one method is to package the definition of the  function  in
-   a  USE module,  such as is done in the example User-defined
-   Reserved Function.
-
- REFERENCES: Guide Introduction_7
-
 ** Probability density functions
 A  series of built in probability density functions are available with
 NONMEM 7.4.2.  For a given probability density there is also a
@@ -797,7 +624,7 @@ these forms:
   affect ERROR, ADVAN9, ADVAN15, or ADVAN17 routines.
 
   The following messages will appear in the NONMEM output report:
-  #+begin_src txt
+  #+begin_src
   PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
   PK SUBROUTINE CALLED AT NONEVENT (ADDITIONAL AND LAGGED) DOSE TIMES
   or
@@ -808,7 +635,7 @@ these forms:
 - CALLFL=-1 (default): call the subroutine with every event record.
 
   Correspondingly messages will appear in the NONMEM output:
-  #+begin_src txt
+  #+begin_src
   PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
   PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES
 
@@ -828,7 +655,7 @@ these forms:
     differs from the previous event time.
 
     The following messages will appear in the NONMEM output report:
-    #+begin_src txt
+    #+begin_src
     PK SUBROUTINE CALLED ONLY WITH NEW INDIVIDUAL OR NEW TIME
     PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL DOSE OR LAGGED) DOSE TIMES.
     #+end_src
@@ -839,7 +666,7 @@ these forms:
     records.
 
     The following messages will appear in the NONMEM output report:
-    #+begin_src txt
+    #+begin_src
     DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
     OTHERWISE, ERROR SUBROUTINE CALLED ONLY WITH OBSERVATION EVENTS
     #+end_src
@@ -856,7 +683,7 @@ these forms:
     set.
 
     The following messages appear in the NONMEM output report:
-    #+begin_src txt
+    #+begin_src
     PK SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
     PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL DOSE OR LAGGED) DOSE TIMES
 
@@ -873,7 +700,7 @@ these forms:
     event  record  of  the data set.
 
     The following messages appear in the NONMEM output report:
-    #+begin_src txt
+    #+begin_src
     DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
     OTHERWISE, ERROR SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
     #+end_src
@@ -900,7 +727,7 @@ ERROR routine, but one which may not be explicitly specified in $ERROR
 via  the  use  of CALLFL.
 
 With  the  last  three  models above (proportional and exponential), NM-TRAN will also request PREDPP to output the message:
-#+begin_src txt
+#+begin_src
   ERROR IN LOG Y IS MODELED
 #+end_src
 This does not mean that a model is fit to Log Y data.
@@ -933,7 +760,7 @@ No  abbreviated  code may follow ")" on the same line as the ")".
 
   NONMEM will output the following messages:
 
-  #+begin_src txt
+  #+begin_src
   PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
   PK SUBROUTINE CALLED AT NONEVENT (ADDITIONAL AND LAGGED) DOSE TIMES
   or
@@ -950,7 +777,7 @@ No  abbreviated  code may follow ")" on the same line as the ")".
 
   NONMEM will output the following messages:
 
-  #+begin_src txt
+  #+begin_src
   PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
   PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES
 
@@ -969,7 +796,7 @@ No  abbreviated  code may follow ")" on the same line as the ")".
 
   NONMEM will output the following messages:
 
-  #+begin_src txt
+  #+begin_src
   PK SUBROUTINE CALLED ONLY WITH NEW INDIVIDUAL OR NEW TIME
   PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
   #+end_src
@@ -985,7 +812,7 @@ No  abbreviated  code may follow ")" on the same line as the ")".
 
   NONMEM will output the following messages:
 
-  #+begin_src txt
+  #+begin_src
   DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
   OTHERWISE, ERROR SUBROUTINE CALLED ONLY WITH OBSERVATION EVENTS
   #+end_src
@@ -999,7 +826,7 @@ No  abbreviated  code may follow ")" on the same line as the ")".
 
   NONMEM will output the following messages:
 
-  #+begin_src txt
+  #+begin_src
   PK SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
   PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES
 
@@ -1134,7 +961,7 @@ abbreviated code uses one of these extended  reserved  function names,
 but the user does not supply the code via $SUBR OTHER, the NONMEM
 executable cannot be created, and there will be an  error  message
 from the Fortran compiler such as:
-#+begin_src txt
+#+begin_src
 Undefined Symbols
 _funcaaa_
 #+end_src
@@ -1142,3 +969,437 @@ _funcaaa_
 [fn:4] In NONMEM v7+ a constant may be up to 30 characters
 (The length is specified by constant SCO in SIZES). Previous versions limit constants to 12
 characters.
+
+** Reserved and other functions
+With verbatim code advanced users can also access many internal NONMEM
+variables.  For example variable ~ITER_REPORT~ that contains the present
+iteration number as in the output may be used within the $PK, $ERROR,
+or $PRED code. To access these variables in certain block one needs to place the
+corresponding MODULE definitions in an include file with name that
+begins with "NONMEM_RESERVED" (case insensitive) at the beginning of
+the control record block. NONMEM provides file ~util/nonmem_reserved_general~
+that has many such variables, including ITER_REPORT, in the form of
+verbatim code:
+#+begin_src f90
+"C ITER_REPORT: Iteration number that is reported to output
+"C (can be negative, if during a burn period).
+"C BAYES_EXTRA, BAYES_EXTRA_REQUEST, used in example 8
+" USE NMBAYES_REAL, ONLY: OBJI
+" USE NMBAYES_INT, ONLY: ITER_REPORT,BAYES_EXTRA_REQUEST,BAYES_EXTRA
+" USE PNM_CONFIG, ONLY: PNM_NODE_NUMBER
+“ USE NM_INTERFACE, ONLY: TFI,TFD
+#+end_src
+For example, to use ~nonmem_reserved_general~ in $PK, place the file
+in the present run directory, and do (examples/example8):
+#+begin_src perl
+$PK
+include nonmem_reserved_general
+BAYES_EXTRA_REQUEST=1
+MU_1=THETA(1)
+MU_2=THETA(2)
+MU_3=THETA(3)
+MU_4=THETA(4)
+CL=DEXP(MU_1+ETA(1))
+V1=DEXP(MU_2+ETA(2))
+Q=DEXP(MU_3+ETA(3))
+V2=DEXP(MU_4+ETA(4))
+S1=V1
+IF(BAYES_EXTRA==1 .AND. ITER_REPORT>=0 .AND. TIME==0.0) THEN
+WRITE(50,*) ITER_REPORT,ID,CL,V1,Q,V2
+ENDIF
+#+end_src
+
+The ~nonmem_reserved_general~ file also contains function
+declarations, such as TFI and TFD, which are convenient functions to
+easily convert an integer to text (“text from integer” TFI) or double
+precision value to text (“text from double” TFD).  They can be used to
+to have compiler can catch a misuse of that function’s arguments. If
+you wish to define your own function, and have the information about
+its proper use of arguments be conveyed upon its execution, so the
+compiler may detect errors, then one method is to package the
+definition of the function in a USE module. For example,
+~myfuncmodule.f90~ below defines the functions ~mymin~ and ~mymax~.
+#+begin_src f90
+  MODULE MYFUNCS
+  contains
+  function mymin(a,b,c,d,e)
+  integer mymin
+  integer a,b,c,d,e
+  mymin=min(a,b,c,d,e)
+  end function
+  function mymax(a,b,c,d,e)
+  integer mymax
+  integer a,b,c,d,e
+  mymax=max(a,b,c,d,e)
+  end function
+  END MODULE MYFUNCS
+#+end_src
+One can create file ~nonmem_reserved_myfunc~ to declare:
+#+begin_src f90
+" USE myfuncs, only: mymin,mymax
+#+end_src
+and use it in control stream files:
+#+begin_src perl
+$PROB  THEOPHYLLINE   POPULATION DATA
+$INPUT      ID DOSE=AMT TIME CP=DV WT
+$DATA       THEOPP
+
+$SUBROUTINES  ADVAN2 OTHER=myfuncmodule.f90
+
+$PK
+;THETA(1)=MEAN ABSORPTION RATE CONSTANT (1/HR)
+;THETA(2)=MEAN ELIMINATION RATE CONSTANT (1/HR)
+;THETA(3)=SLOPE OF CLEARANCE VS WEIGHT RELATIONSHIP (LITERS/HR/KG)
+;SCALING PARAMETER=VOLUME/WT SINCE DOSE IS WEIGHT-ADJUSTED
+include "nonmem_reserved_myfunc"
+   CALLFL=1
+   KA=THETA(1)+ETA(1)
+   K=THETA(2)+ETA(2)
+   CL=THETA(3)*WT+ETA(3)
+   SC=CL/K/WT
+I=mymin(1,2,3,4,5.0)
+print *,'I ',I
+
+$THETA  (.1,3,5) (.008,.08,.5) (.004,.04,.9)
+$OMEGA BLOCK(3)  6 .005 .0002 .3 .006 .4
+
+$ERROR
+   Y=F+EPS(1)
+
+$SIGMA  .4
+#+end_src
+Then compiler will flag errors on mistaken argument use.
+
+** =EXIT=
+:PROPERTIES:
+:CUSTOM_ID: exit
+:END:
+
+EXIT statement has three forms:
+   #+begin_src f90
+     EXIT
+     EXIT n
+     EXIT n k
+   #+end_src
+   n  is  called  the  "PRED error return code"; (also called the "PRED
+   exit code.")  It must be 1 or 2.  Default is 1.
+   k is the user error code.  It may be omitted; if present, it must be
+   integer-valued  in the range 0-999.  With NONMEM 7.5, it may also be
+   in the range 1000-9999  when  issued  during  the  Simulation  Step.
+   Default is 0.
+
+   With  all  versions  of  NONMEM, the value of k is part of the error
+   message in ETEXT, which is reported in the NONMEM output report  and
+   in  file  PRDERR.   With NONMEM 7.5 and later, k tells NONMEM how to
+   handle EXIT statements during the Simulation Step.
+
+   (See [[file:/docs/user-guide/advanced/abbr_block/#simulation-block][Simulation block]]).
+
+   (See [[file:/docs/reference-manual/api/variables/#pred-exit][PRED EXIT code]]).
+
+The EXIT statement causes an immediate exit from the routine and, if
+PREDPP  is being used, a subsequent immediate exit from PREDPP, with a
+return to NONMEM.  It is typically used  in  an  IF  statement  to
+avoid  further  computation  of  the  users  code when the values of
+theta/eta's set by NONMEM are inappropriate  or  would  lead  to  an
+arithmetic  exception.   If such an exit occurs during a Covariance,
+Table or Scatterplot Step, or  during  computation  of  the  initial
+value  of  the  objective  function, NONMEM will abort.  If the exit
+occurs during an Estimation  or  Initial  Estimates  Step,  NONMEM's
+action depends on the error return code value:
+
+  - n=1. Suppose  first  that  a  search  for  eta is not underway.
+    Then a search for theta is underway, and when a search  is
+    underway  for THETA. If the NOABORT option
+    is used then NONMEM will try to continue using different values for
+    THETA. If THETA recovery also fails, NONMEM will aborts. Without the
+    NOABORT option, NONMEM will simply abort.
+    Similarly, if a search for ETA is underway.  NONMEM  will  try  to continue  using  different
+    values for ETA. If this ETA recovery fails,
+    and a search for  THETA  is  not also underway, NONMEM will abort.
+    Otherwise, the above procedure regarding THETA-recovery applies.
+    See also [[file:/docs/reference-manual/api/subroutines/#error-recovery][Error recovery]].
+
+  - n=2. NONMEM aborts immediately.
+
+If NONMEM aborts, and k>0, a user message such as the  following  is
+   printed in the output:
+   "PK SUBROUTINE: USER ERROR CODE = k"
+   This  message  is  intended  to help the user distinguish which EXIT
+   statement caused NONMEM to abort when more than one  EXIT  statement
+   is present in the abbreviated code.
+
+** =WRITE= and =PRINT=
+Example:
+#+begin_src f90
+   WRITE (50,*) 99,ID,CL,THETA(1),ETA(1)
+
+   IF (ICALL.EQ.3) THEN
+     WRITE (55,2) BIAS
+   ENDIF
+#+end_src
+
+Certain  forms of Fortran WRITE, PRINT, OPEN, CLOSE, and REWIND
+statements may be used anywhere in $PRED, $INFN, $PK, $ERROR,  $DES,
+$AES, $AESINITIAL blocks.
+
+#+begin_src f90
+   PRINT list ...
+   PRINT *,list ...
+   WRITE (unit,format) list ...
+   WRITE (*,format) list ...
+   WRITE (unit,*) list ...
+   WRITE (*,*) list ...
+   OPEN(unit)
+   OPEN(unit,FILE=filename)
+   CLOSE(unit)
+   REWIND(unit)
+#+end_src
+Single or double quotes around the filename are optional.  However,
+if the filename contains commas, semicolons, or parentheses, then it
+must be  surrounded  by  single  quotes ' or double quotes ".
+Filename may also contain equal signs if it is enclosed in quotes.
+
+If the file is opened by NM-TRAN, filename may contain embedded spaces
+if  it  is  enclosed in quotes, and may contain at most 80 characters.
+If the file is opened by NONMEM, filename  may  not  contain  embedded
+spaces, and may contain at most 71 characters.
+
+  - unit 6, n or *
+    + "6" indicates the unit connected to the NONMEM output file.
+    + "n" indicates the number of an alternative unit (40<n<2000).
+    + "*"  indicates  a FORTRAN system-dependent output (with most systems, this is equivalent to using unit 6, but see  the  FORTRAN documentation) With OPEN, CLOSE and REWIND, the unit may not be 6 or *.
+
+  - format *, 1, 2, 991, or 992  [fn:1] [fn:2]
+    + "*" indicates list-directed  output.  (FORTRAN  library
+      routines will select a format appropriate for the current
+      run-time value of the quantity when displayed.)
+    + 1 or 991 requests the built-in format specification: 991  FORMAT (35F14.4)
+    + 2 or 992 requests the built-in format specification: 992  FORMAT (35E15.7)
+
+  - list. A  list  of one or more right-hand quantities, i.e.,
+    variables or constants that may appear on the right in abbreviated
+    code.   May not  include expressions or names of abbreviated
+    functions.  When subscripts are appropriate,  these  must  be
+    integer  constants, declared  integer  variables,  or expressions
+    involving such constants and variables.
+
+    With a PRINT statement, a list may also  include  character
+    constants.   A  character  constant is delimited by single or
+    double quotes (' or ").  As with any Fortran character constant, a
+    pair of  adjacent  delimiters  within the constant represents a
+    single character.  E.g.,
+    #+begin_src f90
+    PRINT *,'A isn''t B'
+    #+end_src
+    will output
+    #+begin_src
+    A isn't B
+    #+end_src
+
+    In  an  [[file:/docs/user-guide/advanced/abbr_block/#initialization-finalization-block][Initialization or Finalization block]], a list may include
+    elements of the OMEGA and SIGMA arrays.  In a finalization block,
+    a  list  may  include  elements  of  the  standard  error  arrays
+    (SETHET,SETHETR,SEOMEG and SESIGM).
+
+    Any array whose elements may be listed individually in a WRITE or
+    PRINT  statement  may also be written in its entirety, by listing
+    it without any subscripts.  Specifically, one or more of the
+    following may be included in a list:
+
+  #+begin_src f90
+        THETA THETAFR SETHET  SETHETR
+         THSIMP ETA  THSIMPR
+        OMEGA(BLOCK) OMEGA(DIAG) SEOMEG(BLOCK) SEOMEG(DIAG)
+        OMSIMP(BLOCK) OMSIMP(DIAG)
+        SIGMA(BLOCK) SIGMA(DIAG) SESIGM(BLOCK) SESIGM(DIAG)
+        SGSIMP(BLOCK) SGSIMP(DIAG)
+        IIDX CNTID IIDX,CNTID
+  #+end_src
+
+  Note that IIDX and CNTID are arrays in a module; (See [[file:/docs/reference-manual/api/variables/#ofv-indi][Objective Function Value Individual]]). When  "IIDX"  or "CNTID" is listed, then
+  only that array is written.  When "IIDX,CNTID" is specified, then
+  pairs  of  values  are written, one pair per line, one pair for each
+  individual record.
+
+  The  option  BLOCK  requests  that the entire array be written in
+  full symmetric form.  The option  DIAG  requests  that  only  the
+  diagonal  elements  be written.  DIAG may also be coded DIAGONAL.
+  Arrays of possibly different sizes (e.g., OMEGA  and  SIGMA)  may
+  not  be  listed together in the same WRITE statement.  If a WRITE
+  statement requests that an entire array be written, then the only
+  other  items  that  may  be  listed  with the statement are other
+  entire arrays.
+
+  When entire arrays are written, the format specification with a
+  WRITE statement  must  be  *.   With  either  a WRITE or PRINT
+  statement, an appropriate format is created by the NONMEM system.
+  With  these  for mats, elements of the standard error arrays that do
+  not exist have the value 1E10 and are printed as 0.1000000E+11.
+  (Such elements appear in NONMEM  output  as dots (.........).)  If
+  the covariance step fails or is not requested, all elements of the
+  standard error arrays are 0  and are printed as 0.0000000E+00. For
+  example, to write the omega matrix and its standard errors in
+  symmetric form code the following.  (Only as many elements will  be
+  written as are appropriate for the dimension of omega in the
+  problem.)
+
+  #+begin_src f90
+       IF (ICALL.EQ.3) WRITE (99,*) OMEGA(BLOCK),SEOMEG(BLOCK)
+  #+end_src
+
+ A  list  may  also  include  a vector element or the entire vector (by listing the vector without a subscript).
+
+ The OPEN, CLOSE, and REWIND statements are part of  the  FORTRAN
+ language.  For  details  (i.e.,  the  relationship  of  external
+ files to units), see the Language Reference Manual and the Users
+ Guide for your compiler.
+
+** =PASS=
+#+begin_src f90
+CALL PASS(MODE)
+#+end_src
+may be used only in $PRED
+[[file:/docs/user-guide/advanced/abbr_block/#initialization-finalization-block][Initialization-Finalization blocks]], and in $INFN records.  If present,
+MODE becomes a reserved variable with type INTEGER, and may not  be
+used outside the block(s).
+
+** =SUPP=
+#+begin_src f90
+CALL SUPP(ie,ic)
+#+end_src
+=ie= and =ic= are of integer values 0 or 1.  Value 1 of =ie= / =ic=  suppresses  output  from  the
+Estimation/Covariance step.  A value 0 does not suppress the output
+from the step.  May be used only in $PRED  initialization-finalization
+blocks, and in $INFN records.  The =ie= / =ic= value remains in effect
+until changed by a call to SUPP.
+
+** =RANDOM=
+#+begin_src f90
+CALL RANDOM(n,R)
+#+end_src
+=n=: integer 1-10.  It is the number of the random source. =R=: a
+random number from this source.  May be used only in Simulation and
+Expectation  blocks.  If present, R becomes a reserved variable with
+type REAL, and may not be used outside the block(s).
+
+** =SIMETA=, =SIMEPS=
+#+begin_src f90
+CALL SIMETA(ETA)
+
+CALL SIMEPS(EPS)
+#+end_src
+May  only  be  used  in  Simulation
+blocks.   Note  that  NM-TRAN  itself provides the minimum necessary
+call to SIMETA/SIMEPS.  This statement is used in abbreviated code only  to
+obtain  a different value of ETA/EPS, e.g., so that the ETA distribution
+may be truncated:
+#+begin_src f90
+  DO WHILE (ETA(1).GT.5)
+     CALL SIMETA(ETA)
+  ENDDO
+#+end_src
+
+** =RETURN=
+#+begin_src f90
+   RETURN
+#+end_src
+may  be  used in all special blocks.  RETURN statements must be used
+with caution because they by-pass certain normal  final  actions  of
+the routine.
+
+** =PRED_IGNORE_DATA= block
+Another  kind  of special block is the pred_ignore_data block, which
+may be part of $PRED,$PK, or $INFN blocks.   It  uses  the  reserved
+variables  PRED_IGNORE_DATA_TEST  and  PRED_IGNORE_DATA.  By setting
+values of PRED_IGNORE_DATA=1 for certain  data  records,  it  causes
+these records to be dropped from the NONMEM data set.  Ordinary
+Fortran syntax is used in such blocks.
+
+(See [[file:/docs/user-guide/advanced/abbr_block/#pred_ignore_data_block][PRED_IGNORE_DATA]] block)
+
+
+** =PROTECT=
+Since NONMEM  7.4,  a  series of routines are available that protect
+against domain violations, divide by zero, and  floating  point
+overflows.   Each  of  these routines start with the letter P,
+followed by the name of the mathematical operation they are to
+perform.  For example,  PLOG is the protective code routine that
+performs the LOG operation.  In addition, there are first derivative
+(such as  PLOGD1),  and second  derivative (such as PLOGD2) companion
+routines available which NMTRAN uses for computing analytical
+derivatives. The source  code  of these routines are available in
+..\source\PROTECT.f90.  If you wish to modify their behavior, then
+copy PROTECT.f90 to your run directory  as (say)  myprotect.f90,
+modify it, then refer to this modified code with $SUBROUTINES
+OTHER=myprotect.f90 (The OTHER option is  not  needed  if the P
+functions are coded explicitly or implicitly via $ABBR PROTECT.)
+
+The following protective code routines are available. For  all
+routines, if X=not a number, X is converted to machine precision
+value, which is about 1.0E-15,  before performing an operation on it.
+If  X>INFNTY (where INFNTY is approximately 1.0E+154), then X is
+converted to INFNTY before an operation is performed on it.
+
+- PLOG(x):  returns LOG of x.  If x<SMALLZ, where SMALLZ is
+  approximately 2.8E-103, then LOG(SMALLZ) is returned.
+
+
+- PLOG10(x):   returns  LOG10  of  x.  If x<SMALLZ, where SMALLZ is
+  approximately 2.8E-103, then LOG10(SMALLZ) is returned.
+
+
+- PSQRT(x): returns SQRT of x.  If x=0.0d+00, then 0 is returned.
+
+
+- PEXP(x): returns EXP  of  x.   If  x>40.0,  then  PEXP(100.0)  is
+  returned (avoids overflow).
+
+
+- PDZ(x):  returns  1/x  .   Protects  against  divide by zero.  If
+  abs(x)<SMALLZ, then 1/SMALLZ is returned.
+
+
+- PZR(x): returns x.  protects  against  zero.   If  abs(x)<SMALLZ,
+  then SMALLZ is returned.
+
+
+- PNP(x):  returns x.  Protects against non-positive.  If X<SMALLZ,
+  then SMALLZ is returned.
+
+
+- PHE(x): returns x. Protects against  high  exponent.   If  X>100,
+  then 100 is returned. Thus PEXP(x)=EXP(PHE(x)).
+
+
+- PNG(x):  returns  x.   Protects against negative.  If X<0.0, then
+  0.0 is returned.
+
+
+- PTAN(x): returns tan(x). Protects against returning  infinity  on
+  inputs near pi/2.
+
+
+- PATAN(x): returns atan(x). Protects against large intputs.
+
+
+- PACOS(x),  PASIN(x):  returns acos(x), asin(x), respectively.
+  If |X| is between 1.0 and 1+10**(-08), then x is submitted as  1  or
+  -1.  So, "dirty ones" are cleaned up, but values clearly beyond 1
+  are allowed to trip up the function, so the user is aware of  the
+  logical error in the code, and fix the issue.
+
+
+Instead of replacing various operations with protected code operations by hand, you can ask NMTRAN to automatically convert your code to protected code with the following statement:
+
+#+begin_src perl
+$ABBR PROTECT
+#+end_src
+
+NMTRAN will automatically replace all LOG (or DLOG) with PLOG, EXP (or
+DEXP) with PEXP, SQRT (or DSQRT) with PSQRT, / operations with *PDZ(),
+and B**E operations with PEXP(E*PLOG(B)), and so on.
+
+Note  that  the any P function name that is used explicitly or
+implicitly via $ABBR PROTECT may not be used  for  a  user-defined
+variable name.

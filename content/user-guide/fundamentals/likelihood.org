@@ -5,18 +5,20 @@ draft: false
 bookCollapseSection: false
 weight: 3
 ---
+
 {{< katex >}}{{< /katex >}}
 
 * Likelihood and MLE
 To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component
 $$
-y = f(x, \phi, t) + \epsilon,
+y = f(x, \phi, t) + g(x_{ij}, \phi_i)^T\epsilon,
 $$
 and a statistical component
 $$
 \phi = \mu(z, \theta, \eta).
 $$
-Another formulation is through the likelihood. Let \(p(y_i|\phi_i, \Sigma_i)\) be the
+This formulation in fact describes the likelihood. To simplify
+presentation, let us assume homoscedasticity so that \(g(\cdot)\equiv 1\) . Let \(p(y_i|\phi_i, \Sigma_i)\) be the
 likelihood function for individual /i/, as a function of the
 individual parameter \(\phi_i\) and residual covariance matrix
 \(\Sigma_i\). Then NONMEM's assumption that observation \(y_i\)
@@ -78,9 +80,13 @@ also use \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\) to
 calculate the covariance matrix (hence the standard error) of
 individual predictions.
 
+See [[file:/docs/user-guide/advanced/bayesian/#ebe][Bayesian methods]] on how the individual parameter \(\eta\) is
+calculated in MLE, using empirical bayes estimation (EBE) (aka posthoc
+estimation).
+
 ** Least-square method
 It is helpful to view the extended least-square (ELS) method used by
-classic NONMEM methods through the lens of MLE.
+classical NONMEM methods through the lens of MLE.
 To simplify presentation here we only consider the individual model
 $$
 y_{ij} = f(x_{ij}, \phi_i) + \epsilon_{ij},\quad j=1,\dots,N_i,
@@ -152,7 +158,7 @@ This is the default estimation in NONMEM but users have option to
 
 ** Goodness-of-Fit
 Three Goodness-of-Fit (GoF) quantities are always among the NONMEM
-output: prediction, residual, and weighted residual. One can also request additional quantities.
+output: prediction, residual, and weighted residual.
 
 The prediction ("PRED" in NONMEM output) is the result of \(f()\)
 based on /population estimates/. In other words, it is computed at the
@@ -177,9 +183,76 @@ square root. Note here we only have individual subscript,
 therefore the WRES and \(y\) in the definition are in general vectors
 (for multiple observation of subject /i/).
 
+One can request additional quantities with $TABLE.
 
-# NONMEM provides the following additional GoF quantities.
+- OBJI. These are objective function values for each individual.  The
+  sum of the individual objective function values is equal to the
+  total objective function.
 
-# *** CPRES, CRES, CWRES
-# Depends on the estimation method, one can obtain certain estimate of
-# \(\eta\)'s, denoted as \(\hat{\eta}\). Then CPRES is the linear prediction
+- NPRED, NRES, NWRES. These are non-conditional, no eta-epsilon
+  interaction, pred, res, and wres values.  These are identical to
+  those issued by NONMEM V as PRED, RES, and WRES.
+
+- PREDI, RESI, WRESI. These are non-conditional, with eta-epsilon
+  interaction, pred, res, and wres values.  These are identical to
+  those issued by NONMEM VI as PRED, RES, and WRES.  The WRESI will
+  not differ from NWRES if INTERACTION was not selected in the
+  previous $EST command.
+
+- CPRED, CRES, CWRES. These are conditional, no ETA-EPSILON
+  interaction, PRED, RES, and WRES values. Let \(\hat{\eta}\) be
+  the conditional mode ETAs (from FOCE or ITS) [fn:1], or
+  the conditional mean ETAs (from Monte Carlo EM methods).
+  If \(\hat{\eta}\) is available from a previous $EST estimation, then
+  for subject \(i\), the conditional prediction (CPRED), the conditional residual
+  (CRES), and the conditional weighted residual (CWRES) are
+  $$
+  \text{CPRED}_i = f|_{\hat{\theta}, \hat{\eta}_i} - \frac{\partial f}{\partial \eta_i}|_{\hat{\theta},\hat{\eta}_i}\hat{\eta}_i,
+  $$
+  $$
+  \text{CRES}_i = y_i - \text{CPRED}_i,
+  $$
+  $$
+  \text{CWRES}_i = {\text{cov}^{-1/2}(y_i)}|_{\hat{\eta}_i}\text{CRES}_i.
+  $$
+  The subscripts by "|" denote the functions and derivatives are evaluated at the estimates.
+  CPRED values to be negative.  Users may prefer to request NPRED CRES
+  CWRES,  or NPRED RES CWRES.  The conditional weighted residual will
+  not differ from the non-conditional weighted residual if FO was
+  selected in the previous $EST command.
+
+- CPREDI, CRESI, CWRESI. The counterparts of CPRED, CRES and CWRES with ETA-EPSILON
+  interaction.
+
+- EPRED, ERES, EWRES. These are Monte-Carlo generated (expected) PRED,
+  RES, and WRES values without linearization found in the other
+  diagnostics. For subject /i/, let \(n_i\) be the number of
+  \(\eta_i\) samples: \(\eta_i^{(1)}\),\dots,\(\eta_i^{(n_i)}\), then
+  $$
+  \text{EPRED}_i = \bar{f}(x_{ij}, \mu(z_i, \hat{\theta}, \eta_i))=\frac{1}{n_i}\sum_{k=1}^{n_i}f(x_{ij}, \mu(z_i, \hat{\theta}, \eta_i^{(k)})),
+  $$
+  $$
+  \text{ERES}_i= y_i-\text{EPRED}_i,
+  $$
+  $$
+  \text{EWRES}_i = {\text{cov}^{-1/2}(y_i)}\text{ERES}_i.
+  $$
+  Note that here the residual covariance matrix
+  \({\text{cov}(y_i)}\) is also based on \(\eta_i\) samples:
+
+  $$
+  \text{cov}(y_i) =
+  \frac{1}{n_i}\sum\left[g|_{\eta_i^{(k)}}\hat{\Sigma}g|_{\eta_i^{(k)}}^T + (f|_{\eta_i^{(k)}}-\text{EPRED}_i)(f|_{\eta_i^{(k)}}-\text{EPRED}_i)^T\right]
+  $$
+
+- ECWRES. Similar to EWRES, but with covarinace matrix for the
+  residual error evaluated at \(\hat{\eta}_i\) instead of samples means.
+  $$
+  \text{cov}(y_i) =
+  g|_{\hat{\eta_i}}\hat{\Sigma}g|_{\hat{\eta_i}}^T + \frac{1}{n_i}\sum\left[(f|_{\eta_i^{(k)}}-\text{EPRED}_i)(f|_{\eta_i^{(k)}}-\text{EPRED}_i)^T\right]
+  $$
+
+
+[fn:1] The conditional mode ETAs are also known as conditional
+parametric ETAs (CPE), empirical bayes estimates (EBE), posthoc
+estimates of ETAs, or mode a posteriori (MAP) estimates.

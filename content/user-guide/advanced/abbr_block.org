@@ -6,6 +6,8 @@ bookCollapseSection: false
 weight: 152
 ---
 
+{{< katex >}}{{< /katex >}}
+
 * Code blocks
 Abbreviated code blocks are used to achieve special tasks.
 | Block                             | Usage                                           |
@@ -29,12 +31,11 @@ selectively passed to PK,  ERROR,  and  INFN. It can  be  used  in
 $PK, $ERROR, and $PRED abbreviated code.  The discussion below
 describes the values of ICALL as seen by PRED.
 
-- ICALL=-1: the routine has been called for the PRED_IGNORE_DATA
-  feature of  NONMEM  7.5.   One  call per data record, at the start
-  of the run. These  calls  occur  only   if   abbreviated   code
-  uses   variables PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if
-  the PRED_IGNORE_DATA option of $DATA is used.  Otherwise, there are
-  no calls to  PRED  with ICALL=-1.
+- ICALL=-1: the routine has been called for the ~PRED_IGNORE_DATA~
+  (NM 7.5).  One call per data record, at the start
+  of the run. These calls occur only  if  abbreviated  code
+  uses variables ~PRED_IGNORE_DATA~ or ~PRED_IGNORE_DATA _TEST~, or
+  the $DATA PRED_IGNORE_DATA option.
 
 - ICALL=0:  the routine has been called for initialization at the
   beginning of the NONMEM run; one such call per run.
@@ -46,10 +47,10 @@ describes the values of ICALL as seen by PRED.
   calls occur.
 
 - ICALL=3: the routine has been called for finalization at the end of
-  a NONMEM problem; one such call per problem.
+  a NONMEM problem; one call per problem.
 
 - ICALL=4:  the routine has been called during the Simulation Step;
-  multiple calls occur, as with ICALL=2.
+  multiple calls occur.
 
 - ICALL=5: the routine has been called when expectations are being
   computed; multiple calls occur.
@@ -57,10 +58,7 @@ describes the values of ICALL as seen by PRED.
 - ICALL=6:  the routine has been called when raw data averages are
   being computed; multiple calls occur.
 
-- Note: Some subroutines are called with only a subset of  the  possible values of ICALL.
-
-- REFERENCES: Guide  I, section C,4.2; Guide IV, section IV.D ,
-  IV.E.1; Guide VI, section III.C , IV.B.1
+- Some subroutines are called with only a subset of  the  possible values of ICALL.
 
 ** Compartment initialization
 :PROPERTIES:
@@ -1120,7 +1118,7 @@ generated Fortran subroutines. Special rules:
     this as PRED SIMULATION REDO  in  the  NONMEM  report  file.   It
     writes to the NONMEM report file a description of the data record
     and THETA and ETA values, for example
-    #+begin_src txt
+    #+begin_src
      PRED SIMULATION REDO PRED EXIT CODE = 1 INDIVIDUAL NO.       1
      ID= 1.00000000000000E+00   (WITHIN-INDIVIDUAL) DATA REC NO.   1
      THETA=
@@ -1134,14 +1132,14 @@ generated Fortran subroutines. Special rules:
     sional bad random sample, but is caused by a systematic error  in
     the  control  stream file. The simulation step is terminated with
     the message
-    #+begin_src txt
+    #+begin_src
     PRED ERROR OCCURRED TOO OFTEN ON SIMULATION
     instead of a message
     SIMULATION STEP PERFORMED
     #+end_src
     With NONMEM 7.5, the PRED  EXIT  CODE  k  may  be  in  the  range
     1000-9999. For example,
-    #+begin_src txt
+    #+begin_src
     IF(ICALL==4.and.IPRED<0.01 .and. TIME>20.0) EXIT 1 2300
     #+end_src
     This can only occur with user's EXIT code; PREDPP will not gener-
@@ -1149,7 +1147,7 @@ generated Fortran subroutines. Special rules:
     to  10000  times.   The  message "PRED SIMULATION REDO" itself is
     written to PRDERR  up to 30 times.   After  that,  the  following
     message is written to PRDERR:
-    #+begin_src txt
+    #+begin_src
     SUBSEQUENT PRED SIMULATION REDO ERROR MESSSAGES SUPPRESSED
     #+end_src
     NONMEM continues trying new ETA and EPS. Be careful that the con-
@@ -1157,7 +1155,7 @@ generated Fortran subroutines. Special rules:
     After  10000  tries, the simulation is terminated as a protection
     against an infinite loop. The following  message  is  written  to
     PRDERR:
-    #+begin_src txt
+    #+begin_src
     TOO MANY CONSECUTIVE PRED ERRORS (>10000) OCCURRED ON SIMULATION
     #+end_src
 

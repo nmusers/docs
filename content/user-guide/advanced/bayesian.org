@@ -5,10 +5,11 @@ draft: false
 bookCollapseSection: false
 weight: 154
 ---
+
 {{< katex >}}{{< /katex >}}
 
 * Bayesian methods
-Recall that the classic NONMEM MLE methods seek parameters \((\theta, \Omega,
+Recall that the classical NONMEM MLE methods seek parameters \((\theta, \Omega,
 \Sigma)\) that maximize the log-likelihood \(\mathcal{L}=\log(L)\).
 With Bayesian methods we instead seek the parameters using
 the prior information in addition to the likelihood, based on the
@@ -109,6 +110,36 @@ In the above model ~TNPRI (PROBLEM 2)~ indicates that the prior based
 on ~msf1~ will be imposed on PROBLEM 2, the second problem in the
 control stream that uses default FO for estimation.
 
+** Empirical Bayes estimation of \(\eta\)
+:PROPERTIES:
+:CUSTOM_ID: ebe
+:END:
+Recall that during the MLE the individual parameter \(\eta\) is
+marginalized out. We can use the MAP estimation to "recover" \(\eta\).
+This is done after (FO method) or during (FOCE method) population
+parameter estimation, and referred as /posthoc/ estimation.
+
+Specifically, for subject /i/'s \(\eta_i\), we use the estimated \(\hat{\Omega}\) for the
+prior (multivariate normal) distribution,
+and the estimated \((\hat{\theta}, \hat{\Sigma})\) for the
+likelihood, then we have the posterior probability density for
+\(\eta_i\) as
+$$
+p(\eta_i | y_i) \propto p(y_i|\phi_i(\hat{\theta}, \eta_i, \hat{\Sigma}))p_0(\eta_i,\hat{\Omega}).
+$$
+Then the MAP estimate of \(\eta_i\) is
+
+$$
+\hat{\eta}_i = \text{arg}\,\text{max}_{\eta_i}\log (p(\eta_i | y_i)) =
+\text{arg}\,\text{max}_{\eta_i} [\mathcal{L}_i(\eta_i)|_{\hat{\theta},
+\hat{\Sigma}} + \log p_0(\eta_i,\hat{\Omega})]
+$$
+
+Because the above \({\eta}_i\) prior is based on \(\Omega\)
+estimate which in turn is based on current observations, it is called empirical
+prior, and \(\hat{\eta}_i\) is called /empirical bayes estimate/
+(EBE). In NONMEM the term posthoc estimate and EBE is used interchangably.
+
 ** MCMC sampling
 As another Bayesian approach, sampling does not perform point
 estimation. Instead, it utilizes certain algorithm, aka
@@ -140,7 +171,7 @@ Regardless which sampler to use, prior information is
 still required for the MCMC methods. Consider the following
 two-compartment model example
 
-#+INCLUDE: "/examples/bayes_twocpt/w15.ctl" src perl
+#+INCLUDE: "../../examples/bayes_twocpt/w15.ctl" src perl
 
 We use [[file:/docs/reference-manual/api/subroutines/#nwpri][NWPRI]] in $PRIOR to indicate that
 the priors will be given manually through prior-specification control
@@ -149,17 +180,34 @@ has a normally-distributed prior with mean at 2.0. Note that this is
 not the prior mean for the individual PK parameters as they follow
 log-normal distribution. The $THETAPV record specifies an diagonal covariance matrix
 for the \(\theta\) prior, and each \(\theta\) has a very large prior
-variance, showing the lack of prior information on \(\theta\) [fn:2].
+variance [fn:2], showing the lack of prior information on \(\theta\).
 
-See [[file:/docs/cookbook/mcmc-post/][postprocessing MCMC draws]] on how to examine and interepret the
-sampling results.
+Similarly, $OMEGAP/$OMEGAPD, $SIGMAP/$SIGMAPD specify the elements and
+degrees of freedom for OMEGA and SIGMA, respectively. The priors for
+the two matrices follow inverse Wishart distribution.
+
+Note that before using NUTS, we first do a short (NITER=0) Iterative
+Two Stage (ITS) MLE run. This is to prepare position the sampler so
+that the sampling is initiated in a reasonable proximity in the
+posterior distribution (recall that the concatenate $EST records means
+the estimation uses the previous run's results as starting point).
+
+For the $EST METHOD=NUTS record, we see that there are 1000 samples
+(NITER). That is, each unknown parameter will be sampled 1000 times.
+These samples will be stored in the ".ext" file. BAYES_PHI_STORE=1
+means in addition to \(\theta, \Omega, \Sigma)\) we also requesting
+\(\phi\) samples. NONMEM outputs \(\phi\) samples in ".iph" files.
+These files could be of large size because we are requesting 1000
+samples for each subject \(\phi_i\) of the population. See
+[[file:/docs/cookbook/mcmc-post/][postprocessing MCMC draws]] on how to examine and interepret the sampling results.
 
 [fn:1] The normalization factor is a constant with respect to the
 parameters so the posterior distribution has integral 1. In Bayes'
 theorem it is in fact \(p(y)\), the /marginal/ distribution of the data,
 aka "evidence".
+
 [fn:2] In practice one may want to consider different variance for
 different \(\theta\) elements, as they correspond to different PK
 parameters, incorporating the transformation used. For example, based
-on the given prior mean and variance, CL has a very large prior mean of
+on the given prior mean and variance, CL has an unrealistically large prior mean of
 \(e^{2.0+10.0/2}\).

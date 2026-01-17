@@ -154,19 +154,43 @@ Optional.  Requests  that  the  NONMEM Estimation Step be implemented.
 May also be coded $ESTM or $ESTIMATE.   The  Estimation  Step  obtains
 parameter estimates.
 
-With  NONMEM 7, multiple Estimation Steps can be implemented in a
+In NONMEM v7+, multiple Estimation Steps can be implemented in a
 single problem.  A sequence of two or more Estimation Steps  will
 result in the sequential execution of each.  Options specified in an
 $ESTIMATION record will carry over to the next $ESTIMATION  record
 unless  a new  option  is  specified.  If a particular option is not
 used by the method then the option will be ignored.  The final
 parameter estimates from an Estimation Step will be passed on as the
-initial estimates for the next Estimation Step.
-
-(See $ESTIMATION_record_options).
-
-See  also "Reserved Variables that are of Interest During the  Estima-
-tion Step", at the end of this help item.
+initial estimates for the next Estimation Step. For example,
+#+begin_src perl
+$THETA 0.3 0.5 6.0
+$OMEGA 0.2 0.2 0.2
+$SIGMA 0.2
+; First estimation step
+$EST METHOD=0 MAXEVAL=9999
+     PRINT=5 NSIG=3
+; Second estimation step
+$EST METHOD=CONDTIONAL
+     NSIG=4
+#+end_src
+will first result in estimation of the problem by the first order
+method, using as initial parameters those defined by the $THETA,
+$OMEGA, and $SIGMA statements.  Next, the first order conditional
+estimation method will be implemented, using as initial parameters the
+final estimates of THETA, OMEGA, and SIGMA from the previous analysis.
+Up to 20 estimations may be performed within a problem.  For all
+intermediate estimation steps, their final parameter values and
+objective function will be printed to the raw output file. Settings to
+options specified in a $EST method will by default carry over to the
+next $EST method, until a new option setting specified.  Thus, in the
+example above, PRINT will remain 5 and MAXEVAL will remain 9999 for
+the second $EST statement, whereas NSIG will be changed to 4 and
+METHOD becomes conditional. (NOTHETABOUND, NOOMEGABOUND, and
+NOSIGMABOUND are exceptions to this rule. They pertain to all of the
+estimations in the series within a $PROB.  In NM710, NM712, and NM720,
+these options must be given with the very first $EST record in the
+problem.  With NM73, these options may be placed with any of the $EST
+records, but will still apply to all $EST records in the problem.)
 
 We discuss the METHOD option first, since many other options are
 context-dependent on the estimation method used.
@@ -640,7 +664,7 @@ problem, so use with care.
       subroutine should test NM_STEP and set ANRD accordingly.
 
 *** AUTO=[0|1|2|3]
-AUTO sets recommended options for METHOD used. This option is ignored by the classic NONMEM methods (FO/FOCE/Laplace).
+AUTO sets recommended options for METHOD used. This option is ignored by the classical NONMEM methods (FO/FOCE/Laplace).
   - AUTO=0 (NM73): NONMEM  does  not provide best settings of certain options. This is the default.
   - AUTO=1 (NM73): Several options will be set by NONMEM that will allow
     best  settings  to  be determined.  User may still over-ride those

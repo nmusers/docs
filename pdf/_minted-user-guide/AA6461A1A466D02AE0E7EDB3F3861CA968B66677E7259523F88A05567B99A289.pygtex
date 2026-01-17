@@ -1,0 +1,66 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n+nv}{\PYGZdl{}PROB}\PYG{+w}{ }\PYG{n}{Two}\PYG{+w}{ }\PYG{n}{compartment}\PYG{+w}{ }\PYG{n}{Model}
+\PYG{n+nv}{\PYGZdl{}INPUT}\PYG{+w}{ }\PYG{n}{C}\PYG{+w}{ }\PYG{n}{SET}\PYG{+w}{ }\PYG{n}{ID}\PYG{+w}{ }\PYG{n}{JID}\PYG{+w}{ }\PYG{n}{TIME}\PYG{+w}{  }\PYG{n}{DV}\PYG{o}{=}\PYG{n}{CONC}\PYG{+w}{ }\PYG{n}{AMT}\PYG{o}{=}\PYG{n}{DOSE}\PYG{+w}{ }\PYG{n}{RATE}\PYG{+w}{ }\PYG{n}{EVID}\PYG{+w}{ }\PYG{n}{MDV}\PYG{+w}{ }\PYG{n}{CMT}
+\PYG{n+nv}{\PYGZdl{}DATA}\PYG{+w}{ }\PYG{n}{w15}\PYG{o}{.}\PYG{n}{csv}\PYG{+w}{ }\PYG{n}{IGNORE}\PYG{o}{=}\PYG{n+nv}{@}
+
+\PYG{err}{\PYGZdl{}}\PYG{n+nv}{SUBROUTINES}\PYG{+w}{ }\PYG{n}{ADVAN3}\PYG{+w}{ }\PYG{n}{TRANS4}
+
+\PYG{n+nv}{\PYGZdl{}PK}
+\PYG{n}{MU\PYGZus{}1}\PYG{o}{=}\PYG{n}{THETA}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)}
+\PYG{n}{MU\PYGZus{}2}\PYG{o}{=}\PYG{n}{THETA}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{)}
+\PYG{n}{MU\PYGZus{}3}\PYG{o}{=}\PYG{n}{THETA}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{)}
+\PYG{n}{MU\PYGZus{}4}\PYG{o}{=}\PYG{n}{THETA}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{)}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} Etas are always normally distruted with mean 0, variance OMEGA().}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} phis (mu+eta) are normally distruted with mean MU, and variance OMEGA()}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} Individual parameters will be whatever the transformation is.  In this case, transformatioin is exponential of a}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} normally distributed parameter (phi), so individual parameters are log\PYGZhy{}normally distributed.}
+\PYG{n}{CL}\PYG{o}{=}\PYG{n}{DEXP}\PYG{p}{(}\PYG{n}{MU\PYGZus{}1}\PYG{o}{+}\PYG{n}{ETA}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{))}
+\PYG{n}{V1}\PYG{o}{=}\PYG{n}{DEXP}\PYG{p}{(}\PYG{n}{MU\PYGZus{}2}\PYG{o}{+}\PYG{n}{ETA}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{))}
+\PYG{n}{Q}\PYG{o}{=}\PYG{n}{DEXP}\PYG{p}{(}\PYG{n}{MU\PYGZus{}3}\PYG{o}{+}\PYG{n}{ETA}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{))}
+\PYG{n}{V2}\PYG{o}{=}\PYG{n}{DEXP}\PYG{p}{(}\PYG{n}{MU\PYGZus{}4}\PYG{o}{+}\PYG{n}{ETA}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{))}
+\PYG{n}{S1}\PYG{o}{=}\PYG{n}{V1}
+
+\PYG{n+nv}{\PYGZdl{}ERROR}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} Data DV are normally distributed, with residual variance F*F*SIGMA(1,1), and its SD is F*SQRT(SIGMA(1,1))}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}  This is because EPS() is scaled with sqrt(SIGMA)}
+\PYG{n}{Y}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{F}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{F}\PYG{o}{*}\PYG{n}{EPS}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)}
+
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} Initial values of THETA}
+\PYG{n+nv}{\PYGZdl{}THETA}
+\PYG{+w}{ }\PYG{l+m+mf}{2.0}\PYG{+w}{ }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[LN(CL)]}
+\PYG{+w}{ }\PYG{l+m+mf}{2.0}\PYG{+w}{ }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[LN(V1)]}
+\PYG{+w}{ }\PYG{l+m+mf}{2.0}\PYG{+w}{ }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[LN(Q)]}
+\PYG{+w}{ }\PYG{l+m+mf}{2.0}\PYG{+w}{ }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[LN(V2)]}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}INITIAL values of OMEGA}
+\PYG{n+nv}{\PYGZdl{}OMEGA}\PYG{+w}{ }\PYG{n}{BLOCK}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{)}
+\PYG{l+m+mf}{0.15}\PYG{+w}{   }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[P]}
+\PYG{l+m+mf}{0.01}\PYG{+w}{  }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[F]}
+\PYG{l+m+mf}{0.15}\PYG{+w}{   }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[P]}
+\PYG{l+m+mf}{0.01}\PYG{+w}{  }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[F]}
+\PYG{l+m+mf}{0.01}\PYG{+w}{  }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[F]}
+\PYG{l+m+mf}{0.15}\PYG{+w}{   }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[P]}
+\PYG{l+m+mf}{0.01}\PYG{+w}{  }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[F]}
+\PYG{l+m+mf}{0.01}\PYG{+w}{  }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[F]}
+\PYG{l+m+mf}{0.01}\PYG{+w}{  }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[F]}
+\PYG{l+m+mf}{0.15}\PYG{+w}{   }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[P]}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}Initial value of SIGMA}
+\PYG{n+nv}{\PYGZdl{}SIGMA}
+\PYG{p}{(}\PYG{l+m+mf}{0.6}\PYG{+w}{ }\PYG{p}{)}\PYG{+w}{   }\PYG{p}{;}\PYG{c+c1}{\PYGZsh{}[P]}
+
+\PYG{n+nv}{\PYGZdl{}PRIOR}\PYG{+w}{ }\PYG{n}{NWPRI}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} Prior information of THETAS.  Normal distribution of thetas assumed unless \PYGZdl{}TTDF is set, in which case it is then T distriuted}
+\PYG{n+nv}{\PYGZdl{}THETAP}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mf}{2.0}\PYG{+w}{ }\PYG{n}{FIX}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mf}{2.0}\PYG{+w}{ }\PYG{n}{FIX}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mf}{2.0}\PYG{+w}{ }\PYG{n}{FIX}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mf}{2.0}\PYG{+w}{ }\PYG{n}{FIX}\PYG{p}{)}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} Variance to prior information of THETAS.}
+\PYG{n+nv}{\PYGZdl{}THETAPV}\PYG{+w}{ }\PYG{n}{BLOCK}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{FIXED}\PYG{+w}{ }\PYG{n}{VALUES}\PYG{p}{(}\PYG{l+m+mf}{10.0}\PYG{p}{,}\PYG{l+m+mf}{0.0}\PYG{p}{)}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} Inverse Wishart distribution assumed, unless \PYGZdl{}OLKJDF, \PYGZdl{}OVARF are set.}
+\PYG{n+nv}{\PYGZdl{}OMEGAP}\PYG{+w}{ }\PYG{n}{BLOCK}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{FIXED}\PYG{+w}{ }\PYG{n}{VALUES}\PYG{p}{(}\PYG{l+m+mf}{0.15}\PYG{p}{,}\PYG{l+m+mf}{0.0}\PYG{p}{)}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} Low degrees of freedom, equivalent to block dimension, means low information.}
+\PYG{n+nv}{\PYGZdl{}OMEGAPD}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{+w}{ }\PYG{n}{FIX}\PYG{p}{)}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} Prior information to the SIGMAS.}
+\PYG{p}{;}\PYG{c+c1}{\PYGZsh{} Inverse Wishart distribution assumed, unless \PYGZdl{}SLKJDF, \PYGZdl{}SVARF}
+\PYG{n+nv}{\PYGZdl{}SIGMAP}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mf}{0.06}\PYG{+w}{ }\PYG{n}{FIXED}\PYG{p}{)}
+\PYG{n+nv}{\PYGZdl{}SIGMAPD}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{n}{FIXED}\PYG{p}{)}
+
+\PYG{n+nv}{\PYGZdl{}EST}\PYG{+w}{ }\PYG{n}{METHOD}\PYG{o}{=}\PYG{n}{ITS}\PYG{+w}{ }\PYG{n}{INTERACTION}\PYG{+w}{ }\PYG{n}{NITER}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{n}{NOABORT}\PYG{+w}{ }\PYG{n}{NOPRIOR}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{n}{file}\PYG{o}{=}\PYG{n}{w15\PYGZus{}its}\PYG{o}{.}\PYG{n}{ext}
+\PYG{n+nv}{\PYGZdl{}EST}\PYG{+w}{ }\PYG{n}{METHOD}\PYG{o}{=}\PYG{n}{NUTS}\PYG{+w}{ }\PYG{n}{AUTO}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{n}{PRINT}\PYG{o}{=}\PYG{l+m+mi}{100}\PYG{+w}{ }\PYG{n}{NITER}\PYG{o}{=}\PYG{l+m+mi}{1000}\PYG{+w}{ }\PYG{n}{NOPRIOR}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{n}{BAYES\PYGZus{}PHI\PYGZus{}STORE}\PYG{o}{=}\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{n}{file}\PYG{o}{=}\PYG{n}{w15}\PYG{o}{.}\PYG{n}{ext}
+\end{Verbatim}

@@ -23,14 +23,14 @@ Consider the following example. The model uses ITS to position the initial draws
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="cookbook">
-    <meta property="article:modified_time" content="2026-01-07T08:46:30-08:00">
+    <meta property="article:modified_time" content="2026-01-15T11:03:50-08:00">
 
 
   <meta itemprop="name" content="Postprocessing MCMC draws">
   <meta itemprop="description" content="Postprocessing MCMC draws Each MCMC run generates posterior draws (samples) in .ext and .iph, as described in output files. In this article we show how to postprocess these draws in R.
 Consider the following example. The model uses ITS to position the initial draws, followed by NUTS sampler that draws.
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 $PROB RUN# Example 1 (from samp5l) $INPUT C SET ID JID TIME DV=CONC AMT=DOSE RATE EVID MDV CMT $DATA w15.csv IGNORE=@ $SUBROUTINES ADVAN3 TRANS4 ;# Two compartment Model $PK MU_1=THETA(1) MU_2=THETA(2) MU_3=THETA(3) MU_4=THETA(4) ;# ETAs: normally distruted with mean 0, variance OMEGA(). ;# PHI=MU&#43;ETA: normally distruted with mean MU, and variance OMEGA() ;# thus individual parameters CL,V1,Q,V2 follow log-normal distribution. CL=DEXP(MU_1&#43;ETA(1)) V1=DEXP(MU_2&#43;ETA(2)) Q=DEXP(MU_3&#43;ETA(3)) V2=DEXP(MU_4&#43;ETA(4)) S1=V1 ;# Y is normally distributed, with sd is F*SQRT(SIGMA(1,1)) $ERROR Y = F &#43; F*EPS(1) ;# Initial values of THETA, OMEGA, SIGMA $THETA 2.0 ;# [LN(CL)] 2.0 ;# [LN(V1)] 2.0 ;# [LN(Q)] 2.0 ;# [LN(V2)] $OMEGA BLOCK(4) 0.15 ;# [P] 0.01 ;# [F] 0.15 ;# [P] 0.01 ;# [F] 0.01 ;# [F] 0.15 ;# [P] 0.01 ;# [F] 0.01 ;# [F] 0.01 ;# [F] 0.15 ;# [P] $SIGMA (0.6 ) ;# [P] $PRIOR NWPRI ;# THETA Priors follow normal distribution (use $TTDF for t-distriution). ;# This normal prior is specfied by $THETAP (mean) and $THETAPV (covariance) $THETAP (2.0 FIX) (2.0 FIX) (2.0 FIX) (2.0 FIX) ;# uninformative prior with large variance $THETAPV BLOCK(4) FIXED VALUES(50.0,0.0) ;# Inverse Wishart dist for OMEGA&#39;s prior, unless $OLKJDF, $OVARF used. $OMEGAP BLOCK(4) FIXED VALUES(0.15,0.0) ;# Uninformative prior: low degrees of freedom, equivalent to block dimension. $OMEGAPD (4 FIX) ;# Inverse Wishart dist for SIGMA&#39;s prior, unless $SLKJDF, $SVARF used $SIGMAP (0.06 FIXED) $SIGMAPD (1 FIXED) $EST METHOD=ITS INTERACTION NITER=0 NOABORT NOPRIOR=1 file=w15_its.ext $EST METHOD=NUTS AUTO=1 PRINT=100 NITER=1000 NOPRIOR=0 BAYES_PHI_STORE=1 file=w15.ext delim=q The raw output file contains the draws for THETA, OMEGA, and SIGMA:">
-  <meta itemprop="dateModified" content="2026-01-07T08:46:30-08:00">
+  <meta itemprop="dateModified" content="2026-01-15T11:03:50-08:00">
   <meta itemprop="wordCount" content="1242">
 
 <title>Postprocessing MCMC draws | NONMEM Documentation</title>
@@ -41,7 +41,7 @@ Consider the following example. The model uses ITS to position the initial draws
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.7be99fe1c48c426b84531c662b4b601a55b76b71c49acf3a6afa3692d6115c58.js" integrity="sha256-e&#43;mf4cSMQmuEUxxmK0tgGlW3a3HEms86avo2ktYRXFg=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.c1fef8ef7d563a59711c79d8e0aeccf0cb7cd9f069ae328401a30fc24b12fce5.js" integrity="sha256-wf74731WOllxHHnY4K7M8Mt82fBprjKEAaMPwksS/OU=" crossorigin="anonymous"></script>
 
 
 
@@ -222,7 +222,7 @@ Consider the following example. The model uses ITS to position the initial draws
 
   
     <a href="/docs/user-guide/nmtran/data/" class="">
-      1. Data</a>
+      Data</a>
   
 
         </li>
@@ -236,7 +236,7 @@ Consider the following example. The model uses ITS to position the initial draws
 
   
     <a href="/docs/user-guide/nmtran/control/" class="">
-      2. Control records</a>
+      Control records</a>
   
 
         </li>
@@ -250,7 +250,7 @@ Consider the following example. The model uses ITS to position the initial draws
 
   
     <a href="/docs/user-guide/nmtran/output/" class="">
-      3. Output</a>
+      Output</a>
   
 
         </li>
@@ -286,12 +286,8 @@ Consider the following example. The model uses ITS to position the initial draws
   
 
   
-    <input type="checkbox" id="section-b4d635c55a90184dd9eaba68b950d9ca" class="toggle"  />
-    <label for="section-b4d635c55a90184dd9eaba68b950d9ca" class="flex">
-      <a href="/docs/user-guide/predpp/population_model/" class="">
-        PK parameter model</a>
-      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
-    </label>
+    <a href="/docs/user-guide/predpp/population_model/" class="">
+      PK parameter model</a>
   
 
         </li>
@@ -304,12 +300,36 @@ Consider the following example. The model uses ITS to position the initial draws
   
 
   
-    <input type="checkbox" id="section-0491f18d5682fdcb9c07f795c3b0e97d" class="toggle"  />
-    <label for="section-0491f18d5682fdcb9c07f795c3b0e97d" class="flex">
-      <a href="/docs/user-guide/predpp/general_linear_model/" class="">
-        General linear model</a>
-      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
-    </label>
+    <a href="/docs/user-guide/predpp/general_linear_model/" class="">
+      General linear model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/mm/" class="">
+      Michaelis–Menten model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/pkpd/" class="">
+      PKPD model</a>
   
 
         </li>
@@ -337,20 +357,6 @@ Consider the following example. The model uses ITS to position the initial draws
 
           
   <ul>
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/user-guide/advanced/components/" class="">
-      NONMEM components</a>
-  
-
-        </li>
-      
     
       
         <li>
@@ -387,8 +393,8 @@ Consider the following example. The model uses ITS to position the initial draws
   
 
   
-    <a href="/docs/user-guide/advanced/theta_trans/" class="">
-      THETA transformation</a>
+    <a href="/docs/user-guide/advanced/bayesian/" class="">
+      Bayesian methods</a>
   
 
         </li>
@@ -807,20 +813,6 @@ Consider the following example. The model uses ITS to position the initial draws
   
 
   
-    <a href="/docs/reference-manual/control-records/olkjdf/" class="">
-      $OLKJDF</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
     <a href="/docs/reference-manual/control-records/omega/" class="">
       $OMEGA</a>
   
@@ -835,36 +827,8 @@ Consider the following example. The model uses ITS to position the initial draws
   
 
   
-    <a href="/docs/reference-manual/control-records/omegap/" class="">
-      $OMEGAP</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
     <a href="/docs/reference-manual/control-records/omit/" class="">
       $OMIT</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/reference-manual/control-records/ovarf/" class="">
-      $OVARF, $SVARF</a>
   
 
         </li>
@@ -975,20 +939,6 @@ Consider the following example. The model uses ITS to position the initial draws
   
 
   
-    <a href="/docs/reference-manual/control-records/sigmap/" class="">
-      $SIGMAP, $SIGMAPD</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
     <a href="/docs/reference-manual/control-records/simulation/" class="">
       $SIMULATION</a>
   
@@ -1017,20 +967,6 @@ Consider the following example. The model uses ITS to position the initial draws
   
 
   
-    <a href="/docs/reference-manual/control-records/slkjdf/" class="">
-      $SLKJDF</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
     <a href="/docs/reference-manual/control-records/subroutines/" class="">
       $SUBROUTINES</a>
   
@@ -1047,20 +983,6 @@ Consider the following example. The model uses ITS to position the initial draws
   
     <a href="/docs/reference-manual/control-records/super/" class="">
       $SUPER</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/reference-manual/control-records/svarf/" class="">
-      $SVARF</a>
   
 
         </li>
@@ -1115,36 +1037,8 @@ Consider the following example. The model uses ITS to position the initial draws
   
 
   
-    <a href="/docs/reference-manual/control-records/thetap/" class="">
-      $THETAP, $THETAPV</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
     <a href="/docs/reference-manual/control-records/tol/" class="">
       $TOL</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/reference-manual/control-records/ttdf/" class="">
-      $TTDF</a>
   
 
         </li>
@@ -1302,36 +1196,8 @@ Consider the following example. The model uses ITS to position the initial draws
   
 
   
-    <a href="/docs/cookbook/symbolic_label/" class="">
-      symbolic_label</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
     <a href="/docs/cookbook/prior/" class="">
       Bayesian Priors</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/cookbook/dowhile/" class="">
-      DO WHILE</a>
   
 
         </li>
@@ -1414,20 +1280,6 @@ Consider the following example. The model uses ITS to position the initial draws
   
 
   
-    <a href="/docs/cookbook/protect/" class="">
-      PROTECT</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
     <a href="/docs/cookbook/repeated_records/" class="">
       Repeated Observation Records</a>
   
@@ -1458,20 +1310,6 @@ Consider the following example. The model uses ITS to position the initial draws
   
     <a href="/docs/cookbook/saem-extra-request/" class="">
       SAEM_EXTRA variables</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/cookbook/random/" class="">
-      Stochastic structure</a>
   
 
         </li>
@@ -2032,9 +1870,9 @@ features.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/1edebba7406d3772d46555457e7f4ab37275ce72" title='Last modified by Yi Zhang | 2026 Jan 7' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/f605297f73e7a10fad62f67177202912a0b18428" title='Last modified by Yi Zhang | 2026 Jan 15' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Jan 7</span>
+    <span>2026 Jan 15</span>
   </a>
 
 </div>
@@ -2065,8 +1903,8 @@ features.</p>
     </span>
     <span>
     
-      <a href="/docs/cookbook/protect/" class="flex align-center">
-        <span>PROTECT</span>
+      <a href="/docs/cookbook/repeated_records/" class="flex align-center">
+        <span>Repeated Observation Records</span>
         <img src="/docs/icons/forward.svg" class="book-icon" alt="Forward" />
       </a>
     

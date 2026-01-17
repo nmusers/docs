@@ -1,0 +1,32 @@
+---
+title: "Michaelis–Menten model"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: false
+weight: 16
+---
+{{< katex >}}{{< /katex >}}
+
+* ODE solution of Michaelis–Menten model
+NONMEM AVDAN10 supports one-compartment model with Michaelis-Menten
+(M-M) elimination. For M-M kinetics in other compartment models, user
+will need to utilize general nonlinear models for numerical ODE
+solution. In this example we use $ADVAN6 and $DES to describe a
+two-compartment M-M model with first order absorption.
+
+Let /c/ be the drug amount, recall M-M model assumes elimination rate
+\(c V_m/(K_m + c)\). Here \(V_m\) is the limiting rate at the
+saturating concentration, and \(K_m\) the Michaelis constant. Using
+$MODEL and $DES records we
+can describe the ODE system as
+#+begin_src perl
+$MODEL COMP=(DEPOT,DEFDOS),COMP=(CENTRAL,DEFOBS) COMP=(PERIPH)
+;#...
+$DES
+C2 = A(2)/S2
+DADT(1) = -K12*A(1)
+DADT(2) = K12*A(1) -K23*A(2) +K32*A(3) -C2*VM/(KM+C2)
+DADT(3) = K23*A(2) -K32*A(3)
+#+end_src
+~C2~, The concentration in the central compartment, is calculated
+using drug amount ~A(2)~ and volume scaling factor ~S2~.

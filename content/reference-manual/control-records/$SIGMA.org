@@ -175,7 +175,7 @@ With  NONMEM  7.3 if the initial estimate of a block is not positive
 definite because of rounding errors, a value will  be  added to  the
 diagonal elements to make it positive definite. A message in the
 NONMEM report file  will  indicate  that  this  was  done. E.g.,
-#+begin_src txt
+#+begin_src
  DIAGONAL SHIFT OF  1.1000E-03 WAS IMPOSED TO ENSURE POSITIVE DEFINITENESS
 #+end_src
 
@@ -245,7 +245,7 @@ defined happens to be
   $SIGMA RSW=.06
 #+end_src
 The NONMEM report will describe the relationship, e.g.,
-#+begin_src txt
+#+begin_src
   LABELS FOR EPS
   EPS(1)=EPS(RSW)
 #+end_src
@@ -268,6 +268,59 @@ Or, for diagonals,
   RSW= 0.3
   EX= 0.35
 #+end_src
+
+Yet another example using labels for all parameters:
+#+begin_src perl
+$THETA
+V1=(0.0,7.0) CL=(0.0,7.0) Q=(0.0,7.0) V2=7
+
+$OMEGA BLOCK(4)
+ECL=  0.3
+EV1=  0.01 0.35
+EQ=   (0.01)X2 0.54
+EV2=  (0.01)X3 0.67
+
+$SIGMA
+RSW=(0.6 )   ;#[P]
+
+$THI
+THETA(CL)=LOG(THETAI(CL))
+THETA(V1)=LOG(THETAI(V1))
+THETA(Q)=LOG(THETAI(Q))
+THETA(V2)=LOG(THETAI(V2))
+
+$THR
+THETAR(CL)=LOG(THETA(CL))
+THETAR(V1)=LOG(THETA(V1))
+THETAR(Q)=LOG(THETA(Q))
+THETAR(V2)=LOG(THETA(V2))
+
+$PK
+MU_ECL=THETA(CL)
+MU_EV1=THETA(V1)
+MU_EQ=theta(Q)
+MU_EV2=THETA(V2)
+CL=DEXP(MU_ECL+ETA(ECL))
+V1=DEXP(MU_EV1+ETA(EV1))
+Q=DEXP(MU_EQ+ETA(EQ))
+V2=DEXP(MU_EV2+ETA(EV2))
+S1=V1
+
+$ERROR
+Y = F + F*EPS(RSW)
+#+end_src
+Notice the $THETA, $OMEGA and $SIGMA records must be placed ahead of
+any records that use the symbolic label. So, these records must be
+placed before $THI, $THR, $PK, and $ERROR.  Also, notice that the
+position of CL V1 in $PK in reverse order relative to the associated
+etas in $OMEGA.  Thus, the inter-subject variability of CL is ETA(1),
+and its fixed effect is THETA(2).  The user no longer needs to
+consider the numeric ordering of THETAs and etas, however, and just
+utilize the symbols, and NMTRAN will map out everything correctly in
+the final FSUBS routine.  If later, you wish to add a theta, you can
+place it anywhere in the $THETA record (its position in $THETA defines
+its numerical index), and not be concerned about renumbering the
+THETAs in the code.
 
 *** BLOCK(n) NAMES VALUES
 #+begin_src perl

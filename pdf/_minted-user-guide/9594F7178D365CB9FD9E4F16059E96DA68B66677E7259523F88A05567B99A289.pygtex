@@ -1,0 +1,32 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n+nv}{\PYGZdl{}PROB}\PYG{+w}{   }\PYG{n}{READ}\PYG{+w}{ }\PYG{n}{THE}\PYG{+w}{ }\PYG{n}{MODEL}\PYG{+w}{ }\PYG{n}{SPECIFICATION}\PYG{+w}{ }\PYG{n}{FILE}
+\PYG{n+nv}{\PYGZdl{}DATA}\PYG{+w}{ }\PYG{n}{data}
+\PYG{n+nv}{\PYGZdl{}INPUT}\PYG{+w}{ }\PYG{n}{ID}\PYG{+w}{ }\PYG{n}{DOSE}\PYG{+w}{ }\PYG{n}{TIME}\PYG{+w}{ }\PYG{n}{DV}\PYG{+w}{ }\PYG{n}{WT}
+\PYG{n+nv}{\PYGZdl{}PRIOR}\PYG{+w}{ }\PYG{n}{TNPRI}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{PROBLEM}\PYG{+w}{ }\PYG{l+m+mi}{2}\PYG{p}{)}
+\PYG{n+nv}{\PYGZdl{}MSFI}\PYG{+w}{ }\PYG{n}{msf1}\PYG{+w}{ }\PYG{n}{ONLYREAD}
+\PYG{n+nv}{\PYGZdl{}PRED}
+\PYG{+w}{      }\PYG{n}{IF}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{NEWIND}\PYG{o}{.}\PYG{n}{NE}\PYG{l+m+mf}{.2}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{THEN}
+\PYG{+w}{         }\PYG{n}{AMT}\PYG{o}{=}\PYG{n}{DOSE}\PYG{o}{*}\PYG{n}{WT}
+\PYG{+w}{         }\PYG{n}{W}\PYG{o}{=}\PYG{n}{WT}
+\PYG{+w}{      }\PYG{n}{ENDIF}
+\PYG{+w}{      }\PYG{n}{T0}\PYG{o}{=}\PYG{n}{THETA}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{o}{*}\PYG{n}{EXP}\PYG{p}{(}\PYG{n}{ETA}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{))}
+\PYG{+w}{      }\PYG{n}{T2}\PYG{o}{=}\PYG{n}{THETA}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{)}\PYG{o}{*}\PYG{n}{EXP}\PYG{p}{(}\PYG{n}{ETA}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{))}
+\PYG{+w}{      }\PYG{n}{T1}\PYG{o}{=}\PYG{n}{T2}\PYG{o}{+}\PYG{n}{T0}
+\PYG{+w}{      }\PYG{n}{T3}\PYG{o}{=}\PYG{n}{THETA}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{)}\PYG{o}{*}\PYG{n}{W}\PYG{o}{*}\PYG{n}{EXP}\PYG{p}{(}\PYG{n}{ETA}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{))}
+\PYG{+w}{      }\PYG{n}{A}\PYG{o}{=}\PYG{n}{EXP}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{n}{T2}\PYG{o}{*}\PYG{n}{TIME}\PYG{p}{)}
+\PYG{+w}{      }\PYG{n}{B}\PYG{o}{=}\PYG{n}{EXP}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{n}{T1}\PYG{o}{*}\PYG{n}{TIME}\PYG{p}{)}
+\PYG{+w}{      }\PYG{n}{C}\PYG{o}{=}\PYG{n}{T1}\PYG{o}{\PYGZhy{}}\PYG{n}{T2}
+\PYG{+w}{      }\PYG{n}{D}\PYG{o}{=}\PYG{n}{A}\PYG{o}{\PYGZhy{}}\PYG{n}{B}
+\PYG{+w}{      }\PYG{n}{E}\PYG{o}{=}\PYG{n}{T3}\PYG{o}{*}\PYG{n}{C}
+\PYG{+w}{      }\PYG{n}{Y}\PYG{o}{=}\PYG{n}{AMT}\PYG{o}{*}\PYG{n}{T1}\PYG{o}{*}\PYG{n}{T2}\PYG{o}{/}\PYG{n}{E}\PYG{o}{*}\PYG{n}{D}\PYG{o}{+}\PYG{n}{EPS}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)}
+
+\PYG{n+nv}{\PYGZdl{}PROB}\PYG{+w}{ }\PYG{n}{POPULATION}\PYG{+w}{ }\PYG{n}{DATA}\PYG{+w}{ }\PYG{n}{WITH}\PYG{+w}{ }\PYG{n}{PRIOR}\PYG{+w}{ }\PYG{n}{ON}\PYG{+w}{ }\PYG{n}{THETA}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{OMEGA}\PYG{+w}{ }\PYG{n}{AND}\PYG{+w}{ }\PYG{n}{SIGMA}
+\PYG{n+nv}{\PYGZdl{}INPUT}\PYG{+w}{ }\PYG{n}{ID}\PYG{+w}{ }\PYG{n}{DOSE}\PYG{+w}{ }\PYG{n}{TIME}\PYG{+w}{ }\PYG{n}{DV}\PYG{+w}{ }\PYG{n}{WT}
+\PYG{n+nv}{\PYGZdl{}DATA}\PYG{+w}{ }\PYG{n}{data}\PYG{+w}{  }\PYG{n}{REWIND}
+
+\PYG{n+nv}{\PYGZdl{}THETA}\PYG{+w}{  }\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{4}\PYG{p}{,}\PYG{l+m+mi}{5}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mf}{.09}\PYG{p}{,}\PYG{l+m+mf}{.5}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mf}{.004}\PYG{p}{,}\PYG{l+m+mf}{.01}\PYG{p}{,}\PYG{l+m+mf}{.9}\PYG{p}{)}
+\PYG{n+nv}{\PYGZdl{}OMEGA}\PYG{+w}{ }\PYG{n}{BLOCK}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{)}\PYG{+w}{ }\PYG{l+m+mf}{.7}\PYG{+w}{ }\PYG{l+m+mf}{.04}\PYG{+w}{ }\PYG{l+m+mf}{.05}\PYG{+w}{ }\PYG{l+m+mf}{.02}\PYG{+w}{ }\PYG{l+m+mf}{.06}\PYG{+w}{ }\PYG{l+m+mf}{.08}
+\PYG{n+nv}{\PYGZdl{}SIGMA}\PYG{+w}{  }\PYG{l+m+mf}{.4}
+
+\PYG{n+nv}{\PYGZdl{}EST}
+\end{Verbatim}
