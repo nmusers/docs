@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content=" Bayesian methods Recall that the classical NONMEM MLE methods seek parameters \((\theta, \Omega, \Sigma)\) that maximize the log-likelihood \(\mathcal{L}=\log(L)\). With Bayesian methods we instead seek the parameters using the prior information in addition to the likelihood, based on the Bayes&#39; theorem: $$ p(\theta, \Omega, \Sigma | y) \propto L(\theta, \Omega, \Sigma)p_0(\theta, \Omega, \Sigma). $$ Here the left-hand size \(p(\cdot|y)\) is called posterior distribution of the parameters, and \(p_0(\cdot)\) the prior distribution. Note that similar to the MLE approach presentation the \(\propto\) sign is used because the normalization factor is omitted 1.
+">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="https://nmusers.github.io/docs/user-guide/advanced/bayesian/">
+  <meta property="og:site_name" content="NONMEM Documentation">
+  <meta property="og:title" content="Bayesian methods">
+  <meta property="og:description" content="Bayesian methods Recall that the classical NONMEM MLE methods seek parameters \((\theta, \Omega, \Sigma)\) that maximize the log-likelihood \(\mathcal{L}=\log(L)\). With Bayesian methods we instead seek the parameters using the prior information in addition to the likelihood, based on the Bayes&#39; theorem: $$ p(\theta, \Omega, \Sigma | y) \propto L(\theta, \Omega, \Sigma)p_0(\theta, \Omega, \Sigma). $$ Here the left-hand size \(p(\cdot|y)\) is called posterior distribution of the parameters, and \(p_0(\cdot)\) the prior distribution. Note that similar to the MLE approach presentation the \(\propto\) sign is used because the normalization factor is omitted 1.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="user-guide">
+    <meta property="article:modified_time" content="2026-01-15T11:03:50-08:00">
+
+
+  <meta itemprop="name" content="Bayesian methods">
+  <meta itemprop="description" content="Bayesian methods Recall that the classical NONMEM MLE methods seek parameters \((\theta, \Omega, \Sigma)\) that maximize the log-likelihood \(\mathcal{L}=\log(L)\). With Bayesian methods we instead seek the parameters using the prior information in addition to the likelihood, based on the Bayes&#39; theorem: $$ p(\theta, \Omega, \Sigma | y) \propto L(\theta, \Omega, \Sigma)p_0(\theta, \Omega, \Sigma). $$ Here the left-hand size \(p(\cdot|y)\) is called posterior distribution of the parameters, and \(p_0(\cdot)\) the prior distribution. Note that similar to the MLE approach presentation the \(\propto\) sign is used because the normalization factor is omitted 1.">
+  <meta itemprop="dateModified" content="2026-01-15T11:03:50-08:00">
+  <meta itemprop="wordCount" content="1503">
+
+<title>Bayesian methods | NONMEM Documentation</title>
+<link rel="icon" href="/docs/favicon.png" >
+<link rel="manifest" href="/docs/manifest.json">
+<link rel="canonical" href="https://nmusers.github.io/docs/user-guide/advanced/bayesian/">
+<link rel="stylesheet" href="/docs/book.min.d4e6b62882e125f74e9d9d54ba648dfa9d887bace364bb515b00d18f0f0d1257.css" integrity="sha256-1Oa2KILhJfdOnZ1UumSN&#43;p2Ie6zjZLtRWwDRjw8NElc=" crossorigin="anonymous">
+
+
+  <script defer src="/docs/fuse.min.js"></script>
+  <script defer src="/docs/en.search.min.c1fef8ef7d563a59711c79d8e0aeccf0cb7cd9f069ae328401a30fc24b12fce5.js" integrity="sha256-wf74731WOllxHHnY4K7M8Mt82fBprjKEAaMPwksS/OU=" crossorigin="anonymous"></script>
+
+
+
+  
+</head>
+<body dir="ltr" class="book-kind-page book-type-user-guide">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    
+<aside class="book-menu">
+  <div class="book-menu-content">
+    
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/docs/"><span>NONMEM Documentation</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input id="book-search-input" type="text" 
+    placeholder="Search"
+    aria-label="Search"
+    maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/quick-start/" class="">
+      Quick start</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/" class="">
+      User guide</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/introduction/" class="">
+      Introduction</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-44a5ffdb7f06989151f3c4e11083520b" class="toggle"  />
+    <label for="section-44a5ffdb7f06989151f3c4e11083520b" class="flex">
+      <a href="/docs/user-guide/fundamentals/" class="">
+        Fundamentals</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/population/" class="">
+      Population models</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/pkode/" class="">
+      PK and ODEs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/likelihood/" class="">
+      Likelihood and MLE</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-ac8225f98f95bed71798e0be7ea190cc" class="toggle"  />
+    <label for="section-ac8225f98f95bed71798e0be7ea190cc" class="flex">
+      <a href="/docs/user-guide/nmtran/" class="">
+        Data and model</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/data/" class="">
+      Data</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/control/" class="">
+      Control records</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/output/" class="">
+      Output</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-72ba181ec78d31040713db91ccee5ae1" class="toggle"  />
+    <label for="section-72ba181ec78d31040713db91ccee5ae1" class="flex">
+      <a href="/docs/user-guide/predpp/" class="">
+        PopPK models</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/population_model/" class="">
+      PK parameter model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/general_linear_model/" class="">
+      General linear model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/mm/" class="">
+      Michaelis–Menten model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/pkpd/" class="">
+      PKPD model</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-3588eec4ae7b05621971d2a7883fa0d8" class="toggle" checked />
+    <label for="section-3588eec4ae7b05621971d2a7883fa0d8" class="flex">
+      <a href="/docs/user-guide/advanced/" class="">
+        Advanced topics</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/abbr_block/" class="">
+      Code blocks</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/mu_model/" class="">
+      MU referencing</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/bayesian/" class="active">
+      Bayesian methods</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/" class="">
+      Reference manual</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-377f7f7cc3b0210dc0b24704642ecae6" class="toggle"  />
+    <label for="section-377f7f7cc3b0210dc0b24704642ecae6" class="flex">
+      <a href="/docs/reference-manual/control-records/" class="">
+        Control records</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/abbrev/" class="">
+      $ABBREVIATED</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/aes/" class="">
+      $AES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/aesinit/" class="">
+      $AESINIT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/anneal/" class="">
+      $ANNEAL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/bind/" class="">
+      $BIND</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/chain/" class="">
+      $CHAIN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/contr/" class="">
+      $CONTR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/covar/" class="">
+      $COVARIANCE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/data/" class="">
+      $DATA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/default/" class="">
+      $DEFAULT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/des/" class="">
+      $DES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/design/" class="">
+      $DESIGN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/error/" class="">
+      $ERROR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/estimation/" class="">
+      $ESTIMATION</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/etasphis/" class="">
+      $ETAS, $PHIS</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/format/" class="">
+      $FORMAT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/include/" class="">
+      $INCLUDE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/index/" class="">
+      $INDEX</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/infn/" class="">
+      $INFN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/input/" class="">
+      $INPUT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/ldfold/" class="">
+      $LDFOLD</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/level/" class="">
+      $LEVEL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/mix/" class="">
+      $MIX</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/model/" class="">
+      $MODEL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/msfi/" class="">
+      $MSFI</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/nonpara/" class="">
+      $NONPARAMETRIC</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/omega/" class="">
+      $OMEGA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/omit/" class="">
+      $OMIT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/pk/" class="">
+      $PK</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/pred/" class="">
+      $PRED</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/prior/" class="">
+      $PRIOR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/problem/" class="">
+      $PROBLEM</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/rcov/" class="">
+      $RCOV, $RCOVI</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/scatter/" class="">
+      $SCATTERPLOT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/sigma/" class="">
+      $SIGMA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/simulation/" class="">
+      $SIMULATION</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/sizes/" class="">
+      $SIZES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/subroutines/" class="">
+      $SUBROUTINES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/super/" class="">
+      $SUPER</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/table/" class="">
+      $TABLE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/theta/" class="">
+      $THETA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/thetai/" class="">
+      $THETAI, $THETAR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/tol/" class="">
+      $TOL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/warning/" class="">
+      $WARNINGS</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/abbr/" class="">
+      Abbreviated code</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/data/" class="">
+      Data</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/files/" class="">
+      Output and files</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/" class="">
+      Internals &amp; API</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/modules/" class="">
+      Modules</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/subroutines/" class="">
+      Subroutines</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/variables/" class="">
+      Variables</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-d8246e9b0dff86e0cd3364b2b239c898" class="toggle"  />
+    <label for="section-d8246e9b0dff86e0cd3364b2b239c898" class="flex">
+      <a href="/docs/cookbook/" class="">
+        Cookbook</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/prior/" class="">
+      Bayesian Priors</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/steady_state/" class="">
+      Empirical steady state</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/indi/" class="">
+      Indicator variables</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/etabar_mix/" class="">
+      Mixture model: ETABAR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/nested/" class="">
+      Nested random effects</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/mcmc-post/" class="">
+      Postprocessing MCMC draws</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/repeated_records/" class="">
+      Repeated Observation Records</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/msf-warmup/" class="">
+      Reuse NUTS warmup results</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/saem-extra-request/" class="">
+      SAEM_EXTRA variables</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/time_vary/" class="">
+      Time-varying covariates</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+
+  </div>
+</aside>
+ 
+
+    <div class="book-page">
+      <header class="book-header hidden">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/docs/icons/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>Bayesian methods</h3>
+
+  <label for="toc-control">
+    
+    <img src="/docs/icons/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden">
+    
+  
+<nav id="TableOfContents">
+<ul>
+<li><a href="#headline-1">Bayesian methods</a>
+<ul>
+<li><a href="#headline-2">Maximum a posteriori estimation</a>
+</li>
+<li><a href="#ebe">Empirical Bayes estimation of \(\eta\)</a>
+</li>
+<li><a href="#headline-4">MCMC sampling</a>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article">
+<p>
+<link rel="stylesheet" href="/docs/katex/katex.min.css" /><script defer src="/docs/katex/katex.min.js"></script><script defer src="/docs/katex/auto-render.min.js" onload="renderMathInElement(document.body, {&#34;delimiters&#34;:[{&#34;left&#34;:&#34;$$&#34;,&#34;right&#34;:&#34;$$&#34;,&#34;display&#34;:true},{&#34;left&#34;:&#34;\\(&#34;,&#34;right&#34;:&#34;\\)&#34;,&#34;display&#34;:false},{&#34;left&#34;:&#34;\\[&#34;,&#34;right&#34;:&#34;\\]&#34;,&#34;display&#34;:true}]});"></script></p>
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Bayesian methods
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>Recall that the classical NONMEM MLE methods seek parameters \((\theta, \Omega,
+\Sigma)\) that maximize the log-likelihood \(\mathcal{L}=\log(L)\).
+With Bayesian methods we instead seek the parameters using
+the prior information in addition to the likelihood, based on the
+Bayes&#39; theorem:
+$$
+p(\theta, \Omega, \Sigma | y) \propto L(\theta, \Omega, \Sigma)p_0(\theta, \Omega, \Sigma).
+$$
+Here the left-hand size \(p(\cdot|y)\) is called <em>posterior</em>
+distribution of the parameters, and \(p_0(\cdot)\) the <em>prior</em>
+distribution. Note that similar to the MLE approach presentation
+the \(\propto\) sign is used because the normalization factor is
+omitted <sup class="footnote-reference"><a id="footnote-reference-1" href="#footnote-1">1</a></sup>.</p>
+<p>
+In practice we mostly approach the Bayesian inference on the log
+scale:
+$$
+\log(p(\theta, \Omega, \Sigma | y)) = C + \mathcal{L} + \log(p_0(\theta, \Omega, \Sigma))
+$$
+with constant <em>C</em> from the normalization factor.</p>
+<p>
+The prior distribution is often solicited from literature and previous studies.</p>
+<div id="outline-container-headline-2" class="outline-3">
+<h3 id="headline-2">
+Maximum a posteriori estimation
+</h3>
+<div id="outline-text-headline-2" class="outline-text-3">
+<p>Similar to that the MLE seeks the parameters that maximize the log-likelihood
+$$
+(\hat{\theta}, \hat{\Omega}, \hat{\Sigma})_{\text{MLE}} = \text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L},
+$$
+the maximum a posteriori (MAP) estimation seeks to maximize the
+log posterior distribution:
+$$
+(\hat{\theta}, \hat{\Omega}, \hat{\Sigma})_{\text{MAP}} = \text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\log(p(\theta, \Omega, \Sigma|y)) = \text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,(\mathcal{L}+\log(p_0(\theta, \Omega, \Sigma))).
+$$</p>
+<p>
+In other words, the approach seeks the mode of \(p(\cdot|y)\). This is
+why MAP can also be interpreted as &#34;mode a posteriori&#34; estimation. The
+above equation shows that MAP is in effect MLE with an additional term
+in the objective function. The additional term represents prior
+knowledge of the parameters. To see its action, consider a
+a case with fixed \((\Omega, \Sigma)\) and only one unknown
+\(\theta\), and \(p_0(\theta)\) follows a normal distribution
+$$
+\theta \sim \mathcal{N}(\xi, \sigma_0^2).
+$$
+Then the MAP is equivalent to maximize the objective function
+$$
+\mathcal{L} - \frac{1}{2} \left(\frac{\theta-\xi_0}{\sigma_0}\right)^2.
+$$
+That is, the prior term penalizes the objective function by decreasing itself
+when \(\theta\) moves away from the mean \(\xi\), thus in order to maximize the objective
+function we must seek a balance between the prior term and the
+likelihood term. This is why the prior term is also referred to as
+penalty or regularization for MLE.</p>
+<p>
+NONMEM provides $PRIOR control record to specify the prior. For
+example, one can use</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$PRIOR</span> TNPRI</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>to specify using prior information
+from a previously run model&#39;s MSF. The model example below obtains
+parameter estimates from population data, using a two-compartment PK
+model and incorporating a prior of transformed normal form for all of
+THETA, OMEGA and SIGMA.  The  prior information is found in MSF msf1.</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>   <span style="color:#ff5c57">$PROB</span>   READ THE MODEL SPECIFICATION FILE
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$DATA</span> data
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$INPUT</span> ID DOSE TIME DV WT
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$PRIOR</span> TNPRI (PROBLEM <span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$MSFI</span> msf1 ONLYREAD
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$PRED</span>
+</span></span><span style="display:flex;"><span>         IF (NEWIND<span style="color:#ff6ac1">.</span>NE<span style="color:#ff9f43">.2</span>) THEN
+</span></span><span style="display:flex;"><span>            AMT<span style="color:#ff6ac1">=</span>DOSE<span style="color:#ff6ac1">*</span>WT
+</span></span><span style="display:flex;"><span>            W<span style="color:#ff6ac1">=</span>WT
+</span></span><span style="display:flex;"><span>         ENDIF
+</span></span><span style="display:flex;"><span>         T0<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))
+</span></span><span style="display:flex;"><span>         T2<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">2</span>))
+</span></span><span style="display:flex;"><span>         T1<span style="color:#ff6ac1">=</span>T2<span style="color:#ff6ac1">+</span>T0
+</span></span><span style="display:flex;"><span>         T3<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">*</span>W<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">3</span>))
+</span></span><span style="display:flex;"><span>         A<span style="color:#ff6ac1">=</span>EXP(<span style="color:#ff6ac1">-</span>T2<span style="color:#ff6ac1">*</span>TIME)
+</span></span><span style="display:flex;"><span>         B<span style="color:#ff6ac1">=</span>EXP(<span style="color:#ff6ac1">-</span>T1<span style="color:#ff6ac1">*</span>TIME)
+</span></span><span style="display:flex;"><span>         C<span style="color:#ff6ac1">=</span>T1<span style="color:#ff6ac1">-</span>T2
+</span></span><span style="display:flex;"><span>         D<span style="color:#ff6ac1">=</span>A<span style="color:#ff6ac1">-</span>B
+</span></span><span style="display:flex;"><span>         E<span style="color:#ff6ac1">=</span>T3<span style="color:#ff6ac1">*</span>C
+</span></span><span style="display:flex;"><span>         Y<span style="color:#ff6ac1">=</span>AMT<span style="color:#ff6ac1">*</span>T1<span style="color:#ff6ac1">*</span>T2<span style="color:#ff6ac1">/</span>E<span style="color:#ff6ac1">*</span>D<span style="color:#ff6ac1">+</span>EPS(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$PROB</span> POPULATION DATA WITH PRIOR ON THETA, OMEGA AND SIGMA
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$INPUT</span> ID DOSE TIME DV WT
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$DATA</span> data  REWIND
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$THETA</span>  (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">4</span>,<span style="color:#ff9f43">5</span>) (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">.09</span>,<span style="color:#ff9f43">.5</span>) (<span style="color:#ff9f43">.004</span>,<span style="color:#ff9f43">.01</span>,<span style="color:#ff9f43">.9</span>)
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$OMEGA</span> BLOCK (<span style="color:#ff9f43">3</span>) <span style="color:#ff9f43">.7</span> <span style="color:#ff9f43">.04</span> <span style="color:#ff9f43">.05</span> <span style="color:#ff9f43">.02</span> <span style="color:#ff9f43">.06</span> <span style="color:#ff9f43">.08</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$SIGMA</span>  <span style="color:#ff9f43">.4</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ff5c57">$EST</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>In the above model <code>TNPRI (PROBLEM 2)</code> indicates that the prior based
+on <code>msf1</code> will be imposed on PROBLEM 2, the second problem in the
+control stream that uses default FO for estimation.</p>
+</div>
+</div>
+<div id="outline-container-ebe" class="outline-3">
+<h3 id="ebe">
+Empirical Bayes estimation of \(\eta\)
+</h3>
+<div id="outline-text-ebe" class="outline-text-3">
+<p>Recall that during the MLE the individual parameter \(\eta\) is
+marginalized out. We can use the MAP estimation to &#34;recover&#34; \(\eta\).
+This is done after (FO method) or during (FOCE method) population
+parameter estimation, and referred as <em>posthoc</em> estimation.</p>
+<p>
+Specifically, for subject <em>i</em>&#39;s \(\eta_i\), we use the estimated \(\hat{\Omega}\) for the
+prior (multivariate normal) distribution,
+and the estimated \((\hat{\theta}, \hat{\Sigma})\) for the
+likelihood, then we have the posterior probability density for
+\(\eta_i\) as
+$$
+p(\eta_i | y_i) \propto p(y_i|\phi_i(\hat{\theta}, \eta_i, \hat{\Sigma}))p_0(\eta_i,\hat{\Omega}).
+$$
+Then the MAP estimate of \(\eta_i\) is</p>
+<p>
+$$
+\hat{\eta}_i = \text{arg}\,\text{max}_{\eta_i}\log (p(\eta_i | y_i)) =
+\text{arg}\,\text{max}_{\eta_i} [\mathcal{L}_i(\eta_i)|_{\hat{\theta},
+\hat{\Sigma}} + \log p_0(\eta_i,\hat{\Omega})]
+$$</p>
+<p>
+Because the above \({\eta}_i\) prior is based on \(\Omega\)
+estimate which in turn is based on current observations, it is called empirical
+prior, and \(\hat{\eta}_i\) is called <em>empirical bayes estimate</em>
+(EBE). In NONMEM the term posthoc estimate and EBE is used interchangably.</p>
+</div>
+</div>
+<div id="outline-container-headline-4" class="outline-3">
+<h3 id="headline-4">
+MCMC sampling
+</h3>
+<div id="outline-text-headline-4" class="outline-text-3">
+<p>As another Bayesian approach, sampling does not perform point
+estimation. Instead, it utilizes certain algorithm, aka
+<em>sampler</em>, to sample from the posterior distribution \(p(\cdot|y)\).
+With enough samples, we can have an approximation of the
+posterior probability distribution density (PDF) of \((\theta, \Omega,
+\Sigma)\), and calculate all the statistics therein.</p>
+<p>
+Markov Chain Monte Carlo (MCMC) samplers are the most commonly used samplers.
+NONMEM provides three flavours of them:</p>
+<ul>
+<li>Metropolis-Hasting (M-H) algorithm;</li>
+<li>Gibbs algorithm;</li>
+<li>No-U-Turn Sampler (NUTS) algorithm.</li>
+</ul>
+<p>Specifically,</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$EST</span> BAYES</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>uses M-H and/or Gibbs samplers, and</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$EST</span> NUTS</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>uses the NUTS algorithm.</p>
+<p>
+Compared to point estimation, in general the MCMC approach obtains more
+information (entire distribution rather than mean/mode estimation)
+by paying a computation premium. This trade-off should be examined on a case-by-case basis.</p>
+<p>
+Regardless which sampler to use, prior information is
+still required for the MCMC methods. Consider the following
+two-compartment model example</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">58
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">59
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">60
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">61
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">62
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">63
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">64
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$PROB</span> Two compartment Model
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$INPUT</span> C SET ID JID TIME  DV<span style="color:#ff6ac1">=</span>CONC AMT<span style="color:#ff6ac1">=</span>DOSE RATE EVID MDV CMT
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$DATA</span> w15<span style="color:#ff6ac1">.</span>csv IGNORE<span style="color:#ff6ac1">=</span><span style="color:#ff5c57">@</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$</span><span style="color:#ff5c57">SUBROUTINES</span> ADVAN3 TRANS4
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
+</span></span><span style="display:flex;"><span>MU_1<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>MU_2<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>MU_3<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">3</span>)
+</span></span><span style="display:flex;"><span>MU_4<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># Etas are always normally distruted with mean 0, variance OMEGA().</span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># phis (mu+eta) are normally distruted with mean MU, and variance OMEGA()</span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># Individual parameters will be whatever the transformation is.  In this case, transformatioin is exponential of a</span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># normally distributed parameter (phi), so individual parameters are log-normally distributed.</span>
+</span></span><span style="display:flex;"><span>CL<span style="color:#ff6ac1">=</span>DEXP(MU_1<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">1</span>))
+</span></span><span style="display:flex;"><span>V1<span style="color:#ff6ac1">=</span>DEXP(MU_2<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">2</span>))
+</span></span><span style="display:flex;"><span>Q<span style="color:#ff6ac1">=</span>DEXP(MU_3<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">3</span>))
+</span></span><span style="display:flex;"><span>V2<span style="color:#ff6ac1">=</span>DEXP(MU_4<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">4</span>))
+</span></span><span style="display:flex;"><span>S1<span style="color:#ff6ac1">=</span>V1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ERROR</span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># Data DV are normally distributed, with residual variance F*F*SIGMA(1,1), and its SD is F*SQRT(SIGMA(1,1))</span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e">#  This is because EPS() is scaled with sqrt(SIGMA)</span>
+</span></span><span style="display:flex;"><span>Y <span style="color:#ff6ac1">=</span> F <span style="color:#ff6ac1">+</span> F<span style="color:#ff6ac1">*</span>EPS(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># Initial values of THETA</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETA</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">2.0</span> ;<span style="color:#78787e">#[LN(CL)]</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">2.0</span> ;<span style="color:#78787e">#[LN(V1)]</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">2.0</span> ;<span style="color:#78787e">#[LN(Q)]</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">2.0</span> ;<span style="color:#78787e">#[LN(V2)]</span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e">#INITIAL values of OMEGA</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGA</span> BLOCK(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.15</span>   ;<span style="color:#78787e">#[P]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span>  ;<span style="color:#78787e">#[F]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.15</span>   ;<span style="color:#78787e">#[P]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span>  ;<span style="color:#78787e">#[F]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span>  ;<span style="color:#78787e">#[F]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.15</span>   ;<span style="color:#78787e">#[P]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span>  ;<span style="color:#78787e">#[F]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span>  ;<span style="color:#78787e">#[F]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span>  ;<span style="color:#78787e">#[F]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.15</span>   ;<span style="color:#78787e">#[P]</span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e">#Initial value of SIGMA</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMA</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#ff9f43">0.6</span> )   ;<span style="color:#78787e">#[P]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PRIOR</span> NWPRI
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># Prior information of THETAS.  Normal distribution of thetas assumed unless $TTDF is set, in which case it is then T distriuted</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETAP</span> (<span style="color:#ff9f43">2.0</span> FIX) (<span style="color:#ff9f43">2.0</span> FIX) (<span style="color:#ff9f43">2.0</span> FIX) (<span style="color:#ff9f43">2.0</span> FIX)
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># Variance to prior information of THETAS.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETAPV</span> BLOCK(<span style="color:#ff9f43">4</span>) FIXED VALUES(<span style="color:#ff9f43">10.0</span>,<span style="color:#ff9f43">0.0</span>)
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># Inverse Wishart distribution assumed, unless $OLKJDF, $OVARF are set.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGAP</span> BLOCK(<span style="color:#ff9f43">4</span>) FIXED VALUES(<span style="color:#ff9f43">0.15</span>,<span style="color:#ff9f43">0.0</span>)
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># Low degrees of freedom, equivalent to block dimension, means low information.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGAPD</span> (<span style="color:#ff9f43">4</span> FIX)
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># Prior information to the SIGMAS.</span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># Inverse Wishart distribution assumed, unless $SLKJDF, $SVARF</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMAP</span> (<span style="color:#ff9f43">0.06</span> FIXED)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMAPD</span> (<span style="color:#ff9f43">1</span> FIXED)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$EST</span> METHOD<span style="color:#ff6ac1">=</span>ITS INTERACTION NITER<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0</span> NOABORT NOPRIOR<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> file<span style="color:#ff6ac1">=</span>w15_its<span style="color:#ff6ac1">.</span>ext
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$EST</span> METHOD<span style="color:#ff6ac1">=</span>NUTS AUTO<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> PRINT<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">100</span> NITER<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1000</span> NOPRIOR<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0</span> BAYES_PHI_STORE<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> file<span style="color:#ff6ac1">=</span>w15<span style="color:#ff6ac1">.</span>ext</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>
+We use <a href="/docs/reference-manual/api/subroutines/#nwpri">NWPRI</a> in $PRIOR to indicate that
+the priors will be given manually through prior-specification control
+records. Specifically, the $THETAP specifies that all elements of \(\theta\)
+has a normally-distributed prior with mean at 2.0. Note that this is
+not the prior mean for the individual PK parameters as they follow
+log-normal distribution. The $THETAPV record specifies an diagonal covariance matrix
+for the \(\theta\) prior, and each \(\theta\) has a very large prior
+variance <sup class="footnote-reference"><a id="footnote-reference-2" href="#footnote-2">2</a></sup>, showing the lack of prior information on \(\theta\).</p>
+<p>
+Similarly, $OMEGAP/$OMEGAPD, $SIGMAP/$SIGMAPD specify the elements and
+degrees of freedom for OMEGA and SIGMA, respectively. The priors for
+the two matrices follow inverse Wishart distribution.</p>
+<p>
+Note that before using NUTS, we first do a short (NITER=0) Iterative
+Two Stage (ITS) MLE run. This is to prepare position the sampler so
+that the sampling is initiated in a reasonable proximity in the
+posterior distribution (recall that the concatenate $EST records means
+the estimation uses the previous run&#39;s results as starting point).</p>
+<p>
+For the $EST METHOD=NUTS record, we see that there are 1000 samples
+(NITER). That is, each unknown parameter will be sampled 1000 times.
+These samples will be stored in the &#34;.ext&#34; file. BAYES_PHI_STORE=1
+means in addition to \(\theta, \Omega, \Sigma)\) we also requesting
+\(\phi\) samples. NONMEM outputs \(\phi\) samples in &#34;.iph&#34; files.
+These files could be of large size because we are requesting 1000
+samples for each subject \(\phi_i\) of the population. See
+<a href="/docs/cookbook/mcmc-post/">postprocessing MCMC draws</a> on how to examine and interepret the sampling results.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="footnotes">
+<hr class="footnotes-separatator"/>
+<div class="footnote-definitions">
+<div class="footnote-definition">
+<sup id="footnote-1"><a href="#footnote-reference-1">1</a></sup>
+<div class="footnote-body">
+<p>The normalization factor is a constant with respect to the
+parameters so the posterior distribution has integral 1. In Bayes&#39;
+theorem it is in fact \(p(y)\), the <em>marginal</em> distribution of the data,
+aka &#34;evidence&#34;.</p>
+</div>
+</div>
+<div class="footnote-definition">
+<sup id="footnote-2"><a href="#footnote-reference-2">2</a></sup>
+<div class="footnote-body">
+<p>In practice one may want to consider different variance for
+different \(\theta\) elements, as they correspond to different PK
+parameters, incorporating the transformation used. For example, based
+on the given prior mean and variance, CL has an unrealistically large prior mean of
+\(e^{2.0+10.0/2}\).</p>
+</div>
+</div>
+</div>
+</div>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+<div>
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/f605297f73e7a10fad62f67177202912a0b18428" title='Last modified by Yi Zhang | 2026 Jan 15' target="_blank" rel="noopener">
+    <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
+    <span>2026 Jan 15</span>
+  </a>
+
+</div>
+
+<div>
+
+</div>
+
+</div>
+
+
+
+  
+
+
+
+  
+  
+  
+  <div class="flex flex-wrap justify-between">
+    <span>
+    
+      <a href="/docs/user-guide/advanced/mu_model/" class="flex align-center">
+        <img src="/docs/icons/backward.svg" class="book-icon" alt="Backward" />
+        <span>MU referencing</span>
+      </a>
+    
+    </span>
+    <span>
+    
+      <a href="/docs/reference-manual/" class="flex align-center">
+        <span>Reference manual</span>
+        <img src="/docs/icons/forward.svg" class="book-icon" alt="Forward" />
+      </a>
+    
+    </span>
+  </div>
+  
+
+
+ 
+        
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+        
+        
+  
+ 
+        
+  
+  
+    <script>(function(){document.querySelectorAll("pre:has(code)").forEach(e=>{e.addEventListener("click",e.focus),e.addEventListener("copy",function(t){if(t.preventDefault(),navigator.clipboard){const t=window.getSelection().toString()||e.textContent;navigator.clipboard.writeText(t)}})})})()</script>
+  
+
+      </footer>
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+  
+  <aside class="book-toc">
+    <div class="book-toc-content">
+      
+  
+<nav id="TableOfContents">
+<ul>
+<li><a href="#headline-1">Bayesian methods</a>
+<ul>
+<li><a href="#headline-2">Maximum a posteriori estimation</a>
+</li>
+<li><a href="#ebe">Empirical Bayes estimation of \(\eta\)</a>
+</li>
+<li><a href="#headline-4">MCMC sampling</a>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+
+
+
+    </div>
+  </aside>
+  
+ 
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
