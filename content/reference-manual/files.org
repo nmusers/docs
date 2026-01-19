@@ -647,10 +647,8 @@ then in addition to the main MSF file msfroot.msf and
 msfroot_ETAS.msf, files msfroot_RMAT.msf and msfroot_SMAT.msf
 containing intermediate information on the R matrix and S matrix will
 also be produced if a $COV record was implemented.  These files
-provide information when a $MSFI record along with a $COV … RESUME
-record is used in a subsequent problem or control stream.  See RESUME
-(NM73) in INTRODUCTION TO NONMEM 7: section I.59 $COV: Additional
-Options and Behavior.
+provide information when a $MSFI record along with [[file:/docs/reference-manual/control-records/covar/#resume][$COV … RESUME]]
+is used in a subsequent problem or control stream.
 
 ** Output quantities
 *** PRED-defined items
@@ -712,10 +710,10 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
   THE FOLLOWING LABELS ARE EQUIVALENT
   Subsequent  lines  show the relationship of such items for the current
   Estimation method.
-  (See $TABLE, $SCATTER).
-  (See PRED,RES,WRES).
-  See INTRODUCTION TO NONMEM 7, $TABLE: Additional Statistical  Diagnostics, Associated Parameters, and Output Format
   #+end_src
+  (See $TABLE, $SCATTER).
+
+  (See PRED,RES,WRES).
 
 - Suppose that marginal items appear.  If this item is 1 or 2 on a
   given record, the values of PRED  and  any  PRED-defined  displayed
@@ -766,7 +764,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
    $ESTIM  ... POSTHOC ...
    $TABLE TVCL CL
   #+end_src
-  TVCL  is  a  SAVE  variable  because it is defined in a [[file:/docs/user-guide/advanced/abbr_block/#copying-block][copying block]]. During the copying pass with COMACT=1, it is set to the
+  TVCL  is  a  SAVE  variable  because it is defined in a [[file:/docs/reference-manual/abbr/#copying-block][copying block]]. During the copying pass with COMACT=1, it is set to the
   typical  value of CL, because when COMACT=1, etas are 0.  Were the
   values of TVCL not stored in the SAVE region, then during the
   copying pass to obtain values for tables and with COMACT=2, TVCL
@@ -821,7 +819,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
    $TABLE FT IPRED WR WR2
   #+end_src
   IPRED is the conditional estimate of F.
-  FT is a SAVE variable because it is defined in a [[file:/docs/user-guide/advanced/abbr_block/#copying-block][copying block]].
+  FT is a SAVE variable because it is defined in a [[file:/docs/reference-manual/abbr/#copying-block][copying block]].
   During  the copying pass with COMACT=1, it is set to the typical
   value of F, because when COMACT=1, etas are 0.   Were  the  values
   of  FT  not stored in the SAVE region, then during the copying pass
@@ -895,7 +893,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
    $TABLE CL1 CL2
   #+end_src
   CL1  (and  CL2)  is a SAVE variable because it is defined in a
-  [[file:/docs/user-guide/advanced/abbr_block/#copying-block][copying block]].  Were the values for CL1 not stored in the SAVE
+  [[file:/docs/reference-manual/abbr/#copying-block][copying block]].  Were the values for CL1 not stored in the SAVE
   region,  during the  copying  pass  to obtain values for tables and
   with MIXNUM=2, CL1 would retain its value set with the previous data
   record.
@@ -912,7 +910,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
    $ESTIM  ... POSTHOC ...
    $TABLE CLE
   #+end_src
-  CLE is a SAVE variable because it is defined in a [[file:/docs/user-guide/advanced/abbr_block/#copying-block][copying block]].
+  CLE is a SAVE variable because it is defined in a [[file:/docs/reference-manual/abbr/#copying-block][copying block]].
   Were the values for CLE not stored in the SAVE region, during  the
   copying pass  to  obtain  values  for tables and with MIXNUM>MIXEST,
   CLE would retain its value set with the previous data record.
@@ -1902,79 +1900,6 @@ The same when the following error occurs.
 
     MESSAGE ISSUED FROM COVARIANCE STEP
 #+end_src
-
-*** Errors in PREDPP
-As of NONMEM 7, A differential equation solver  has  been  introduced,
-called  LSODA, and is accessed using ADVAN=13 or ADVAN13.  The code to
-the differential equation solver is  found  in  source\LSODA.f90.   On
-occasion,  coded  errors  will be displayed if the algorithm is having
-trouble integrating  the  equations.   These  errors  may  usually  be
-ignored,  unless the error shows up frequently, and ultimately results
-in failure for the problem to complete.   Typically the remedy  is  to
-increase  or decrease TOL, but for those who desire to understand what
-the error codes mean, there are well documented comments on  these  at
-the beginning of LSODA.f90.  They are printed here for convenience:
-#+begin_src
-  STATE=An index used for input and output to specify the the state of the calculation.
-
-  On input,the values of istate are as follows.
-  1  Means this is the first call for the problem (initializations will be done).
-     See note below.
-  2  Means this is not the first call,and the calculation is to continue
-     normally, with no change in any input parameters except possibly TOUT
-     and ITASK. (If ITOL,RTOL,and/or ATOL are changed between calls with
-     ISTATE=2,the new values will be used but not tested for legality.)
-  3  Means this is not the first call,and the calculation is to continue
-     normally,but with a change in input parameters other than TOUT and ITASK.
-     changes are allowed in NEQ,ITOL,RTOL,ATOL,IOPT,LRW,LIW,JT,ML,MU and any
-     optional inputs except H0,MXORDN,AND MXORDS.
-     (see IWORK description for ML and MU.)
-  Note: A preliminary call with TOUT=T is not counted as a first call here,as
-  no initialization or checking of input is done. (Such a call is sometimes
-  useful for the purpose of outputting the initial conditions.) Thus the first
-  call for which TOUT /= T requires ISTATE=1 on input.
-
-  On output,istate has the following values and meanings.
-   1  Means nothing was done; TOUT=T and ISTATE=1 on input.
-   2  Means the integration was performed successfully.
-  -1  Means an excessive amount of work (more than MXSTEP steps) was done on
-      this call,before completing the requested task,but the integration was
-      otherwise successful as far as T. (MXSTEP is an optional input and is
-      normally 500.) TO continue,the user may simply reset ISTATE to a value > 1
-      and call again (the excess work step counter will be reset to 0).
-      In addition,the user may increase MXSTEP to avoid this error return
-      (see below on optional inputs).
-  -2  Means too much accuracy was requested for the precision of the machine
-      being used. This was detected before completing the requested task,but
-      the integration was successful as far as T. To continue,the tolerance
-      parameters must be reset,and ISTATE must be set to 3. The optional output
-      TOLSF may be used for this purpose. (Note: If this condition is detected
-      before taking any steps,then an illegal input return (ISTATE=-3) occurs
-      instead.)
-  -3  Means illegal input was detected,before taking any integration steps.
-      See written message for details.
-      Note: If the solver detects an infinite loop of calls to the solver with
-      illegal input,it will cause the run to stop.
-  -4  Means there were repeated error test failures on one attempted step,before
-      completing the requested task,but the integration was successful as far as T.
-      The problem may have a singularity,or the input may be inappropriate.
-  -5  Means there were repeated convergence test failures on one attempted step,
-      before completing the requested task,but the integration was successful as
-      far as T. This may be caused by an inaccurate jacobian matrix, if one is
-      being used.
-  -6  Means EWT(I) became zero for some I during the integration. Pure relative
-      error control (ATOL(I)=0.0) was requested on a variable which has now
-      vanished. The integration was successful as far as T.
-  -7  Means the length of RWORK and/or IWORK was too small to proceed,but the
-      integration was successful as far as T. This happens when DLSODA chooses
-      to switch methods but LRW and/or LIw is too small for the new method.
-
-  Note: Since the normal output value of ISTATE is 2, it does not need to be
-  reset for normal continuation. Also,since a negative input value of ISTATE
-  will be regarded as illegal, a negative output value requires the user to
-  change it, and possibly other inputs,before calling the solver again.
-#+end_src
-
 
 [fn:1] Displayed etas are the simulated etas if the simulated etas are
 stored in common NMPRD7. This is the case when NM-TRAN is used. If

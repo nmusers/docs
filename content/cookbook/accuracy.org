@@ -1,0 +1,188 @@
+---
+title: "Accuracy control"
+author: ["Yi Zhang"]
+draft: false
+bookCollapseSection: false
+---
+{{< katex >}}{{< /katex >}}
+
+* Controlling the Accuracy of the Gradient Evaluation and Individual Objective Function Evaluation
+In classical NONMEM methods (First order, First order conditional,
+Laplace), the user specifies SIGDIGIT or NSIG to indicate the number
+of significant digits that population parameters are to be evaluated
+at the maximum likelihood.  If NSIG=3 (the default), then the problem
+would be optimized until all of the parameters varied by less than 3
+significant digits.  This same NSIG value would also be used to
+specify relative step size (h) to each THETA, SIGMA, and OMEGA, for
+evaluating the partial derivative of the objective function
+\(\mathcal{T}\) with
+respect to the parameter.  Such evaluations are
+needed to set up gradients to determine the direction the search
+algorithm must travel to approach the minimum of the objective
+function.
+
+NONMEM uses the forward finite difference for the partial derivative with respect
+to a \(\theta\).
+Numerical analysis recommends [6]
+that the ideal relative step size /h/ should
+be no greater than SIGL/2, where SIGL is the significant digits to
+which the objective function is evaluated.  If /h/ is set to a precision
+of SIGL/2, then the derivative will have approximately SIGL/2 precision as well.
+
+In the main search algorithm, central difference methods are also used.
+Numerical analysis of central finite difference methods recommend that
+the ideal relative step size /h/ for the parameter should be no
+greater than SIGL/3.  If h is set to SIGL/3, then the resulting finite
+difference value itself will have approximately 2*SIGL/3 precision.
+
+The main search algorithm also utilizes pseudo-second derivative type
+evaluations using forward difference methods.  For these calculations,
+an ideal h would be 10-SIGL/3, resulting in precision of second
+derivative constructs of about SIGL/3.  Thus, it is safest to set the
+step size h, as specified by NSIG, to be no more than SIGL/3.
+
+An internal SIGL in NONMEM specifies the precision to which the
+objective function itself (actually, the individual subject objective
+functions, which sum to the total objective function) is to be
+evaluated.  This internal SIGL is set to 10.  As long as NSIG was set
+to a value less then or equal to 10/2 or 10/3, then the gradients
+would be evaluated to an appropriate precision to make the gradient
+search algorithm work efficiently. With many subjects, if SIGL=10 is
+the precision to which each individual objective function is
+evaluated, and they are all of the same sign, then the sum objective
+function could have a resulting precision of log10(N)+SIGL, where N is
+the number of subjects, for a maximum of 15, the limiting precision of
+double precision.  Thus with 100 subjects, the actual precision that
+the total objective function is evaluated could be 12.  One should not
+necessarily rely on this, so it is safest to suppose the more
+conservative precision of 10, for which a suitable NSIG would be 3.
+
+For analytical problems, those which do not utilize $DES, one can
+usually expect a reasonably efficient convergence to the minimum of
+the objective function with NSIG=3.  However, with differential
+equation problems (those used for ADVAN 6, 8, 9, 13, 14, or 15), the
+limiting precision that objective function values may be evaluated is
+not based on the internal SIGL of 10, but rather, on the TOL level set
+by the user (where TOL represents the relative significant digits
+precision to which differential equations are to be integrated, so the
+precision is 10-TOL), which is used by PREDPP when differential
+equations are integrated.  The relationship between the predicted
+value and the individual subject’s maximized objective function is
+complex, but one can use the rule of thumb that the individual’s
+objective function is evaluated to a precision of the smaller of TOL
+and the internal SIGL.  Thus, when a user specifies a TOL=4, then it
+may well be that the sum objective function has no greater precision
+than 4.   If the user then specifies NSIG=3, then the main search
+algorithm evaluates finite gradients using step size h that varies
+theta at the 3rd significant digit.  This results in 1 significant
+digit precision remaining in evaluating the finite difference
+gradients.  The search algorithm is now attempting to maximize the
+objective function to 3 significant digits, when it is working with
+gradients that are accurate to only 1-2 significant digits.  This
+results in inefficient advancement of the objective function, causing
+NONMEM to make repeated evaluations within an iteration, as well as
+iterations for which the objective function is barely moving.  NONMEM
+can then spend many hours trying to obtain precision in its parameters
+which are impossible to obtain.  Eventually it may stop because the
+maximum iterations were used up, or when it realizes that it could not
+reach the desired precision.
+
+With this understanding of the search algorithm process, and
+recognizing the complex relationship between the step size needed for
+each parameter and the finite difference method used in each part of
+the algorithm, the optimization algorithm was changed to allow the
+user to specify SIGL, and for the algorithm to set up the appropriate
+step size for a given finite difference method, based on the
+user-supplied SIGL.  While some trial and error may still be required
+by the user for a given problem, certain general rules may be
+considered.
+
+  - Set SIGL, NSIG, and TOL
+  #+begin_src f90
+  SIGL<=TOL
+  NSIG<=SIGL/3
+  #+end_src
+  so that
+    + For forward finite difference, h is set to SIGL/2 precision
+    + For central finite difference, h is set to SIGL/3 precision
+    + For forward second order difference, h is set to SIGL/3 precision
+  The individual fits for evaluating optimal eta values will be
+  maximized to a precision of the user-supplied SIGL value
+
+  Optimization of population parameters occurs until none of the parameters change by more than NSIG significant digits.
+
+  - For the $COV step, the step size for evaluating the R matrix
+    (central difference second derivative) is set to SIGL/4, which
+    according to numerical analysis, yields the optimal precision of
+    SIGL/2 for the second derivative terms.  If only the S matrix is
+    evaluated (central difference first derivative), then the step size
+    for it is set to SIGL/3.  (But see $COV: Additional Options and
+    Behavior for a way to set SIGL and TOL for $COV, distinct from the
+    option for the $EST command).
+
+
+  - If the user sets NSIG>SIGL/3, and specifies SIGL, then the
+    optimization algorithm will do the following, which is a less than
+    optimal setup:
+    + For forward finite difference, h is set to NSIG precision
+    + For central finite difference, h is set to NSIG precision
+    + For forward second order difference, h is set to NSIG precision
+  The individual fits for evaluating optimal eta values will be
+  maximized to a precision of the user-supplied SIGL value
+
+  Optimization of population parameters occurs until none of the
+  parameters change by more than NSIG significant digits.
+
+  - If the user does not specify SIGL, or sets SIGL=100, then the
+    optimization algorithm will perform the traditional NONMEM VI
+    optimization, which as discussed above, may not be ideal:
+    + For forward finite difference, h is set to NSIG precision
+    + For central finite difference, h is set to NSIG precision
+    + For forward second order difference, h is set to NSIG precision
+  The individual fits for evaluating optimal eta values will be
+  maximized to a precision of SIGL=10
+
+  Optimization of population parameters occurs until none of the
+  parameters change by more than NSIG significant digits.
+
+To see the advantage of properly setting NSIG, TOL , and SIGL, consider the following problem, which is example 6 at the end of this document.  Data were simulated with 17 PK and 18 PD observations for each of 50 subjects receiving a bolus of drug, followed by short infusion a week later. The PK model has 2 compartments (Vc, k12, k21) with first-order (k10) and receptor-mediated clearance (Vmax, Kmc).  The PD model is indirect response, with receptors generated by zero order process (k03), and removed by first order process (k30) or via drug-receptor complex (Vmax, Kmc). There are 46 population parameters, variances/covariances, and intra-subject error coefficients, and thee differential equations.  In the table below are listed the estimation times (not including a $COV step) using various SIGL, NSIG, and TOL values.  Note that when not setting SIGL (NM 6 method), the problem would take a very long time.  When SIGL, NSIG, and TOL were set properly, estimation times were much less, with successful completions.   Of course, as they say in the weight-loss commercials, individual results may vary, and such great differences in execution times will not occur for all problems.
+
+| ADVAN | NSIG=3,TOL=6,SIGL=100 (NM6) | NSIG=2,TOL=6,SIGL=6 | NSIG=1,TOL=4,SIGL=3 |
+|-------+-----------------------------+---------------------+---------------------|
+|     9 |                         >30 |                  22 |                  10 |
+|     6 |                         >24 |                  17 |                   3 |
+|    13 |                         >20 |                 8.5 |                   2 |
+
+** The SIGLO level (NM72)
+As of NONMEM 7.2.0, the user may obtain even greater control of the
+precision at which various parts of the estimation are performed by
+using the SIGLO option.  If used, the SIGLO option is the precision to
+which the individual etas are estimated.  The SIGL level set by the
+user continues to be the precision (or delta ) setting for the finite
+difference algorithms in the higher level estimation process for
+THETAS, OMEGAS, and SIGMAS.  By default, if SIGLO is not specified,
+then SIGLO is set to the same value as SIGL, and everything is
+evaluated in accordance with the previous paragraph.  Should SIGLO be
+used, the recommended setting would be:
+
+#+begin_src f90
+SIGLO<=TOL
+SIGL<=SIGLO
+NSIG<=SIGL/3
+#+end_src
+
+** Alternative convergence criterion (NM72)
+For FO/FOCE/Laplace methods, sometimes many iterations will occur with
+very little change in the objective function, even with SIGL/TOL
+adjustment.  This may occur because a parameter may oscillate at the
+2nd significant digit, for example, and NSIG was set to 3.  The
+parameter may never settle down to a value that fluctuates at less
+than NSIG significant digits if its contribution to the objective
+function is very small.  Thus, a minimum objective function is
+achieved, but NONMEM’s traditional convergence test, based on all
+parameters changing by less then NSIG significant digits, is never
+satisfied.  An alternative convergence test is to set CTYPE=4 in the
+$EST statement.  NONMEM will then additionally test if the objective
+function has not changed by more then NSIG digits beyond the decimal
+point over 10 iterations.  If this condition is satisfied, the
+estimation will terminate successfully.

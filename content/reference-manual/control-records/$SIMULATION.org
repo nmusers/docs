@@ -202,24 +202,112 @@ NOPREDICTION: permitted only with ONLYSIM.
       are used as the true parameter values ("true values") in the simulation.
 
 *** TTDF=n (NM75)
-      If  TTDF  is  set to a non-zero integer value n, thetas are simulated with n degrees of freedom t-distribution.  TRUE=PRIOR  must
-      be  specified  as  well.  Priors must also be specified appropriately.
-      See also $TTDF control record (NM75) to specify degrees of  freedom for each theta.  The value of TTDF overrides $TTDF
-      See INTRODUCTION  TO NONMEM 7, Simulating THETAS with t-Distribution
+With TTDF set to a non-zero integer, THETAs can be simulated from
+the t-distribution with TTDF degrees of freedom, when setting also TRUE=PRIOR.  For example:
+
+#+begin_src perl
+$SIMULATION (567811 NORMAL) (2933012 UNIFORM) SUBPROBLEMS=10 ONLYSIM
+TTDF=4 TRUE=PRIOR
+#+end_src
+
+This also requires set up priors, such as:
+
+#+begin_src perl
+$PRIOR NWPRI PLEV=0.999
+$THETAP  (1.68 FIXED)  (1.58 FIXED) (8.12E-01 FIXED) ( 2.37 FIXED)
+$THETAPV BLOCK(4)
+0.04 FIX
+0.00 0.4
+0.00  0.00 0.4
+0.00  0.00 0.0 0.4
+$OMEGAP BLOCK(4)
+ 1.65276E-01  FIXED
+ 4.62368E-03  1.33770E-01
+ 6.35274E-03  1.69155E-02  2.13881E-01
+ -1.53098E-02  1.25855E-02  5.32524E-02  1.62771E-01
+$OMEGAPD (50 FIX)
+$SIGMAP BLOCK(1) 0.0544 FIXED
+$SIGMAPD (300 FIXED)
+#+end_src
+
+See [[file:/docs/reference-manual/control-records/ttdf/][$TTDF]] for specifying degrees of freedom for each THETA.  ~$SIML TTDF~ over-rides the ~$TTDF~ settings.
 
 *** BOOTSTRAP=n
-      With the BOOTSTRAP option, NONMEM does not perform the usual simulation  activity  of  randomly creating DV values for a new data
-      set, but rather selects a random set of subjects from an existing
-      "template"  data  set (which must already have legitimate DV values).  The BOOTSTRAP number n refers to how many subjects are  to
-      be randomly selected from the data set.  Setting -1 means to randomly select as many subjects as are in the data set.  For  example,  if  400  subjects  are in the simulation template data set,
-      then 400 subjects are randomly selected.  The random  source  is,
-      in  effect, uniform, because any subject is equally probable.  If
-      n is greater than the number of subjects,  NONMEM  will  use  the
-      number of subjects.
+With the BOOTSTRAP option, NONMEM does not perform the usual
+simulation  activity  of  randomly creating DV values for a new data
+set, but rather selects a random set of subjects from an existing
+"template"  data  set (which must already have legitimate DV values).
+The BOOTSTRAP number n refers to how many subjects are  to be randomly
+selected from the data set.  Setting -1 means to randomly select as
+many subjects as in the data set.
+#+begin_src perl
+$SIML BOOTSTRAP=-1 SUBP=100
+#+end_src
 
-      The  BOOTSTRAP option in $SIML is most suitable for multi-subject
-      data, in which there is an ID data column  identifying  the  subjects.   However,  see  the example "BOOTSTRAPPING SINGLE SUBJECT
-      DATA" in the INTRODUCTION TO NONMEM 7.
+For  example,  if  400  subjects  are in the simulation template data
+set, then 400 subjects are randomly selected.  The random  source  is,
+in  effect, uniform, because any subject is equally probable.  If n is
+greater than the number of subjects,  NONMEM  will  use  the number of
+subjects.
+
+BOOTSTRAP can also be applied to single-subject data, in obtaining
+summary statistics. For example (examples/control3boot):
+
+#+begin_src perl
+$PROBLEM  THEOPHYLLINE   SINGLE SUBJECT DATA
+$INPUT  DOSE=AMT TIME CP=DV CAT
+$DATA  DATA3B
+$SUBROUTINES  ADVAN2
+
+$PK
+CALLFL=1
+KA=THETA(1)
+K=THETA(2)
+SC=THETA(3)
+
+$ERROR
+IPRED=F
+W=1.0
+; first observation after dose is part of "first subject".  So, put in dummy record, CAT=3,
+; and give it a residual variance that is very large, so it does not influence the fit.
+IF(CAT==3.0) W=1.0E+10
+Y=F+W*ERR(1)
+
+$THETA  (0,1.7)  (0,.102)  (0,29)
+$OMEGA 0.2
+
+$SIML (567666 NORMAL) (33012 UNIFORM) BOOTSTRAP=-1 STRAT=CAT SUBP=100
+
+$ESTIMATION MAXEVAL=9999  PRINT=2
+$COVR
+$TABLE TIME CAT AMT CP IPRED W NOAPPEND NOPRINT file=control3boot.tab
+#+end_src
+
+The data file is as follows:
+#+begin_src r
+    320    .0     .    1
+     .     .1    3.0   3
+     .     .27   1.71  2
+     .     .52   7.91  2
+     .    1.     8.31  2
+     .    1.92   8.33  2
+     .    3.5    6.85  2
+     .    5.02   6.08  2
+     .    7.03   5.4   2
+     .    9.     4.55  2
+     .   12.     3.01  2
+     .   24.3     .90  2
+#+end_src
+The CAT data item identifies category number, used in stratification
+(see STRAT option), so that each record will be presented in every
+random dataset. The single dose record has CAT=1 ,and the observation
+events have CAT=2. Every bootstrap sample will contrain records with
+each CAT value. NONMEM assumes the dose record and the first data
+record after it belong to “one individual”, therefore this first
+record (time=0.1) will always be sampled with the dose record. To
+ensure that this dummy record does not contribute to the estimate, it
+is given a large residual deviation W=1.0E+10, equivalent to very
+little weight in the model estimate.
 
 *** REPLACE | NOREPLACE
 REPLACE: subjects are selected with replacement.   This  results  in  some
@@ -234,14 +322,39 @@ NOREPLACE:
       replacement, that is, without repeating a subject).
 
 *** STRAT
-      The label of a data item that serves as the stratification.  This
-      splits the data set into distinct sub-sets, guaranteeing  a  specific number of subjects will be selected from each category.
+A single stratification data item may be entered. In the above
+bootstraping single-subject example, the data item CAT serves as the stratification.  This splits
+the data set into distinct sub-sets, guaranteeing a specific number of
+subjects will be selected from each category.  For example, if in the
+base data set CAT has values of 1 or 2, with 33 subjects in group 1
+and 67 subjects in group 2 out of 100 total subjects, then exactly 33%
+of  of subjects from group 1 will be randomly selected out of 50 total
+(16), and exactly 67% of subjects will be randomly selected from group
+2 (34).  This has value when desiring that a bootstrap analysis
+maintain the same proportion of subjects belonging to certain
+categories, such as gender, or age bracket.  To stratify by both age
+bracket and gender, create a stratification data item that would be,
+for example, valued 1 for subjects who are male under 30, 2 for
+subjects that are female under 30, 3 for subjects who are male over
+30, 4 for subjects who are female over 30.  Any discrete numerical
+values will do, as long as the stratifier is not a continuous
+variable, and the subjects need not be sorted according to the
+stratification data item.
 
 *** STRATF
-      The  label  of a data item that contains the fraction that should
-      represent a category  in  the  bootstrapped  data  set.   Without
-      STRATF,  the number of subjects to be taken from a given category
-      is proportional to the number of subjects in the base data set.
+The option STRATF points to a data item that contains the fraction
+that should represent a category in the bootstrapped data set.
+Without STRATF, the number of subjects to be taken from a given
+category is proportional to the number of subjects in the base data
+set.  If you want the category to be represented at a different
+proportion, then specify a STRATF data item, in this example, FCAT.
+Suppose FCAT=0.5 for CAT=1 and 0.5 for CAT=2 as well. Even though only
+33% of subjects in the base data set belong to category 1, exactly 50%
+of  subjects from group 1 will be randomly selected out of 50 total
+(25), and exactly 50% of subjects will be randomly selected from group
+2 (25) in the formation of each bootstrap data set.   This allows you
+to alter the proportions in each category from what is in the original
+data set.
 
 *** NOREWIND|REWIND
       The NOREWIND option requests that if any input data  item(s)  are
@@ -271,16 +384,39 @@ NOREPLACE:
       be used to prevent resetting the random seeds, so that each iteration serves as a new random instance.
 
 *** RANMETHOD=[n|S|m|P]
-      As of NONMEM 7.3, the RANMETHOD option is available for the  $SIM
-      record,  to  use alternative random numbers generators.  N is the
-      random number generator type, S is Sobol sequence, and m  is  the
-      Sobol  scrambler.   The default is NONMEM's traditional one, n=4.
-      Among the Sobol sequence methods, the S2 method appears  to  provide the least biased random samples, that is nearly uniform distribution, with good mixing in multi-dimensional spaces.   As  of
-      NONMEM  7.4,  RANMETHOD  will  also act on the P modifier , which
-      will retain separate seed sequences for each subject, so that the
-      random  variable  patterns are retained regardless of whether the
-      simulation is done in  single  computing  or  parallel  computing
-      mode. (See [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
+As of NM73, the RANMETHOD option is available for the $SIM record, to
+use alternative random numbers generators (default is NONMEM’s
+traditional one, number 4):
+
+Option n is the random number generator type, S is Sobol sequence, and
+m is the Sobol scrambler.  See the description of RANMETHOD under I.39
+Monte Carlo Importance Sampling EM.
+
+As of NM74, RANMETHOD will also act on the P modifier, which will retain separate random number sequences for each subject, so that the random variable patterns are retained regardless of whether the simulation is done in single computing or parallel computing mode.  So, when parallel computing, you may select
+
+#+begin_src perl
+$SIM PARAFILE=ON RANMETHOD=P
+#+end_src
+
+Before NM74, a P descriptor could be given without an error message,
+but it was ignored because the parallel random number generation for
+each individual was not yet developed for $SIM.
+
+NONMEM’s default random number generator for the $SIM step is 4 (in
+contrast, default random number generator for $EST and $TABLE is 3).
+Number 4 is NONMEM’s classic random number generator.  Whatever random
+number source is selected, it affects all seed1 sources, and all
+source seed2 if not also selecting P.  The P descriptor sets initial
+seed2 to 0 when creating starting seeds for each individual.
+
+The Sobol method is used only to generate normally distributed random
+vectors of etas and epsilons, when the S descriptor is selected, and
+SEED1 of source 1 is used to set the seed.  Among the Sobol sequence
+methods, the S2 method appears to provide the least biased random
+samples, that is nearly uniform distribution, with good mixing in
+multi-dimensional spaces.
+
+(See also [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
 
 *** PARAFILE=filename
       As  of  NONMEM 7.4, the Simulation Step computation may be parallelized.  by default. By default, parallelization is  not  turned

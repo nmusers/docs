@@ -11,7 +11,7 @@ weight: 2
 * Pharmacokinetics and ordinary differential equations
 Since pharmacokinetics (PK) always involves time \(t\), we make it explicit
 in the population data formulation from the last chapter. To simplify
-notation we also assume homoscedasticity and hide the subscripts for the moment:
+presentation we only consider homoscedastic residual error and omit the subscripts:
 $$
 y = f(x, \phi, t) + \epsilon.
 $$
@@ -59,6 +59,7 @@ predictions.
     routine). PRED is among NONMEM's default output.
 
 ** Ordinary differential equations
+#+index: Differential equations!ODE
 Ordinary differential equations (ODEs) are often used in mechanistic
 PK models. In fact, the one-compartment model from earlier is based on
 an ODE model: our \(f(D, (V,k), t)\) is the solution of
@@ -120,16 +121,16 @@ not even have to specify \(g()\). Since these models describe how
 allows users to specify in the $SUBROUTINE control record.
 
 ** General linear ODE model
-A special case of the ODE models is when \(g()\) is linear with
-respect to \(A\):
+#+index: Differential equations!linear ODE
+A special case of the ODE models is when \(g()\) is linear function of A
 $$
 \frac{dA(t)}{dt}=K^TA(t).
 $$
-Here \(K\) is a \(n\times n\) matrix that could depend on \(x\). \(K_{ij}\)
-\((i, j)\) entry of \(K\), quantifies the first-order distribution of drug
-from compartment number /i/ to compartment number /j/. For example,
-the above two-compartment model with first-order absorption can be
-cast this way:
+
+Here \(K\) is a \(n\times n\) matrix that could depend on \(x\).
+\(K(i, j)\) quantifies the first-order distribution of drug from
+compartment number /i/ to compartment number /j/. For example, the
+above two-compartment model with first-order absorption can be cast as:
 $$
 A=[A_0, A_1, A_2]^T,\\
 K_{11}=-k_a,\\
@@ -138,6 +139,8 @@ K_{31}=k_{12},\quad K_{33}=k_{21}.
 $$
 NONMEM provides special subroutine ADVAN5 and ADVAN7 for this type of
 systems, and uses the above numbering scheme for matrix \(K\).
+#+index: Differential equations!ADVAN5
+#+index: Differential equations!ADVAN7
 
 ** Parameterization
 Another way to write the above two-compartment models is to use PK
@@ -154,6 +157,8 @@ between different TRANS routines for a given PK model. Like ADVAN
 routines, users specify TRANS in the $SUBROUTINE control record.
 
 ** Dose
+#+index: dose
+#+index: Differential equations!dose
 It is helpful to see doses in PK studies from the pespective of ODEs,
 as dosing can be represented as either setting the initial condition of
 the ODEs, or amending the RHS function \(g()\). Specifically, consider

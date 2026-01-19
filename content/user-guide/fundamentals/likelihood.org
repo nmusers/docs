@@ -11,25 +11,25 @@ weight: 3
 * Likelihood and MLE
 To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component
 $$
-y = f(x, \phi, t) + g(x_{ij}, \phi_i)^T\epsilon,
+y = f(x, \phi, t) + h(x_{ij}, \phi_i)\epsilon,
 $$
 and a statistical component
 $$
 \phi = \mu(z, \theta, \eta).
 $$
 This formulation in fact describes the likelihood. To simplify
-presentation, let us assume homoscedasticity so that \(g(\cdot)\equiv 1\) . Let \(p(y_i|\phi_i, \Sigma_i)\) be the
-likelihood function for individual /i/, as a function of the
-individual parameter \(\phi_i\) and residual covariance matrix
-\(\Sigma_i\). Then NONMEM's assumption that observation \(y_i\)
-follows a multivariate normal distribution can be expressed as
+presentation, let us assume homoscedasticity so that \(h(\cdot)\equiv
+1\) . Let \(p(y_i|\phi_i, \Sigma_i)\) be the likelihood for individual /i/, as a function of the
+individual parameter \(\phi_i\) and diagonal matrix
+\(\Sigma_i\). Then the NONMEM assumption that \(y_i\)
+is multivariate normal can be expressed as
 $$
 p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[
 -\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t))
 \right].
 $$
 Assume \(\phi_i=\mu(z_i, \theta)+\eta_i\) and recall that \(\eta_i\)
-also has multivariate normal distribution:
+also has multivariate normal distribution, we have
 $$
 p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[
 -\frac{1}{2}\eta_i^T\Omega\eta_i
@@ -39,9 +39,10 @@ then the individual likelihood is
 $$
 p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega).
 $$
-In classical NONMEM methods, we only seek the likelihood of population
-parameters by /marginalizing/ \(\eta_i\), so that the individual
-likelihood of the population parameters is
+In classical NONMEM methods, we fit the model by estimating the population
+parameters, with \(\eta_i\) /marginalized/, based on the indivudal
+likelihood (keep in mind that \(\phi_i\) is a function of \(\eta_i\))
+#+index: Likelihood
 $$
 L_i\equiv p(y_i|\Sigma_i, \theta, \Omega) = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega)\,d\phi_i
  = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\eta_i | \Omega)\,d\eta_i,
@@ -52,7 +53,7 @@ L=\Pi_iL_i=L_1\times L_2\times\dots \times L_{N}.
 $$
 The reason that we use "proportional to" (\(\propto\)) instead of "equal
 to" (\(=\)) is that we fit the model by maximizing the likelihood /L/, and
-the normalizing coefficients are not relevant. In fact, we maximize
+this is not affected by the normalizing coefficients. In practice we actually maximize
 the log-likelihood \(\mathcal{L}\) for its superior numerical statbility and
 being simpler to work with for common distributions (from the expontential family):
 $$
@@ -63,18 +64,19 @@ to maximize \(\mathcal{L}\). These methods are called /maximized
 likelihood estimations/ (MLEs), and the corresponding
 "optimal" parameter values /maximized likelihood estimates/,
 denoted as \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\).
-In fact, NONMEM takes one step further by minimizing certain approximations of \(-2\mathcal{L}\),
-and call these approximations /objective function/ \(\mathcal{T}\) and /objective function for individual/
-\(\mathcal{T}_i\). Though different NONMEM MLE methods
-define \(\mathcal{T}\) differently, they all aim to simplify
-\(\mathcal{L}\) evaluation while keep the minimizer "close" to
+In fact, NONMEM takes one step further by minimizing an /objective
+function/ \(\mathcal{T}\), as a certain approximation of
+\(-2\mathcal{L}\). Different NONMEM MLE methods
+define \(\mathcal{T}\) differently, but they all aim to simplify
+\(\mathcal{L}\) evaluation while keep the estimation "close" to
 the MLE solution:
+#+index: Likelihood!MLE
 $$
 \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{T}\approx \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{-2L}=\text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L}.
 $$
-The approximation is unbiased in predicted individual mean responses.
-These predictions are obtained setting \(\hat{\eta}=0\) and
-\(\epsilon=0\). In other words, the prediction is for the mean
+The approximation is unbiased in predicted individual mean responses
+that are based on \(\hat{\eta}=0\) and
+\(\epsilon=0\). That is, the prediction is for the "typical"
 reponses of individuals with same fixed effects. In addition, one can
 also use \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\) to
 calculate the covariance matrix (hence the standard error) of
@@ -124,13 +126,15 @@ $$
 \sigma_{j} = \upsilon f(x_{ij}, \phi_i)^{\xi},
 $$
 with \(\upsilon\) and \(\xi\) both as unknown parameters (that can be
-modeled as elements of THETA). We can see this is an extension of the
-proportional residual error model.
+modeled as elements of THETA). We can see this is equivalent to the
+power error model.
 
 ** Covariance (standard error) estimation
 Let vector \(p=(p_1,p_2,\dots, p_n)\) be the collection of all the
  entries of \( (\theta, \Omega, \Sigma) \), and
-\(\hat{p}=(\hat{p}_1,\hat{p}_2,\dots,\hat{p}_n)\) the corresponding estimate. To obtain error estimation of \(\hat{p}\), NONMEM calculates two matrices.
+\(\hat{p}=(\hat{p}_1,\hat{p}_2,\dots,\hat{p}_n)\) the corresponding
+ MLE solution. The error estimation of \(\hat{p}\) is based on approximating \(\mathcal{I}^{-1}\),
+ the inverse of the Fisher Information Matrix (FIM) \(\mathcal{I}\). To obtain FIM NONMEM calculates  two matrices.
 
 - Matrix \(R\) with
   $$
@@ -181,7 +185,8 @@ Here \(\text{cov}^{1/2}\) denotes the matrix square root of the
 covariance matrix, and \(\text{cov}^{-1/2}\) the inverse of the matrix
 square root. Note here we only have individual subscript,
 therefore the WRES and \(y\) in the definition are in general vectors
-(for multiple observation of subject /i/).
+(for multiple observation of subject /i/). Note that the structure of
+\(\text{cov}\) depends on the approximation \(\mathcal{T}\).
 
 One can request additional quantities with $TABLE.
 
@@ -199,7 +204,7 @@ One can request additional quantities with $TABLE.
   not differ from NWRES if INTERACTION was not selected in the
   previous $EST command.
 
-- CPRED, CRES, CWRES. These are conditional, no ETA-EPSILON
+- CPRED, CRES, CWRES @@latex:\cite{hooker_conditional_2007}@@ @@html:[2]@@. These are conditional, no ETA-EPSILON
   interaction, PRED, RES, and WRES values. Let \(\hat{\eta}\) be
   the conditional mode ETAs (from FOCE or ITS) [fn:1], or
   the conditional mean ETAs (from Monte Carlo EM methods).
@@ -242,16 +247,45 @@ One can request additional quantities with $TABLE.
 
   $$
   \text{cov}(y_i) =
-  \frac{1}{n_i}\sum\left[g|_{\eta_i^{(k)}}\hat{\Sigma}g|_{\eta_i^{(k)}}^T + (f|_{\eta_i^{(k)}}-\text{EPRED}_i)(f|_{\eta_i^{(k)}}-\text{EPRED}_i)^T\right]
+  \frac{1}{n_i}\sum\left[h|_{\eta_i^{(k)}}\hat{\Sigma}h|_{\eta_i^{(k)}}^T + (f|_{\eta_i^{(k)}}-\text{EPRED}_i)(f|_{\eta_i^{(k)}}-\text{EPRED}_i)^T\right]
   $$
 
 - ECWRES. Similar to EWRES, but with covarinace matrix for the
   residual error evaluated at \(\hat{\eta}_i\) instead of samples means.
   $$
   \text{cov}(y_i) =
-  g|_{\hat{\eta_i}}\hat{\Sigma}g|_{\hat{\eta_i}}^T + \frac{1}{n_i}\sum\left[(f|_{\eta_i^{(k)}}-\text{EPRED}_i)(f|_{\eta_i^{(k)}}-\text{EPRED}_i)^T\right]
+  h|_{\hat{\eta_i}}\hat{\Sigma}h|_{\hat{\eta_i}}^T + \frac{1}{n_i}\sum\left[(f|_{\eta_i^{(k)}}-\text{EPRED}_i)(f|_{\eta_i^{(k)}}-\text{EPRED}_i)^T\right]
   $$
 
+- NPD, NPDE @@latex:\cite{comets_computing_2008,nguyen_extension_2012}@@ @@html:[1,3]@@. Based on the fact that should the observations be
+  generated from the estimated parameters (in other words the
+  estimation was perfect), the cumulated distribution function (CDF)
+  of the residual error would follow the uniform distribution on [0,
+  1]. We can estimate the CDF by generating predictions through Monte
+  Carlo simulation, and test its uniformity. NPD takes the approach of
+  transforming the estimate back using the normal quantile function and
+  test the result's normality.
+  $$
+  \text{PD}_i = \frac{1}{n_i}\sum_k P(\text{cov}(y_i)^{-1/2}|_{\eta_i^{(k)}}(y_i-f|_{\eta_i^{(k)}})),
+  $$
+  $$
+  \text{NPD}_i = P^{-1}(\text{PD}_i).
+  $$
+  Here \(P()\) is the CDF of a normal distribution, and \(P^{-1}\)
+  the corresponding quantile function.
+
+  NPDE is the decorrelated version of NPD, takes into account within-subject correlations.
+
+# comment the following section for latex export
+** Reference
+# use the following to error latex export as a reminder
+#+BEGIN_HTML
+#+END_HTML
+[1] E. Comets, K. Brendel, and F. Mentré, /Computing normalised prediction distribution errors to evaluate nonlinear mixed-effect models: The npde add-on package for R/, 90, pp. 154–166.
+
+[2] A. C. Hooker, C. E. Staatz, and M. O. Karlsson, /Conditional weighted residuals (CWRES): A model diagnostic for the FOCE method/, 24, pp. 2187–2197.
+
+[3] T. H. T. Nguyen, E. Comets, and F. Mentré, /Extension of NPDE for evaluation of nonlinear mixed effect models in presence of data below the quantification limit with applications to HIV dynamic model/, 39, pp. 499–518.
 
 [fn:1] The conditional mode ETAs are also known as conditional
 parametric ETAs (CPE), empirical bayes estimates (EBE), posthoc

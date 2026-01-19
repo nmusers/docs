@@ -28,7 +28,7 @@ https://github.com/alex-shpak/hugo-book
   <meta itemprop="description" content="$SIMULATION Instructions for the NONMEM Simulation Step.
 1 2 3 4 5 6 7 8 9 10 11 12 13 $SIMULATION (seed1 [seed2] [NORMAL|UNIFORM|NONPARAMETRIC] [NEW]) ... [CLOCKSEED=[0|1]] [SOURCE_EPS=n] [SUBPROBLEMS=n] [ONLYSIMULATION] [OMITTED] [REQUESTFIRST] [REQUESTSECOND] [PREDICTION|NOPREDICTION] [TRUE=INITIAL|FINAL|PRIOR] [TTDF=n] [BOOTSTRAP=n [REPLACE|NOREPLACE] [STRAT=label] [STRATF=label]] [NOREWIND|REWIND] [SUPRESET|NOSUPRESET] [RANMETHOD=[n|S|m|P] ] [PARAFILE=[filename|ON|OFF] ;# EXAMPLE $SIMULATION (889215690) (2239177789 UNIFORM) DISCUSSION Optional. Requests that the NONMEM Simulation Step be implemented. May also be coded $SIMULATE or $SIML.">
   <meta itemprop="dateModified" content="2026-01-15T11:03:50-08:00">
-  <meta itemprop="wordCount" content="2412">
+  <meta itemprop="wordCount" content="3178">
 
 <title>$SIMULATION | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -38,7 +38,7 @@ https://github.com/alex-shpak/hugo-book
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.c1fef8ef7d563a59711c79d8e0aeccf0cb7cd9f069ae328401a30fc24b12fce5.js" integrity="sha256-wf74731WOllxHHnY4K7M8Mt82fBprjKEAaMPwksS/OU=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.0a0eaba0977dcc7ec7ea84dc76362fcd7dd268ae5d9d9c08541b17b50194c6b0.js" integrity="sha256-Cg6roJd9zH7H6oTcdjYvzX3SaK5dnZwIVBsXtQGUxrA=" crossorigin="anonymous"></script>
 
 
 
@@ -246,6 +246,20 @@ https://github.com/alex-shpak/hugo-book
   
 
   
+    <a href="/docs/user-guide/nmtran/nmfe/" class="">
+      Running NONMEM</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
     <a href="/docs/user-guide/nmtran/output/" class="">
       Output</a>
   
@@ -332,6 +346,20 @@ https://github.com/alex-shpak/hugo-book
         </li>
       
     
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/plasma-urine/" class="">
+      Plasma-urine examples</a>
+  
+
+        </li>
+      
+    
   </ul>
 
         </li>
@@ -354,20 +382,6 @@ https://github.com/alex-shpak/hugo-book
 
           
   <ul>
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/user-guide/advanced/abbr_block/" class="">
-      Code blocks</a>
-  
-
-        </li>
-      
     
       
         <li>
@@ -1193,6 +1207,20 @@ https://github.com/alex-shpak/hugo-book
   
 
   
+    <a href="/docs/cookbook/accuracy/" class="">
+      Accuracy control</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
     <a href="/docs/cookbook/prior/" class="">
       Bayesian Priors</a>
   
@@ -1209,6 +1237,20 @@ https://github.com/alex-shpak/hugo-book
   
     <a href="/docs/cookbook/steady_state/" class="">
       Empirical steady state</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/ignore-accept/" class="">
+      IGNORE/ACCEPT data records</a>
   
 
         </li>
@@ -1758,10 +1800,62 @@ TRUE
 TTDF=n (NM75)
 </h4>
 <div id="outline-text-headline-18" class="outline-text-4">
-<p>If  TTDF  is  set to a non-zero integer value n, thetas are simulated with n degrees of freedom t-distribution.  TRUE=PRIOR  must
-      be  specified  as  well.  Priors must also be specified appropriately.
-      See also $TTDF control record (NM75) to specify degrees of  freedom for each theta.  The value of TTDF overrides $TTDF
-      See INTRODUCTION  TO NONMEM 7, Simulating THETAS with t-Distribution</p>
+<p>With TTDF set to a non-zero integer, THETAs can be simulated from
+the t-distribution with TTDF degrees of freedom, when setting also TRUE=PRIOR.  For example:</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$SIMULATION</span> (<span style="color:#ff9f43">567811</span> NORMAL) (<span style="color:#ff9f43">2933012</span> UNIFORM) SUBPROBLEMS<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">10</span> ONLYSIM
+</span></span><span style="display:flex;"><span>TTDF<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">4</span> TRUE<span style="color:#ff6ac1">=</span>PRIOR</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>
+This also requires set up priors, such as:</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$PRIOR</span> NWPRI PLEV<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0.999</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETAP</span>  (<span style="color:#ff9f43">1.68</span> FIXED)  (<span style="color:#ff9f43">1.58</span> FIXED) (<span style="color:#ff9f43">8.12E-01</span> FIXED) ( <span style="color:#ff9f43">2.37</span> FIXED)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETAPV</span> BLOCK(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.04</span> FIX
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.00</span> <span style="color:#ff9f43">0.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.00</span>  <span style="color:#ff9f43">0.00</span> <span style="color:#ff9f43">0.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.00</span>  <span style="color:#ff9f43">0.00</span> <span style="color:#ff9f43">0.0</span> <span style="color:#ff9f43">0.4</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGAP</span> BLOCK(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">1.65276E-01</span>  FIXED
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">4.62368E-03</span>  <span style="color:#ff9f43">1.33770E-01</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">6.35274E-03</span>  <span style="color:#ff9f43">1.69155E-02</span>  <span style="color:#ff9f43">2.13881E-01</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff6ac1">-</span><span style="color:#ff9f43">1.53098E-02</span>  <span style="color:#ff9f43">1.25855E-02</span>  <span style="color:#ff9f43">5.32524E-02</span>  <span style="color:#ff9f43">1.62771E-01</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGAPD</span> (<span style="color:#ff9f43">50</span> FIX)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMAP</span> BLOCK(<span style="color:#ff9f43">1</span>) <span style="color:#ff9f43">0.0544</span> FIXED
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMAPD</span> (<span style="color:#ff9f43">300</span> FIXED)</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>
+See <a href="/docs/reference-manual/control-records/ttdf/">$TTDF</a> for specifying degrees of freedom for each THETA.  <code>$SIML TTDF</code> over-rides the <code>$TTDF</code> settings.</p>
 </div>
 </div>
 <div id="outline-container-headline-19" class="outline-4">
@@ -1769,18 +1863,138 @@ TTDF=n (NM75)
 BOOTSTRAP=n
 </h4>
 <div id="outline-text-headline-19" class="outline-text-4">
-<p>With the BOOTSTRAP option, NONMEM does not perform the usual simulation  activity  of  randomly creating DV values for a new data
-      set, but rather selects a random set of subjects from an existing
-      &#34;template&#34;  data  set (which must already have legitimate DV values).  The BOOTSTRAP number n refers to how many subjects are  to
-      be randomly selected from the data set.  Setting -1 means to randomly select as many subjects as are in the data set.  For  example,  if  400  subjects  are in the simulation template data set,
-      then 400 subjects are randomly selected.  The random  source  is,
-      in  effect, uniform, because any subject is equally probable.  If
-      n is greater than the number of subjects,  NONMEM  will  use  the
-      number of subjects.</p>
+<p>With the BOOTSTRAP option, NONMEM does not perform the usual
+simulation  activity  of  randomly creating DV values for a new data
+set, but rather selects a random set of subjects from an existing
+&#34;template&#34;  data  set (which must already have legitimate DV values).
+The BOOTSTRAP number n refers to how many subjects are  to be randomly
+selected from the data set.  Setting -1 means to randomly select as
+many subjects as in the data set.</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$SIML</span> BOOTSTRAP<span style="color:#ff6ac1">=-</span><span style="color:#ff9f43">1</span> SUBP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">100</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
 <p>
-      The  BOOTSTRAP option in $SIML is most suitable for multi-subject
-      data, in which there is an ID data column  identifying  the  subjects.   However,  see  the example &#34;BOOTSTRAPPING SINGLE SUBJECT
-      DATA&#34; in the INTRODUCTION TO NONMEM 7.</p>
+For  example,  if  400  subjects  are in the simulation template data
+set, then 400 subjects are randomly selected.  The random  source  is,
+in  effect, uniform, because any subject is equally probable.  If n is
+greater than the number of subjects,  NONMEM  will  use  the number of
+subjects.</p>
+<p>
+BOOTSTRAP can also be applied to single-subject data, in obtaining
+summary statistics. For example (examples/control3boot):</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$PROBLEM</span>  THEOPHYLLINE   SINGLE SUBJECT DATA
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$INPUT</span>  DOSE<span style="color:#ff6ac1">=</span>AMT TIME CP<span style="color:#ff6ac1">=</span>DV CAT
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$DATA</span>  DATA3B
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SUBROUTINES</span>  ADVAN2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
+</span></span><span style="display:flex;"><span>CALLFL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>KA<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>K<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>SC<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">3</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ERROR</span>
+</span></span><span style="display:flex;"><span>IPRED<span style="color:#ff6ac1">=</span>F
+</span></span><span style="display:flex;"><span>W<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1.0</span>
+</span></span><span style="display:flex;"><span>; first observation after dose is part of <span style="color:#5af78e">&#34;first subject&#34;</span><span style="color:#ff6ac1">.</span>  So, put in dummy record, CAT<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">3</span>,
+</span></span><span style="display:flex;"><span>; <span style="color:#ff6ac1">and</span> give it a residual variance that is very large, so it does <span style="color:#ff6ac1">not</span> influence the fit<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span>IF(CAT<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">3.0</span>) W<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1.0E+10</span>
+</span></span><span style="display:flex;"><span>Y<span style="color:#ff6ac1">=</span>F<span style="color:#ff6ac1">+</span>W<span style="color:#ff6ac1">*</span>ERR(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETA</span>  (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">1.7</span>)  (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">.102</span>)  (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">29</span>)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGA</span> <span style="color:#ff9f43">0.2</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIML</span> (<span style="color:#ff9f43">567666</span> NORMAL) (<span style="color:#ff9f43">33012</span> UNIFORM) BOOTSTRAP<span style="color:#ff6ac1">=-</span><span style="color:#ff9f43">1</span> STRAT<span style="color:#ff6ac1">=</span>CAT SUBP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">100</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ESTIMATION</span> MAXEVAL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">9999</span>  PRINT<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">2</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$COVR</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$TABLE</span> TIME CAT AMT CP IPRED W NOAPPEND NOPRINT file<span style="color:#ff6ac1">=</span>control3boot<span style="color:#ff6ac1">.</span>tab</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>
+The data file is as follows:</p>
+<div class="src src-r">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>    <span style="color:#ff9f43">320</span>    <span style="color:#ff9f43">.0</span>     .    <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>     .     <span style="color:#ff9f43">.1</span>    <span style="color:#ff9f43">3.0</span>   <span style="color:#ff9f43">3</span>
+</span></span><span style="display:flex;"><span>     .     <span style="color:#ff9f43">.27</span>   <span style="color:#ff9f43">1.71</span>  <span style="color:#ff9f43">2</span>
+</span></span><span style="display:flex;"><span>     .     <span style="color:#ff9f43">.52</span>   <span style="color:#ff9f43">7.91</span>  <span style="color:#ff9f43">2</span>
+</span></span><span style="display:flex;"><span>     .    <span style="color:#ff9f43">1</span>.     <span style="color:#ff9f43">8.31</span>  <span style="color:#ff9f43">2</span>
+</span></span><span style="display:flex;"><span>     .    <span style="color:#ff9f43">1.92</span>   <span style="color:#ff9f43">8.33</span>  <span style="color:#ff9f43">2</span>
+</span></span><span style="display:flex;"><span>     .    <span style="color:#ff9f43">3.5</span>    <span style="color:#ff9f43">6.85</span>  <span style="color:#ff9f43">2</span>
+</span></span><span style="display:flex;"><span>     .    <span style="color:#ff9f43">5.02</span>   <span style="color:#ff9f43">6.08</span>  <span style="color:#ff9f43">2</span>
+</span></span><span style="display:flex;"><span>     .    <span style="color:#ff9f43">7.03</span>   <span style="color:#ff9f43">5.4</span>   <span style="color:#ff9f43">2</span>
+</span></span><span style="display:flex;"><span>     .    <span style="color:#ff9f43">9</span>.     <span style="color:#ff9f43">4.55</span>  <span style="color:#ff9f43">2</span>
+</span></span><span style="display:flex;"><span>     .   <span style="color:#ff9f43">12</span>.     <span style="color:#ff9f43">3.01</span>  <span style="color:#ff9f43">2</span>
+</span></span><span style="display:flex;"><span>     .   <span style="color:#ff9f43">24.3</span>     <span style="color:#ff9f43">.90</span>  <span style="color:#ff9f43">2</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>The CAT data item identifies category number, used in stratification
+(see STRAT option), so that each record will be presented in every
+random dataset. The single dose record has CAT=1 ,and the observation
+events have CAT=2. Every bootstrap sample will contrain records with
+each CAT value. NONMEM assumes the dose record and the first data
+record after it belong to “one individual”, therefore this first
+record (time=0.1) will always be sampled with the dose record. To
+ensure that this dummy record does not contribute to the estimate, it
+is given a large residual deviation W=1.0E+10, equivalent to very
+little weight in the model estimate.</p>
 </div>
 </div>
 <div id="outline-container-headline-20" class="outline-4">
@@ -1805,8 +2019,24 @@ NOREPLACE:
 STRAT
 </h4>
 <div id="outline-text-headline-21" class="outline-text-4">
-<p>The label of a data item that serves as the stratification.  This
-      splits the data set into distinct sub-sets, guaranteeing  a  specific number of subjects will be selected from each category.</p>
+<p>A single stratification data item may be entered. In the above
+bootstraping single-subject example, the data item CAT serves as the stratification.  This splits
+the data set into distinct sub-sets, guaranteeing a specific number of
+subjects will be selected from each category.  For example, if in the
+base data set CAT has values of 1 or 2, with 33 subjects in group 1
+and 67 subjects in group 2 out of 100 total subjects, then exactly 33%
+of  of subjects from group 1 will be randomly selected out of 50 total
+(16), and exactly 67% of subjects will be randomly selected from group
+2 (34).  This has value when desiring that a bootstrap analysis
+maintain the same proportion of subjects belonging to certain
+categories, such as gender, or age bracket.  To stratify by both age
+bracket and gender, create a stratification data item that would be,
+for example, valued 1 for subjects who are male under 30, 2 for
+subjects that are female under 30, 3 for subjects who are male over
+30, 4 for subjects who are female over 30.  Any discrete numerical
+values will do, as long as the stratifier is not a continuous
+variable, and the subjects need not be sorted according to the
+stratification data item.</p>
 </div>
 </div>
 <div id="outline-container-headline-22" class="outline-4">
@@ -1814,10 +2044,19 @@ STRAT
 STRATF
 </h4>
 <div id="outline-text-headline-22" class="outline-text-4">
-<p>The  label  of a data item that contains the fraction that should
-      represent a category  in  the  bootstrapped  data  set.   Without
-      STRATF,  the number of subjects to be taken from a given category
-      is proportional to the number of subjects in the base data set.</p>
+<p>The option STRATF points to a data item that contains the fraction
+that should represent a category in the bootstrapped data set.
+Without STRATF, the number of subjects to be taken from a given
+category is proportional to the number of subjects in the base data
+set.  If you want the category to be represented at a different
+proportion, then specify a STRATF data item, in this example, FCAT.
+Suppose FCAT=0.5 for CAT=1 and 0.5 for CAT=2 as well. Even though only
+33% of subjects in the base data set belong to category 1, exactly 50%
+of  subjects from group 1 will be randomly selected out of 50 total
+(25), and exactly 50% of subjects will be randomly selected from group
+2 (25) in the formation of each bootstrap data set.   This allows you
+to alter the proportions in each category from what is in the original
+data set.</p>
 </div>
 </div>
 <div id="outline-container-headline-23" class="outline-4">
@@ -1874,16 +2113,45 @@ SUPRESET|NOSUPRESET
 RANMETHOD=[n|S|m|P]
 </h4>
 <div id="outline-text-headline-25" class="outline-text-4">
-<p>As of NONMEM 7.3, the RANMETHOD option is available for the  $SIM
-      record,  to  use alternative random numbers generators.  N is the
-      random number generator type, S is Sobol sequence, and m  is  the
-      Sobol  scrambler.   The default is NONMEM&#39;s traditional one, n=4.
-      Among the Sobol sequence methods, the S2 method appears  to  provide the least biased random samples, that is nearly uniform distribution, with good mixing in multi-dimensional spaces.   As  of
-      NONMEM  7.4,  RANMETHOD  will  also act on the P modifier , which
-      will retain separate seed sequences for each subject, so that the
-      random  variable  patterns are retained regardless of whether the
-      simulation is done in  single  computing  or  parallel  computing
-      mode. (See [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).</p>
+<p>As of NM73, the RANMETHOD option is available for the $SIM record, to
+use alternative random numbers generators (default is NONMEM’s
+traditional one, number 4):</p>
+<p>
+Option n is the random number generator type, S is Sobol sequence, and
+m is the Sobol scrambler.  See the description of RANMETHOD under I.39
+Monte Carlo Importance Sampling EM.</p>
+<p>
+As of NM74, RANMETHOD will also act on the P modifier, which will retain separate random number sequences for each subject, so that the random variable patterns are retained regardless of whether the simulation is done in single computing or parallel computing mode.  So, when parallel computing, you may select</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$SIM</span> PARAFILE<span style="color:#ff6ac1">=</span>ON RANMETHOD<span style="color:#ff6ac1">=</span>P</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>
+Before NM74, a P descriptor could be given without an error message,
+but it was ignored because the parallel random number generation for
+each individual was not yet developed for $SIM.</p>
+<p>
+NONMEM’s default random number generator for the $SIM step is 4 (in
+contrast, default random number generator for $EST and $TABLE is 3).
+Number 4 is NONMEM’s classic random number generator.  Whatever random
+number source is selected, it affects all seed1 sources, and all
+source seed2 if not also selecting P.  The P descriptor sets initial
+seed2 to 0 when creating starting seeds for each individual.</p>
+<p>
+The Sobol method is used only to generate normally distributed random
+vectors of etas and epsilons, when the S descriptor is selected, and
+SEED1 of source 1 is used to set the seed.  Among the Sobol sequence
+methods, the S2 method appears to provide the least biased random
+samples, that is nearly uniform distribution, with good mixing in
+multi-dimensional spaces.</p>
+<p>
+(See also <a href="/docs/reference-manual/control-records/estimation/">$ESTIMATION</a>).</p>
 </div>
 </div>
 <div id="outline-container-headline-26" class="outline-4">

@@ -8,24 +8,24 @@ https://github.com/alex-shpak/hugo-book
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content=" Likelihood and MLE To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component $$ y = f(x, \phi, t) &#43; g(x_{ij}, \phi_i)^T\epsilon, $$ and a statistical component $$ \phi = \mu(z, \theta, \eta). $$ This formulation in fact describes the likelihood. To simplify presentation, let us assume homoscedasticity so that \(g(\cdot)\equiv 1\) . Let \(p(y_i|\phi_i, \Sigma_i)\) be the likelihood function for individual i, as a function of the individual parameter \(\phi_i\) and residual covariance matrix \(\Sigma_i\). Then NONMEM&#39;s assumption that observation \(y_i\) follows a multivariate normal distribution can be expressed as $$ p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[ -\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t)) \right]. $$ Assume \(\phi_i=\mu(z_i, \theta)&#43;\eta_i\) and recall that \(\eta_i\) also has multivariate normal distribution: $$ p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[ -\frac{1}{2}\eta_i^T\Omega\eta_i \right], $$ then the individual likelihood is $$ p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega). $$ In classical NONMEM methods, we only seek the likelihood of population parameters by marginalizing \(\eta_i\), so that the individual likelihood of the population parameters is $$ L_i\equiv p(y_i|\Sigma_i, \theta, \Omega) = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega)\,d\phi_i = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\eta_i | \Omega)\,d\eta_i, $$ The total likelihood for the population is $$ L=\Pi_iL_i=L_1\times L_2\times\dots \times L_{N}. $$ The reason that we use &#34;proportional to&#34; (\(\propto\)) instead of &#34;equal to&#34; (\(=\)) is that we fit the model by maximizing the likelihood L, and the normalizing coefficients are not relevant. In fact, we maximize the log-likelihood \(\mathcal{L}\) for its superior numerical statbility and being simpler to work with for common distributions (from the expontential family): $$ \mathcal{L}=\sum_i\mathcal{L}_i=\sum_i\log(L_i). $$ NONMEM&#39;s point estimating methods aim to adjust parameters to maximize \(\mathcal{L}\). These methods are called maximized likelihood estimations (MLEs), and the corresponding &#34;optimal&#34; parameter values maximized likelihood estimates, denoted as \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\). In fact, NONMEM takes one step further by minimizing certain approximations of \(-2\mathcal{L}\), and call these approximations objective function \(\mathcal{T}\) and objective function for individual \(\mathcal{T}_i\). Though different NONMEM MLE methods define \(\mathcal{T}\) differently, they all aim to simplify \(\mathcal{L}\) evaluation while keep the minimizer &#34;close&#34; to the MLE solution: $$ \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{T}\approx \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{-2L}=\text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L}. $$ The approximation is unbiased in predicted individual mean responses. These predictions are obtained setting \(\hat{\eta}=0\) and \(\epsilon=0\). In other words, the prediction is for the mean reponses of individuals with same fixed effects. In addition, one can also use \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\) to calculate the covariance matrix (hence the standard error) of individual predictions.
+<meta name="description" content=" Likelihood and MLE To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component $$ y = f(x, \phi, t) &#43; h(x_{ij}, \phi_i)\epsilon, $$ and a statistical component $$ \phi = \mu(z, \theta, \eta). $$ This formulation in fact describes the likelihood. To simplify presentation, let us assume homoscedasticity so that \(h(\cdot)\equiv 1\) . Let \(p(y_i|\phi_i, \Sigma_i)\) be the likelihood for individual i, as a function of the individual parameter \(\phi_i\) and diagonal matrix \(\Sigma_i\). Then the NONMEM assumption that \(y_i\) is multivariate normal can be expressed as $$ p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[ -\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t)) \right]. $$ Assume \(\phi_i=\mu(z_i, \theta)&#43;\eta_i\) and recall that \(\eta_i\) also has multivariate normal distribution, we have $$ p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[ -\frac{1}{2}\eta_i^T\Omega\eta_i \right], $$ then the individual likelihood is $$ p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega). $$ In classical NONMEM methods, we fit the model by estimating the population parameters, with \(\eta_i\) marginalized, based on the indivudal likelihood (keep in mind that \(\phi_i\) is a function of \(\eta_i\))
 ">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:url" content="https://nmusers.github.io/docs/user-guide/fundamentals/likelihood/">
   <meta property="og:site_name" content="NONMEM Documentation">
   <meta property="og:title" content="Likelihood and MLE">
-  <meta property="og:description" content="Likelihood and MLE To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component $$ y = f(x, \phi, t) &#43; g(x_{ij}, \phi_i)^T\epsilon, $$ and a statistical component $$ \phi = \mu(z, \theta, \eta). $$ This formulation in fact describes the likelihood. To simplify presentation, let us assume homoscedasticity so that \(g(\cdot)\equiv 1\) . Let \(p(y_i|\phi_i, \Sigma_i)\) be the likelihood function for individual i, as a function of the individual parameter \(\phi_i\) and residual covariance matrix \(\Sigma_i\). Then NONMEM&#39;s assumption that observation \(y_i\) follows a multivariate normal distribution can be expressed as $$ p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[ -\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t)) \right]. $$ Assume \(\phi_i=\mu(z_i, \theta)&#43;\eta_i\) and recall that \(\eta_i\) also has multivariate normal distribution: $$ p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[ -\frac{1}{2}\eta_i^T\Omega\eta_i \right], $$ then the individual likelihood is $$ p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega). $$ In classical NONMEM methods, we only seek the likelihood of population parameters by marginalizing \(\eta_i\), so that the individual likelihood of the population parameters is $$ L_i\equiv p(y_i|\Sigma_i, \theta, \Omega) = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega)\,d\phi_i = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\eta_i | \Omega)\,d\eta_i, $$ The total likelihood for the population is $$ L=\Pi_iL_i=L_1\times L_2\times\dots \times L_{N}. $$ The reason that we use &#34;proportional to&#34; (\(\propto\)) instead of &#34;equal to&#34; (\(=\)) is that we fit the model by maximizing the likelihood L, and the normalizing coefficients are not relevant. In fact, we maximize the log-likelihood \(\mathcal{L}\) for its superior numerical statbility and being simpler to work with for common distributions (from the expontential family): $$ \mathcal{L}=\sum_i\mathcal{L}_i=\sum_i\log(L_i). $$ NONMEM&#39;s point estimating methods aim to adjust parameters to maximize \(\mathcal{L}\). These methods are called maximized likelihood estimations (MLEs), and the corresponding &#34;optimal&#34; parameter values maximized likelihood estimates, denoted as \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\). In fact, NONMEM takes one step further by minimizing certain approximations of \(-2\mathcal{L}\), and call these approximations objective function \(\mathcal{T}\) and objective function for individual \(\mathcal{T}_i\). Though different NONMEM MLE methods define \(\mathcal{T}\) differently, they all aim to simplify \(\mathcal{L}\) evaluation while keep the minimizer &#34;close&#34; to the MLE solution: $$ \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{T}\approx \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{-2L}=\text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L}. $$ The approximation is unbiased in predicted individual mean responses. These predictions are obtained setting \(\hat{\eta}=0\) and \(\epsilon=0\). In other words, the prediction is for the mean reponses of individuals with same fixed effects. In addition, one can also use \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\) to calculate the covariance matrix (hence the standard error) of individual predictions.">
+  <meta property="og:description" content="Likelihood and MLE To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component $$ y = f(x, \phi, t) &#43; h(x_{ij}, \phi_i)\epsilon, $$ and a statistical component $$ \phi = \mu(z, \theta, \eta). $$ This formulation in fact describes the likelihood. To simplify presentation, let us assume homoscedasticity so that \(h(\cdot)\equiv 1\) . Let \(p(y_i|\phi_i, \Sigma_i)\) be the likelihood for individual i, as a function of the individual parameter \(\phi_i\) and diagonal matrix \(\Sigma_i\). Then the NONMEM assumption that \(y_i\) is multivariate normal can be expressed as $$ p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[ -\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t)) \right]. $$ Assume \(\phi_i=\mu(z_i, \theta)&#43;\eta_i\) and recall that \(\eta_i\) also has multivariate normal distribution, we have $$ p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[ -\frac{1}{2}\eta_i^T\Omega\eta_i \right], $$ then the individual likelihood is $$ p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega). $$ In classical NONMEM methods, we fit the model by estimating the population parameters, with \(\eta_i\) marginalized, based on the indivudal likelihood (keep in mind that \(\phi_i\) is a function of \(\eta_i\))">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="user-guide">
-    <meta property="article:modified_time" content="2026-01-15T11:03:50-08:00">
+    <meta property="article:modified_time" content="2026-01-16T17:04:42-08:00">
 
 
   <meta itemprop="name" content="Likelihood and MLE">
-  <meta itemprop="description" content="Likelihood and MLE To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component $$ y = f(x, \phi, t) &#43; g(x_{ij}, \phi_i)^T\epsilon, $$ and a statistical component $$ \phi = \mu(z, \theta, \eta). $$ This formulation in fact describes the likelihood. To simplify presentation, let us assume homoscedasticity so that \(g(\cdot)\equiv 1\) . Let \(p(y_i|\phi_i, \Sigma_i)\) be the likelihood function for individual i, as a function of the individual parameter \(\phi_i\) and residual covariance matrix \(\Sigma_i\). Then NONMEM&#39;s assumption that observation \(y_i\) follows a multivariate normal distribution can be expressed as $$ p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[ -\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t)) \right]. $$ Assume \(\phi_i=\mu(z_i, \theta)&#43;\eta_i\) and recall that \(\eta_i\) also has multivariate normal distribution: $$ p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[ -\frac{1}{2}\eta_i^T\Omega\eta_i \right], $$ then the individual likelihood is $$ p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega). $$ In classical NONMEM methods, we only seek the likelihood of population parameters by marginalizing \(\eta_i\), so that the individual likelihood of the population parameters is $$ L_i\equiv p(y_i|\Sigma_i, \theta, \Omega) = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega)\,d\phi_i = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\eta_i | \Omega)\,d\eta_i, $$ The total likelihood for the population is $$ L=\Pi_iL_i=L_1\times L_2\times\dots \times L_{N}. $$ The reason that we use &#34;proportional to&#34; (\(\propto\)) instead of &#34;equal to&#34; (\(=\)) is that we fit the model by maximizing the likelihood L, and the normalizing coefficients are not relevant. In fact, we maximize the log-likelihood \(\mathcal{L}\) for its superior numerical statbility and being simpler to work with for common distributions (from the expontential family): $$ \mathcal{L}=\sum_i\mathcal{L}_i=\sum_i\log(L_i). $$ NONMEM&#39;s point estimating methods aim to adjust parameters to maximize \(\mathcal{L}\). These methods are called maximized likelihood estimations (MLEs), and the corresponding &#34;optimal&#34; parameter values maximized likelihood estimates, denoted as \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\). In fact, NONMEM takes one step further by minimizing certain approximations of \(-2\mathcal{L}\), and call these approximations objective function \(\mathcal{T}\) and objective function for individual \(\mathcal{T}_i\). Though different NONMEM MLE methods define \(\mathcal{T}\) differently, they all aim to simplify \(\mathcal{L}\) evaluation while keep the minimizer &#34;close&#34; to the MLE solution: $$ \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{T}\approx \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{-2L}=\text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L}. $$ The approximation is unbiased in predicted individual mean responses. These predictions are obtained setting \(\hat{\eta}=0\) and \(\epsilon=0\). In other words, the prediction is for the mean reponses of individuals with same fixed effects. In addition, one can also use \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\) to calculate the covariance matrix (hence the standard error) of individual predictions.">
-  <meta itemprop="dateModified" content="2026-01-15T11:03:50-08:00">
-  <meta itemprop="wordCount" content="1351">
+  <meta itemprop="description" content="Likelihood and MLE To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component $$ y = f(x, \phi, t) &#43; h(x_{ij}, \phi_i)\epsilon, $$ and a statistical component $$ \phi = \mu(z, \theta, \eta). $$ This formulation in fact describes the likelihood. To simplify presentation, let us assume homoscedasticity so that \(h(\cdot)\equiv 1\) . Let \(p(y_i|\phi_i, \Sigma_i)\) be the likelihood for individual i, as a function of the individual parameter \(\phi_i\) and diagonal matrix \(\Sigma_i\). Then the NONMEM assumption that \(y_i\) is multivariate normal can be expressed as $$ p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[ -\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t)) \right]. $$ Assume \(\phi_i=\mu(z_i, \theta)&#43;\eta_i\) and recall that \(\eta_i\) also has multivariate normal distribution, we have $$ p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[ -\frac{1}{2}\eta_i^T\Omega\eta_i \right], $$ then the individual likelihood is $$ p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega). $$ In classical NONMEM methods, we fit the model by estimating the population parameters, with \(\eta_i\) marginalized, based on the indivudal likelihood (keep in mind that \(\phi_i\) is a function of \(\eta_i\))">
+  <meta itemprop="dateModified" content="2026-01-16T17:04:42-08:00">
+  <meta itemprop="wordCount" content="1580">
 
 <title>Likelihood and MLE | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -35,7 +35,7 @@ https://github.com/alex-shpak/hugo-book
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.c1fef8ef7d563a59711c79d8e0aeccf0cb7cd9f069ae328401a30fc24b12fce5.js" integrity="sha256-wf74731WOllxHHnY4K7M8Mt82fBprjKEAaMPwksS/OU=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.0a0eaba0977dcc7ec7ea84dc76362fcd7dd268ae5d9d9c08541b17b50194c6b0.js" integrity="sha256-Cg6roJd9zH7H6oTcdjYvzX3SaK5dnZwIVBsXtQGUxrA=" crossorigin="anonymous"></script>
 
 
 
@@ -243,6 +243,20 @@ https://github.com/alex-shpak/hugo-book
   
 
   
+    <a href="/docs/user-guide/nmtran/nmfe/" class="">
+      Running NONMEM</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
     <a href="/docs/user-guide/nmtran/output/" class="">
       Output</a>
   
@@ -329,6 +343,20 @@ https://github.com/alex-shpak/hugo-book
         </li>
       
     
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/plasma-urine/" class="">
+      Plasma-urine examples</a>
+  
+
+        </li>
+      
+    
   </ul>
 
         </li>
@@ -351,20 +379,6 @@ https://github.com/alex-shpak/hugo-book
 
           
   <ul>
-    
-      
-        <li>
-          
-  
-  
-
-  
-    <a href="/docs/user-guide/advanced/abbr_block/" class="">
-      Code blocks</a>
-  
-
-        </li>
-      
     
       
         <li>
@@ -1190,6 +1204,20 @@ https://github.com/alex-shpak/hugo-book
   
 
   
+    <a href="/docs/cookbook/accuracy/" class="">
+      Accuracy control</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
     <a href="/docs/cookbook/prior/" class="">
       Bayesian Priors</a>
   
@@ -1206,6 +1234,20 @@ https://github.com/alex-shpak/hugo-book
   
     <a href="/docs/cookbook/steady_state/" class="">
       Empirical steady state</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/ignore-accept/" class="">
+      IGNORE/ACCEPT data records</a>
   
 
         </li>
@@ -1387,6 +1429,8 @@ https://github.com/alex-shpak/hugo-book
 </li>
 <li><a href="#headline-4">Goodness-of-Fit</a>
 </li>
+<li><a href="#headline-5">Reference</a>
+</li>
 </ul>
 </li>
 </ul>
@@ -1411,25 +1455,25 @@ Likelihood and MLE
 <div id="outline-text-headline-1" class="outline-text-2">
 <p>To summarize the previous two chapters, in NONMEM nomenclature, a model consists of a structure component
 $$
-y = f(x, \phi, t) + g(x_{ij}, \phi_i)^T\epsilon,
+y = f(x, \phi, t) + h(x_{ij}, \phi_i)\epsilon,
 $$
 and a statistical component
 $$
 \phi = \mu(z, \theta, \eta).
 $$
 This formulation in fact describes the likelihood. To simplify
-presentation, let us assume homoscedasticity so that \(g(\cdot)\equiv 1\) . Let \(p(y_i|\phi_i, \Sigma_i)\) be the
-likelihood function for individual <em>i</em>, as a function of the
-individual parameter \(\phi_i\) and residual covariance matrix
-\(\Sigma_i\). Then NONMEM&#39;s assumption that observation \(y_i\)
-follows a multivariate normal distribution can be expressed as
+presentation, let us assume homoscedasticity so that \(h(\cdot)\equiv
+1\) . Let \(p(y_i|\phi_i, \Sigma_i)\) be the likelihood for individual <em>i</em>, as a function of the
+individual parameter \(\phi_i\) and diagonal matrix
+\(\Sigma_i\). Then the NONMEM assumption that \(y_i\)
+is multivariate normal can be expressed as
 $$
 p(y_i|\phi_i, \Sigma_i) \propto \det(\Sigma_i)^{1/2}\exp\left[
 -\frac{1}{2}(y_i-f(x, \phi_i, t))^T\Sigma_i^{-1}(y_i-f(x, \phi_i, t))
 \right].
 $$
 Assume \(\phi_i=\mu(z_i, \theta)+\eta_i\) and recall that \(\eta_i\)
-also has multivariate normal distribution:
+also has multivariate normal distribution, we have
 $$
 p(\phi_i | \theta, \Omega) \propto \det(\Omega)^{1/2}\exp\left[
 -\frac{1}{2}\eta_i^T\Omega\eta_i
@@ -1439,10 +1483,10 @@ then the individual likelihood is
 $$
 p(y_i|\eta_i, \Sigma_i, \theta, \Omega)=p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega).
 $$
-In classical NONMEM methods, we only seek the likelihood of population
-parameters by <em>marginalizing</em> \(\eta_i\), so that the individual
-likelihood of the population parameters is
-$$
+In classical NONMEM methods, we fit the model by estimating the population
+parameters, with \(\eta_i\) <em>marginalized</em>, based on the indivudal
+likelihood (keep in mind that \(\phi_i\) is a function of \(\eta_i\))</p>
+<p>$$
 L_i\equiv p(y_i|\Sigma_i, \theta, \Omega) = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\phi_i | \theta, \Omega)\,d\phi_i
  = \int_{-\infty}^{\infty} p(y_i|\phi_i, \Sigma_i)p(\eta_i | \Omega)\,d\eta_i,
 $$
@@ -1452,7 +1496,7 @@ L=\Pi_iL_i=L_1\times L_2\times\dots \times L_{N}.
 $$
 The reason that we use &#34;proportional to&#34; (\(\propto\)) instead of &#34;equal
 to&#34; (\(=\)) is that we fit the model by maximizing the likelihood <em>L</em>, and
-the normalizing coefficients are not relevant. In fact, we maximize
+this is not affected by the normalizing coefficients. In practice we actually maximize
 the log-likelihood \(\mathcal{L}\) for its superior numerical statbility and
 being simpler to work with for common distributions (from the expontential family):
 $$
@@ -1463,18 +1507,18 @@ to maximize \(\mathcal{L}\). These methods are called <em>maximized
 likelihood estimations</em> (MLEs), and the corresponding
 &#34;optimal&#34; parameter values <em>maximized likelihood estimates</em>,
 denoted as \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\).
-In fact, NONMEM takes one step further by minimizing certain approximations of \(-2\mathcal{L}\),
-and call these approximations <em>objective function</em> \(\mathcal{T}\) and <em>objective function for individual</em>
-\(\mathcal{T}_i\). Though different NONMEM MLE methods
-define \(\mathcal{T}\) differently, they all aim to simplify
-\(\mathcal{L}\) evaluation while keep the minimizer &#34;close&#34; to
-the MLE solution:
-$$
+In fact, NONMEM takes one step further by minimizing an <em>objective
+function</em> \(\mathcal{T}\), as a certain approximation of
+\(-2\mathcal{L}\). Different NONMEM MLE methods
+define \(\mathcal{T}\) differently, but they all aim to simplify
+\(\mathcal{L}\) evaluation while keep the estimation &#34;close&#34; to
+the MLE solution:</p>
+<p>$$
 \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{T}\approx \text{arg}\,\text{min}_{\theta, \Omega, \Sigma}\,\mathcal{-2L}=\text{arg}\,\text{max}_{\theta, \Omega, \Sigma}\,\mathcal{L}.
 $$
-The approximation is unbiased in predicted individual mean responses.
-These predictions are obtained setting \(\hat{\eta}=0\) and
-\(\epsilon=0\). In other words, the prediction is for the mean
+The approximation is unbiased in predicted individual mean responses
+that are based on \(\hat{\eta}=0\) and
+\(\epsilon=0\). That is, the prediction is for the &#34;typical&#34;
 reponses of individuals with same fixed effects. In addition, one can
 also use \(\hat{\theta}\), \(\hat{\Omega}\), and \(\hat{\Sigma}\) to
 calculate the covariance matrix (hence the standard error) of
@@ -1528,8 +1572,8 @@ $$
 \sigma_{j} = \upsilon f(x_{ij}, \phi_i)^{\xi},
 $$
 with \(\upsilon\) and \(\xi\) both as unknown parameters (that can be
-modeled as elements of THETA). We can see this is an extension of the
-proportional residual error model.</p>
+modeled as elements of THETA). We can see this is equivalent to the
+power error model.</p>
 </div>
 </div>
 <div id="outline-container-headline-3" class="outline-3">
@@ -1539,7 +1583,9 @@ Covariance (standard error) estimation
 <div id="outline-text-headline-3" class="outline-text-3">
 <p>Let vector \(p=(p_1,p_2,\dots, p_n)\) be the collection of all the
  entries of \( (\theta, \Omega, \Sigma) \), and
-\(\hat{p}=(\hat{p}_1,\hat{p}_2,\dots,\hat{p}_n)\) the corresponding estimate. To obtain error estimation of \(\hat{p}\), NONMEM calculates two matrices.</p>
+\(\hat{p}=(\hat{p}_1,\hat{p}_2,\dots,\hat{p}_n)\) the corresponding
+ MLE solution. The error estimation of \(\hat{p}\) is based on approximating \(\mathcal{I}^{-1}\),
+ the inverse of the Fisher Information Matrix (FIM) \(\mathcal{I}\). To obtain FIM NONMEM calculates  two matrices.</p>
 <ul>
 <li>Matrix \(R\) with
 $$
@@ -1594,7 +1640,8 @@ Here \(\text{cov}^{1/2}\) denotes the matrix square root of the
 covariance matrix, and \(\text{cov}^{-1/2}\) the inverse of the matrix
 square root. Note here we only have individual subscript,
 therefore the WRES and \(y\) in the definition are in general vectors
-(for multiple observation of subject <em>i</em>).</p>
+(for multiple observation of subject <em>i</em>). Note that the structure of
+\(\text{cov}\) depends on the approximation \(\mathcal{T}\).</p>
 <p>
 One can request additional quantities with $TABLE.</p>
 <ul>
@@ -1609,7 +1656,7 @@ interaction, pred, res, and wres values.  These are identical to
 those issued by NONMEM VI as PRED, RES, and WRES.  The WRESI will
 not differ from NWRES if INTERACTION was not selected in the
 previous $EST command.</li>
-<li>CPRED, CRES, CWRES. These are conditional, no ETA-EPSILON
+<li>CPRED, CRES, CWRES  [2]. These are conditional, no ETA-EPSILON
 interaction, PRED, RES, and WRES values. Let \(\hat{\eta}\) be
 the conditional mode ETAs (from FOCE or ITS) <sup class="footnote-reference"><a id="footnote-reference-1" href="#footnote-1">1</a></sup>, or
 the conditional mean ETAs (from Monte Carlo EM methods).
@@ -1650,15 +1697,47 @@ Note that here the residual covariance matrix
 
 $$
 \text{cov}(y_i) =
-\frac{1}{n_i}\sum\left[g|_{\eta_i^{(k)}}\hat{\Sigma}g|_{\eta_i^{(k)}}^T + (f|_{\eta_i^{(k)}}-\text{EPRED}_i)(f|_{\eta_i^{(k)}}-\text{EPRED}_i)^T\right]
+\frac{1}{n_i}\sum\left[h|_{\eta_i^{(k)}}\hat{\Sigma}h|_{\eta_i^{(k)}}^T + (f|_{\eta_i^{(k)}}-\text{EPRED}_i)(f|_{\eta_i^{(k)}}-\text{EPRED}_i)^T\right]
 $$</li>
 <li>ECWRES. Similar to EWRES, but with covarinace matrix for the
 residual error evaluated at \(\hat{\eta}_i\) instead of samples means.
 $$
 \text{cov}(y_i) =
-g|_{\hat{\eta_i}}\hat{\Sigma}g|_{\hat{\eta_i}}^T + \frac{1}{n_i}\sum\left[(f|_{\eta_i^{(k)}}-\text{EPRED}_i)(f|_{\eta_i^{(k)}}-\text{EPRED}_i)^T\right]
+h|_{\hat{\eta_i}}\hat{\Sigma}h|_{\hat{\eta_i}}^T + \frac{1}{n_i}\sum\left[(f|_{\eta_i^{(k)}}-\text{EPRED}_i)(f|_{\eta_i^{(k)}}-\text{EPRED}_i)^T\right]
 $$</li>
+<li>NPD, NPDE  [1,3]. Based on the fact that should the observations be
+generated from the estimated parameters (in other words the
+estimation was perfect), the cumulated distribution function (CDF)
+of the residual error would follow the uniform distribution on [0,
+1]. We can estimate the CDF by generating predictions through Monte
+Carlo simulation, and test its uniformity. NPD takes the approach of
+transforming the estimate back using the normal quantile function and
+test the result&#39;s normality.
+$$
+\text{PD}_i = \frac{1}{n_i}\sum_k P(\text{cov}(y_i)^{-1/2}|_{\eta_i^{(k)}}(y_i-f|_{\eta_i^{(k)}})),
+$$
+$$
+\text{NPD}_i = P^{-1}(\text{PD}_i).
+$$
+Here \(P()\) is the CDF of a normal distribution, and \(P^{-1}\)
+the corresponding quantile function.
+
+NPDE is the decorrelated version of NPD, takes into account within-subject correlations.</li>
 </ul>
+</div>
+</div>
+<div id="outline-container-headline-5" class="outline-3">
+<h3 id="headline-5">
+Reference
+</h3>
+<div id="outline-text-headline-5" class="outline-text-3">
+<div class="html-block">
+</div>
+<p>[1] E. Comets, K. Brendel, and F. Mentré, <em>Computing normalised prediction distribution errors to evaluate nonlinear mixed-effect models: The npde add-on package for R</em>, 90, pp. 154–166.</p>
+<p>
+[2] A. C. Hooker, C. E. Staatz, and M. O. Karlsson, <em>Conditional weighted residuals (CWRES): A model diagnostic for the FOCE method</em>, 24, pp. 2187–2197.</p>
+<p>
+[3] T. H. T. Nguyen, E. Comets, and F. Mentré, <em>Extension of NPDE for evaluation of nonlinear mixed effect models in presence of data below the quantification limit with applications to HIV dynamic model</em>, 39, pp. 499–518.</p>
 </div>
 </div>
 </div>
@@ -1685,9 +1764,9 @@ estimates of ETAs, or mode a posteriori (MAP) estimates.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/f605297f73e7a10fad62f67177202912a0b18428" title='Last modified by Yi Zhang | 2026 Jan 15' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/1fbe5fdfc154f4b410e58fae35e11114eda477c1" title='Last modified by Yi Zhang | 2026 Jan 16' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Jan 15</span>
+    <span>2026 Jan 16</span>
   </a>
 
 </div>
@@ -1766,6 +1845,8 @@ estimates of ETAs, or mode a posteriori (MAP) estimates.</p>
 <li><a href="#headline-3">Covariance (standard error) estimation</a>
 </li>
 <li><a href="#headline-4">Goodness-of-Fit</a>
+</li>
+<li><a href="#headline-5">Reference</a>
 </li>
 </ul>
 </li>

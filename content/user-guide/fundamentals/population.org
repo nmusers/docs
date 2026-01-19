@@ -13,7 +13,7 @@ In this chapter we discuss models for populations data. Those data
 contain observations from a set of individuals sampled from a
 population. Such data are characterized by one or more
 observations for each individual. All the models
-discussed here are /parameter models/, in that observations are described
+discussed here are /parametric models/, in that observations are described
 with models with parameters. These models are capable of explaining the
 data variability due to the those unknown random parameters.
 
@@ -21,54 +21,55 @@ data variability due to the those unknown random parameters.
 :PROPERTIES:
 :CUSTOM_ID: mixed_form
 :END:
-Individuals in a population of size \(N\) are different due to
+Individuals in a sample of size \(N\) are different due to
 /fixed/ and/or /random/ effects, manifested
-as individual parameters \(\phi_i\), \((i=1,\dots,N)\), with
-individual ID \(i\) in subscript. Then a general formulation for /mixed-effects/ model is to use certain
-function \(f\) of known quantities
-\(x_{ij}\) and unknown parameters \(\phi_i\) to describe the
-observations \(y_{ij}\). This function \(f()\) is sometimes refered as
-/structure model/. In reality \(f(x_{ij}, \phi_i)\) does not
-account for all the variability of \(y_{ij}\), therefore we additively
-complement it with a /residual error/ term \(\epsilon_{ij}\). In summary
-
+as individual parameters \(\phi_i\) (clearance, volume of
+distribution, etc), \(i=1,\dots,N\). For a general formulation for /mixed-effects/ model we consider a function \(f()\) of known quantities
+\(x_{ij}\) (doses, covariates, time, etc) and unknown parameters \(\phi_i\) to describe
+observations \(y_{ij}\) (plasma concentration, drug effect, etc). \(f()\) is sometimes refered as
+/structure model/. Since in reality \(f(x_{ij}, \phi_i)\) cannot
+account for all the variability of \(y_{ij}\), we additively
+complement it with a /residual error/ term. In summary
+#+index: Residual error
+#+index: Residual error!EPS
 $$
-y_{ij} = f(x_{ij}, \phi_i) + g(x_{ij}, \phi_i)^T\epsilon_{ij}.
+y_{ij} = f(x_{ij}, \phi_i) + h(x_{ij}, \phi_i)\epsilon_{ij}.
 $$
 
-Note
 - Subscript \(ij\), \(j=1\dots,N_i\) denotes observation \(j\) for
-  individual \(i\). Individuals often do not have same number of
-  observations so in general \(N_i\ne N_k\) when \(i\ne k\).
-  The total number of observations in a data set is \(N_{\text{obs}}=\sum_iN_i\).
+  individual \(i\). Then total number of observations in a data set is
+  \(N_{\text{obs}}=\sum_iN_i\). In general individuals do not have the
+  same number of observations: \(N_i\ne N_k\) when \(i\ne k\).
 
-- The term "nonlinear" in "nonlinear mixed-effects model" refers the
-  fact that \(f()\) is often nonlinear with respect to \(x_{ij}\)
-  and/or \(\phi_i\).
+- The term "nonlinear" in "nonlinear mixed-effects model" is related
+  to \(f()\) being nonlinear with respect to its arguments.
 
-- NONMEM assumes that \(\epsilon_{ij}\) follows a multivariate normal
+- For the residual error, We assume that \(\epsilon_{ij}\) follows a multivariate normal
   distribution [fn:3],
+#+index: Residual error!SIGMA
   $$
   \epsilon_{ij} \sim \text{MultiNormal}(0, \Sigma).
   $$
-  NONMEM uses reserved variable =SIGMA= for the covariance matrix
-  \(\Sigma\). \(\epsilon_{ij}\) are assumed independent from \(\epsilon_{kl}\) when \((i,j)\ne (k, l)\).
-  Function \(g()\) provides adjustment of \(\epsilon\), so that the
-  residual error assumes variance \(g^T\Sigma g\). For example,
-  + a \(1\times 1\) covariance matrix \(\Sigma\) with constant \(g()\equiv 1\) represents
-    homoscedasticity in residual error. That is, all the observations
-    \(y_{ij}\) share a same normally distributed residual error
-    \(\epsilon\). This is sometimes referred as additive residual
+  The covariance matrix \(\Sigma\) is represented in NONMEM by reserved variable =SIGMA=. This implies \(\epsilon_{ij}\) can be a vector (see
+  below). We also assume \(\epsilon_{ij}\) are independent from \(\epsilon_{kl}\) when \((i,j)\ne (k, l)\).
+  We use (matrix) function \(h()\) to adjust \(\epsilon\) so that the
+  residual error in general has variance \(h\Sigma h^T\). Consider the
+  following examples.
+  + \(\epsilon\) is a scalar and \(h()\equiv 1\) a
+    constant. It represents
+    homoscedastic residual error: all the observations
+    \(y_{ij}\) share a same normally distributed residual error. This is sometimes referred as additive residual
     error model;
 
-  + a \(1\times 1\) covariance matrix \(\Sigma\) with
-    \(g(x_{ij},\phi_i)=f(x_{ij},\phi_i)\) represents proportional
-    error model. It says the variance of the residual error is
+  + \(\epsilon\) is a scalar and
+    \(h(x_{ij},\phi_i)=f(x_{ij},\phi_i)^{\xi}\). It represents the power
+    error model. When \(\xi=1\) it becomes the proportional error
+    model in which the residual error variance is
     proportional to the squared prediction;
 
-  + a \(2\times 2\) covariance matrix \(\Sigma\) with \(g(x_{ij},
-    \phi_i)=[f(x_{ij}, \phi_i), 1]^T\) represents combined the additive
-    and proportional residual error model. It is equivalent to
+  + \(\epsilon\) is a 2-vector and \(h(x_{ij},
+    \phi_i)=[f(x_{ij}, \phi_i), 1]^T\). It combines the additive
+    and proportional model, equivalent to
     $$
     y_{ij} = f(x_{ij}, \phi_i) + f(x_{ij}, \phi_i)\epsilon_{ij}^{(1)} + \epsilon_{ij}^{(2)},
     $$
@@ -76,68 +77,64 @@ Note
     \epsilon_{ij}^{(1)} \sim \mathcal{N}(0, \upsilon_{11}),
     $$
     $$
-    \epsilon_{ij}^{(2)} \sim \mathcal{N}(0, \upsilon_{22}),
+    \epsilon_{ij}^{(2)} \sim \mathcal{N}(0, \upsilon_{22}).
     $$
-    with \(\upsilon_{11}\) and  \(\upsilon_{22}\) the diagonal elements of
-    \(\Sigma\);
+    The variances \(\upsilon_{11}\) and \(\upsilon_{22}\) are the
+    diagonal elements of \(\Sigma\).
 
-  + a \(2\times 2\) covariance matrix \(\Sigma\) with
-    \(g()^{(1)}\equiv g()^{(2)}\equiv 1\) represents multivariate
-    residual error model (superscripts for types of observations):
-    $$
-    y_{ij}^{(1)} = f(x_{ij}, \phi_i)^{(1)} + \epsilon_{ij}^{(1)},
-    $$
-    $$
-    y_{ij}^{(2)} = f(x_{ij}, \phi_i)^{(2)} + \epsilon_{ij}^{(2)},
-    $$
-    $$
-    [\epsilon_{ij}^{(1)}, \epsilon_{ij}^{(2)}]^T \sim \text{MultiNormal}(0, \Sigma),
-    $$
-    One usse of this model is to describe concentration and effect
-    data simultaneously.
+  + \(\epsilon\),  \(y_{ij}\) and \(f()\) are 2-vectors, and \(h()\) a \(2\times 2\) matrix. It
+    represents a multivariate model. This could be the case when
+    observations are the plasma concentrations in both central and
+    peripheral compartments, or from two tissues/organs in a physiologically based PK (PBPK) model.
+  NONMEM provides control record [[/docs/user-guide/nmtran/control/#error][$ERROR]] to specify the residual error \(h(x_{ij}, \phi_i)\epsilon_{ij}\).
+- Sometimes we use the vectorized representation for
+  subject /i/
+  $$
+  y_i=f(x_i, \phi_i) + h(x_i, \phi_i)\epsilon_i.
+  $$
+  For example, for the above combine error model, \(y_i\) and \(f()\)
+  would be a \(N_i\)-vector, \(h()\) a
+  \(N_i\times 2N_i\) matrix, and \(\epsilon_i\) a \(2N_i\)-vector.
 
-  NONMEM provides control record [[/docs/user-guide/nmtran/control/#error][$ERROR]] to specify \(g(x_{ij}, \phi_i)\epsilon_{ij}\).
-
-Next we describe the models for \(\phi_i\), by /assuming/ \(\phi_i\) deviates a
-"typical" value by a random perturbation \(\eta_i\). By "typical" we mean
+Next we describe the models for \(\phi_i\). We /assume/ \(\phi_i\) has a
+"typical" value \(\bar{\phi}_i=\mu(z_i, \theta)\). By "typical" we mean
 that the value is the same for individuals with same covariates
-\(z_{i}\), e.g. weight and height. We
-use function \(\mu()\) to describe this model: \(\bar{\phi}_i=\mu(z_i, \theta)\), with parameter
-\(\theta\) and covariate \(z_i\) for "typical" value of \(\phi_i\), so that
+\(z_{i}\), e.g. weight and height. We then assume \(\phi_i\) deviates \(\bar{\phi}_i\) by a random perturbation \(\eta_i\):
 
 $$
 \phi_{i} = \mu(z_{i}, \theta) + \eta_{i}.
 $$
 
-Note
-- We refer \(z_i\) as /fixed effects/, and \(\theta\) /fixed effect
+- We refer \(z_i\) as the /fixed effects/, and \(\theta\) the /fixed effect
   parameters/ [fn:1]. NONMEM uses reserved variable =THETA= for
-  \(\theta\) [fn:2].
-- We refer \(\eta_i\) as /random effects/. NONMEM uses reserved
-  variable =ETA= for \(\eta\).
-- A nonlinear \(\mu()\) contributes to additional nonliearity of the problem.
-- In general for each individual, \(\theta\), \(\phi\), and \(\eta\) are vectors.
+  \(\theta\) [fn:2]. We refer \(\eta_i\) as the /random effects parameters/. NONMEM uses reserved
+  variable =ETA= for \(\eta\). In general \(\theta\), \(\phi_i\), and
+  \(\eta_i\) are vectors. NONMEM output use =PHI= for \(\phi_i\).
+#+index: THETA
+#+index: ETA
+#+index: PHI
+- A nonlinear \(\mu()\) contributes further to the nonliearity of the problem.
 - NONMEM assumes all \(\eta_i\)'s follow a multivariate normal
   distribution [fn:3],
   $$
   \eta_i \sim \text{MultiNormal}(0, \Omega).
   $$
   NONMEM uses reserved variable =OMEGA= for the covariance matrix \(\Omega\).
-- NONMEM output use =PHI= for \(\phi_i\)'s.
+#+index: OMEGA
 - In some of NONMEM's solution algorithms the above \(\mu() + \eta\) pattern can improve
-  efficiency. See [[file:/docs/user-guide/techniques/mu_model][MU referencing]].
+  efficiency. See [[file:/docs/user-guide/advanced/mu_model][MU referencing]].
 
 NONMEM refers the random effect with \(\phi\) (or equivalently \(\eta\)) as the
 /first-level/, and the randomness due to \(\epsilon\) the
-/second-level/. We can see that in general the variance-covariance structure for
-residual error, \(g(x,\phi)^T\epsilon\), contains both levels of
-random effects. In other words, \(\phi\) (or \(\eta\)) /interacts/
-with \(\epsilon\) by contributing to the stochastic structure of the
-residual error. This behavior is accounted for in NONMEM's estimation
+/second-level/. By definition the residual error's variance-covariance
+structure, \(h(x,\phi)\epsilon\), contains both levels of
+random effects, as \(\phi\) (or \(\eta\)) /interacts/
+with \(\epsilon\) in the residual error term. This behavior is accounted for in NONMEM's estimation
 methods through option "INTERACTION". By default the INTERACTION is
-not activated. In that case, the residual error is estimated with
-\(\eta=0\), becomes \(g(x, \phi|_{\eta=0})^T\epsilon\). We recommend
+not activated, and the estimation is based on
+residual error \(h(x, \phi|_{\eta=0})\epsilon\). We recommend
 always use INTERACTION.
+#+index: INTERACTION
 
 ** Covariate models
 In NONMEM guides the models for \(\mu()\) are called structure
@@ -150,6 +147,9 @@ value" of CL. In NONMEM the above equation for \(\phi\), i.e. the association of
 \(z\), are encoded in control record [[file:/docs/user-guide/nmtran/control/#guide_$pk][$PK]].
 
 *** Linear (additive) models
+:PROPERTIES:
+:CUSTOM_ID: additive-model
+:END:
 The simplest form of \(\mu()\) is its being linearly related to
 \(\theta\). For example, if CL is
 the sum of renal and non-renal components (CL_{ren} and CL_{met}, respectively),
@@ -158,7 +158,7 @@ believed to be proportional to renal function (RF) as described according
 to a standard formula involving covariates in \(z\): age (AGE),
 serum creatinine (SECR), and weight (WT), then one might consider the
 following model (we omit subscript \(i\) to avoid clutter).
-
+#+index: Additive model
 $$
 \tilde{\text{CL}}_{\text{met}} = \theta_1 \text{WT},
 $$
@@ -181,6 +181,7 @@ Multiplicative models are linear models on a logarithmic scale.
 For example, if patients covering a very wide range of weights
 are studied, metabolic clearance might vary with weight, but
 not linearly. Then instead of modeling them linearly, we assume
+#+index: Multiplicative model
 $$
 \log(\tilde{\text{CL}}_{\text{met}}) = \theta_1 + \theta_2\log(\text{WT}),
 $$
@@ -192,6 +193,7 @@ Note that the two sets of \(\theta\)'s are not the same, but since
 they are unknown parameters we can transform them and fit either set
 in a model. This /reparameterization/ is common in statistical modeling.
 *** Saturation Models
+#+index: Saturation model
 A useful model for processes reaching a maximum is a hyperbolic model.
 For example, if a second drug, (whose steady-state plasma
 concentration, Cpss_2 is known and given in the data set), is present
@@ -246,17 +248,19 @@ positive-semidefinite. NONMEM utilizes the symmetry so that only the
 /lower triangular elements/ are used to specifiy =OMEGA=. For example,
 in a two-compartment model we can have \(\eta=(\eta_{k10}, \eta_{k12},
 \eta_{k21})\) for the elimination and transfer coefficients. Then
-\(\Omega\) will be a 3x3 matrix but =OMEGA= contains only 6 elements:
-(\(\text{cov}(\cdot,\cdot)\) indicates covariance).
-
+\(\Omega\) will be a 3x3 matrix but =OMEGA= contains only 6 elements,
 $$
-\omega_{11}=\text{cov}(\eta_{k10}, \eta_{k10});\\
-\omega_{21}=\text{cov}(\eta_{k10}, \eta_{k12});\\
-\omega_{31}=\text{cov}(\eta_{k10}, \eta_{k21});\\
-\omega_{22}=\text{cov}(\eta_{k12}, \eta_{k12});\\
-\omega_{23}=\text{cov}(\eta_{k12}, \eta_{k21});\\
-\omega_{33}=\text{cov}(\eta_{k21}, \eta_{k21}).
+\omega_{11}=\text{var}(\eta_{k10}),\quad
+\omega_{22}=\text{var}(\eta_{k12}),\quad
+\omega_{33}=\text{var}(\eta_{k21})
 $$
+for diagonal, and
+$$
+\omega_{21}=\text{cov}(\eta_{k10}, \eta_{k12}), \quad
+\omega_{31}=\text{cov}(\eta_{k10}, \eta_{k21}), \quad
+\omega_{23}=\text{cov}(\eta_{k12}, \eta_{k21})
+$$
+for off-diagonal.
 
 **** Additive model
 An additive model, for example for volumn of distribution V:
@@ -313,7 +317,7 @@ $$
 \text{CL}_{\text{ren}}= \tilde{\text{CL}}_{\text{ren}}(1 + \eta_3).
 $$
 
-Thus here \(\phi\) (corresponding to CL here), is associated to than
+Thus here \(\phi\) (corresponding to CL here), is associated to more than
 one \(\eta\)'s (\(\eta\)_{1-3} here), and not in the form of
 \(\phi=\mu+\eta\). Another example where  [[#mixed_form][the additive form]]
 for \(\eta\) is not applicable is when \(\phi\) is associated with
@@ -327,24 +331,26 @@ $$
 and we allow the dimention of \(\phi_i\) and \(\eta_i\) to be different.
 
 ** Population mixed effects model
+#+index: Mixed effects model
 In summary, the population mixed effects model in NONMEM has the
 following general form.
 $$
-y_ij = f(x_{ij}, \phi_i) + g(x_{ij}, \phi)^T\epsilon_{ij},
+y_ij = f(x_{ij}, \phi_i) + h(x_{ij}, \phi)\epsilon_{ij},
 $$
 $$
 \phi_i = \mu(z_{i}, \theta, \eta_i).
 $$
-In NONMEM we use "control records" to specify the above model: though
-NONMEM provides control record $PRED to the entire model, more often
-for pharmacometrics applications we use NONMEM's built-in models and
+In NONMEM we use "control records" to specify the above model.
+Control record $PRED can be used for general modeling, but for PK problems more often
+we use NONMEM's built-in models and use
   - control record $SUBROUTINES to specifiy \(f()\);
-  - when \(f()\) is based on numerical solutions of differential equation systems,
-    we use $DES, $AES, and $MODEL to specify them;
-  - $PK to specify \(\mu()\);
-  - $ERROR to specify \(g()^T\epsilon\);
-  - $THETA, $OMEGA, $SIGMA to specify the initial estimate and
-    constraints of \(\theta\), \(\Omega\), and \(\Sigma\), respectively.
+  - control record $PK to specify \(\mu()\);
+  - control record $ERROR to specify \(h()\epsilon\);
+  - control record $THETA, $OMEGA, $SIGMA to specify the initial estimate and
+    constraints of \(\theta\), \(\Omega\), and \(\Sigma\), respectively;
+  - control record $DES, $AES, and $MODEL for general \(f()\) structures that require
+    numerical solutions of differential equation systems.
+
 All the mentioned control records will be discussed in the next part
 of the guide.
 

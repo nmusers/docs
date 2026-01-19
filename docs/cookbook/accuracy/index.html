@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content=" Controlling the Accuracy of the Gradient Evaluation and Individual Objective Function Evaluation In classical NONMEM methods (First order, First order conditional, Laplace), the user specifies SIGDIGIT or NSIG to indicate the number of significant digits that population parameters are to be evaluated at the maximum likelihood. If NSIG=3 (the default), then the problem would be optimized until all of the parameters varied by less than 3 significant digits. This same NSIG value would also be used to specify relative step size (h) to each THETA, SIGMA, and OMEGA, for evaluating the partial derivative of the objective function \(\mathcal{T}\) with respect to the parameter. Such evaluations are needed to set up gradients to determine the direction the search algorithm must travel to approach the minimum of the objective function.
+">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="https://nmusers.github.io/docs/cookbook/accuracy/">
+  <meta property="og:site_name" content="NONMEM Documentation">
+  <meta property="og:title" content="Accuracy control">
+  <meta property="og:description" content="Controlling the Accuracy of the Gradient Evaluation and Individual Objective Function Evaluation In classical NONMEM methods (First order, First order conditional, Laplace), the user specifies SIGDIGIT or NSIG to indicate the number of significant digits that population parameters are to be evaluated at the maximum likelihood. If NSIG=3 (the default), then the problem would be optimized until all of the parameters varied by less than 3 significant digits. This same NSIG value would also be used to specify relative step size (h) to each THETA, SIGMA, and OMEGA, for evaluating the partial derivative of the objective function \(\mathcal{T}\) with respect to the parameter. Such evaluations are needed to set up gradients to determine the direction the search algorithm must travel to approach the minimum of the objective function.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="cookbook">
+
+
+  <meta itemprop="name" content="Accuracy control">
+  <meta itemprop="description" content="Controlling the Accuracy of the Gradient Evaluation and Individual Objective Function Evaluation In classical NONMEM methods (First order, First order conditional, Laplace), the user specifies SIGDIGIT or NSIG to indicate the number of significant digits that population parameters are to be evaluated at the maximum likelihood. If NSIG=3 (the default), then the problem would be optimized until all of the parameters varied by less than 3 significant digits. This same NSIG value would also be used to specify relative step size (h) to each THETA, SIGMA, and OMEGA, for evaluating the partial derivative of the objective function \(\mathcal{T}\) with respect to the parameter. Such evaluations are needed to set up gradients to determine the direction the search algorithm must travel to approach the minimum of the objective function.">
+  <meta itemprop="wordCount" content="1681">
+
+<title>Accuracy control | NONMEM Documentation</title>
+<link rel="icon" href="/docs/favicon.png" >
+<link rel="manifest" href="/docs/manifest.json">
+<link rel="canonical" href="https://nmusers.github.io/docs/cookbook/accuracy/">
+<link rel="stylesheet" href="/docs/book.min.d4e6b62882e125f74e9d9d54ba648dfa9d887bace364bb515b00d18f0f0d1257.css" integrity="sha256-1Oa2KILhJfdOnZ1UumSN&#43;p2Ie6zjZLtRWwDRjw8NElc=" crossorigin="anonymous">
+
+
+  <script defer src="/docs/fuse.min.js"></script>
+  <script defer src="/docs/en.search.min.0a0eaba0977dcc7ec7ea84dc76362fcd7dd268ae5d9d9c08541b17b50194c6b0.js" integrity="sha256-Cg6roJd9zH7H6oTcdjYvzX3SaK5dnZwIVBsXtQGUxrA=" crossorigin="anonymous"></script>
+
+
+
+  
+</head>
+<body dir="ltr" class="book-kind-page book-type-cookbook">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    
+<aside class="book-menu">
+  <div class="book-menu-content">
+    
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/docs/"><span>NONMEM Documentation</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input id="book-search-input" type="text" 
+    placeholder="Search"
+    aria-label="Search"
+    maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/quick-start/" class="">
+      Quick start</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/" class="">
+      User guide</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/introduction/" class="">
+      Introduction</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-44a5ffdb7f06989151f3c4e11083520b" class="toggle"  />
+    <label for="section-44a5ffdb7f06989151f3c4e11083520b" class="flex">
+      <a href="/docs/user-guide/fundamentals/" class="">
+        Fundamentals</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/population/" class="">
+      Population models</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/pkode/" class="">
+      PK and ODEs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/likelihood/" class="">
+      Likelihood and MLE</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-ac8225f98f95bed71798e0be7ea190cc" class="toggle"  />
+    <label for="section-ac8225f98f95bed71798e0be7ea190cc" class="flex">
+      <a href="/docs/user-guide/nmtran/" class="">
+        Data and model</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/data/" class="">
+      Data</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/control/" class="">
+      Control records</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/nmfe/" class="">
+      Running NONMEM</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/output/" class="">
+      Output</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-72ba181ec78d31040713db91ccee5ae1" class="toggle"  />
+    <label for="section-72ba181ec78d31040713db91ccee5ae1" class="flex">
+      <a href="/docs/user-guide/predpp/" class="">
+        PopPK models</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/population_model/" class="">
+      PK parameter model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/general_linear_model/" class="">
+      General linear model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/mm/" class="">
+      Michaelis–Menten model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/pkpd/" class="">
+      PKPD model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/plasma-urine/" class="">
+      Plasma-urine examples</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-3588eec4ae7b05621971d2a7883fa0d8" class="toggle"  />
+    <label for="section-3588eec4ae7b05621971d2a7883fa0d8" class="flex">
+      <a href="/docs/user-guide/advanced/" class="">
+        Advanced topics</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/mu_model/" class="">
+      MU referencing</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/bayesian/" class="">
+      Bayesian methods</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/" class="">
+      Reference manual</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-377f7f7cc3b0210dc0b24704642ecae6" class="toggle"  />
+    <label for="section-377f7f7cc3b0210dc0b24704642ecae6" class="flex">
+      <a href="/docs/reference-manual/control-records/" class="">
+        Control records</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/abbrev/" class="">
+      $ABBREVIATED</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/aes/" class="">
+      $AES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/aesinit/" class="">
+      $AESINIT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/anneal/" class="">
+      $ANNEAL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/bind/" class="">
+      $BIND</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/chain/" class="">
+      $CHAIN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/contr/" class="">
+      $CONTR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/covar/" class="">
+      $COVARIANCE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/data/" class="">
+      $DATA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/default/" class="">
+      $DEFAULT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/des/" class="">
+      $DES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/design/" class="">
+      $DESIGN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/error/" class="">
+      $ERROR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/estimation/" class="">
+      $ESTIMATION</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/etasphis/" class="">
+      $ETAS, $PHIS</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/format/" class="">
+      $FORMAT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/include/" class="">
+      $INCLUDE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/index/" class="">
+      $INDEX</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/infn/" class="">
+      $INFN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/input/" class="">
+      $INPUT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/ldfold/" class="">
+      $LDFOLD</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/level/" class="">
+      $LEVEL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/mix/" class="">
+      $MIX</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/model/" class="">
+      $MODEL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/msfi/" class="">
+      $MSFI</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/nonpara/" class="">
+      $NONPARAMETRIC</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/omega/" class="">
+      $OMEGA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/omit/" class="">
+      $OMIT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/pk/" class="">
+      $PK</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/pred/" class="">
+      $PRED</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/prior/" class="">
+      $PRIOR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/problem/" class="">
+      $PROBLEM</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/rcov/" class="">
+      $RCOV, $RCOVI</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/scatter/" class="">
+      $SCATTERPLOT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/sigma/" class="">
+      $SIGMA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/simulation/" class="">
+      $SIMULATION</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/sizes/" class="">
+      $SIZES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/subroutines/" class="">
+      $SUBROUTINES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/super/" class="">
+      $SUPER</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/table/" class="">
+      $TABLE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/theta/" class="">
+      $THETA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/thetai/" class="">
+      $THETAI, $THETAR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/tol/" class="">
+      $TOL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/warning/" class="">
+      $WARNINGS</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/abbr/" class="">
+      Abbreviated code</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/data/" class="">
+      Data</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/files/" class="">
+      Output and files</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/" class="">
+      Internals &amp; API</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/modules/" class="">
+      Modules</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/subroutines/" class="">
+      Subroutines</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/variables/" class="">
+      Variables</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-d8246e9b0dff86e0cd3364b2b239c898" class="toggle" checked />
+    <label for="section-d8246e9b0dff86e0cd3364b2b239c898" class="flex">
+      <a href="/docs/cookbook/" class="">
+        Cookbook</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/accuracy/" class="active">
+      Accuracy control</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/prior/" class="">
+      Bayesian Priors</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/steady_state/" class="">
+      Empirical steady state</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/ignore-accept/" class="">
+      IGNORE/ACCEPT data records</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/indi/" class="">
+      Indicator variables</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/etabar_mix/" class="">
+      Mixture model: ETABAR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/nested/" class="">
+      Nested random effects</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/mcmc-post/" class="">
+      Postprocessing MCMC draws</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/repeated_records/" class="">
+      Repeated Observation Records</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/msf-warmup/" class="">
+      Reuse NUTS warmup results</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/saem-extra-request/" class="">
+      SAEM_EXTRA variables</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/time_vary/" class="">
+      Time-varying covariates</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+
+  </div>
+</aside>
+ 
+
+    <div class="book-page">
+      <header class="book-header hidden">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/docs/icons/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>Accuracy control</h3>
+
+  <label for="toc-control">
+    
+    <img src="/docs/icons/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden">
+    
+  
+<nav id="TableOfContents">
+<ul>
+<li><a href="#headline-1">Controlling the Accuracy of the Gradient Evaluation and Individual Objective Function Evaluation</a>
+<ul>
+<li><a href="#headline-2">The SIGLO level (NM72)</a>
+</li>
+<li><a href="#headline-3">Alternative convergence criterion (NM72)</a>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article">
+<link rel="stylesheet" href="/docs/katex/katex.min.css" /><script defer src="/docs/katex/katex.min.js"></script><script defer src="/docs/katex/auto-render.min.js" onload="renderMathInElement(document.body, {&#34;delimiters&#34;:[{&#34;left&#34;:&#34;$$&#34;,&#34;right&#34;:&#34;$$&#34;,&#34;display&#34;:true},{&#34;left&#34;:&#34;\\(&#34;,&#34;right&#34;:&#34;\\)&#34;,&#34;display&#34;:false},{&#34;left&#34;:&#34;\\[&#34;,&#34;right&#34;:&#34;\\]&#34;,&#34;display&#34;:true}]});"></script>
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+Controlling the Accuracy of the Gradient Evaluation and Individual Objective Function Evaluation
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>In classical NONMEM methods (First order, First order conditional,
+Laplace), the user specifies SIGDIGIT or NSIG to indicate the number
+of significant digits that population parameters are to be evaluated
+at the maximum likelihood.  If NSIG=3 (the default), then the problem
+would be optimized until all of the parameters varied by less than 3
+significant digits.  This same NSIG value would also be used to
+specify relative step size (h) to each THETA, SIGMA, and OMEGA, for
+evaluating the partial derivative of the objective function
+\(\mathcal{T}\) with
+respect to the parameter.  Such evaluations are
+needed to set up gradients to determine the direction the search
+algorithm must travel to approach the minimum of the objective
+function.</p>
+<p>
+NONMEM uses the forward finite difference for the partial derivative with respect
+to a \(\theta\).
+Numerical analysis recommends [6]
+that the ideal relative step size <em>h</em> should
+be no greater than SIGL/2, where SIGL is the significant digits to
+which the objective function is evaluated.  If <em>h</em> is set to a precision
+of SIGL/2, then the derivative will have approximately SIGL/2 precision as well.</p>
+<p>
+In the main search algorithm, central difference methods are also used.
+Numerical analysis of central finite difference methods recommend that
+the ideal relative step size <em>h</em> for the parameter should be no
+greater than SIGL/3.  If h is set to SIGL/3, then the resulting finite
+difference value itself will have approximately 2*SIGL/3 precision.</p>
+<p>
+The main search algorithm also utilizes pseudo-second derivative type
+evaluations using forward difference methods.  For these calculations,
+an ideal h would be 10-SIGL/3, resulting in precision of second
+derivative constructs of about SIGL/3.  Thus, it is safest to set the
+step size h, as specified by NSIG, to be no more than SIGL/3.</p>
+<p>
+An internal SIGL in NONMEM specifies the precision to which the
+objective function itself (actually, the individual subject objective
+functions, which sum to the total objective function) is to be
+evaluated.  This internal SIGL is set to 10.  As long as NSIG was set
+to a value less then or equal to 10/2 or 10/3, then the gradients
+would be evaluated to an appropriate precision to make the gradient
+search algorithm work efficiently. With many subjects, if SIGL=10 is
+the precision to which each individual objective function is
+evaluated, and they are all of the same sign, then the sum objective
+function could have a resulting precision of log10(N)+SIGL, where N is
+the number of subjects, for a maximum of 15, the limiting precision of
+double precision.  Thus with 100 subjects, the actual precision that
+the total objective function is evaluated could be 12.  One should not
+necessarily rely on this, so it is safest to suppose the more
+conservative precision of 10, for which a suitable NSIG would be 3.</p>
+<p>
+For analytical problems, those which do not utilize $DES, one can
+usually expect a reasonably efficient convergence to the minimum of
+the objective function with NSIG=3.  However, with differential
+equation problems (those used for ADVAN 6, 8, 9, 13, 14, or 15), the
+limiting precision that objective function values may be evaluated is
+not based on the internal SIGL of 10, but rather, on the TOL level set
+by the user (where TOL represents the relative significant digits
+precision to which differential equations are to be integrated, so the
+precision is 10-TOL), which is used by PREDPP when differential
+equations are integrated.  The relationship between the predicted
+value and the individual subject’s maximized objective function is
+complex, but one can use the rule of thumb that the individual’s
+objective function is evaluated to a precision of the smaller of TOL
+and the internal SIGL.  Thus, when a user specifies a TOL=4, then it
+may well be that the sum objective function has no greater precision
+than 4.   If the user then specifies NSIG=3, then the main search
+algorithm evaluates finite gradients using step size h that varies
+theta at the 3rd significant digit.  This results in 1 significant
+digit precision remaining in evaluating the finite difference
+gradients.  The search algorithm is now attempting to maximize the
+objective function to 3 significant digits, when it is working with
+gradients that are accurate to only 1-2 significant digits.  This
+results in inefficient advancement of the objective function, causing
+NONMEM to make repeated evaluations within an iteration, as well as
+iterations for which the objective function is barely moving.  NONMEM
+can then spend many hours trying to obtain precision in its parameters
+which are impossible to obtain.  Eventually it may stop because the
+maximum iterations were used up, or when it realizes that it could not
+reach the desired precision.</p>
+<p>
+With this understanding of the search algorithm process, and
+recognizing the complex relationship between the step size needed for
+each parameter and the finite difference method used in each part of
+the algorithm, the optimization algorithm was changed to allow the
+user to specify SIGL, and for the algorithm to set up the appropriate
+step size for a given finite difference method, based on the
+user-supplied SIGL.  While some trial and error may still be required
+by the user for a given problem, certain general rules may be
+considered.</p>
+<ul>
+<li>Set SIGL, NSIG, and TOL</li>
+</ul>
+<div class="src src-f90">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>SIGL<span style="color:#ff6ac1">&lt;=</span>TOL
+</span></span><span style="display:flex;"><span>NSIG<span style="color:#ff6ac1">&lt;=</span>SIGL<span style="color:#ff6ac1">/</span><span style="color:#ff9f43">3</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>so that</p>
+<ul>
+<li>For forward finite difference, h is set to SIGL/2 precision</li>
+<li>For central finite difference, h is set to SIGL/3 precision</li>
+<li>For forward second order difference, h is set to SIGL/3 precision</li>
+</ul>
+<p>The individual fits for evaluating optimal eta values will be
+  maximized to a precision of the user-supplied SIGL value</p>
+<p>
+  Optimization of population parameters occurs until none of the parameters change by more than NSIG significant digits.</p>
+<ul>
+<li>For the $COV step, the step size for evaluating the R matrix
+(central difference second derivative) is set to SIGL/4, which
+according to numerical analysis, yields the optimal precision of
+SIGL/2 for the second derivative terms.  If only the S matrix is
+evaluated (central difference first derivative), then the step size
+for it is set to SIGL/3.  (But see $COV: Additional Options and
+Behavior for a way to set SIGL and TOL for $COV, distinct from the
+option for the $EST command).</li>
+</ul>
+<ul>
+<li>
+<p>If the user sets NSIG&gt;SIGL/3, and specifies SIGL, then the
+optimization algorithm will do the following, which is a less than
+optimal setup:</p>
+<ul>
+<li>For forward finite difference, h is set to NSIG precision</li>
+<li>For central finite difference, h is set to NSIG precision</li>
+<li>For forward second order difference, h is set to NSIG precision</li>
+</ul>
+</li>
+</ul>
+<p>The individual fits for evaluating optimal eta values will be
+  maximized to a precision of the user-supplied SIGL value</p>
+<p>
+  Optimization of population parameters occurs until none of the
+  parameters change by more than NSIG significant digits.</p>
+<ul>
+<li>
+<p>If the user does not specify SIGL, or sets SIGL=100, then the
+optimization algorithm will perform the traditional NONMEM VI
+optimization, which as discussed above, may not be ideal:</p>
+<ul>
+<li>For forward finite difference, h is set to NSIG precision</li>
+<li>For central finite difference, h is set to NSIG precision</li>
+<li>For forward second order difference, h is set to NSIG precision</li>
+</ul>
+</li>
+</ul>
+<p>The individual fits for evaluating optimal eta values will be
+  maximized to a precision of SIGL=10</p>
+<p>
+  Optimization of population parameters occurs until none of the
+  parameters change by more than NSIG significant digits.</p>
+<p>
+To see the advantage of properly setting NSIG, TOL , and SIGL, consider the following problem, which is example 6 at the end of this document.  Data were simulated with 17 PK and 18 PD observations for each of 50 subjects receiving a bolus of drug, followed by short infusion a week later. The PK model has 2 compartments (Vc, k12, k21) with first-order (k10) and receptor-mediated clearance (Vmax, Kmc).  The PD model is indirect response, with receptors generated by zero order process (k03), and removed by first order process (k30) or via drug-receptor complex (Vmax, Kmc). There are 46 population parameters, variances/covariances, and intra-subject error coefficients, and thee differential equations.  In the table below are listed the estimation times (not including a $COV step) using various SIGL, NSIG, and TOL values.  Note that when not setting SIGL (NM 6 method), the problem would take a very long time.  When SIGL, NSIG, and TOL were set properly, estimation times were much less, with successful completions.   Of course, as they say in the weight-loss commercials, individual results may vary, and such great differences in execution times will not occur for all problems.</p>
+<table>
+<thead>
+<tr>
+<th class="align-right">ADVAN</th>
+<th>NSIG=3,TOL=6,SIGL=100 (NM6)</th>
+<th class="align-right">NSIG=2,TOL=6,SIGL=6</th>
+<th class="align-right">NSIG=1,TOL=4,SIGL=3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="align-right">9</td>
+<td>&gt;30</td>
+<td class="align-right">22</td>
+<td class="align-right">10</td>
+</tr>
+<tr>
+<td class="align-right">6</td>
+<td>&gt;24</td>
+<td class="align-right">17</td>
+<td class="align-right">3</td>
+</tr>
+<tr>
+<td class="align-right">13</td>
+<td>&gt;20</td>
+<td class="align-right">8.5</td>
+<td class="align-right">2</td>
+</tr>
+</tbody>
+</table>
+<div id="outline-container-headline-2" class="outline-3">
+<h3 id="headline-2">
+The SIGLO level (NM72)
+</h3>
+<div id="outline-text-headline-2" class="outline-text-3">
+<p>As of NONMEM 7.2.0, the user may obtain even greater control of the
+precision at which various parts of the estimation are performed by
+using the SIGLO option.  If used, the SIGLO option is the precision to
+which the individual etas are estimated.  The SIGL level set by the
+user continues to be the precision (or delta ) setting for the finite
+difference algorithms in the higher level estimation process for
+THETAS, OMEGAS, and SIGMAS.  By default, if SIGLO is not specified,
+then SIGLO is set to the same value as SIGL, and everything is
+evaluated in accordance with the previous paragraph.  Should SIGLO be
+used, the recommended setting would be:</p>
+<div class="src src-f90">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>SIGLO<span style="color:#ff6ac1">&lt;=</span>TOL
+</span></span><span style="display:flex;"><span>SIGL<span style="color:#ff6ac1">&lt;=</span>SIGLO
+</span></span><span style="display:flex;"><span>NSIG<span style="color:#ff6ac1">&lt;=</span>SIGL<span style="color:#ff6ac1">/</span><span style="color:#ff9f43">3</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-3" class="outline-3">
+<h3 id="headline-3">
+Alternative convergence criterion (NM72)
+</h3>
+<div id="outline-text-headline-3" class="outline-text-3">
+<p>For FO/FOCE/Laplace methods, sometimes many iterations will occur with
+very little change in the objective function, even with SIGL/TOL
+adjustment.  This may occur because a parameter may oscillate at the
+2nd significant digit, for example, and NSIG was set to 3.  The
+parameter may never settle down to a value that fluctuates at less
+than NSIG significant digits if its contribution to the objective
+function is very small.  Thus, a minimum objective function is
+achieved, but NONMEM’s traditional convergence test, based on all
+parameters changing by less then NSIG significant digits, is never
+satisfied.  An alternative convergence test is to set CTYPE=4 in the
+$EST statement.  NONMEM will then additionally test if the objective
+function has not changed by more then NSIG digits beyond the decimal
+point over 10 iterations.  If this condition is satisfied, the
+estimation will terminate successfully.</p>
+</div>
+</div>
+</div>
+</div>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+<div>
+
+</div>
+
+<div>
+
+</div>
+
+</div>
+
+
+
+  
+
+
+
+  
+  
+  
+  <div class="flex flex-wrap justify-between">
+    <span>
+    
+      <a href="/docs/cookbook/" class="flex align-center">
+        <img src="/docs/icons/backward.svg" class="book-icon" alt="Backward" />
+        <span>Cookbook</span>
+      </a>
+    
+    </span>
+    <span>
+    
+      <a href="/docs/cookbook/prior/" class="flex align-center">
+        <span>Bayesian Priors</span>
+        <img src="/docs/icons/forward.svg" class="book-icon" alt="Forward" />
+      </a>
+    
+    </span>
+  </div>
+  
+
+
+ 
+        
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+        
+        
+  
+ 
+        
+  
+  
+    <script>(function(){document.querySelectorAll("pre:has(code)").forEach(e=>{e.addEventListener("click",e.focus),e.addEventListener("copy",function(t){if(t.preventDefault(),navigator.clipboard){const t=window.getSelection().toString()||e.textContent;navigator.clipboard.writeText(t)}})})})()</script>
+  
+
+      </footer>
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+  
+  <aside class="book-toc">
+    <div class="book-toc-content">
+      
+  
+<nav id="TableOfContents">
+<ul>
+<li><a href="#headline-1">Controlling the Accuracy of the Gradient Evaluation and Individual Objective Function Evaluation</a>
+<ul>
+<li><a href="#headline-2">The SIGLO level (NM72)</a>
+</li>
+<li><a href="#headline-3">Alternative convergence criterion (NM72)</a>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+
+
+
+    </div>
+  </aside>
+  
+ 
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

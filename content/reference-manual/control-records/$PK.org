@@ -259,7 +259,7 @@ The above code fragment is an explicit compartment initialization
 block. A_0(n) may also be assigned a value with an unconditional
 statement. This defines an implicit compartment initialization block. NMTRAN inserts "IF (A_0FLG.EQ.1) ..." before the statement and "ENDIF" after it. Indicator variables may be used to avoid conditional assignment statements.
 
-See Compartment Initialization Block.
+See [[file:/docs/reference-manual/abbr/#compartment-initialization][Compartment Initialization Block]].
 
 **** Initial steady state flag I_SS
 Reserved left-hand variable I_SS may be set to the same values as the I_SS option of $MODEL
@@ -304,7 +304,7 @@ Same as the ICALL argument passed by NONMEM to PREDPP.
     for some records).
   + ICALL=6: Raw data averages.
   + Special rules apply to blocks of abbreviated code that are executed when ICALL is not 2.
-      (See [[file:/docs/user-guide/advanced/abbr_block/#initialization-finalization-block][Initialization-Finalization block]], [[file:/docs/user-guide/advanced/abbr_block/#simulation-block][Simulation block]], [[file:/docs/user-guide/advanced/abbr_block/#expectation-block][Expectation block]], [[file:/docs/user-guide/advanced/abbr_block/#data-average-block][Data average block]]).
+      (See [[file:/docs/reference-manual/abbr/#initialization-finalization-block][Initialization-Finalization block]], [[file:/docs/reference-manual/abbr/#simulation-block][Simulation block]], [[file:/docs/reference-manual/abbr/#expectation-block][Expectation block]], [[file:/docs/reference-manual/abbr/#data-average-block][Data average block]]).
 
 NM-TRAN will move abbreviated code that tests for ICALL=0, ICALL=1, or ICALL=3 in the $PK block
 to the INFN routine as part of an $INFN block.
@@ -357,7 +357,58 @@ A(n) are the latest computed compartment amounts, and
 
 **** A_0FLG
 signals  a  record with which it is possible to initialize a compartment amount.
-   (See Compartment Initialization Block)
+   (See [[file:/docs/reference-manual/abbr/#compartment-initialization][Compartment Initialization Block]]), and A_UFLG below.
+
+**** A_UFLG, A_U(n)
+Before NM75, the amounts in compartments could be set by the use of
+the A_0() array only when EVID=3, EVID=4, or for the first record of
+an individual, that is, only at the “initial” state. The A_0FLG is set
+to 1 by PREDPP at those times, which then executes code that sets the
+A_0() values. For example:
+
+#+begin_src perl
+$PK
+If (A_0FLG==1) then
+A_0(3)=k03/k30
+Endif
+#+end_src
+Any A_0(x) not explicitly defined are set to 0.  However, the A_0FLG
+may not set by the user in the $PK record, preventing the user from
+updating compartment amounts at any time.  As of nm75, the modeler may
+update the compartment values at any time, using the flag A_UFLG (the
+ending U stands for update) with the desired compartment values set in
+the array A_U().  By use of MTIME to designate a variable time
+position at which an abrupt change in compartment amounts occurs, one
+could input a dose as follows:
+#+begin_src f90
+MTIME(1)=wtime
+MTDIFF=1
+AZTEST=A_0FLG
+IF(TSTATE==MTIME(1).AND.AZTEST==0) A_UFLG=1
+IF(A_UFLG==1) THEN
+A_U(1)=A(1)+wdose
+A_U(2)=A(2)
+A_U(3)=A(3)
+ENDIF
+#+end_src
+
+The IF(A_UFLG==1) block is optional, as NMTRAN will insert one if not present.  So the code could also be written as:
+
+#+begin_src f90
+MTIME(1)=wtime
+MTDIFF=1
+AZTEST=A_0FLG
+IF(TSTATE==MTIME(1).AND.AZTEST==0) A_UFLG=1
+A_U(1)=A(1)+wdose
+A_U(2)=A(2)
+A_U(3)=A(3)
+#+end_src
+The A_UFLG event must be triggered with an IF(TSTATE==MTIME())
+condition as indicated in the above example.  Care should be taken
+that all the A_U(x) for all compartments x be properly defined.
+NMTRAN converts A_U() to A_0() during FSUBS code construction.  You
+may wish to ensure A_0FLG is 0 whenever A_UFLG is set to 1, as shown
+in the example above (examples/a_uflg).
 
 *** Forbidden Variable Names
   IDEF IREV EVTREC NVNT INDXS IRGG GG NETAS DADT(n) E(n) EPS(n)

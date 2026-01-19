@@ -291,8 +291,7 @@ Among the Sobol
       sequence methods, the S2 method  appears  to  provide  the  least
       biased  random samples, that is nearly uniform distribution, with
       good mixing in multi-dimensional spaces.
-      See INTRODUCTION TO NONMEM 7, Reference [5]
-      See INTRODUCTION TO NONMEM 7, Monte Carlo Importance Sampling EM
+
       RANMETHOD should be specified only on the first  $TABLE  command.
       The  RANMETHOD  set  in  the $TABLE command does not propagate to
       $EST or $CHAIN.
@@ -384,14 +383,15 @@ table described by list1 in favor of the automatically-generated
 items.)
 
 *** FORMAT=s
-      This option defines the delimiter and  number  format  for  table
-      files.  It affects table files until a different FORMAT is specified.  s defines the delimiter [,|s(pace)|t(ab)]  followed  by  a
-      Fortran  format  specification.   The default is s1PE11.4.  There
-      are many more options for FORMAT.
-      For more details, see the [[file:/docs/reference-manual/control-records/#format-ref][format help]]:
+This option defines the delimiter and  number  format  for  table
+files.  It affects table files until a different FORMAT is specified.
+s defines the delimiter [,|s(pace)|t(ab)]  followed  by  a Fortran
+format  specification.   The default is s1PE11.4.  There are many more
+options for FORMAT.
 
-      Alternately,  use  LFORMAT and/or RFORMAT.
-      See INTRODUCTION TO NONMEM 7, FORMAT=s1PE11.4
+For more details, see the [[file:/docs/reference-manual/control-records/#format-ref][format help]]:
+
+Alternately,  use  LFORMAT and/or RFORMAT.
 
 *** LFORMAT=s
       Specifies the format of the full label record of a table.  Allows
@@ -431,28 +431,114 @@ items.)
            Floating value, with single digit to the right of the  decimal.
 
 *** VARCALC=[0|1|2|3](NM74,NM75)
-To report standard errors associated with etas (individual parameters)
+To report standard errors associated with ETAs (individual parameters)
 in the  tables  for  user-defined  variables,  set
 #+begin_src perl
 $TABLE ...VARCALC=1
 #+end_src
 (See ~examples/setest~).
 This appends an item named item_SE following each user-defined item in
-      list1.   If  using  RFORMAT formatting option, make sure to allow
-      enough format fields to include  reported  standard  errors.   In
-      addition, full variances-covariances among all user-defined variables and PREDPP parameters will be outputted  to  file  root.vpd
-      (the FORMAT used for this file is that defined in the $EST statement).  With NONMEM 7.5, file root.vpt  is  also  created.   This
-      contains  variance-covariances  associated with thetas (or omegas
-      and sigmas) as well  as  those  associated  with  etas/individual
-      parameters.   To  append  the  comparable  total  standard errors
-      item_SE to tables, set $TABLE ...VARCALC=3.  To only  create  the
-      vpd  and  vpt  files,  and not report SE's to the table, set VARCALC=2.  This option must be re-coded for each $TABLE record  for
-      which  SE's  are  wanted.  If VARCALC=1 or 2 or 3 is requested at
-      least once among any of the tables, then the variance  items  are
-      written  to  the  vpd  and vpt files.  VARCALC=0 requests neither
-      SE's nor vpd nor vpt, and is  the  default.   Values  of  COMACT,
-      which  identify copying passes, may need to be tested in abbreviated code when this feature is used.
-      See INTRODUCTION TO NONMEM 7, Requesting Standard Errors to UserDefined and PREDPP Parameters
+list1.   If  using  RFORMAT formatting option, make sure to allow
+enough format fields to include  reported  standard  errors.   In
+addition, full variances-covariances among all user-defined variables
+and PREDPP parameters will be outputted  to  file  root.vpd (the
+FORMAT used for this file is that defined in the $EST statement).
+With NONMEM 7.5, file root.vpt  is  also  created.   This contains
+variance-covariances  associated with thetas (or omegas and sigmas) as
+well  as  those  associated  with  etas/individual parameters.   To
+append  the  comparable  total  standard errors item_SE to tables, set
+$TABLE ...VARCALC=3.  To only  create  the vpd  and  vpt  files,  and
+not report SE's to the table, set VARCALC=2.  This option must be
+re-coded for each $TABLE record  for which  SE's  are  wanted.  If
+VARCALC=1 or 2 or 3 is requested at least once among any of the
+tables, then the variance  items  are written  to  the  vpd  and vpt
+files.  VARCALC=0 requests neither SE's nor vpd nor vpt, and is  the
+default.   Values  of  COMACT, which  identify copying passes, may
+need to be tested in abbreviated code when this feature is used.
+
+The variances are based on variance-covariance of the ETAs/PHIs in the
+.phi file, centered about the values reported in the table files.
+
+- For classical NONMEM methods, this means variables are centered at the ETA mode.
+- For EM methods:
+  + FNLETA=1,3: variance-covariance of ETAs from last iteration of
+    last estimation method is used, and centered about FNLETA based
+    evaluations of variables (MAP, ETA mode).
+  + FNLETA=0: variance-covariance of ETAs from last iteration of last
+    estimation method is used, and centered about method based
+    evaluations of variables (conditional means for EM methods,
+    conditional modes for classical and ITS methods, MCMC posterior
+    means for BAYES).
+  + FNLETA=2: variance-covariance, and ETAs used for assessing
+    variables are obtained from external source.
+
+The standard errors in the .vpt table are most accurately assessed if
+the problem is MU modeled.  If it is not MU modeled, then only
+standard errors of variables that do not vary with etas (variables
+derived exclusively from THETAs, for example), are assured to be
+correctly calculated.  It also takes into account that the .phi tables
+contain variances to phi’s and etas under fixed theta conditions for
+all methods except BAYES, where the variances to phis or etas are
+sampled under varying theta conditions.
+
+Note that to obtain the PRED and its error, one should define a
+variable that is based on IPRED, but evaluated only when COMACT=1
+(NONMEM passes through the model system with ETA=0):
+
+#+begin_src perl
+IPRED=F
+If(COMACT==1) PREDU=IPRED
+#+end_src
+
+So, PREDU is IPRED evaluated with ETA=0.  Then, list this in a table:
+
+#+begin_src perl
+$TABLE …  PREDU … VARCALC=3
+#+end_src
+
+Keep in mind that PREDU has only statistical errors associated with
+THETAS (and SIGMAS, depending on how PREDU is evaluated, based on the
+variance-covariance in the .cov file), and not etas (the phc()
+variances in the .phi file do not contribute to PREDU, since etas=0
+when COMACT=1), so VARCALC=3 is required.  No statistical errors are
+evaluated for weighted residual diagnostics (WRES, NPD’s, etc).
+
+The vpd and vpt files contain entries for each COMACT the NONMEM used
+to calculate the table items. For the vpd file, variance-covariance
+among user-defined variables and PREDPP variables are placed in this
+file, associated with individual variances of the .phi file.  The
+COMACT column value is usually 2, or 3 if $NONPARAMETRIC ETAS was
+implemented. The subsequent columns contain the values of user-defined
+table items, followed by variance-covariance of these items (labeled
+VAR1_VAR2, where VAR1 and VAR2 are the particular table items).
+
+For the vpt file, the total variance-covariance among user-defined
+variables and PREDPP variables are placed in this file, associated
+with individual variances of the .phi file, as well as the
+variance-covariance of the fixed effects variables (THETAS, SIGMAS,
+OMEGAS) of the .cov file.   The COMACT column value is 1 to indicate
+the record contains the values during a COMACT=1 pass, that is with
+ETAs set to 0.  Thus, an individual predicted value (IPRED) on this
+record would in fact by the population predicted value (PRED).  The
+subsequent columns contain the values of user-defined table items,
+followed by variance-covariance of these items (labled VAR1_VAR2, wher
+VAR1 and VAR2 are the particular table items).  The variance
+IPRED_IPRED for a record with COMACT=1 would then have essentially the
+statistical error associated with the variance-covariance of the
+appropriate THETAs.  If you are satisfied to pick up the PRED values
+and their errors from the vpt table, then it is not necessary to
+define a COMACT=1 evaluated variable in the control stream, as you can
+get it from IPRED on the COMACT=1 rows in the .vpt table.  But if you
+want the appropriate PRED variable with standard error presented in
+the user-requested $TABLE table, then the PREDU must be defined as
+above.  For non-parametric estimated etas, when $NONPARAMETRIC ETAS is
+used, then a COMACT 3 pass will be made, and their values will be
+presented in the vpt table with the COMACT set to 3.
+
+Example ~examples/predu.ctl~ prints out IPRED, PRED, and PREDU in the
+various tables (predu.tab, predu.phi, predu.cov, predu.vpt,
+predu.vpd), and one can compare their values and associated standard
+errors.
 
 *** FIXEDETAS=(list)(NM74)
       Specified  etas  may be treated as if they are fixed effects when

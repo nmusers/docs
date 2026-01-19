@@ -1,0 +1,96 @@
+---
+title: "Running NONMEM"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: false
+weight: 4
+---
+
+{{< katex >}}{{< /katex >}}
+
+* Running NONMEM
+NONMEM runs can be invoked using the command line/shell script ~nmfe~
+(NONMEM Front End). The script is appended with release version, e.g.
+~nmfe75~ for NONMEM v7.5. The basic use requires two arguments, model
+file and report file:
+#+begin_src sh
+  nmfe75.bat model.ctl model.res # Windows
+  nmfe75 model.ctl model.res # Linux/Unix
+#+end_src
+The run will output status, information, and messages on screen, to
+re-direct/save them, one may use
+#+begin_src sh
+  nmfe75 model.ctl model.res >stdout.txt
+  nmfe75 mycontrol.ctl myresults.res -background>console.txt
+#+end_src
+
+Some common additional options are listed below.
+
+- ~-rundir~. The user may enter a run directory that is different from
+  the directory in which the script is launched:
+  #+begin_src sh
+    -rundir=c:\my_favorite_dir
+  #+end_src
+  One must have all user dependent input files, control stream file,
+  msf files, and data files, are available in that run directory.
+
+- ~-nmexec~. The user may also enter an alternative name for the
+  constructed executable. For example,
+  #+begin_src sh
+    -nmexec=nonmem2
+  #+end_src
+  specifies an alternative executable name ~nonmem2~, than the default
+  ~nonmem.exe~ (windows) or ~nonmem~ (Linux).
+
+- ~-xmloff~ stops the XML output file from being created.
+
+- ~-flushtime=x~ requests file updating (flushing) to occur not more
+  than every x seconds. For example,
+  #+begin_src sh
+    -xmloff -flushtime=10.0
+  #+end_src
+  may increase the simulation speed. File flushes for the MSF system
+  are not affected, and continue to be updated every PRINT iterations
+  during estimation.  The default setting of flushtime is 1 second,
+  suitable for most problems, but you can change this as needed
+  (fractional seconds are also allowed).  If you prefer file updates
+  occurring as frequently as possible, you can set flushtime to 0.0,
+  but this could cause considerable slowing of execution for small
+  problems and data sets.
+
+- Beginning in NM73, an additional feature of the execution script
+  file is that the path to the fortran compiler system and MPI system
+  that is appropriate for NONMEM may be retrieved from a script file
+  that could have the following environment variables defined:
+  #+begin_src sh
+    compilerpath
+    mpibinpath
+    mpilibpath
+    mpilibname
+  #+end_src
+  Comments in these files are provided for instructions about each of
+  these environment variables.  These paths will be temporarily added
+  to the front of the PATH environment variable, so that the
+  appropriate compiler or MPI system is called to service NONMEM.  In
+  the past, conflicts with other installed fortran compilers from
+  other applications would prevent the appropriate compiler from being
+  used for the NONMEM system.  This location file method allows NONMEM
+  to be forced to look in a particular location.
+
+- ~-locfile~ specifies the location file (nmloc.bat or nmloc by
+  convention. See ~util/nmlocoriginal.*~ as templates). For example
+  #+begin_src sh
+    nmfe75 myfile.ctl myfile.res -locfile=nmloc.bat
+  #+end_src
+  If –locfile is not specified, the nmfe7x script looks in the present
+  working directory for nmloc.bat (windows) or nmloc (linux).  If this
+  file is not found, it looks in the top directory of the NONMEM
+  installed directory.  Thus, the file nmloc.bat (Windows) or nmloc
+  (Linux) in the top nonmem installed directory serves as the default
+  location file, and may be modified, or used as a template and placed
+  in the working directory or specified in the –locfile option on the
+  command line.  If a particular environment variable in the above
+  list is not found or is not defined, then nmfe7x will behave as in
+  earlier versions, and rely on the presently existing PATH for
+  finding the compiler and MPI system.  The nmfe7x script will display
+  a statement as to what path it will use.
