@@ -77,23 +77,9 @@ the order how we approach a problem using NONMEM models:
 - choose a kinetics model and its parameterization;
 - choose an estimation method;
 - get the results.
-Though this process is always iterative by nature, it helps us
-understand the roles of the control records involved and keep in mind
-the big picture of model building.
-
-Unless explained otherwise, each section of control record begins with
-a code block for its usage and an example. We use the following notations.
-- Any or all arguments in =[ ]= are optional, e.g. =[foo bar]=, and
-  equivalently =[foo] [bar]=,  means =foo= and =bar= are both optional.
-- Options delimited by =|= cannot be used together, e.g. =option=a|b=
-  means one must choose to specify =option=a= or =option=b=.
-- =...= indicates reaptable arguments, e.g. =filename ...= means one can
-  supply multiple files, and =[label|value]...= means =label1 value2 value3 label4= is allowed.
-- A keyword with "(NONMEM version)" appended indicates the
-  record/option as introduced in that version. For example "$DEFAULT
-  (NM74)" means the record was introduced in NONMEM v7.4.
-- Starting in v7.2 NONMEM  is no longer case-sensitive to reserved
-  keywords, reserved variables, or user-defined variables.
+Though this process is always iterative by nature, the list helps us
+understand the roles of each control record and how they are connected
+in model building.
 
 **  $PROBLEM
 #+begin_src perl
@@ -102,7 +88,7 @@ $PROBLEM [text]
 $PROB  THEOPHYLLINE   POPULATION DATA
 #+end_src
 
-The text becomes a heading for the NONMEM printout. This record is required.
+The ~text~ becomes a heading for the NONMEM printout. This record is required.
 A $PROBLEM record other than the first one marks the beginning of another problem specification.
 
 The text must be contained on a single record, and
@@ -117,12 +103,10 @@ $INPUT item ...
 $INPUT      ID DOSE TIME CP=DV WT
 #+end_src
 
-$INPUT define the data item in NONMEM data records,
-in the order of their appearance.
-
-This record is required, and it must precede any other
-NONMEM control record in the problem specification that refers to
-specific data item types.
+$INPUT defines the data item in NONMEM data records, in the order of
+their appearance. It is required. $INPUT must precede any other NONMEM
+control record in the problem specification that refers to specific
+data item types.
 
 Each item has form B or A=B, where A and B are data item labels.
 Each data item label consists of letters (A-Z) and numerals (0-9), but it
@@ -133,21 +117,17 @@ a synonym of =DV=, and =CP= is used as the label in NONMEM output.
 All the reserved data items from the previous chapter can be specified
 as items.
 
-
 **  $DATA
 #+begin_src perl
- $DATA  [filename|*]
+ $DATA  filename|*
         [IGNORE=(list)...|ACCEPT=(list)...]
 ; Example
 $DATA       DATAFILE
 #+end_src
 This record gives the name of the file containing the NONMEM data set.
-
-This record is required with the first problem specification, and with any
+It is required with the first problem specification, and with any
 problem specification where the NONMEM data set differs from that of the
 preceding problem specification.
-
-The filename must be the first option on the record.
 
 Below we only discuss commonly used options. See Reference manual for details.
 
@@ -214,12 +194,12 @@ $SUBROUTINES [subname = name] ...
 $SUBROUTINES ADVAN3 TRNAS2
 #+end_src
 
-NONMEM requires a PRED routine for model predictions, with
-built-in ADVAN routines for common models and matching TRANS routines
-for parameterization. The $SUBROUTINES record is used to specify them:
-it describes which pharmacokinetic model is to be used.
-There are many reserved subnames (subroutine names),
-here we only discuss a few: ADVAN, TRANS, and SS.
+Recall that NONMEM requires a PRED routine for model predictions, and
+provides with
+built-in models in ADVAN routines and parameterization in TRANS routines.
+These are specified in the $SUBROUTINES record. Though $SUBROUTINES
+supports other options,
+here we only discuss ADVAN, TRANS, and SS routines.
 
 For PK models user can choose from the following ADVAN routines
 - ADVAN1 (One Compartment Linear Model)
@@ -229,8 +209,7 @@ For PK models user can choose from the following ADVAN routines
 - ADVAN10 (One Compartment Model with Michaelis-Menten Elimination)
 - ADVAN11 (Three Compartment Linear Model)
 - ADVAN12 (Three Compartment Linear Model with First Order Absorption)
-NONMEM has additional ADVANs for more general models. See Reference
-manual for details.
+- additional ADVANs for more general models, see Reference manual for details.
 
 The following applies when using ADVAN models.
 1. The compartments are numbered. These numbers are used in two places. First, they are
@@ -326,7 +305,6 @@ The following applies when using ADVAN models.
 # files.
 
 # Abbreviated code is described in next Chapter.
-
 
 ** $THETA
 #+begin_src perl
@@ -985,9 +963,9 @@ $ETAS FILE=myprevious.iph TBLN=3 ITERATION=123
 #+end_src
 
 ** Overview of a NONMEM run
-Each NONMEM problem's run consists of a sequence of steps. Do not
-worry if you are not familiar with the terms or variables, as we will
-go through them in detail.
+Each NONMEM run consists of a sequence of steps, listed below. NONMEM has an internal
+variable ~ICALL~ to flag the nature of step. Later we will see that
+user can use ~ICALL~ to selectively modify the runs.
 1. NONMEM  loads information from a model specification file, if $MSFI
    is present NONMEM makes a single call to  PRED  (with ICALL=0),
    at  the beginning  of  the  run, to allow PRED to undertake run
@@ -1007,9 +985,9 @@ go through them in detail.
 
 5. ESTIMATION STEP (with ICALL=2): NONMEM inputs initial etas from
    file specified by $ETAS/$PHIS, if record is present NONMEM searches
-   for parameter values that mini- mize the objective function (if
-   $ESTIMATION present).  With  NON- MEM 7, multiple Estimation Steps
-   can be implemented in  a  single problem.   A  sequence  of  two
+   for parameter values that minimize the objective function (if
+   $ESTIMATION present).  Multiple Estimation Steps
+   can be implemented in  a single problem.   A  sequence  of  two
    or  more  Estimation Steps  will result in the sequential execution
    of each.
 
