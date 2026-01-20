@@ -8,25 +8,28 @@ https://github.com/alex-shpak/hugo-book
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content=" Data and model In this part we go through NONMEM&#39;s data and model specification, as well as interpret sample outputs. Almost all modern NONMEM models are specified using NM-TRAN (NONMEM TRANslator), a NONMEM component in charge of parsing and resourcing.
-NM-TRAN is a stand-alone program that preprocess input control stream and data, so that they can be used by NONMEM for model fitting. In NONMEM applications almost all model specification is done through NM-TRAN, including all the examples in this documentation. It converts them into three things: a NONMEM data set, a NONMEM control stream 1, and needed subroutines.
+<meta name="description" content=" Data and model In this part we go through NONMEM&#39;s data and model specification, as well as interpret sample outputs, using NM-TRAN (NONMEM TRANslator) syntax, a (standalone) NONMEM component for input parsing. Almost all modern NONMEM models are specified using NM-TRAN.
+NM-TRAN takes its input from two files:
+NM-TRAN control stream, NM-TRAN data set. and creates three things: a NONMEM data set, a NONMEM control stream 1, and necessary subroutines. For example, it uses the data file input and creates NONMEM data file FDATA 2. The table below lists some files that NM-TRNA generates.
 ">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:url" content="https://nmusers.github.io/docs/user-guide/nmtran/">
   <meta property="og:site_name" content="NONMEM Documentation">
   <meta property="og:title" content="Data and model">
-  <meta property="og:description" content="Data and model In this part we go through NONMEM&#39;s data and model specification, as well as interpret sample outputs. Almost all modern NONMEM models are specified using NM-TRAN (NONMEM TRANslator), a NONMEM component in charge of parsing and resourcing.
-NM-TRAN is a stand-alone program that preprocess input control stream and data, so that they can be used by NONMEM for model fitting. In NONMEM applications almost all model specification is done through NM-TRAN, including all the examples in this documentation. It converts them into three things: a NONMEM data set, a NONMEM control stream 1, and needed subroutines.">
+  <meta property="og:description" content="Data and model In this part we go through NONMEM&#39;s data and model specification, as well as interpret sample outputs, using NM-TRAN (NONMEM TRANslator) syntax, a (standalone) NONMEM component for input parsing. Almost all modern NONMEM models are specified using NM-TRAN.
+NM-TRAN takes its input from two files:
+NM-TRAN control stream, NM-TRAN data set. and creates three things: a NONMEM data set, a NONMEM control stream 1, and necessary subroutines. For example, it uses the data file input and creates NONMEM data file FDATA 2. The table below lists some files that NM-TRNA generates.">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="website">
 
 
   <meta itemprop="name" content="Data and model">
-  <meta itemprop="description" content="Data and model In this part we go through NONMEM&#39;s data and model specification, as well as interpret sample outputs. Almost all modern NONMEM models are specified using NM-TRAN (NONMEM TRANslator), a NONMEM component in charge of parsing and resourcing.
-NM-TRAN is a stand-alone program that preprocess input control stream and data, so that they can be used by NONMEM for model fitting. In NONMEM applications almost all model specification is done through NM-TRAN, including all the examples in this documentation. It converts them into three things: a NONMEM data set, a NONMEM control stream 1, and needed subroutines.">
-  <meta itemprop="dateModified" content="2026-01-16T17:04:42-08:00">
-  <meta itemprop="wordCount" content="535">
+  <meta itemprop="description" content="Data and model In this part we go through NONMEM&#39;s data and model specification, as well as interpret sample outputs, using NM-TRAN (NONMEM TRANslator) syntax, a (standalone) NONMEM component for input parsing. Almost all modern NONMEM models are specified using NM-TRAN.
+NM-TRAN takes its input from two files:
+NM-TRAN control stream, NM-TRAN data set. and creates three things: a NONMEM data set, a NONMEM control stream 1, and necessary subroutines. For example, it uses the data file input and creates NONMEM data file FDATA 2. The table below lists some files that NM-TRNA generates.">
+  <meta itemprop="dateModified" content="2026-01-18T21:56:40-08:00">
+  <meta itemprop="wordCount" content="393">
 
 <title>Data and model | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -36,7 +39,7 @@ NM-TRAN is a stand-alone program that preprocess input control stream and data, 
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.0a0eaba0977dcc7ec7ea84dc76362fcd7dd268ae5d9d9c08541b17b50194c6b0.js" integrity="sha256-Cg6roJd9zH7H6oTcdjYvzX3SaK5dnZwIVBsXtQGUxrA=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.68d25ec3e96a1ae3cf6126ab949dd660b52b670e90c9e20c6768888c850273d2.js" integrity="sha256-aNJew&#43;lqGuPPYSarlJ3WYLUrZw6QyeIMZ2iIjIUCc9I=" crossorigin="anonymous"></script>
 
 
 <link rel="alternate" type="application/rss+xml" href="https://nmusers.github.io/docs/user-guide/nmtran/index.xml" title="NONMEM Documentation" />
@@ -325,7 +328,7 @@ NM-TRAN is a stand-alone program that preprocess input control stream and data, 
 
   
     <a href="/docs/user-guide/predpp/mm/" class="">
-      Michaelis–Menten model</a>
+      Michaelis–Menten elimination</a>
   
 
         </li>
@@ -1444,26 +1447,18 @@ Data and model
 </h2>
 <div id="outline-text-headline-1" class="outline-text-2">
 <p>In this part we go through NONMEM&#39;s data and model specification, as
-well as interpret sample outputs. Almost all modern NONMEM models are specified using NM-TRAN (NONMEM
-TRANslator), a NONMEM component in charge of parsing and resourcing.</p>
-<p>
-NM-TRAN is a stand-alone program that preprocess input control
-stream and data, so that they can be used by NONMEM for model fitting.
-In NONMEM applications almost all model specification is done through
-NM-TRAN, including all the examples in this documentation. It converts them into
-three things: a <em>NONMEM data set</em>, a <em>NONMEM control stream</em> <sup class="footnote-reference"><a id="footnote-reference-1" href="#footnote-1">1</a></sup>, and needed subroutines.</p>
+well as interpret sample outputs, using NM-TRAN (NONMEM
+TRANslator) syntax, a (standalone) NONMEM component for input parsing.
+Almost all modern NONMEM models are specified using NM-TRAN.</p>
 <p>
 NM-TRAN takes its input from two files:</p>
 <ul>
 <li>NM-TRAN control stream,</li>
 <li>NM-TRAN data set.</li>
 </ul>
-<p>The first file uses control record entry $DATA to specify the path to the second.</p>
-<p>
-NM-TRAN modifies (see
-next section) its data file input and generates the data file FDATA
-for NONMEM <sup class="footnote-reference"><a id="footnote-reference-2" href="#footnote-2">2</a></sup>. This FDATA file is among the several NM-TRAN output
-files, including</p>
+<p>and creates three things: a <em>NONMEM data set</em>, a <em>NONMEM control
+stream</em> <sup class="footnote-reference"><a id="footnote-reference-1" href="#footnote-1">1</a></sup>, and necessary subroutines. For example, it uses the data file input and creates NONMEM data file FDATA
+<sup class="footnote-reference"><a id="footnote-reference-2" href="#footnote-2">2</a></sup>. The table below lists some files that NM-TRNA generates.</p>
 <table>
 <thead>
 <tr>
@@ -1504,7 +1499,8 @@ files, including</p>
 See <a href="/docs/reference-manual/files/">reference manual</a> for additional
 files and details.</p>
 <p>
-NONMEM consumes the input files created by NM-TRAN, and generates  a number of files during the run.</p>
+Usinig the files created by NM-TRAN, NONMEM fits the model and
+generates a number of output files.</p>
 <p>
 If an Model Specification File (MSF) is output, and intermediate output with iteration summaries
 is requested (i.e., $ESTIM options MSFI and PRINT are used), then
@@ -1514,20 +1510,10 @@ terminates.  INTER now include lines giving the parameter  estimates
 in their natural unscaled space  (NPARAMETR) as well as the UCP
 values (PARAMETER).</p>
 <p>
-Additional output files include
-files with  extensions  (suffixes)  .ext,  .cov,  .coi,
- .cor,  .phi,  .phm,  .grd,  .shk,  .shm, .cnv, smt, .rmt, etc.
-The names of the files start with &#34;root&#34;, where root is the root name of the NM-TRAN control stream file.
-The file root.ext is called the raw output file.
-The root name may be specified by $ESTIMATION record option FILE.</p>
-<p>
 NM-TRAN also supports NONMEM&#39;s pre-built population PK models (PREDPP) by generating its
 subroutines. It also handles additional model inputs such mixture
 models (MIX) and Bayesian inference (PRIOR and BAYES). We will cover
 PREDPP in the next part.</p>
-<p>
-Unless specified, hereon in this document by &#34;PREDPP reocords/entries&#34;
-we always refer to when they are used in NM-TRAN.</p>
 </div>
 </div>
 <div class="footnotes">
@@ -1568,9 +1554,9 @@ form of the data will appear in FDATA.csv.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/1fbe5fdfc154f4b410e58fae35e11114eda477c1" title='Last modified by Yi Zhang | 2026 Jan 16' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/2500fbdb595d1fd79845568a4c045a6db4d7853d" title='Last modified by Yi Zhang | 2026 Jan 18' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Jan 16</span>
+    <span>2026 Jan 18</span>
   </a>
 
 </div>
