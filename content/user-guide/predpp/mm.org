@@ -8,26 +8,92 @@ weight: 16
 
 {{< katex >}}{{< /katex >}}
 
-* ODE solution of Michaelis–Menten elimination model
-NONMEM AVDAN10 supports one-compartment model with Michaelis-Menten
-(M-M) elimination. For M-M kinetics in other compartment models, user
+* Michaelis–Menten elimination
+Let /c/ be the drug amount, the Michaelis-Menten
+(M-M) elimination model assumes elimination rate
+\begin{equation}
+\frac{V_m c}{K_m + c},
+\end{equation}
+with \(V_m\) the limiting rate at the
+saturating concentration, and \(K_m\) the Michaelis constant, of the
+unit of concentration. Alternatively, the mechanism can be described
+in terms of drug amount (mass) /A/:
+\begin{equation}
+\frac{V_m A}{K_m + A}.
+\end{equation}
+Then here \(K_m\) should have the unit of drug amount. This is the
+unit used in NONMEM's ADVAN10 for one-compartment models. Consider the following model.
+#+begin_src perl
+$PROB RUN# adv10tr1 YOUR TEXT
+$INPUT C ID TIME DV AMT DROP=RATE EVID ;etc.
+$DATA data10.csv IGNORE=C
+$SUBROUTINE ADVAN10 TRANS1 TOL=5
+$PK
+;# TO NUMBER RECORDS WITHIN AN INDIVIDUAL
+  IF(NEWIND.LT.2) INDR=1
+  IF(NEWIND.EQ.2) INDR=INDR+1
+  IF(TIME.EQ.0) DOSE=AMT ;# allows sorting graphs by dose
+  TVVM=THETA(1)
+  VM=TVVM*EXP(ETA(1))
+  TVKM=THETA(2)
+  KM=TVKM*EXP(ETA(2))
+  TVV=THETA(3)
+  V=TVV*EXP(ETA(3))
+  S1=V
+
+$ERROR
+  IPRED=F
+  Y=F + F*ERR(1) +ERR(2)
+  CN=F/DOSE
+$THETA
+  (0,10)  ;[VM]
+  (0,10)  ;[KM]
+  (0,1.0) ;[V]
+$OMEGA
+  0.04 ;[P] INTERINDIVIDUAL VARIABILITY IN VM
+  0.04 ;[P] INTERINDIVIDUAL VARIABILITY IN KM
+  0.04 ;[P] INTERINDIVIDUAL VARIABILITY IN V
+$SIGMA
+  0.1  ;[P] PROPORTIONAL COMPONENT OF RESIDUAL VARIABILITY
+  0.001 ;[A] ADDITIVE COMPONENT OF RESIDUAL VARIABILITY
+$ESTIMATION MAXEVAL=9999 PRINT=5 POSTHOC MSF=adv10tr1.MSF
+$TABLE ID TIME DOSE IPRED CN INDR FILE=adv10tr1.tab NOPRINT
+$TABLE ID VM KM V ONEHEADER FILE=patabadv10tr1 NOPRINT
+#+end_src
+Here ~VM~ and ~KM~ are reserved variables for \(V_m\) and \(K_m\),
+respectively.
+
+** ODE solution of Michaelis–Menten elimination model
+For M-M kinetics in other compartment models, user
 will need to utilize general nonlinear models for numerical ODE
 solution. In this example we use $ADVAN6 and $DES to describe a
 two-compartment M-M model with first order absorption.
 
-Let /c/ be the drug amount, recall M-M model assumes elimination rate
-\(c V_m/(K_m + c)\). Here \(V_m\) is the limiting rate at the
-saturating concentration, and \(K_m\) the Michaelis constant. Using
-$MODEL and $DES records we
+Using $MODEL and $DES records we
 can describe the ODE system as
 #+begin_src perl
-$MODEL COMP=(DEPOT,DEFDOS),COMP=(CENTRAL,DEFOBS) COMP=(PERIPH)
-;#...
-$DES
-C2 = A(2)/S2
-DADT(1) = -K12*A(1)
-DADT(2) = K12*A(1) -K23*A(2) +K32*A(3) -C2*VM/(KM+C2)
-DADT(3) = K23*A(2) -K32*A(3)
+;# ...
+ $SUBROUTINES  ADVAN6  TRANS1 TOL=4
+ $MODEL COMP=(DEPOT,DEFDOS),COMP=(CENTRAL,DEFOBS) COMP=(PERIPH)
+
+ $PK
+    VM  = THETA(1)*EXP(ETA(1))
+    KM  = THETA(2)*EXP(ETA(2))
+    S2  = THETA(3)*EXP(ETA(3))
+    K12 = THETA(4)*EXP(ETA(4))
+    K23 = THETA(5)*EXP(ETA(5))
+    K32 = THETA(6)*EXP(ETA(6))
+
+ $ERROR
+    Y = F + ERR(1)
+
+ $DES
+     C2      =  A(2)/S2
+     DADT(1) = -K12*A(1)
+     DADT(2) =  K12*A(1) -K23*A(2) +K32*A(3) -C2*VM/(KM+C2)
+     DADT(3) =            K23*A(2) -K32*A(3)
+
+;# ...
 #+end_src
-~C2~, The concentration in the central compartment, is calculated
+Similar to the previous example, the saturation ~C2~, The concentration in the central compartment, is calculated
 using drug amount ~A(2)~ and volume scaling factor ~S2~.
