@@ -2258,7 +2258,7 @@ normally distributed values for that subject.
   ENDIF
   #+end_src
 
-** MTIME
+** MTIME, MTDIFF, MNOW, MPAST, MNEXT
 :PROPERTIES:
 :CUSTOM_ID: mtime
 :END:
@@ -2274,109 +2274,97 @@ normally distributed values for that subject.
   USE PKERR_REAL,ONLY: MTIME
 #+end_src
 Model event times are additional PK parameters defined in the PK
-routine or $PK block. A model event time is not associated with any
-compartment, but, like an absorption lag time, defines a time to which
-the system is advanced. When the time is reached, certain new
-indicator variables are set and a call to PK is made. At this call
-(and/or subsequent to this call) PK or DES or AES or ERROR can use the
-indicator variables to change some aspect of the system, e.g., a term
-in a differential equation, or the rate of an infusion. This feature
-may be used with any ADVAN routine and does not require that extra
-compartments be added to the model or that dummy doses be included in
-the data set. There may be up to PCT model event times, where PCT is
-defined in PSIZES and TSIZES. Its current value is 30.
+routine or $PK block. Similar to absorption lag times, a model event
+time MTIME(i) defines a time at which the system is modified or
+advanced (/i/ is not related to compartment but merely a counter).
+When MTIME(i) is reached, /read-only/ indicator variables MNOW(i),
+MPAST(i), MNEXT(i) change value and a call to PK is made.  The calls
+to PK,  DES, AES, and ERROR can use the indicator variables to change
+behavior of the system, such as adding a term in the differential
+equation or adjusting the rate of an infusion. This feature may be
+used with any ADVAN routine.
 
-PK routine contains code to copy MTIME parameters and their eta derivatives to GG. If there are gaps in the
-sequence of MTIME parameters, the corresponding positions in GG are left as-is. Since GG is initialized
-to 0 before calls to PK, the effective value of omitted MTIME parameters is 0.
-The MTIME array is never listed in NMPRD4. Therefore, if an MTIME parameter is to be displayed in
-a table or scatter it must be copied to a PK-defined variable in NMPRD4, e.g.,
+The indicator variables are defined as
+#+begin_src f90
+  ! USAGE:
+    USE ROCM_INT, ONLY: MNOW=>MTNOW,MPAST=>MTPAST,MNEXT=>MTNEXT
+
+  ! GLOBAL DECLARATION:
+    USE SIZES, ONLY: PCT
+    INTEGER(KIND=ISIZE) :: MTNOW,MTPAST(PCT),MTNEXT(PCT)
+#+end_src
+~PCT~ defines (in PSIZES and TSIZES) the maximum number of model event
+times. The default value is 30. They are all intialized to 0 at start
+of an IR and at RESET events.
+
+The indicator variables change value in the following way.
+ - MNEXT: MNEXT(i)=1 during the advance from the previous time to MTIME(i).
+      Otherwise, MNEXT(i)=0.  The previous time may be an event time, a
+      non-event time, or a model event time.
+
+ - MPAST: MPAST(i)=0 until the call to PK subsequent to the one for
+   which MNEXT(i)=1.  At that call MPAST(i)=1. It then retains this
+   value, unless MTIME(i) is redefined, in which case MPAST will be
+   appropriately redefined as another step function. For example,
+   assume MTIME(1)<MTIME(2)<MTIME(3), then the MNEXT and MPAST values assume the following sequence.
+   #+begin_src r
+              MTIME(1)       MTIME(2)       MTIME(3)
+     ............|..............|..............|..................
+     011111111111100000000000000000000000000000000000000 MNEXT(1)
+     000000000000011111111111111100000000000000000000000 MNEXT(2)
+     000000000000000000000000000011111111111111100000000 MNEXT(3)
+     000000000000011111111111111111111111111111111111111 MPAST(1)
+     000000000000000000000000000011111111111111111111111 MPAST(2)
+     000000000000000000000000000000000000000000011111111 MPAST(3)
+   #+end_src
+
+ - MNOW: MNOW=i if MNEXT(i)=1 for some i.  MNOW=0 otherwise.
+
+In addition, NONMEM provides variable MTDIFF
+#+begin_src f90
+  ! USAGE:
+    USE PRMOD_INT, ONLY: MTDIFF
+
+  ! GLOBAL DECLARATION:
+    INTEGER(KIND=ISIZE) :: MTDIFF
+#+end_src
+to flag that the values of MTIME have possibly been reset. The value
+of MTDIFF is 0 when PK is called. If PK sets MTDIFF to a value other
+than 0, then PREDPP will  understand  that with  that  call to PK, the
+values of one or more of the MTIME(i) have possibly been reset. It is
+not necessary to set MTDIFF at a call to PK with the first record of
+an individual  or with a reset record, because these record
+automatically reset all MTIME(i) to 0.
+
+MTIME does not have to be consecutive or in ascending order: PK may define MTIME(i) and
+MTIME(i+2) but not MTIME(i+1). In this case MTIME(i+1)=0. (Internally
+PK copies MTIME parameters and their ETA derivatives to GG. If there
+are gaps in the sequence of MTIME parameters, the corresponding
+positions in GG are left as-is. Since GG is initialized to 0 before
+calls to PK, the omitted MTIME parameters is 0. Since ETA derivatives
+are not included in MTIME, the ERROR routine should not use MTIME
+parameters in such a way as to influence the value of Y if those
+parameters have ETA derivatives.)
+
+The MTIME array is never listed in NMPRD4. Therefore, if an MTIME
+parameter is to be output it must be copied to a PK-defined variable in NMPRD4, e.g.,
 #+begin_src f90
   MTIME(1)=...
   MT1=MTIME(1)
   ...
   $TABLE MT1
 #+end_src
-Another reason for defining MTIME in a MODULE is to make it available
-to the ERROR routine via the same USE statement. All other basic and
-additional parameters are available to ERROR only if listed in NMPRD4.
-If MTIME is defined in ERROR, then the values of the MTIME parameters
-are available as well. However, eta derivatives are not included in
-MTIME, only in GG. (This is done to save space and compute time.)
-Hence the ERROR routine should not use MTIME parameters in such a way
-as to influence the value of Y if those parameters have eta
-derivatives. NM-TRAN gives an appropriate warning if an MTIME variable
-is used in the $ERROR block. Values of MTIME may be used in DES and
-AES, where they are obtained from the subroutine argument P (which is
-really GG) and may have eta derivatives
 
-Model times are independent of non-event dose times. See below (Rules
-for coincidence of times) when model times happen to coincide with
-other times.
+MTIME is independent of non-event dose times. In particular, MTIME is
+ignored during Steady-State calculation since it is intended for a
+single repeated dose with no changes in the status of the system.
 
-In abbreviated code, the model event times have reserved names
-MTIME(i), where i is an integer from 1 to PCT.
+MTIME is in fact a random variable so may contain ETA in the
+definition. Therefore the indicator variables can be implicitly
+ETA-dependent. However, PREDPP does not consider the indicator
+variables as random variables, and their ETA-derivatives are always 0.
 
-The indicator variables currently implemented have reserved names
-MNEXT(i) and MPAST(i), each corresponding to the MTIME(i) variable
-with the same index i. An indicator variable may be used in the PK,
-ERROR, DES, or AES routine (as a right-hand quantity in abbreviated
-codes). An indicator variable may not be used on the right (other than
-in a write/ print statement) unless the corresponding MTIME has
-already been defined. It is not required that one or more indicator
-variables be used.
-
-There is no requirement that the MTIME(i) be in ascending order. That
-is, MTIME(i) may be less than, equal to, or greater than MTIME(i+1).
-Any MTIME(i) may be negative or have the value 0, in which case
-MPAST(i)=1 always and MNEXT(i)=0 always.
-
-There may be gaps in the sequence of any length. E.g., PK may define MTIME(i) and MTIME(i+2) but
-not MTIME(i+1). This has the same effect as including the code MTIME(i+1)=0.
-
-PK may redefine MTIME(i). See "Example 3" below.
-
-An ETA may be used in the definition of MTIME(i).
-
-PREDPP sets all indicator variables to 0 at start of an IR and at RESET events.
-
-MNEXT(i)=1 when PREDPP calls PK prior to the advance to MTIME(i), and
-remains 1 during the advance from the previous time to MTIME(i).
-Otherwise, MNEXT(i)=0. (The previous time may be an event time,
-non-event time, or model event time).
-
-MPAST(i)=0 until the call to PK subsequent to the one for which
-MNEXT(i)=1. At that call MPAST(i)=1. It then retains this value,
-unless MTIME is redefined, in which case MPAST will be appropriately
-redefined as another step function.
-
-Another related variable is MNOW. MNOW=i if this is a call to PK such
-that MNEXT(i)=1 for some i. MNOW=0 otherwise.
-
-Model event time MTIME is not a dose-related feature and has no effect on steady-state doses. See Note
-3 of chapter V.
-
-For example, assume MTIME(1)<MTIME(2)<MTIME(3), then the relevant
-values assume the following sequence.
-#+begin_src
-         MTIME(1)       MTIME(2)       MTIME(3)
-............|..............|..............|..................
-011111111111100000000000000000000000000000000000000 MNEXT(1)
-000000000000011111111111111100000000000000000000000 MNEXT(2)
-000000000000000000000000000011111111111111100000000 MNEXT(3)
-000000000000011111111111111111111111111111111111111 MPAST(1)
-000000000000000000000000000011111111111111111111111 MPAST(2)
-000000000000000000000000000000000000000000011111111 MPAST(3)
-#+end_src
-Event times (both dose and non-dose) can occur anywhere above. See
-below the rules for coincidence of times. If model event times depend on
-ETAS, so do the values of indicator variables. However, the effect of
-the model event times or of the indicator variables on the
-eta-derivatives of the state vector is handled by PREDPP in such a way
-that the indicator variables are /not/ random variables, and their
-ETA-derivatives are always 0.
-
-For another example,  assume an infusion with rate
+For example,  consider an infusion with rate
   - ~400*EXP(ETA(1))~ from time 0 to 1.5;
   - ~300*EXP(ETA(2))~ from time 1.5 to 2.5;
   - ~200*EXP(ETA(3))~ from time 2.5 till end of infusion.
@@ -2399,8 +2387,9 @@ TIME    MNOW    MNEXT1  MNEXT2  MPAST1  MPAST2  R1        TSTATE
 3.00    0.00    0.00    0.00    1.00    1.00    200.00    2.50
 #+end_src
 
-For another example, consider an Enterohepatic Recycling (EHC) model,
-with drug transfer from compartment 4 to 1 controlled by "FLAG":
+For another example, consider an Enterohepatic Recycling (EHC) model
+(see full example at [[file:/docs/user-guide/predpp/mtime][MTIME examples]]).
+The model has drug transfer from compartment 4 to 1 controlled by a random "FLAG":
 #+begin_src f90
   DADT(1)=-KA*A(1)+K41*A(4)*FLAG
   DADT(4)=K1G*A(2)-K41*A(4)*FLAG
@@ -2441,8 +2430,8 @@ The approaches below are equivalent.
       ALAG6=ALAG5+DELTA
 
       IF (NEWIND.LT.2) THEN
-      FLAG=0.0
-      OLDTIM=0
+        FLAG=0.0
+        OLDTIM=0
       ENDIF
       IF (OLDTIM.EQ.ALAG5) FLAG=1
       IF (OLDTIM.EQ.ALAG6) FLAG=0
@@ -2633,71 +2622,6 @@ When MTIME values contains coincidence of times, the following rules apply.
     3.00      0.00      0.00      1.00      2.00      1.00
     3.00      0.00      0.00      1.00      0.00      2.00
   #+end_src
-
-** MTDIFF
-The value of MTDIFF is 0 when PK is called.  If PK sets MTDIFF to
-      a value other than 0, e.g., MTDIFF=1, then PREDPP will understand
-      that with that call to PK, the values  of  one  or  more  of  the
-      MTIME(i)  have  possibly  been reset.  It is not necessary to set
-      MTDIFF at a call to PK with the first record of an individual  or
-      with a reset record.
-- Fortran usage and definition
-  #+begin_src f90
-    ! USAGE:
-      USE PRMOD_INT, ONLY: MTDIFF
-
-    ! GLOBAL DECLARATION:
-      INTEGER(KIND=ISIZE) :: MTDIFF
-  #+end_src
-
- MTDIFF is of interest when model time parameters MTIME are used.
-
- The  value  of  MTDIFF is 0 when PK is called.  If PK sets MTDIFF to a
- value other than 0, e.g., MTDIFF=1, then PREDPP will  understand  that
- with  that  call to PK, the values of one or more of the MTIME(i) have
- possibly been reset.
-
- It is not necessary to set MTDIFF at a  call  to  PK  with  the  first
- record  of an individual or with a reset record.  At such calls, it is
- assumed that all MTIME(i) are being set  (if  only  to  their  default
- value of 0).
-
- Suppose PK has defined a value MTIME(i).  PREDPP calls PK prior to the
- advance to MTIME(i).  PK may change MTIME(i) at this  call.   However,
- the  new  value  of  MTIME(i) is ignored till after the advance.  Only
- then is the new value of MTIME(i) effective.
-
- MTDIFF=0 (the default) can save considerable run time when  there  are
- many  model  time parameters.  Note that the results are unpredictable
- if the times are in fact changed when MTDIFF=0.
-
- (See model time examples).
-(See Circadian Example: Examples Using MTIME to Model Periodic Discontinuities in $DES)
-** MNOW, MPAST, MNEXT
-Read-only indicator variables, not to be set by PK.
-
- - MNOW: MNOW=i if MNEXT(i)=1 for some i.  MNOW=0 otherwise.
-
- - MNEXT: MNEXT(i)=1 during the advance from the previous time to MTIME(i).
-      Otherwise, MNEXT(i)=0.  The previous time may be an event time, a
-      non-event time, or a model event time.
-
- - MPAST: MPAST(i)=0 until the call to PK subsequent to the one  for  which
-      MNEXT(i)=1.  At that call MPAST(i)=1. It then retains this value,
-      unless MTIME(i) is redefined, in which case MPAST will be  appropriately redefined as another step function.
- - Fortran usage and definition
-   #+begin_src f90
-   ! USAGE:
-     USE ROCM_INT, ONLY: MNOW=>MTNOW,MPAST=>MTPAST,MNEXT=>MTNEXT
-
-   ! GLOBAL DECLARATION:
-     USE SIZES, ONLY: PCT
-     INTEGER(KIND=ISIZE) :: MTNOW,MTPAST(PCT),MTNEXT(PCT)
-   #+end_src
-
- (See Circadian Example: Examples Using MTIME to Model Periodic Discontinuities in $DES)
-
- (See MTIME for details).
 
 * PREDPP variables
 PREDPP modules contain values that are (for the most part)
