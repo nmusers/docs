@@ -1,0 +1,491 @@
+---
+title: "Change $DES at given time"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: false
+weight: 20
+---
+
+{{< katex >}}{{< /katex >}}
+
+* Model changes in DES
+In the [[file:/docs/user-guide/fundamentals/pkode/#dose][section of ODE and dosing]], we saw that a finite infusion dose
+changes the ODE system by adding the infusion rate on the RHS. NONMEM
+provides a general way to extend this concept of system changes at
+given time, through random variable MTIME.
+
+Consider the Enterohepatic Recycling (EHC) model below
+(examples/mtimehill).
+#+begin_src perl
+$PROB  EHC using MTIME for the flag
+
+$INPUT ID DOSE=AMT TIME CP=DV WT SS=DROP II ADDL EVID
+$DATA mtimess.dat
+
+$SUBROUTINES  ADVAN6 TOL=6
+$MODEL COMP=(DEPOT,INITIALOFF,DEFDOSE) COMP=(CENTRAL,DEFOBS,NOOFF)
+COMP=(PERIPH) COMP=(GALL )
+
+$PK
+;# Save the value of II from the dose record.
+   if (ii>0) inter=ii
+
+   KA=THETA(1)*EXP(ETA(1))
+   KE=THETA(2)*EXP(ETA(2))
+   CL=THETA(3)*WT*EXP(ETA(3))
+   S2=CL/KE/WT
+   K41=THETA(4)*EXP(ETA(4))
+   K23=THETA(5)*EXP(ETA(5))
+   K32=THETA(6)*EXP(ETA(6))
+   K1G=THETA(7)*EXP(ETA(7))
+
+   if (newind<=1) then
+     MTIME(1)=THETA(8)
+     MTIME(2)=MTIME(1)+THETA(9)
+   else
+     MTIME(1)=MTIME(1)
+     MTIME(2)=MTIME(2)
+   endif
+
+  ;# Update mtime variables after mtime(2) is reached.
+  ;# New values are for the next dosing interval (TIME+II)
+  IF (MNOW == 2) THEN
+    MTIME(1) = MTIME(1)+inter
+    MTIME(2) = MTIME(2)+inter
+    MTDIFF=1
+  ENDIF
+
+$DES
+   FLAG=MPAST(1)-MPAST(2)
+   DADT(1)=-KA*A(1)+K41*A(4)*FLAG
+   DADT(2)= KA*A(1)-KE*A(2)-K23*A(2)+K32*A(3)-K1G*A(2)
+   DADT(3)= K23*A(2)-K32*A(3)
+   DADT(4)= K1G*A(2)-K41*A(4)*FLAG
+
+$ERROR
+A1=A(1) ;# for display in table
+A2=A(2)
+A3=A(3)
+A4=A(4)
+   Y=F+EPS(1)
+
+$THETA 1 1 1
+$THETA 10  ;# rate of gall bladder emptying is large vs. other k's
+$THETA 1 1 1
+$THETA 3 5 ;# start emptying at T+theta(8) ; lasts till T+theta(9)
+$OMEGA 1 1 1 1 1 1 1
+$SIGMA  .4
+
+$TABLE TIME A1 A2 A3 A4 NOAPPEND FILE=mtimess.tab NOPRINT
+#+end_src
+The model has drug transfer from compartment 4 to 1 that only appears
+during a certain period of time (to reflect EHC). To
+estimate the beginning and end of this period, we model them as MTIME(1)
+and MTIME(2), respectively. Then values of the internal indicator variable
+MNEXT, MPAST, and MNOW is shown in the follow scheme.
+#+begin_src r
+           MTIME(1)       MTIME(2)
+  ............|..............|...........
+  01111111111110000000000000000000000000 MNEXT(1)
+  00000000000001111111111111110000000000 MNEXT(2)
+  00000000000001111111111111111111111111 MPAST(1)
+  00000000000000000000000000001111111111 MPAST(2)
+  01111111111112222222222222220000000000 MNOW
+#+end_src
+
+In other words, MNEXT(i) and MPAST(i) flag the "before" and "after" of
+MTIME(i), and MNOW stores the counter of MNEXT. Therefore, we define
+FLAG on line 40 such that FLAG=1 during time interval (MTIME(1),
+MTIME(2)], indicating the transfer between the two compartments.
+
+Note that MTIME variables are ignored during Steady-State calculation.
+This is because steady states are intended for
+a single repeated dose with no changes in the status of the system.
+Hence the ~$INPUT... SS=DROP~ option.
+
+** Smooth changes of DES
+In the above example, the derivative DADT is discontinuous at MTIME(1)
+and MTIME(2), i.e., the changes to the ODEs is instataneous (though
+the states /A/ stays continuous). To make DADT continuous, we can
+use a smooth function that changes between 0 and 1 as FLAG. Consider
+the following alternative implementation of the EHC model (examples/mtimehill).
+#+begin_src perl
+$PROB  EHC using Hill (sigmoid emax model) for the flags
+$INPUT      ID DOSE=AMT TIME CP=DV WT SS II ADDL EVID
+$DATA       hillss.dat
+
+$SUBROUTINES  ADVAN6 TOL=6
+$MODEL COMP=(DEPOT,INITIALOFF,DEFDOSE) COMP=(CENTRAL,DEFOBS,NOOFF)
+COMP=(PERIPH) COMP=(GALL )
+
+$PK
+   KA=THETA(1)*EXP(ETA(1))
+   KE=THETA(2)*EXP(ETA(2))
+   CL=THETA(3)*WT*EXP(ETA(3))
+   S2=CL/KE/WT
+   K41=THETA(4)*EXP(ETA(4))
+   K23=THETA(5)*EXP(ETA(5))
+   K32=THETA(6)*EXP(ETA(6))
+   K1G=THETA(7)*EXP(ETA(7))
+
+$DES
+;# Save the value of II from the dose record.
+   if (ii>0) inter=ii
+   mt1=inter*INT(T/inter)+THETA(8)
+   mt2=mt1+THETA(9)
+   hill1=exp(-THETA(10)*(T-mt1))
+   hill2=exp(-THETA(10)*(T-mt2))
+   flag1=1./(1+hill1)  ;# changes from 0 to 1 near t=mt1
+   flag2=1./(1+hill2)  ;# changes from 0 to 1 near t=mt2
+   FLAG=flag1-flag2
+
+   DADT(1)=-KA*A(1)+K41*A(4)*FLAG
+   DADT(2)= KA*A(1)-KE*A(2)-K23*A(2)+K32*A(3)-K1G*A(2)
+   DADT(3)= K23*A(2)-K32*A(3)
+   DADT(4)= K1G*A(2)-K41*A(4)*FLAG
+
+$ERROR
+A1=A(1) ;# for display in table
+A2=A(2)
+A3=A(3)
+A4=A(4)
+   Y=F+EPS(1)
+
+$THETA 1 1 1
+$THETA 10  ;# rate of gall bladder emptying is large vs. other k's
+$THETA 1 1 1
+$THETA 3 5 ;# start emptying at T+THETA(8) ; lasts till T+THETA(9)
+$THETA 50 ;# a very large hill exponent
+$OMEGA 1 1 1 1 1 1 1
+$SIGMA  .4
+
+$TABLE TIME A1 A2 A3 A4 NOAPPEND FILE=hillss.tab NOPRINT
+#+end_src
+Here we construct two Hill functions of the independent time variable ~T~
+that change their values in the neighborhood of time ~mt1~ and ~mt2~, and use their
+differences as the smooth FLAG that rises from 0 to 1 around ~mt1~ and
+back to 0 around ~mt2~. ~THETA(10)~, the exponent in the Hill
+functions, represents how fast the derivatives change. The greater it
+is the closer the system approache the earlier model using MTIME for
+instataneous changes.
+
+Note unlike the model using MTIME, stead-state dose is allowed here.
+But keep in mind the changes in differential equations do not act
+retroactively: the action of FLAG in the future does not affect the
+steady-state calculations. Specifically, with data (the first a few
+records of the data file for examples/mtimehill)
+#+begin_src r
+#       ID DOSE=AMT      TIME        CP=DV     WT SS II ADDL EVID
+         1    100.00      0.         .       79.6 1  12 100   1
+         1       .        4.0         .      79.6 .  . .     2
+         1       .        8.0         .      79.6 .  . .     2
+         1       .       12.0         .      79.6 .  . .     2
+         1       .       16.0         .      79.6 .  . .     2
+         1       .       20.0         .      79.6 .  . .     2
+         1       .       24.0         .      79.6 .  . .     2
+#+end_src
+that specifies ~II=12~, the $DES changes at ~THETA(8)~ and
+~THETA(8)+THETA(9)~ /after/ the the start of the begin of intervals (0, 12),
+(12, 24), etc,  when the system is steady-state. This is done by using
+~INT~ (integer function)
+#+begin_src f90
+mt1=II*INT(T/II)+THETA(8)
+#+end_src
+
+** Periodic discontinuities in $DES
+Changes in $DES could be periodic. One classical example is circadian
+rhythm. Consider the following model that has a change in $DES every
+24 hours (examples/step_circexa).
+#+begin_src perl
+  $PROBLEM step_circadian
+  $INPUT ID TIME AMT CMT EVID DV MDV
+
+  $DATA circadian.csv IGNORE=@
+
+  $THETA
+   (0.0001,0.5,0.9999)   ;#-- typical shift as a fraction of 24h
+   (0.0001,0.5,0.9999)   ;#-- typical duration as a fraction of 24h
+
+  $OMEGA
+    3                    ;#-- IIV in shift (%CV=100*sqrt(1-th1)*eta1)
+    3                    ;#-- IIV in duration (%CV=100*sqrt(1-th2)*eta2)
+
+  $SUBROUTINE ADVAN13 TOL=9
+
+  $MODEL NCOMP=1
+    COMP=(FLAG)
+
+  $PK
+    REPID=(IREP-1)*10 + ID
+
+    ;# Define shift and duration parameters
+
+    TVSHIFT = 24*THETA(1)                   ;# typical shift on 24h scale;# (0,24)
+                                            ;# where THETA(1) represents this typical shift as a fraction of 24h;# (0,1)
+    LGSHI = LOG(THETA(1)/(1-THETA(1)))      ;# logit transformation of the typical fraction of 24h;# (-INF,+INF)
+    ILGSHI = LGSHI+ETA(1)                   ;# addition of IIV;# (-INF,+INF)
+    SHIFT = 24*EXP(ILGSHI)/(1+EXP(ILGSHI))  ;# back-transformation and scale-up of individual shift to 24h scale;# (0,24)
+
+    TVDUR = 24*THETA(2)                     ;# typical duration on 24h scale;# (0,24)
+                                            ;# where THETA(1) represents this typical duration as a fraction of 24h;# (0,1)
+    LGDUR = LOG(THETA(2)/(1-THETA(2)))      ;# logit transformation of the typical fraction of 24h;# (-INF,+INF)
+    ILGDUR = LGDUR+ETA(2)                   ;# addition of IIV;# (-INF,+INF)
+    DUR = 24*EXP(ILGDUR)/(1+EXP(ILGDUR))    ;# back-transformation and scale-up of individual duration to 24h scale;# (0,24)
+
+    ;# Define offset for the start of the circadian rhythm parameter (in case the
+    ;# step function "starts" before TIME=0
+    IF ((SHIFT+DUR) > 24) THEN
+      OFFSET = 24
+    ELSE
+      OFFSET = 0
+    END IF
+
+    TX = SHIFT-OFFSET
+
+    IF (NEWIND <= 1) THEN
+      MTIME(1) = TX
+      MTIME(2) = TX+DUR
+    ELSE
+      MTIME(1) = MTIME(1)
+      MTIME(2) = MTIME(2)
+    ENDIF
+
+    ;# Defines of mtime(1) to use for integration during this interval
+    INTMTIME = MTIME(1)
+
+    ;# Update mtime variables after mtime(2) is reached
+    IF (MNOW == 2) THEN
+      MTIME(1) = MTIME(1)+24
+      MTIME(2) = MTIME(2)+24
+      MTDIFF=1
+    ENDIF
+
+    ;# Save mtime(1), mtime(2), and tstate for the TABLE statement
+    MT1=MTIME(1)
+    MT2=MTIME(2)
+    MP1=MPAST(1)
+    MP2=MPAST(2)
+    STS=TSTATE
+
+    ;# Save mnow as a real variable for the WRITE statement
+    RMNOW=MNOW
+
+    ;# Initialize the file used to output variables at and in-between records
+    IF (ICALL == 1) THEN
+      "OPEN (FILE='step_circexa.txt',UNIT=96)
+      "WRITE (96,'(10A14)') 'REPID','RMNOW','TIME','MT1','MT2','MP1','MP2','TSTATE','INTMTIME'
+    ENDIF
+
+    ;# Output variables in-between observation records using WRITE statement
+    WRITE (96,991) REPID,RMNOW,TIME,MT1,MT2,MP1,MP2,TSTATE,INTMTIME
+
+  $DES
+    ;# Define FLAG variable:
+    ;# FLAG=1 when T is in [SHIFT+n*24, SHIFT+DUR+n*24], where n=0,1,2,3,...
+    ;# FLAG=0 otherwise
+    FLAG = MPAST(1)-MPAST(2)
+
+    ;# Monitor FLAG:
+    DADT(1) = FLAG
+
+  $ERROR
+    ;# Output variables at observation records using WRITE statement and flagging
+    ;# the output row with MNOW=9.
+    WRITE (96,991) REPID,9.0,TIME,MT1,MT2,MP1,MP2,TSTATE,INTMTIME
+
+    ;# Define ouput for TABLE statement
+    FLAGCMT = A(1)
+    IF (ICALL == 4) THEN
+      DV = FLAGCMT
+    ENDIF
+
+  $SIMULATION(12345) NSUB=10 ONLYSIM NOPREDICTION
+
+  $TABLE REPID TIME FLAG FLAGCMT NOAPPEND NOPRINT ONEHEADER FILE=step_circexa.tab
+
+  $TABLE REPID RMNOW TIME MT1 MT2 MP1 MP2 STS INTMTIME SHIFT DUR
+    NOAPPEND NOPRINT ONEHEADER FILE=step_circexa_debug.tab
+#+end_src
+Simlar to the first model earlier, FLAG is the difference of MPAST
+variables. The MTIME(1) and MTIME(2) variables respectively define the times at
+which FLAG is set to 1 and 0, such as ~MTIME(2)-MTIME(1)=DUR~. After
+MTIME(2) is reached, both variables are incremented by 24, and the
+FLAG update process perpetuates itself every 24 hours. Compartment 1
+is a dummy compartment intended to monitor the
+FLAG variable: the amount A1 starts at 0 and is incremented by DUR
+every day. A related information is the time at which the current
+state vector was computed, i.e. the time to which the system was most
+recently advanced. It is reported in the reserved variable ~TSTATE~.
+
+Both $TABLE and WRITE are used in to report the values of the
+variables of interest. WRITE statements are used because $TABLE
+functions only for event records, but not for nonevent times such as
+Model times.
+
+For an extension of the above example, consider the following biological response
+
+\begin{equation}
+R(t) = R_{\text{min}} + a\sin(z(t)), \quad t\in [t_{\text{shift}}+24n,
+t_{\text{shift}}+t_{\text{dur}} + 24n].
+)
+\end{equation}
+Here \(R_{\text{min}}\) is the flat baseline, \(n\) the counter, \(z(t)\)
+the circadian function of time \(t\) that scales the sinusoidal
+response interval to \([0, \pi]\). This model can be used to describe
+the response baseline of a drug that influences circadian rhythms related biological
+processes, e.g. metabolic effects of corticoids. If the effect of the
+drug is not direct, one can express the biological response and the
+drug effect in terms of an indirect response model. For example,
+assume an agonist that stimulates the formation of the said biological
+processes, we can model the response as
+
+$$
+\frac{dR}{dt} = k_{\text{in}}(t)(1+s(C)) - k_{\text{out}}R.
+$$
+where \(k_{\text{out}}\) is the constant elimination rate of the
+response, \(k_{\text{in}}\) the time-varying formation rate, and
+\(s(C)\) the stimulation that depends on drug concentration \(C\).
+The Eq.(1) then describes the response baseline in the absence of drug,
+$$
+\frac{dR}{dt} = k_{\text{in}}(t),
+$$
+where \(K_{\text{in}}\) is sinusoidal inside certain intervals and
+constant otherwise. Again we use a FLAG variable to model it (examples/idr_circexa).
+#+begin_src perl
+  $PROBLEM idr_circadian
+  $INPUT ID TIME AMT CMT EVID DV MDV
+
+  $DATA circadian.csv IGNORE=@
+
+  $THETA
+   (0.0001,0.5,0.9999)   ;#-- typical scaled-down shift
+   (0.0001,0.5,0.9999)   ;#-- typical scaled-down duration
+   (0,4)                 ;#-- typical amplitude of response
+   (0,0.5)               ;#-- typical minimum response
+   (0,0.1)               ;#-- typical elimination rate
+
+  $OMEGA
+    3                    ;#-- IIV in shift (%CV=100*sqrt(1-th1)*eta1)
+    3                    ;#-- IIV in duration (%CV=100*sqrt(1-th2)*eta2)
+
+  $SUBROUTINE ADVAN13 TOL=9
+
+  $MODEL NCOMP=1
+    COMP=(RESP)
+
+  $PK
+
+    ;#------------------------
+    ;# Indirect response model
+    ;#------------------------
+    PI = 3.14159263
+
+    ;# Define shift and duration parameters
+
+    TVSHIFT = 24*THETA(1)                   ;# typical shift on 24h scale;# (0,24)
+                                            ;# where THETA(1) represents this typical shift as a fraction of 24h;# (0,1)
+    LGSHI = LOG(THETA(1)/(1-THETA(1)))      ;# logit transformation of the typical fraction of 24h;# (-INF,+INF)
+    ILGSHI = LGSHI+ETA(1)                   ;# addition of IIV;# (-INF,+INF)
+    SHIFT = 24*EXP(ILGSHI)/(1+EXP(ILGSHI))  ;# back-transformation and scale-up of individual shift to 24h scale;# (0,24)
+
+    TVDUR = 24*THETA(2)                     ;# typical duration on 24h scale;# (0,24)
+                                            ;# where THETA(1) represents this typical duration as a fraction of 24h;# (0,1)
+    LGDUR = LOG(THETA(2)/(1-THETA(2)))      ;# logit transformation of the typical fraction of 24h;# (-INF,+INF)
+    ILGDUR = LGDUR+ETA(2)                   ;# addition of IIV;# (-INF,+INF)
+    DUR = 24*EXP(ILGDUR)/(1+EXP(ILGDUR))    ;# back-transformation and scale-up of individual duration to 24h scale;# (0,24)
+
+    AMP = THETA(3)
+    RMIN = THETA(4)
+    KOUT = THETA(5)
+    RMAX = RMIN + AMP
+
+    ;# Circadian rhythm
+    ;# Determine initial value of the response and time offset based upon whether
+    ;# SHIFT and DUR are such that the response is flat or within the sinusoid
+    ;# phase at time 0
+    IF ((SHIFT+DUR).GT.24) THEN
+      OFFSET = 24
+      INIT1 = RMIN+AMP*SIN(PI*(OFFSET-SHIFT)/DUR)
+    ELSE
+      OFFSET = 0
+      INIT1 = RMIN
+    END IF
+    TX = SHIFT-OFFSET
+
+    IF (NEWIND <= 1) THEN
+      MTIME(1) = TX
+      MTIME(2) = TX+DUR
+    ELSE
+      MTIME(1) = MTIME(1)
+      MTIME(2) = MTIME(2)
+    ENDIF
+
+    ;# Defines of mtime(1) to use for integration during this interval
+    INTMTIME = MTIME(1)
+
+    ;# Update mtime variables after mtime(2) is reached
+    IF (MNOW == 2) THEN
+      MTIME(1) = MTIME(1)+24
+      MTIME(2) = MTIME(2)+24
+      MTDIFF=1
+    ENDIF
+
+    ;# Initialize the response compartment
+    IF (A_0FLG == 1) THEN
+      A_0(1) = INIT1
+    ENDIF
+
+    ;#---------------
+    ;# 24h clock time
+    ;#---------------
+
+    ;# Use mtime(3) to scale the T variable in $DES from 0 to infinity to repeating
+    ;# 0-24h intervals
+    IF (NEWIND<=1) THEN
+      MTIME(3)=TIME+24
+    ELSE
+      MTIME(3)=MTIME(3)
+    ENDIF
+
+    INTMTIME3=MTIME(3)
+
+    IF (MNOW==3) THEN
+      MTIME(3)=MTIME(3)+24
+      MTDIFF=1
+    ENDIF
+
+  $DES
+    ;# Define FLAG variable:
+    ;# FLAG=1 when T is in [SHIFT+n*24,SHIFT+DUR+n*24], where n=0,1,2,3,...
+    ;# FLAG=0 otherwise
+    FLAG = MPAST(1)-MPAST(2)
+
+    ;# Define time-varying kin:
+    ;# * kin is constant (KOUT*RMIN) when FLAG=0
+    ;# * kin is time-varying when FLAG=1, and function of TS, a transformation
+    ;#   function of T scaling time from 0 to infinity to repeating intervals [0,1]
+    TS = (T-INTMTIME)/DUR
+    KIN = KOUT*RMIN + FLAG*((AMP*PI/DUR)*COS(PI*TS) + KOUT*AMP*SIN(PI*TS))
+
+    ;# Response
+    DADT(1) = KIN-KOUT*A(1)
+
+    ;# 24h clock time
+    T24 = T-(INTMTIME3-24)
+
+  $ERROR
+    REPID = (IREP-1)*10 + ID
+    RESPONSE = A(1)
+    IF (ICALL == 4) THEN
+      DV = RESPONSE
+    ENDIF
+
+  $SIMULATION(12345) NSUB=10 ONLYSIM NOPREDICTION
+
+  $TABLE REPID TIME RESPONSE SHIFT DUR ONEHEADER NOAPPEND NOPRINT
+    FILE=idr_circexa.tab
+#+end_src
+The $DES block describes the response as the state variable. Line 120
+defines a continuous 24h clock time, through the circadian reset of
+the MTIME(3) variable in $PK. Note that here \(z(t)\) is implemented
+using the ~INTMTIME~ variable that records MTIME(1).
