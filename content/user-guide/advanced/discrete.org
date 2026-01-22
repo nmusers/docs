@@ -1,0 +1,79 @@
+---
+title: "Discrete observations"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: false
+weight: 155
+---
+
+{{< katex >}}{{< /katex >}}
+
+* Discrete observation data
+In addition to support PK models with continuous observations such as
+plasma concentration, NONMEM can also model discrete observations.
+The the likelihood framework introduced earlier provides the
+foundation for such models.
+
+Recall that with MLE NONMEM tries to maximize the approximated
+log-likelihood \(\mathcal{L}\). This is same for the discrete data.
+The only difference is that the likelihood function is no longer based
+on the multivariate normal distribution and \(\Sigma\), but a suitable
+discrete distribution with its parameters still expressed as \(\phi\).
+For example, assume the observations are for a dichotomous drug
+response, say \(R=1\) vs \(R=0\). Let \(p=P(R=1)\) be the probability
+of having a response, then we can describe the log-odds (logit) of \(p\) using
+a mixed-effects model
+$$
+\text{logit} = \theta_1 + \theta_2 \text{D}^{\theta_3} + \eta_1.
+$$
+Here \(D\) is the dose, and the corresponding power model term describes the
+increased probability of response due to drug. The baseline response
+probability is described by \(\theta_1 + \eta_1\). Below is the corresponding
+NONMEM implementation.
+#+begin_src perl
+  $PROB DICHOTOMOUS RESPONSE
+  $DATA data
+  $INPUT ID DOSE DV
+  $PRED
+  LOGIT=THETA(1)+THETA(2)*DOSE**THETA(3)+ETA(1)
+  A=EXP(LOGIT)
+  P=A/(1+A)
+  IF (DV.EQ.1) THEN
+    Y=P
+  ELSE
+    Y=1-P
+  ENDIF
+  $THETA .1 (25,100) (1,3,5)
+  $OMEGA 1
+  $ESTIMATION METHOD=COND LAPLACE LIKELIHOOD MAX=500
+#+end_src
+Note that for discrete observations, reserved variable ~Y~ is no
+longer for data but the likelihood. Accordingly one must use [[file:/docs/reference-manual/control-records/estimation/#likelihood][$EST
+LIKELIHOOD option]].
+
+If we would like to simulate such a dichotomous outcome, we can
+use the RANDOM routine to generate a series of random number and
+define DV according to the value of \(p\).
+#+begin_src perl
+$PROB DICHOTOMOUS RESPONSE
+$DATA data
+$INPUT ID DOSE DV
+$PRED
+LOGIT=THETA(1)+THETA(2)*DOSE**THETA(3)+ETA(1)
+A=EXP(LOGIT)
+P=A/(1+A)
+IF (ICALL.EQ.4) THEN
+  CALL RANDOM (2,R)
+  IF (R.LE.P) DV=1
+  IF (R.GT.P) DV=0
+ENDIF
+IF (DV.EQ.1) Y=P
+IF (DV.EQ.0) Y=1-P
+$THETA .1 (25,100) (1,3,5)
+$OMEGA 1
+$SIMULATION (7755399) (45211 UNIFORM)
+$ESTIMATION MET=COND LAPLACE LIKE MAX=500
+#+end_src
+Here ~R~ is randomly generated from a uniform distribution, thus the
+DV defined according to line 13 has probability \(p\). Note that just
+like $ESTIMATION here the simulated values are likelihood as well.

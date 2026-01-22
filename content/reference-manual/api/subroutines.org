@@ -620,7 +620,7 @@ Input/Output argument:
       ICALL=4,  ERROR should calculate the simulated observation (after
       calling  SIMETA  and/or  SIMEPS  to  obtain  simulated  ETA  and
       EPS, as necessary) and place its value in F.  With the Simulation Step, ERROR may return the simulated observation as the DV
-      data item, rather than in the argument F.  With odd-type data the
+      data item, rather than in the argument F.  With discrete data the
       simulated observation must be  returned  as  the  DV  data  item.
       (See [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
 
@@ -1494,13 +1494,13 @@ Input argument:
 Output argument:
 
 - F   When ICALL=2, the prediction associated  with  the  data  record.
-      With  odd-type  data,  the  likelihood  of the observation in the
+      With  discrete  data,  the  likelihood  of the observation in the
       record, but if there is no observation, F is ignored.
 
       When ICALL=4, the value of the simulated  observation  associated
       with  the  data record.  Alternatively, F can be ignored, and the
       DV item in the data record can be directly set to  the  value  of
-      the  simulated  observation.   With  odd-type data, F is ignored;
+      the  simulated  observation.   With  discrete data, ~F~ is ignored;
       PRED should directly set the DV item to the value  of  the  simulated observation.
 
 - G   An array of derivatives of F with respect to etas.  Values should
@@ -1899,8 +1899,8 @@ Input arguments:
     These are the dimensions of the THETA, OMEGA, and SIGMA arrays of
     the parameters that enter into the model for the data.
 
-    Before NONMEM 7.3, NEPS was ignored.  With  odd-type  population
-    data  or with non-odd-type single-subject data, where OMEGA takes
+    Before NONMEM 7.3, NEPS was ignored.  With  discrete
+    data or with continuous single-subject data, where OMEGA takes
     the place of SIGMA, the input argument NETA must be set.
 
   - NTHP,NETP,NEPP:
@@ -2448,6 +2448,50 @@ Not to be used with the new $ESTIMATION methods of NONMEM 7.
  Output argument:
 
   CNT Relevant only if TNPRI is called at ICALL=2.  CNT is the penalty.
+
+** RANDOM
+:PROPERTIES:
+:CUSTOM_ID: random
+:END:
+#+begin_src f90
+! usage
+  USE SIZES, ONLY: ISIZE,DPSIZE
+  INTEGER(KIND=ISIZE) :: KR
+  REAL(KIND=DPSIZE) :: R
+  CALL RANDOM (KR,R)
+#+end_src
+
+The NONMEM utility routine RANDOM may be called by PRED, PK or ERROR
+during the Simulation Step (ICALL=4) and data average block (ICALL=5)
+to obtain numbers from random number generators.
+
+Input argument:
+
+  - KR:  an  integer  variable or integer constant.  The index of the
+    random source. Random sources are defined using the $SIMULATION
+    record. With standard normal as the default distribution.
+    Typically, the first source is reserved by NONMEM to generate
+    realizations of the ETA and EPSILON variables and/or to randomly
+    mix individuals into different subpopulations according to the
+    mixing parameter.  Thus, typically, RANDOM must be called with KR
+    > 1. A random source that is specified on the $SIMULATION record
+    as  NONPARAMETRIC should not be used to obtain a value of R.
+
+Output argument:
+
+  - R:  A number from the KR RNG.  R is of double precision since
+    NONMEM 7 but single precision in earlier versions.  Each time
+    RANDOM is called, a new R is generated.
+
+An abbreviated code may use RANDOM explicitly in either a simulation
+or a data average block.  When RANDOM is called in abbreviated code, R
+is reserved and is used for the random number. For example, below WT (a data item and a local variable with the same name) is generated with a simulated value having mean 70 and  standard deviation 7.
+#+begin_src f90
+  IF (ICALL.EQ.4.AND.NEWIND.NE.2) THEN
+  CALL RANDOM(2,R)
+  ENDIF
+  IF (ICALL.EQ.4) WT=70+7*R
+#+end_src
 
 ** SPTWO
 :PROPERTIES:

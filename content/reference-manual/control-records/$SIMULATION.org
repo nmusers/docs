@@ -21,14 +21,16 @@
 #+end_src
 
 ** DISCUSSION
- Optional.  Requests  that  the  NONMEM Simulation Step be implemented.
- May also be coded $SIMULATE or $SIML.
+Optional.  Requests  that  the  NONMEM Simulation Step be implemented.
+May also be coded $SIMULATE or $SIML.
 
- Usually, when the Simulation Step is implemented, the simulated observation  is  taken to be the quantity to which the Y variable (with NMTRAN abbreviated code) or F variable (with  a  user-supplied  PRED  or
- ERROR  routine)  is set.  This is the default behaviour.  However, see
- option NOPREDICTION below.
+Unless NOPREDICTION is used (see below), the simulated observation is
+the quantity to which the Y variable (with NMTRAN abbreviated code) or
+F variable (with  a  user-supplied  PRED  or ERROR  routine)  is set,
+using the parameter values given as initial estimates (from $THETA,
+$OMEGA, $SIGMA). Initial estimates must be given for all parameters.
 
- If a $ESTIM record appears in the problem specification,  then  unless
+If a $ESTIM record appears in the problem specification,  then  unless
  the LIKELIHOOD or -2LOGLIKELIHOOD option appears on the $ESTIM record,
  etas (if any) are understood to be single-subject  etas,  except  when
  epsilons also appear, in which case the etas are understood to be population etas.  If a $ESTIM record does not appear, but a $SIMUL record
@@ -65,15 +67,15 @@
       random source defined in a preceding NONMEM run. It is seldom
       used.
 
-*** NORMAL
-      The random numbers of the source are  to  be  pseudo-normal  with
-      mean 0 and variance 1 (unless the source is the first and used to
-      generate eta and epsilon realizations, in which  case  the  variance-covariance  of  these  variables  is  that  specified in the
-      $OMEGA and $SIGMA records).  This is the default.
+*** NORMAL | UNIFORM | NONPARAMETRIC
+Specifies distribution used by the pseudo-random number generator
+(pRNG) of the source. NORMAL (default) indicates normal distribution
+with mean 0 and variance 1 (unless the source is "1" that is used to
+generate ETA and EPSILON, in which  case  the  variance-covariance  of
+these  variables  is  that  specified in the $OMEGA and $SIGMA
+records). UNIFORM indicates uniform distribution on [0,1].
 
-*** UNIFORM
-      The random numbers of the source are to be pseudo-uniform on  the
-      interval [0,1].
+NONPARAMETRIC indicates that the first source defined with the NONPARAMETRIC attribute are used to generate realizations of  random vectors  from a (multivariate) nonparametric distribution on ETA, obtained from the Nonparametric Step of an earlier  problem.   An input  MSF  must also be present.  It is understood that the etas are to be simulated from the  nonparametric  distribution  rather than  from  the  pseudo-normal  distribution  associated with the first source.  The NONPARAMETRIC attribute can only  be  used  in the definition of the second or subsequent source.
 
 *** CLOCKSEED=[0|1]  (NM75)
       If  CLOCKSEED=1  (default  is  0),  actual  starting seed will be
@@ -88,16 +90,6 @@
       a different source than the default, which is the first. n is the
       number of the source for epsilons.  This  source  must  have  the
       NORMAL attribute.
-
-*** NONPARAMETRIC
-      The  random  numbers  from the first source defined with the NONPARAMETRIC attribute are used to generate realizations of  random
-      vectors  from a (multivariate) nonparametric distribution on eta,
-      obtained from the Nonparametric Step of an earlier  problem.   An
-      input  MSF  must also be present.  It is understood that the etas
-      are to be simulated from the  nonparametric  distribution  rather
-      than  from  the  pseudo-normal  distribution  associated with the
-      first source.  The NONPARAMETRIC attribute can only  be  used  in
-      the definition of the second or subsequent source.
 
 *** NEW
 If  the  NEW  option  is  used,  the  vector of eta's (epsilon's)
@@ -162,22 +154,23 @@ If  the  NEW  option  is  used,  the  vector of eta's (epsilon's)
       simulation block.  REQUESTSECOND implies REQUESTFIRST.
 
 *** PREDICTION | NOPREDICTION
-PREDICTION: permitted only with ONLYSIM, and is the default.
-      With or without ONLYSIM, unless the  NOPREDICTION  is  used,  the
-      simulated  observation is taken to be the quantity to which the Y
-      variable (with NM-TRAN abbreviated code) or F  variable  (with  a
-      user-supplied  PRED  or  ERROR  routine) is set.  In a simulation
-      block, the DV variable may  be  directly  set  to  the  simulated
-      observation, but the Y (or F) variable should also be set to this
-      observation.  E.g., if a line of code DV=... is used in a simulation  block, be sure to follow this line with the additional line
-      Y=DV.
+PREDICTION: default, used only with ONLYSIM. The simulated
+observation is taken to be the quantity to which the Y variable (with
+NM-TRAN abbreviated code) or F  variable  (with  a user-supplied  PRED
+or  ERROR  routine) is set. In a simulation block, the DV variable
+may  be  directly  set  to  the  simulated observation, but the Y (or
+F) variable should also be set to this observation. That is
+#+begin_src perl
+  $SIMULATION
+  DV=...
+  Y=DV
+#+end_src
 
-NOPREDICTION: permitted only with ONLYSIM.
-      Indicates that the simulated observation will be taken to be  the
-      value to which the DV variable is set.  The code Y=... is permitted inside or outside  a  simulation  block,  but  if  such  code
-      appears in a simulation block, be sure to also include e.g. DV=Y.
-      Also, etas (if any) are understood to be population etas, even if
-      epsilons do not appear.
+NOPREDICTION: permitted only with ONLYSIM. Indicates that the
+simulated observation will be taken to be the value to which the DV
+variable is set.  When ~Y=...~ is used in a simulation block, one
+should use it to assign DV: ~DV=Y~. ETAs are understood to be
+population ETAs, even if EPSILONs do not appear.
 
 *** TRUE
 - TRUE=INITIAL: the initial estimates given in the control stream are used as the
