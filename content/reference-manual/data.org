@@ -153,7 +153,7 @@ CAUTION:   If  PREDPP  is used without using NM-TRAN as a preprocessor
  data file used by NONMEM and PREDPP is FDATA (in  which  case  NM-TRAN
  has  preprocessed  it)  or is the file named in the $DATA record.
 
- (See multiple dose example, exogenous supplementation example).
+(See multiple dose example, [[file:/docs/user-guide/predpp/exogenous/][exogenous supplementation example]]).
 
 (See [[file:/docs/reference-manual/data/#trans-dose-spec][dose]], [[file:/docs/reference-manual/data/#ss-dose][SS dose]]).
 
@@ -502,7 +502,7 @@ NONMEM data set
  case all interdose interval data items (obtained after clock time
  conversion) are divided by 24.
 
- (See exogenous supplementation example).
+ (See [[file:/docs/user-guide/predpp/exogenous/][exogenous supplementation example]]).
 
 ** L2
  L2  labels  level-two  (L2)  data  items.   The level two data item is
@@ -562,47 +562,58 @@ data for two types of observations.
 :PROPERTIES:
 :CUSTOM_ID: mrg
 :END:
- MRG_ labels NONMEM's marginal (MRG) data item.  The marginal data item
- is optional.  With a nonobservation record (i.e. MDV=1 or MDV=101), it
- controls  the definition of the value of the PRED item associated with
- the record.  Basically, 0 means the PRED item is the typical value  of
- F,  and  1 or 2 means it is the expectation of F.  (Note that with NMTRAN, F is defined by Y.)  However, the marginal data item  also  controls  the  definition of the value of any PRED-defined item D that is
- displayed in a table or scatterplot (except items stored in  the  SAVE
- region) and associated with the record.
+MRG_ labels NONMEM's optional marginal (MRG) data item.  With a
+nonobservation record (i.e. MDV=1 or MDV=101), it controls  the
+definition of the value of the PRED item associated with the record.
+Basically, 0 means the PRED item is the typical value of F,  and 1
+or 2 means it is the expectation of F.  (Note that with NMTRAN, F is
+calculated through Y.)  Note that the marginal data item  also affects  the
+definition of the value of any PRED-defined item (denoted as "D" below) that is displayed
+in a table or scatterplot (except items stored in  the  SAVE region)
+and associated with the record.
 
- Values are:
+ - MRG_=0: The PRED item is the typical value of F and an output
+   D is either the typical value or (for conditional estimates)
+   the conditional estimate of the variable D.
 
- - 0: The PRED item is the typical value of F and a displayed item D is either the typical value of the variable  D  or,  if  conditional estimates are requested, the conditional estimate of the variable D.
+ - MRG_=1 or MRG_=2:
+   The values of the PRED and D items are determined  as follows.
+   + If the Simulation Step with ONLYSIMULATION option, the PRED item
+     is the simulation expectation of F, over  the  simulated values
+     of ETA for all the individuals in the data set  (including  those
+     individuals  with no observation records),  and the D item is the
+     simulation expectation of the variable D.
 
- - 1 or 2:
-   The values of the PRED  and  D  items  are  determined  by  other
-   things: If the Simulation Step is implemented, and ONLYSIMULATION
-   is specified, the PRED item is the simulation expectation  of  F,
-   over  the  simulated values of eta for all the individuals in the
-   data  set  (including  those  individuals  with  no   observation
-   records),  and  the  D  item is the simulation expectation of the
-   variable D.  If conditional estimates are obtained  (e.g.,  using
-   the  POSTHOC  option), the PRED item is the posterior expectation
-   of F, over the conditional estimates of eta for  all  individuals
-   in  the  data set (that have some observation records), and the D
-   item is the posterior expectation of the variable D.   Otherwise,
-   the PRED and D items are as with METHOD=0.
+   + If conditional estimates are obtained  (e.g.,  using the  POSTHOC
+     option), the PRED item is the posterior expectation of F, over
+     the conditional estimates of ETA for  all  individuals in  the
+     data set (that have observation records), and the D item is the
+     posterior expectation of the variable D.
+
+   + In other cases, the PRED and D items are as with METHOD=0.
 
    If the expectation is the posterior expectation:
-
    + MRG_=1, the deletion adjustment is not used.
+   + MRG_=2,  the  deletion adjustment is used.  With the deletion
+     adjustment, the posterior expectation for a given  individual  is
+     obtained  by  not including in the computed expectation the value
+     of the variable evaluated at the conditional estimate of his eta.
 
-   + MRG_=2,  the  deletion adjustment is used.  With the deletion adjustment, the posterior expectation for a given  individual  is obtained  by  not including in the computed expectation the value of the variable evaluated at the conditional estimate of his eta.
+   With MRG_=1 or 2, MDV must also be 1 or 101.  This use of  MDV=1
+   does not  prevent,  as  would  ordinarily  happen, the DV or RES
+   items from being plotted.
 
-   With MRG_=1 or 2, MDV must also be 1 or 101.  This use of  MDV=1  does not  prevent,  as  would  ordinarily  happen, the DV or RES items from being plotted.
+A plot of PRED (and of any PRED-defined item not stored  in  the  SAVE
+region)  will only include points from records with MRG_=1, unless one
+explicitly partitions on MRG_.
 
- A plot of PRED (and of any PRED-defined item not stored  in  the  SAVE region)  will only include points from records with MRG_=1, unless one explicitly partitions on MRG_.
+If PREDPP is used and NM-TRAN generates MDV, MDV is set to 1  if  MRG_
+is  1  or  2.  If PREDPP is used, NM-TRAN sets MRG_ to 0 (if it is not
+already 0) when EVID is not equal to 0.
 
- If PREDPP is used and NM-TRAN generates MDV, MDV is set to 1  if  MRG_ is  1  or  2.  If PREDPP is used, NM-TRAN sets MRG_ to 0 (if it is not already 0) when EVID is not equal to 0.  LP
+WARNING: If PREDPP is used and NM-TRAN generates EVID, it sets  EVID=2 for records with MDV=1 and no dosing information.  This causes MRG_ to be set to 0.  When MRG_ is used, the data set should include  MDV  and EVID data items.  The values should be MDV=1 and EVID=0 when MRG_>0.
 
- Warning: If PREDPP is used and NM-TRAN generates EVID, it sets  EVID=2 for records with MDV=1 and no dosing information.  This causes MRG_ to be set to 0.  When MRG_ is used, the data set should include  MDV  and EVID data items.  The values should be MDV=1 and EVID=0 when MRG_>0.
-
- (See expectation example, expectation block).
+(See [[file:/docs/reference-manual/abbr/#expectation-block][expectation block]]).
 
 ** RATE
 :PROPERTIES:
@@ -619,20 +630,26 @@ four kinds of values.
       positive also.  If this is a steady-state dose event record, both
       AMT and RATE may be 0; (See [[file:/docs/reference-manual/data/#ss-dose][SS dose]]).
 
-  - RATE=-1:  the dose is a zero-order bolus dose,  i.e.,  an  infusion,  whose
-      rate  is  modeled  in the PK routine.  As an example, suppose the
-      compartment being dosed is numbered 1 (e.g., the  CMT  data  item
-      contains  1,  or  it  contains 0 and compartment 1 is the default
-      compartment for doses).  The $PK abbreviated code must  define  a
-      value  for  R1,  the  rate  parameter  for  compartment  1, e.g.,
-      ~R1=THETA(4)+ETA(4)~.
+  - RATE=-1:  the dose is a zero-order bolus dose,  i.e.,  an
+    infusion,  whose rate  is  modeled  in the PK routine.  As an
+    example, suppose the compartment being dosed is numbered 1 (e.g.,
+    CMT=1,  or CMT=0 and compartment 1 is the default dose compartment).  The $PK
+    abbreviated code must  assign for the reserved variable R1,  the  rate
+    parameter  for  compartment  1, e.g.,
+    #+begin_src f90
+      R1=THETA(4)+ETA(4)
+    #+end_src
 
-  - RATE=-2:   the dose is a zero-order bolus dose,  i.e.,  an  infusion,  whose
-      duration  is  modeled  in the PK routine.  As an example, suppose
-      the compartment being dosed is numbered  1  as  above.   The  $PK
-      abbreviated code must define a value for D1, the duration parameter for compartment 1, e.g., D1=THETA(4)+ETA(4)
+  - RATE=-2:   the dose is a zero-order bolus dose,  i.e.,  an
+    infusion,  whose duration  is  modeled  in the PK routine.  For
+    example, assume again the dose compartment is 1, with RATE=-2, the
+    $PK block must assign for reserved variable D1, the duration
+    parameter for compartment 1, such as
+    #+begin_src f90
+      D1=THETA(4)+ETA(4)
+    #+end_src
 
- RATE must be 0 for observation, other-type, and reset event records.
+RATE must be 0 for observation, other-type, and reset event records.
 
 ** RAW_
 :PROPERTIES:
@@ -1008,8 +1025,6 @@ ID         TIME
  If present, the year component may consist of one to four digits.  The
  value  of  NM-TRAN's LAST20 constant determines the assumed century of
  one and two digit years: 1900's or 2000's.
-
-
 
 ** FINISH record
 

@@ -1,0 +1,89 @@
+---
+title: "Exogenous and endogenous doses"
+author: ["Yi Zhang"]
+draft: false
+bookCollapseSection: false
+weight: 20
+---
+
+{{< katex >}}{{< /katex >}}
+
+* Exogenous supplementation model
+In  this  example,  an oral "drug" is given exogenously, and it also
+exists as an endogenous substance. Additionally there is an unknown
+dosing history prior to  the observation period (prior to time zero).
+This example illustrates how three sources of drug  can  be  modeled:
+pre-existing endogenous drug, pre-existing drug from an unknown prior
+dos-ing history, and drug from known doses.
+
+The rate of the endogenous drug production is assumed to be constant,
+with no feedback control of production. Thus the endogenous drug is at
+steady-state,  and, assumed with linear kinetics, its effect is an
+additive constant (THETA(7) in the model) to the exogenous drug in the
+sampled compartment.
+
+For the drug with unknown dosing history, it is assumed at steady
+state, modeled by a steady state infusion dose into the depot
+compartment, ending at time 0, and having an unknown rate (THETA(5) in
+the model). The result  of the  SS  dose is to introduce drug into all
+compartments of the system (not just the central compartment) because
+it is distributed through-out  the  system  and  is subject to
+elimination from the system. Thus the THETA(5) estimate takes account
+of both the "baseline" observation at time 0 as well as the later
+observations.
+
+Note that if samples are not taken sufficiently long after the time of
+the last dose ( > 4 half-lives), then THETA(7) and THETA(5) may not be
+separately identifiable.  Note that  the  value  of  THETA(7)  may  be
+determined  by the residual concentration after all exogenous drug has
+disappeared.
+
+A combined additive and CCV error model is used. In the model THETA(8)
+is  the ratio of the coefficient of variable of the CCV component to the
+standard deviation of the additive component.
+
+Any ADVAN/TRANS combination could be used. Though for implementation
+is for single subject, the approach is equally applicable to population data.
+
+#+begin_src perl
+ $PROBLEM Example of pre-existing drug.
+ $INPUT ID TIME DV AMT SS II RATE
+ $DATA DATA1
+ $SUBROUTINES   ADVAN4 TRANS5
+ $PK
+   AOB=THETA(1)
+   ALPHA=THETA(2)
+   BETA=THETA(3)
+   KA=THETA(4)
+   R1=THETA(5)
+   S2=THETA(6)
+ $ERROR
+   FP=THETA(7)+F  ;# adds endogenous component
+   W=(1+THETA(8)*THETA(8)*FP*FP)**.5
+   Y=FP+W*ERR(1)
+#+end_src
+In the model the reserved variable ~R1~ is the infusion rate in the
+depot compartment (see [[file:/docs/reference-manual/control-records/pk/#infusion-rate][$PK]]). If there are additional doses into the
+depot compartment with modeled rates, it is necessary to assign a
+value to R1 conditionally, e.g.
+#+begin_src f90
+  IF (TIME.EQ.0) THEN
+     R1=THETA(5)  ;!rate for SS infusion record at time 0
+  ELSE
+     R1=....      ;!rate of other kind of dose
+  ENDIF
+#+end_src
+The combined additive and CCV error model can also be modeled using two random variables:
+#+begin_src f90
+  Y = F*(1+ERR(1)) + ERR(2)
+#+end_src
+Below is a fragment of the data.  Record 1 specifies  the  SS
+infusion for  the  pre-existing drug, which ends at time 0.  Record 2
+gives the baseline observation.  Record 3 specifies an oral bolus
+dose.   Record 4 gives an observation.
+#+begin_src r
+  1       0       .      0       1       0      -1
+  1       0    62.2      .       .       .       .
+  1    0.01       .     95       .       .       .
+  1    0.50  235.93      .       .       .       .
+#+end_src

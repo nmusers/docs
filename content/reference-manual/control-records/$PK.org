@@ -12,32 +12,27 @@ abbreviated code
 #+end_src
 
 ** Discussion
-This record gives an abbreviated code for the PK routine. The record along with all its continuation records is
-called a $PK block.
+This optional record specifies an abbreviated code for the PK routine.
+The record along with all its continuation records is called a $PK
+block. If given it must only be with the first problem specification,
+preceding any $ERROR records. It cannot be used with a user-supplied
+MODEL subroutine or [[file:/docs/reference-manual/api/subroutines/#trans][TRANS routine]].
 
-This record is optional. If given it must only be with the first
-problem specification, preceding any $ERROR records. It cannot be used
-with a user-supplied MODEL subroutine or [[file:/docs/reference-manual/api/subroutines/#trans][TRANS routine]].
-
-$PK statements must include assignment statements giving a value to every basic PK
-parameter for the given ADVAN and TRANS combination. They
-may also include assignment statements giving values to one or more of
-the additional PK parameters.
-
-Basic parameters are typically the rate constants
+A $PK block must include assignment for every basic PK
+parameter for the given ADVAN and TRANS combination. It
+may also include assignment statements for
+the additional PK parameters. Basic parameters (see below) are typically the rate constants
 ("micro-constants") for use in kinetic formulas, or
 parameters specified through transformation
-("TRANS"), such as clearance and volume.
+("TRANS"), such as clearance and volume. See [[file:/docs/reference-manual/control-records/subroutines][ADVAN and TRANS routines]]
+for corresponding additional parameters.
 
-Additional parameters are listed below.
-
-See [[file:/docs/reference-manual/abbr/][abbreviated code]] for general rules for abbreviated code.
+See [[file:/docs/reference-manual/abbr/][abbreviated code]] for general syntax.
 
 ** ASSIGNMENT AND CONDITIONAL STATEMENTS
 *** Left-hand quantities
-Left-hand quantities in assignment statements must include Basic  PK
-parameters  according to the  ADVAN and TRANS routines used, as well
-as additional optional parameters.
+Left-hand quantities in assignment statements must include basic PK
+parameters listed below.
 | Basic  PK  parameters                                   | ADVAN routines                                                                 |
 |---------------------------------------------------------+--------------------------------------------------------------------------------|
 | K CL V                                                  | (ADVAN1)                                                                       |
@@ -49,28 +44,7 @@ as additional optional parameters.
 | VM, KM                                                  | (ADVAN10)                                                                      |
 | K K12 K21 K13 K31 CL Q2 Q3 V1 V2 V3 ALPHA BETA GAMMA    | (ADVAN11)                                                                      |
 | KA K K23 K32 K24 K42 CL Q3 Q4 V2 V3 V4 ALPHA BETA GAMMA | (ADVAN12)                                                                      |
-
-For ADVAN5 and ADVAN7 (the general linear models), the basic PK
-parameters are the rate constants. The reserved variable symbolizing
-the rate constant that quantifies the first-order distribution of drug
-from compartment number m to compartment number n is Kmn. (See [[file:/docs/reference-manual/control-records/model/][$MODEL]]
-record for a description of compartment numbering.) The occurence of
-this variable on the left of an assignment statement or conditional
-assignment statement establishes the possiblity that this distribution
-can take place. The variable Km0 may be used instead of Kmn, where n
-is the number of the output compartment. When the number of
-compartments exceeds 10, the syntax Kmn=k may be ambiguous. The letter
-T may be used to separate the two compartment numbers KmTn. The rate
-constants are numbered (these numbers are used internally by the
-ADVAN) according to the order in which they appear in the abbreviated
-code.
-
-For ADVAN6, ADVAN8, ADVAN9, ADVAN13, ADVAN14, ADVAN15 (the general nonlinear models),
-the reserved array elements symbolizing explicit basic PK parameters are P(1),
-P(2), etc. The value of the nth element of the P vector passed to DES
-and AES is the value stored in P(n), referred to as "explicit" basic PK parameters. Any variable defined in
-$PK may be used on the right-hand side in a $DES or $AES block; these
-are "implicit" basic PK parameters.
+See [[file:/docs/reference-manual/control-records/subroutines][ADVAN and TRANS routines]] for details of each routine.
 
 Additional optional PK parameters include PK-defined (i.e.,
 PRED-defined) items, and the ones listed below (the digit following the letter indicates compartment number).
@@ -135,6 +109,9 @@ the central for plasma observations, with any ADVAN.
  (See [[file:/docs/reference-manual/data/#cmt-pcmt][CMT]], [[file:/docs/reference-manual/api/subroutines/#PK][PK]], [[file:/docs/reference-manual/data/#default_compartment][default compartment]]).
 
 **** Infusion rates Rn
+:PROPERTIES:
+:CUSTOM_ID: infusion-rate
+:END:
 There is one rate parameter associated with every possible  dose
 compartment  of the kinetic model (the output compartment is not a
 possible dose compartment) and the rate parameter used for a given
@@ -168,7 +145,7 @@ parameter applies to the dose and to all the additional doses.
 
 (See [[file:/docs/reference-manual/data/#cmt-pcmt][CMT]], [[file:/docs/reference-manual/data/#rate][RATE]], [[file:/docs/reference-manual/api/subroutines/#PK][PK]], [[file:/docs/reference-manual/data/#default_compartment][default compartment]]).
 
- (See exogenous supplementation example).
+(See [[file:/docs/user-guide/predpp/exogenous/][exogenous supplementation example]]).
 
 **** Infusion durations Dn
 There is one duration parameter associated with  every  possible  dose
@@ -241,10 +218,8 @@ PREDPP ignores the time scale parameter with general nonlinear models (ADVAN6, 8
 
 (See [[file:/docs/reference-manual/api/subroutines/#PK][PK]]).
 
-**** Model event times MTIME(i)
-     (The subscript i is not a compartment number.)
-
-     (See MTIME)
+**** Model event times MTIME
+See [[file:/docs/reference-manual/api/variables/#mtime][MTIME]].
 
 **** Initial compartment amounts A_0
 Array elements A_0(1), ..., A_0(n) may be used on the left-hand to assign initial values to compartments. A reserved right-hand variable, A_0FLAG, is set to 1 by PREDPP when PK may initialize
@@ -266,7 +241,7 @@ Reserved left-hand variable I_SS may be set to the same values as the I_SS optio
 record. This allows initial steady-state to be set conditionally, e.g., if some subjects are at steady-state
 and others are not.
 
-(See advan68, advan9,  [[file:/docs/reference-manual/control-records/model/][$MODEL]])
+(See ADVAN6/8/9, [[file:/docs/reference-manual/control-records/model/][$MODEL]])
 
 (See [[file:/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod][Initial Steady State: I_SS,ISSMOD]]).
 
@@ -411,7 +386,9 @@ may wish to ensure A_0FLG is 0 whenever A_UFLG is set to 1, as shown
 in the example above (examples/a_uflg).
 
 *** Forbidden Variable Names
+#+begin_src f90
   IDEF IREV EVTREC NVNT INDXS IRGG GG NETAS DADT(n) E(n) EPS(n)
+#+end_src
 
 ** PSEUDO ASSIGNMENT STATEMENTS
   - COMRES=-1

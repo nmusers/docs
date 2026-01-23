@@ -15,14 +15,35 @@ Marks the beginning of abbreviated code for the INFN routine.
 #+end_src
 
 ** DISCUSSION
- The  $INFN  record is used to describe initialization processing for a
- NONMEM run, or NONMEM problem, or finalization processing for a NONMEM
- problem.  It is used with PREDPP.
+The  $INFN  record is used to describe initialization processing for a
+NONMEM run, or NONMEM problem, or finalization processing for a NONMEM
+problem.  It is used with PREDPP. See [[file:/docs/reference-manual/abbr/#initialization-finalization-block][Initialization-Finalization block]] for details.
 
-See @@html: <a href="/docs/reference-manual/abbr/][abbreviated code]]) for general rules.
+For  example,  consider inserting the following abbreviated code in a
+$INFN (or  $PRED) block. It outputs final parameter  estimates,
+standard  errors,  minimum value of the objective function, and
+conditional estimates of etas to various user files.  The return codes
+from Estimation and Covariance steps (zero for normal termination) are
+also output.
 
-(See [[file:/docs/reference-manual/abbr/#initialization-finalization-block][Initialization-Finalization block]], Finalization example)
+#+begin_src f90
+  IF (ICALL.EQ.3) THEN
+    DO WHILE(DATA)
+    IF (NEWIND.LE.1) WRITE (50,*) ETA
+    ENDDO
+    WRITE (51,*) OBJECT
+    WRITE (52,*) THETA
+    WRITE (52,*) THETAFR
+    WRITE (53,*) SETHET
+    WRITE (53,*) SETHETR
+    WRITE (54,*) OMEGA(BLOCK)
+    WRITE (55,*) SEOMEG(BLOCK)
+    WRITE (56,*) SIGMA(BLOCK)
+    WRITE (57,*) SESIGM(BLOCK)
+    WRITE (58,*) IERE,IERC
+  ENDIF
+#+end_src
 
 ** RECORD ORDER
 
- Follows $SUBROUTINES.
+Follows $SUBROUTINES.

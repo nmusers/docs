@@ -22,50 +22,46 @@
 
 ** DISCUSSION
 Optional.  Requests  that  the  NONMEM Simulation Step be implemented.
-May also be coded $SIMULATE or $SIML.
+May also be coded $SIMULATE or $SIML. The simulation (see NOPREDICTION
+option for an exception) generates the ~Y~ variable (with NMTRAN
+abbreviated code) or the ~F~ variable (with a user-supplied  PRED  or
+ERROR routine) using the initial parameter estimates specified in
+$THETA, $OMEGA, $SIGMA. Thus initial estimates must be given for all
+parameters.
 
-Unless NOPREDICTION is used (see below), the simulated observation is
-the quantity to which the Y variable (with NMTRAN abbreviated code) or
-F variable (with  a  user-supplied  PRED  or ERROR  routine)  is set,
-using the parameter values given as initial estimates (from $THETA,
-$OMEGA, $SIGMA). Initial estimates must be given for all parameters.
+The interpretation of ETAs depends on the control records and options provided:
+  - if the $ESTIM (or $SIMUL) and ~$SIMUL [LIKELIHOOD | -2LOGLIKELIHOOD]~ option are
+    used, ETAs are for population data;
+  - if the $ESTIM (or $SIMUL) is used, ~$SIMUL [LIKELIHOOD | -2LOGLIKELIHOOD]~ option is
+    not used but EPS is used, ETAs are for population data;
+  - if the $ESTIM (or $SIMUL) is used, neither ~[LIKELIHOOD | -2LOGLIKELIHOOD]~
+    option or EPS is used, ETAs are for single-subject data;
+  - With option ~NOPREDICTION~ (see below)
 
-If a $ESTIM record appears in the problem specification,  then  unless
- the LIKELIHOOD or -2LOGLIKELIHOOD option appears on the $ESTIM record,
- etas (if any) are understood to be single-subject  etas,  except  when
- epsilons also appear, in which case the etas are understood to be population etas.  If a $ESTIM record does not appear, but a $SIMUL record
- appears,  then  unless  the  NOPREDICTION option appears on the $SIMUL
- record, etas are understood in the same way.   When  the  NOPREDICTION
- option is used, the etas are understood to be population etas.
+In addition to this control record,
+a [[file:/docs/reference-manual/abbr/#simulation-block]["simulation block"]]
+(executed when ICALL=4) can be used in $PK, $ERROR, and $PRED for simulation.
 
- In NM-TRAN abbreviated code, there can be a special block of code that
- is implemented only during the simulation task  (See ICALL, Simulation
- Block).  It is called a "simulation block".
+Internally the simulation of ETA and EPS are performed by [[file:/docs/reference-manual/api/subroutines/#simeta][SIMETA]] and
+[[file:/docs/reference-manual/api/subroutines/#simeps][SIMEPS]] routines, respectively.
 
 ** OPTIONS
- The  information  coded  within  each  set  of parentheses defines the
- attributes of a single random source.  A source of random  numbers  is
- an  "infinite"  stream of random numbers.  Each pair of parentheses on
- the record defines a separate source of random numbers, and the information  coded  within  the  parentheses  defines the attributes of the
- source.  The sources are ordered as they are  defined  on  the  $SIMUL
- record.   The  numbers  from  a source are explicitly available to the
- user via the NONMEM utility routine: RANDOM (See RANDOM).  By default,
- the first source is earmarked for the simulation of etas and epsilons,
- and then the numbers from this source are not explicitly available  to
- the user.  However, see option SOURCE_EPS below.
+Each parenthese defines an instance of pseudo random number generator
+(pRNG). The pRNGs are ordered as defined on the $SIMUL record.  User
+can use NONMEM [[file:/docs/reference-manual/api/subroutines/#random][utility routine RANDOM]] to access the pRNG.  By default,
+the first pRNG is for the simulating ETA and EPS and not available to
+the user. This can be changed with the SOURCE_EPS option below.
 
-*** seed1
-      Seed1 is the first seed for the random source, an integer between
-      0 and 2147483647.  If this is not the first problem specification
-      in  the control stream, then seed1 can be -1, indicating that the
-      random source is to be continued from the previous problem.
+*** seed1, seed2
+Seed1 is the first seed for the random source, an integer between 0
+and 2147483647.  If this is not the first problem specification in
+the control stream, then seed1 can be -1, indicating that the random
+source is to be continued from the previous problem.
 
-*** seed2
-      Seed2 is the second  seed  for  the  random  source,  an
-      integer between  0  and 2147483647.  It is used when it is
-      desired that the current problem make use of a continuation of a
-      random source defined in a preceding NONMEM run. It is seldom
-      used.
+Seed2 is the second  seed  for  the  random  source,  an integer
+between  0  and 2147483647.  It is used when it is desired that the
+current problem make use of a continuation of a random source defined
+in a preceding NONMEM run. It is seldom used.
 
 *** NORMAL | UNIFORM | NONPARAMETRIC
 Specifies distribution used by the pseudo-random number generator
@@ -76,6 +72,16 @@ these  variables  is  that  specified in the $OMEGA and $SIGMA
 records). UNIFORM indicates uniform distribution on [0,1].
 
 NONPARAMETRIC indicates that the first source defined with the NONPARAMETRIC attribute are used to generate realizations of  random vectors  from a (multivariate) nonparametric distribution on ETA, obtained from the Nonparametric Step of an earlier  problem.   An input  MSF  must also be present.  It is understood that the etas are to be simulated from the  nonparametric  distribution  rather than  from  the  pseudo-normal  distribution  associated with the first source.  The NONPARAMETRIC attribute can only  be  used  in the definition of the second or subsequent source.
+
+*** NEW
+The  NEW  option requests a new call to pRNG (through routine SIMETA
+and SIMEPS) to genereate ETA/EPS, rather than only at the
+start of each individual record/level-two record. That is,
+with NEW, a call to SIMETA/SIMEPS will obtain new  ETA/EPS,  even if ID/L2 has
+not changed  The output NONMEM  report  describes this  as
+#+begin_src perl
+DIFFERENT ETA AND EPS WITH EACH CALL TO SIMETA AND SIMEPS
+#+end_src
 
 *** CLOCKSEED=[0|1]  (NM75)
       If  CLOCKSEED=1  (default  is  0),  actual  starting seed will be
@@ -91,25 +97,22 @@ NONPARAMETRIC indicates that the first source defined with the NONPARAMETRIC att
       number of the source for epsilons.  This  source  must  have  the
       NORMAL attribute.
 
-*** NEW
-If  the  NEW  option  is  used,  the  vector of eta's (epsilon's)
-      changes with each call to SIMETA (SIMEPS), rather  than  only  at
-      the  start of the next individual record (next level-two record).
-      That is, with NEW, a call to SIMETA will obtain new  eta's,  even
-      if  ID  has not changed.  A call to SIMEPS will obtain new eps's,
-      even if L2 has not changed.  The output NONMEM  report  describes
-      this  as  "DIFFERENT  ETA  AND  EPS  WITH EACH CALL TO SIMETA AND
-      SIMEPS".
 
 *** ONLYSIMULATION
-      NONMEM is being asked to simulate data but  not  to  evaluate  an
-      objective  function  on  these  data.   WRES values in tables and
-      scatterplots will be 0.  PRED-defined data items  in  tables  and
-      scatterplots  will  be  computed using simulated etas and initial
-      thetas.
+By default, when the Simulation Step is implemented, various
+statistics used for data analysis are always computed from the
+simulated data. These are the value of the objective function at the
+initial parameter estimates and if a table is requested, the weighted
+residuals based on these estimates. The data may be simulated in a way
+that gives rise to a problem with computing these statistics. For
+example, perhaps the simulation model is not appropriate for data
+analysis using the NONMEM default objective function. Option
+~ONLYSIMULATION~ requests simulation but to evaluate an objective
+function  on  these  data.   WRES values in tables and scatterplots
+will be 0.  PRED-defined data items  in  tables  and scatterplots
+will  be  computed using simulated ETAs and initial THETAs.
 
-      $ESTIM, $COV and $NONP cannot be used with ONLYSIMULATION.  Also,
-      see the PREDICTION and NOPREDICTION options.
+$ESTIM, $COV and $NONP cannot be used with ONLYSIMULATION. See also the PREDICTION and NOPREDICTION options.
 
 *** SUBPROBLEMS=n
       Requests that the entire NONMEM problem is to be repeated n times
@@ -168,7 +171,7 @@ F) variable should also be set to this observation. That is
 
 NOPREDICTION: permitted only with ONLYSIM. Indicates that the
 simulated observation will be taken to be the value to which the DV
-variable is set.  When ~Y=...~ is used in a simulation block, one
+variable is set. When ~Y=...~ is used in a simulation block, one
 should use it to assign DV: ~DV=Y~. ETAs are understood to be
 population ETAs, even if EPSILONs do not appear.
 
