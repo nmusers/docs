@@ -135,6 +135,9 @@ COMRES=-1
 This statement indicates no variables defined in the abbreviated code are listed in NMPRD4.
 
 ** Loop (DO-WHILE)
+:PROPERTIES:
+:CUSTOM_ID: dowhile
+:END:
 ~DO-WHILE~ may be used  in  all  blocks  of  abbreviated
 code:
 #+begin_src perl
@@ -1313,92 +1316,6 @@ Fortran syntax is used in such blocks.
 
 (See [[file:/docs/reference-manual/abbr/#pred_ignore_data_block][PRED_IGNORE_DATA]] block)
 
-
-** =PROTECT=
-Since NONMEM  7.4,  a  series of routines are available that protect
-against domain violations, divide by zero, and  floating  point
-overflows.   Each  of  these routines start with the letter P,
-followed by the name of the mathematical operation they are to
-perform.  For example,  PLOG is the protective code routine that
-performs the LOG operation.  In addition, there are first derivative
-(such as  PLOGD1),  and second  derivative (such as PLOGD2) companion
-routines available which NMTRAN uses for computing analytical
-derivatives. The source  code  of these routines are available in
-..\source\PROTECT.f90.  If you wish to modify their behavior, then
-copy PROTECT.f90 to your run directory  as (say)  myprotect.f90,
-modify it, then refer to this modified code with $SUBROUTINES
-OTHER=myprotect.f90 (The OTHER option is  not  needed  if the P
-functions are coded explicitly or implicitly via $ABBR PROTECT.)
-
-The following protective code routines are available. For  all
-routines, if X=not a number, X is converted to machine precision
-value, which is about 1.0E-15,  before performing an operation on it.
-If  X>INFNTY (where INFNTY is approximately 1.0E+154), then X is
-converted to INFNTY before an operation is performed on it.
-
-- PLOG(x):  returns LOG of x.  If x<SMALLZ, where SMALLZ is
-  approximately 2.8E-103, then LOG(SMALLZ) is returned.
-
-
-- PLOG10(x):   returns  LOG10  of  x.  If x<SMALLZ, where SMALLZ is
-  approximately 2.8E-103, then LOG10(SMALLZ) is returned.
-
-
-- PSQRT(x): returns SQRT of x.  If x=0.0d+00, then 0 is returned.
-
-
-- PEXP(x): returns EXP  of  x.   If  x>40.0,  then  PEXP(100.0)  is
-  returned (avoids overflow).
-
-
-- PDZ(x):  returns  1/x  .   Protects  against  divide by zero.  If
-  abs(x)<SMALLZ, then 1/SMALLZ is returned.
-
-
-- PZR(x): returns x.  protects  against  zero.   If  abs(x)<SMALLZ,
-  then SMALLZ is returned.
-
-
-- PNP(x):  returns x.  Protects against non-positive.  If X<SMALLZ,
-  then SMALLZ is returned.
-
-
-- PHE(x): returns x. Protects against  high  exponent.   If  X>100,
-  then 100 is returned. Thus PEXP(x)=EXP(PHE(x)).
-
-
-- PNG(x):  returns  x.   Protects against negative.  If X<0.0, then
-  0.0 is returned.
-
-
-- PTAN(x): returns tan(x). Protects against returning  infinity  on
-  inputs near pi/2.
-
-
-- PATAN(x): returns atan(x). Protects against large intputs.
-
-
-- PACOS(x),  PASIN(x):  returns acos(x), asin(x), respectively.
-  If |X| is between 1.0 and 1+10**(-08), then x is submitted as  1  or
-  -1.  So, "dirty ones" are cleaned up, but values clearly beyond 1
-  are allowed to trip up the function, so the user is aware of  the
-  logical error in the code, and fix the issue.
-
-
-Instead of replacing various operations with protected code operations by hand, you can ask NMTRAN to automatically convert your code to protected code with the following statement:
-
-#+begin_src perl
-$ABBR PROTECT
-#+end_src
-
-NMTRAN will automatically replace all LOG (or DLOG) with PLOG, EXP (or
-DEXP) with PEXP, SQRT (or DSQRT) with PSQRT, / operations with *PDZ(),
-and B**E operations with PEXP(E*PLOG(B)), and so on.
-
-Note  that  the any P function name that is used explicitly or
-implicitly via $ABBR PROTECT may not be used  for  a  user-defined
-variable name.
-
 * Code blocks
 :PROPERTIES:
 :CUSTOM_ID: code-blocks
@@ -1986,17 +1903,17 @@ super-problems,  which  may  be  iterated.   The  "beginning" and
 and  last iterations  of the superproblem.  There are opportunities to
 make some rudimentary computations at:
 
-- the beginning of a run (run initialization)
-- the beginning of a superproblem (superproblem initialization)
-- the beginning of a problem (problem initialization)
-- the end of a subproblem (subproblem finalization)
-- the end of a problem (problem finalization)
-- the end of a superproblem (superproblem finalization)
-- the end of a run (run finalization)
+- the beginning of a run (run initialization);
+- the beginning of a superproblem (superproblem initialization);
+- the beginning of a problem (problem initialization);
+- the end of a subproblem (subproblem finalization);
+- the end of a problem (problem finalization);
+- the end of a superproblem (superproblem finalization);
+- the end of a run (run finalization).
 
 For example, data transgeneration may take place at  problem
 initialization.   Or, a variable may be initialized at problem
-initialization and modified at each subproblem  finalization,  and
+initialization and modified at each subproblem finalization,  and
 its  final  value written  to a user file at problem finalization.
 There is no opportunity to do subproblem initialization.  When  using
 abbreviated  code, initialization  and finalization opportunities are
@@ -2137,9 +2054,9 @@ In addition, these rules apply:
            RETURN
        ENDIF
    #+end_src
-   The  DOWHILE  (DATA)  causes the transgeneration statements to be
+   ~DOWHILE (DATA)~ has the transgeneration statements
   executed with each data record.  In effect, NM-TRAN supplies  the
-  statements  MODE=...  and  CALL  PASS(MODE) that are shown in the
+  statements  ~MODE=...~  and  ~CALL PASS(MODE)~ that are shown in the
   above.
 
 - Variables that are first defined in an initialization block or
@@ -2208,7 +2125,28 @@ In addition, these rules apply:
   may appear as left-hand quantities in initialization blocks.
   (See Repetition Variables).
 
-See also Guide VI, section VI.A , Figure 37
+As a practical example, the abbreviated code below can be inserted in a $PRED or $INFN
+block to output final parameter estimates, standard errors, minimum value of
+the objective function, and conditional estimates of ETAs to various user files. The return
+codes from Estimation and Covariance steps (zero for normal termination) are also output.
+
+#+begin_src f90
+  IF (ICALL.EQ.3) THEN
+    DO WHILE(DATA)
+      IF (NEWIND.LE.1) WRITE (50,*) ETA
+    ENDDO
+    WRITE (51,*) OBJECT
+    WRITE (52,*) THETA
+    WRITE (52,*) THETAFR
+    WRITE (53,*) SETHET
+    WRITE (53,*) SETHETR
+    WRITE (54,*) OMEGA(BLOCK)
+    WRITE (55,*) SEOMEG(BLOCK)
+    WRITE (56,*) SIGMA(BLOCK)
+    WRITE (57,*) SESIGM(BLOCK)
+    WRITE (58,*) IERE,IERC
+  ENDIF
+#+end_src
 
 ** Copying
 :PROPERTIES:

@@ -385,7 +385,7 @@ May  be  used  in  all  blocks of abbreviated code and $TABLE and
       $ABBR REPLACE THETA(SID_KA)=THETA(4 to 10 by -3) ; order: 10,7,4
       $ABBR REPLACE THETA(SID_KA)=THETA(10 to 4) ; order: 10,9,8,7,6,5,4
       #+end_src
-
+      with
       #+begin_src perl
       $ABBR REPLACE THETA(SID_KA)=THETA(,4 to 13 by 3,25 to 37 by 4)
       #+end_src
@@ -402,65 +402,96 @@ May  be  used  in  all  blocks of abbreviated code and $TABLE and
       and task specification records.
       These may be helpful for debugging.
 
-***  DECLARE
+*** DECLARE
+:PROPERTIES:
+:CUSTOM_ID: declare
+:END:
 #+begin_src f90
-  ; Usage
+  ;! Usage
   DECLARE [INTEGER] [DOWHILE] name [(dimension [,dimension])] ...
 #+end_src
-      One  or  names  may  be  coded. They are referred to as "declared
-      variables."  IF INTEGER or DOWHILE is  coded,  the  type  of  the
-      variable is integer.  Otherwise, the type of the variable is double precision.  If one or two dimensions are declared, the  variable  being declared is an array.  Each dimension may be a number
-      or a variable or  an  expression.   Constants  defined  in  SIZES
-      (e.g.,  NO,  LVR)  may  be used.  Multiple DECLARE options may be
-      coded. The characters "DECLARE" are  optional  after  the  first.
-      Commas  are  ignored, and type and dimensions must be respecified
-      as needed.  No other  options  of  $ABBR  may  appear  after  the
-      DECLARE  option(s).   Declared  variables  are  global, i.e., are
-      defined in all blocks of abbreviated code.  The  number  of  subscripts  must agree with the number of dimensions in the declaration.  Declared variables that are not INTEGER or DOWHILE will be
-      random variables if they are assigned in a statement whose rightside involves ETA's or EPS's.
+One or more variable names may be declared using the ~$ABBR DECLARE~
+statement.
+  - Variable types. ~DECLARE ... INTEGER~ and ~DECLARE ... DOWHILE~
+    (for [[file:/docs/reference-manual/abbr/#dowhile][DOWHILE]] loop indices only) declare integers that can
+    serve as subscripts of arrays. Otherwise declared variables are
+    double precision reals, and they become random variables if
+    assigned from an expression involving ETA or EPS.
+  - Arrays. One and two dimensional array can be declared using parentheses.
+    The dimension can be a constant, variable, or expression
+    (including ~SIZES~ constants like ~NO~ or ~LVR~). For example
+    #+begin_src perl
+      $ABBR DECLARE A,B(10),C(1,NO-1),INTEGER I J  ; only I is INTEGER.
+    #+end_src
+  - Initialization. All declared variables are initalized (or filled) with 0.
+  - Multiple ~$ABBR DECLARE~ are allowed. After the first the ~DECLARE~
+    keyword is optional and declarations are comma- or
+    space-separated. No other ~$ABBR~ options may follow DECLARE
+    option(s).
+  - Declared variables have global scope, thus they are available in
+    abbreviated code blocks.
+  - Output. Elements of  a  declared  array  may be displayed in
+    WRITE/PRINT statement using indices.
+    #+begin_src f90
+      PRINT *,B(1),B(2) ;! allowed
+      PRINT *,B         ;! not allowed
+    #+end_src
+    They cannot be output by $TABLE. The workaround is to code, e.g.,
+    #+begin_src perl
+      ;#... code assigning values to B(1) etc. ...
+        B1=B(1)
+      $TABLE B1
+    #+end_src
 
-      Example:
-
-      #+begin_src perl
-      $ABBR DECLARE A,B(10),C(1,NO-1),INTEGER I J
-      #+end_src
-
-      Only I is INTEGER.
-
-      Variables may be declared as INTEGER or DOWHILE for use  as  subscripts  of declared arrays or reserved variables that are arrays
-      (but not of ETA, ERR, or EPS).
-
-      Variables used as looping indices in DOWHILE statements  must  be
-      declared as DOWHILE variables.
-
-      Declared variables are automatically initialized to 0.
-
-      Elements  of  a  declared  array  may be displayed in WRITE/PRINT
-      statement, but not the entire array.  E.g., the following is permitted
-      #+begin_src perl
-      PRINT *,B(1),B(2)
-      #+end_src
-      but not
-      #+begin_src perl
-      PRINT *,B
-      #+end_src
-
-      Neither individual elements nor the entire array may be listed in
-      $TABLE.  The workaround is to code, e.g.,
-      #+begin_src perl
-	  ... code assigning values to B(1) etc. ...
-	    B1=B(1)
-	  $TABLE B1
-      #+end_src
-
-      (See [[file:/docs/techniques/dowhile/][DOWHILE block]]).
 
 ***  PROTECT
-      With NONMEM 7.4, a series of routines are available that  protect
-      against  domain  violations,  divide  by zero, and floating point
-      overflows.  Each of these routines start with the letter P,  followed  by the name of the mathematical operation they are to perform.  For example, PLOG is the protective code routine that performs  the  LOG operation.  With $ABBR PROTECT, NMTRAN will automatically replace all relevant function names with the P name.
+In NONMEM v7.4+,  a series of routines are available that protect
+against domain violations, divide by zero, and  floating  point
+overflows.   Each  of  these routines start with the letter P,
+followed by the name of the mathematical operation they are to
+perform.  For example,  PLOG is the protective code routine that
+performs the LOG operation.  In addition, there are first derivative
+(such as  PLOGD1),  and second  derivative (such as PLOGD2) companion
+routines available which NMTRAN uses for computing analytical
+derivatives. The source  code  of these routines are available in
+..\source\PROTECT.f90.  If you wish to modify their behavior, then
+copy PROTECT.f90 to your run directory  as (say)  myprotect.f90,
+modify it, then refer to this modified code with $SUBROUTINES
+OTHER=myprotect.f90 (The OTHER option is  not  needed  if the P
+functions are coded explicitly or implicitly via $ABBR PROTECT.)
 
-     (See [[file:/docs/techniques/protect/][PROTECT]]).
+The following protective code routines are available. For all
+routines, if ~x=NAN~, ~x~ is converted to machine precision
+value first.
+If ~x>INFNTY~ (Double pecision ~INFNTY~ is approximately 1.0E+154), then ~x~ is
+converted to ~INFNTY~ first. ~SMALLZ~
+denotes the small positive floating point number limit (approximately
+~2.8E-103~).
+| Routine   | Function | Protection                                  |
+|-----------+----------+---------------------------------------------|
+| PLOG(x)   | LOG(x)   | PLOG(x)=LOG(SMALLZ) if x<SMALLZ             |
+| PLOG10(x) | LOG10(x) | PLOG10(x)=LOG10(SMALLZ) if x<SMALLZ         |
+| PSQRT(x)  | SQRT(x)  | PSQRT(0.0d0)=0.0                            |
+| PEXP(x)   | EXP(x)   | PEXP(x)=EXP(300.0) if x>300.0               |
+| PDZ(x)    | 1/x      | PDZ(x)=1/SMALLZ if abs(x)<SMALLZ            |
+| PZR(x)    | x        | PZR(x)=SMALLZ if abs(x)<SMALLZ              |
+| PNP(x)    | x        | PNP(x)=x if x<SMALLZ                        |
+| PHE(x)    | x        | PHE(x)=100 if x>100.0                       |
+| PNG(x)    | x        | PNG(x)=0.0 if x<0.0                         |
+| PTAN(x)   | TAN(x)   | Protects against infinity near Pi/2         |
+| PATAN(x)  | ATAN(x)  | Protects against large input                |
+| PACOS(x)  | ACOS(x)  | treat x with abs(x) in [1, 1E-8] as 1 or -1 |
+| PASIN(x)  | ASIN(x)  | treat x with abs(x) in [1, 1E-8] as 1 or -1 |
+
+The option
+#+begin_src perl
+$ABBR PROTECT
+#+end_src
+requests automatical replacement of functions with the protect counterparts.
+
+Note  that the any P function name that is used explicitly or
+implicitly via $ABBR PROTECT may not be used for a  user-defined
+variable name.
 
 ***  FUNCTION
 #+begin_src perl

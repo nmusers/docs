@@ -1,0 +1,137 @@
+---
+title: "Interpolate covariates"
+author: "Yi Zhang"
+draft: false
+bookCollapseSection: false
+---
+
+{{< katex >}}{{< /katex >}}
+
+* Interpolate missing covariates
+In this example (examples/infnexa2), the data set contains missing
+values for WT item and the model performs interpolation within the
+$INFN block. The main model control stream is shown below.
+#+begin_src perl
+$PROB  THEOPHYLLINE   POPULATION DATA
+$INPUT      ID DOSE=AMT TIME CP=DV WT
+$DATA       THEOPP
+$SUBROUTINES  ADVAN2
+
+$ABBR REPLACE INTVBL=WT     ;# to be interpolated
+$ABBR REPLACE NULLVAL=0.0   ;# null
+$ABBR DECLARE U(MAXIDS,NO)  ;# U(IS,I)=time of the non-null value of subj.
+$ABBR DECLARE V(MAXIDS,NO)  ;# Ith non-null value of subj.
+$ABBR DECLARE INTEGER IS    ;# SUBJECT number
+$ABBR DECLARE IVAL(NO)      ;# IVAL(IS)= # of non-null values for subj. IS
+$ABBR DECLARE INTEGER I, INTEGER J, INTEGER L
+$INFN
+ INCLUDE 'infnabbr'
+
+$PK
+;# THETA(1)=MEAN ABSORPTION RATE CONSTANT (1/HR)
+;# THETA(2)=MEAN ELIMINATION RATE CONSTANT (1/HR)
+;# THETA(3)=SLOPE OF CLEARANCE VS WEIGHT RELATIONSHIP (LITERS/HR/KG)
+;# SCALING PARAMETER=VOLUME/WT SINCE DOSE IS WEIGHT-ADJUSTED
+   KA=THETA(1)+ETA(1)
+   K=THETA(2)+ETA(2)
+   CL=THETA(3)*WT+ETA(3)
+   SC=CL/K/WT
+
+$THETA  (.1,3,5) (.008,.08,.5) (.004,.04,.9)
+$OMEGA BLOCK(3)  6 .005 .0002 .3 .006 .4
+
+$ERROR
+   Y=F+EPS(1)
+
+$SIGMA  .4
+$TABLE ID DOSE TIME DV WT NOAPPEND FILE=THEOPPexa2
+#+end_src
+Here we use ~$ABBR REPLACE~ to assign aliases to ~WT~ and zero, and
+~$ABBR DECLARE~ to declare helper variables. They
+are used in the included "infnabbr" file:
+#+begin_src f90
+    ;! $INFN FOR INTERPOLATING INDEPENDENT VARIABLE INTVBL
+    IS=0
+    IF (ICALL.EQ.1) THEN
+       ;! FIRST PASS.  SAVE VALUES OF TIME & INDEP VAR. WHEN IT IS NON-NULL
+       DO WHILE (DATA)
+          IF (NEWIND < 2) THEN  ;! INITIALIZE NEW INDIVIDUAL
+             IS=IS+1
+             IVAL(IS)=0
+          ENDIF
+          IF (INTVBL /= NULLVAL) THEN     ;! SAVE NON-NULL VALUE
+             IVAL(IS)=IVAL(IS)+1
+             I=IVAL(IS)
+             U(IS,I)=TIME
+             V(IS,I)=INTVBL
+          ENDIF
+       ENDDO
+       ;! SECOND PASS
+       IS=0
+       DO WHILE (DATA)
+          IF (NEWIND < 2) THEN  ;! INITIALIZE NEW INDIVIDUAL
+             IS=IS+1
+             I=0
+          ENDIF
+          ;! IF INDEP VAR IS MISSING AND WAS ONLY NON-NULL ONCE, COPY IT
+          IF (INTVBL == NULLVAL .AND. IVAL(IS) == 1) THEN
+             INTVBL=V(IS,1)
+          ELSE
+             IF (INTVBL /= NULLVAL) THEN        ;! COUNT ANOTHER NON-NULL VALUE
+                I=I+1
+             ELSE                               ;! CURRENT RECORD HAS NULL VALUE
+                IF (I==0) THEN ;! EXTRAPOLATE FROM FIRST 2 VALUES
+                   J=1
+                   L=2
+                ELSEIF (I>0 .AND. I<IVAL(IS)) THEN ;! INTERPOLATE FROM VALUES BEFORE AND AFTER
+                   J=I
+                   L=I+1
+                ELSEIF (I==IVAL(IS)) THEN  ;! EXTRAPOLATE FROM LAST 2 VALUES
+                   J=I-1
+                   L=I
+                ENDIF
+                SLOPE=(V(IS,J)-V(IS,L))/(U(IS,J)-U(IS,L))
+                INTVBL=V(IS,J)+SLOPE*(TIME-U(IS,J))
+             ENDIF
+          ENDIF
+       ENDDO
+    ENDIF
+#+end_src
+The ~ICALL~ clause indicates that the interpolation is only done at
+the beginning of the problem.
+
+* Interpolate ODEs parameters
+Another interpolation scenario is when the RHS of a differential
+equation system has time-varying covariates. For example, assume the
+RHS contains ~D_WT~,
+the time-dependent variable counterpart of the weight data item
+~WT~. We will need calculate ~D_WT~ by interpolation before using it
+in $DES. This can be achieved with the following snippet.
+#+begin_src perl
+  $PK
+  ;# initialize OLDTIME and OLDWT
+  IF (NEWIND.LE.1) THEN
+    OLDTIME=TIME
+    OLDWT=WT
+  ENDIF
+
+  ;# calculate the slope for $DES
+  DELTA_TIME=TIME-OLDTIME
+  DELTA_WT=WT-OLDWT
+
+  IF (DELTA_TIME>0) THEN
+     SLOPE=DELTA_WT/DELTA_TIME
+  ELSE
+     SLOPE=0.
+  ENDIF
+
+  ;# save wt and time for next $PK record
+  OLDTIME=TIME
+  OLDWT=WT
+
+  $DES
+     D_WT=OLDWT+SLOPE*(T-OLDTIME) ;# D_WT is the value of WT at time T
+     DADT(1)=D_WT                 ;# compute AUC of D_WT as a test
+#+end_src
+Here we simply compute a 1-D ODE for the AUC of weight. $DES uses
+linearly interpolated ~D_WT~ between every data record.
