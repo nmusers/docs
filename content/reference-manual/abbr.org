@@ -11,89 +11,69 @@ weight: 12
 :CUSTOM_ID: abbreviated-code
 :END:
 
-Abbreviated  code  follows a subset of Fortran language syntax within an NM-TRAN control
-stream that is used to specify a model.  The $PRED, $PK, $ERROR, $DES,
-$AES, $AESINITIAL, $TOL, $MIX, and $INFN records each initiates a
-block of abbreviated code.  Such a block ends with either  the
-appearance  of another  record (beginning with a "$"), or end of the
-control stream. The code blocks in NONMEM 7.2+ versions are case-insensitive.
+Abbreviated code follows a subset of Fortran language syntax within an NM-TRAN control
+stream. A /block/ of abbreviated code begins with control record $PRED, $PK, $ERROR, $DES,
+$AES, $AESINITIAL, $TOL, $MIX, or $INFN, and ends with either
+another record (that begins with "$"), or the end of the
+control stream. The code blocks are case-insensitive (NM72).
 
 ** Comments
 Semicolon character ";" marks the beginning of comments so that the
  rest of the line is ignored.
 
 ** Line continuation
-Continuation lines are permitted using the character & at the end of the line.
+Character "&" at the end of a line indicates continuation to the next line.
 
 ** Variables
-User-defined variables are names used in code blocks that are not
-reserved words. They used to be restricted to 8 characters in length
-and could not include the char- acter in  previous  versions  of
-NONMEM.  With NONMEM 7 a user-defined  variable  name  consists  of
-1-20 letters (A-Z), numerals (0-9), and the character '_', beginning
-with a letter.  (The length 20 is specified by [[file:/docs/reference-manual/api/modules/#sizes-fsizes-prsizes][constant SD in SIZES]])
+In NONMEM v7+ a user-defined variable can have a name consisting  of
+1-20 (specified by [[file:/docs/reference-manual/api/modules/#sizes-fsizes-prsizes][constant SD in SIZES]]) letters (A-Z), numerals
+(0-9), understore ("_"), and begins
+with a letter. It cannot be one of the reserved variable names or keywords.
+A user-defined variable is of type double precision real. See
+"subscripts" section below on the use of integer variables.
 
-User-define variables are used as the left-hand quantities in
-assignment (see below).
-
-All variables  are  all of double precision floating point type.
+A user-define variable is used as the left-hand quantities in
+assignment.
 
 ** Assignment
-An assignment statement  =A=B=  uses  right-hand  quantities  in  an
-expression =B= in order to define a user-defined variable =A=.
-
-Permissible right-hand quantities =B= are expressions consisting of :
-  - previously  defined  quantities,  including  declared variables
-    that have also been used on the left side of an assignment statement. (See [[file:/docs/reference-manual/control-records/abbrev][$ABBREVIATED]]);
+A user-defined variable =A= is given value =B= through assignment state =A=B=.
+The right-hand (RHS) quantity =B= can be an expression of:
+  - previously  defined  quantities (see [[file:/docs/reference-manual/control-records/abbrev][$ABBREVIATED]]);
   - constants [fn:4], e.g. 1, 1.1, 3E+1, 3E1, 3E01, 3E-1 3E-01, 3D+1, 3D1, 3D01, 3D-1, 3D-01;
-  - THETA,  OMEGA  and  SIGMA elements, e.g. THETA(1), OMEGA(2,2).
-    When the two subscripts for an OMEGA or SIGMA element are the
-    same,  only one subscript is needed, e.g. OMEGA(2);
-  - data items defined in the $INPUT record variables;
-  - ETA(n), EPS(n), ERR(n), assummed with mean 0 and
-    covariances matrix specifed accordingly by OMEGA and
-    SIGMA. Except in certain blocks of abbreviated code  (i.e.
-    a  simulation block,   an   initialization   block,  a
-    finalization  block,  or  a pred_ignore_data block), the variables
-    are considered to be (the base) random
-    variables, and quantities defined in terms of these variables
-    (directly or indirectly) are  themselves random
-    variables.  NM-TRAN sets up computations for derivatives of random
-    variables with  respect  to  the  base  random variables.
-  - operators =+= (add), =-= (substract,) =*= (multiply), =/=
-    (divide), =**= (exponentiate);
-  - parentheses (), may  be  nested.
-  - Fortran functions:  LOG (natural log), LOG10, EXP, SQRT, SIN, COS,
-   ABS, TAN, ASIN, ACOS, ATAN, INT, MIN, MAX, MOD;
-  - NONMEM function: PHI;
-  - NONMEM function: GAMLN for the logarithm of the gamma function. It
-    can be used to evaluate factorials:
-    #+begin_src f90
-      exp(gamln(x+1.0)) ;! equals to X! = X(X-1)(X-2)...
-    #+end_src
+  - THETA,  OMEGA,  and  SIGMA elements, e.g. ~THETA(1)~, ~OMEGA(1,3)~,
+    ~OMEGA(2,2)~ (equivalently ~OMEGA(2)~, for diagonal elements);
+  - data items defined from the $INPUT record;
+  - ETA, EPS, and ERR, elements, assummed with mean 0 and
+    covariance matrix specifed by OMEGA and SIGMA;
+  - operators: =+= , =-= , =*= , =/= , and =**= (exponentiate);
+  - parentheses ~()~;
+  - Fortran functions:  ~LOG~ (natural log), ~LOG10~, ~EXP~, ~SQRT~, ~SIN~, ~COS~,
+    ~ABS~, ~TAN~, ~ASIN~, ~ACOS~, ~ATAN~, ~INT~, ~MIN~, ~MAX~, ~MOD~;
+  - NONMEM function: ~PHI~ (cumulative distribution function);
+  - NONMEM function: ~GAMLN~ (logarithm of the gamma function) [fn:5];
   - NONMEM function: RANDMT and RANDMTU that return a random variables
     (See Introduction to NONMEM 7 for details).
 
-If a Fortran function has  random  variable  arguments,  NONMEM
-computes the cooresponding partial derivatives.  The partial
-derivative of ABS(X) with respect to eta is mathematically undefined
-at X=0.  We are arbitrarily defining it to be dX/deta. If the
-prediction depends on X, X must always be either positive or
-negative. If  the  argument of GAMLN is a random variable, it must
-always be positive.  Function PHI may have a random argument but no
-partial derivates are computed.
-
-Similarly, INT,  MOD,  MIN,  and  MAX  functions  return  discontinuous
-values, and no partial derivatives are computed.  If they  are  used
-outside  of  a simulation block and the function value affects the
-value of the objective function, then an error in the NONMEM
-Estimation Step will probably occur.  If they are needed in the
-computations of DADT (differential equations; with ADVAN 6, 8, 9,
-13, 14,  15,  16, 17, 18), then the funcions should be used
-instead in the PK routine, and model event time (MTIME)
-parameters be used to set flags for DES. (See [[file:/docs/cookbook/mtime/][Model Time examples]]).
-
-See below "functions" and "subscripted variables".
+Variables assigned with ETA, EPS, or ERR expressions are random
+variables, so are the quantities defined in terms of them. If a
+fortran function includes random variable arguments, NONMEM
+automatically computes the partial derivatives of these variables with
+respective to ETA, EPS, and ERR. However, special cases require attention:
+  - The partial derivative of ABS(X) at X=0 is mathematically
+    undefined. NONMEM defines it as ~dX/dETA~ (similar for EPS, and
+    ERR). Similarly, NONMEM does not compute partial derivatives for
+    functions that return discontinuous values, such INT, MOD, MIN,
+    and MAX. If using them outside of a simulation block such that the
+    function value affects the objective function value (OFV) may lead
+    to erroneous estimation.  If they are needed in the computations
+    of ~DADT~ in ~$DES~, then the funcions should be used instead in the
+    PK routine, and [[file:/docs/reference-manual/api/variables/#mtime][model event time]] (see also [[file:/docs/cookbook/mtime/][Model Time examples]]).
+  - The cumulative distribution function ~PHI~ may accept a
+    random variable argument, but NONMEM does not compute partial
+    derivatives for it.
+  - NONMEM computes derivatives only when they are needed, thus not in
+    simulation block, initialization block, finalization  block, or
+    ~PRED_IGNORE_DATA~ block (see [[file:/docs/reference-manual/abbr/#code-blocks][Code blocks]] below.)
 
 Left-hand quantities =A= can be:
 
@@ -116,30 +96,23 @@ Left-hand quantities =A= can be:
    with respect to the base random variables).
 - User-defined variables.
 
+Except  in  certain  blocks  of  abbreviated code (i.e. a simulation
+block, an initialization block, or a finalization block), a label in
+an  $INPUT record may not appear on the left in an assignment
+statement.
 
-Variables,  constants,  and  functions  are  all of double precision floating point type.
+See also pseudo-assignment below.
 
-Except  in  certain  blocks  of  abbreviated code (i.e. a simulation block, an initialization block, or a finalization block), a label in an  $INPUT record may not appear on the left in an assignment statement.
-
-Note that not every reserved variable can served as "B" in assignment
-statement A=B. For a statement A=B with a reserved variable A
-that cannot later be used as a right-hand quantity, NONMEM call it
-/pseudo-statement/. The pseudo-statement for a given reserved variable
-can only appear at most once in an abbreviated code.
-for a particular routine. It must appear before other statements of abbreviated code ocurring in that routine.
-For an abbreviated code for PRED, there is only one allowable type of
-pseudo-statement, for variable COMRES, and the only permitted value for the integer constant is -1. So, the statement must look like
-#+begin_src f90
-COMRES=-1
-#+end_src
-This statement indicates no variables defined in the abbreviated code are listed in NMPRD4.
-
+[fn:5] It can be used to evaluate factorials:
+    #+begin_src f90
+      exp(gamln(x+1.0)) ;! equals to X! = X(X-1)(X-2)...
+    #+end_src
 ** Loop (DO-WHILE)
 :PROPERTIES:
 :CUSTOM_ID: dowhile
 :END:
 ~DO-WHILE~ may be used  in  all  blocks  of  abbreviated
-code:
+code (NM73):
 #+begin_src perl
  $ABBR DECLARE DOWHILE ILOOP $PK
  ILOOP=1
@@ -148,28 +121,16 @@ code:
  ILOOP=ILOOP+1
  ENDDO
 #+end_src
-Previously, they were permitted only in initialization-finalization,
-simulation, data  average,  and  expectation blocks.  See the separate
-descriptions of these blocks.  With NONMEM 7.3, DOWHILE may also be
-used  in  data-analytic blocks (i.e., in code that is executed at
-ICALL=2).
-
 When  it  is  used  in  data-anlytic code, DOWHILE must be used with a
-looping variable.  Such a variable meets three criteria:
-
-- It is declared as such, e.g. $ABBR DECLARE DOWHILE ILOOP
-- It is given a value in the statement immediately before DOWHILE
-- It is given a value in the statement immediately before ENDDO.
-
-Usually, the looping variable will be tested  in  the  condition,  but this is not necessary.
+looping counter defined with [[file:/docs/reference-manual/control-records/abbrev/#declare][$ABBR DECLARE DOWHILE]], as the ~ILOOP~ in
+the example.
 
 - DOWHILE blocks may be nested.
 
 - DOWHILE  blocks  may  not  include IF/THEN/ENDIF blocks.  Only
-  single-statement IF statements are permitted.  E.g., IF (condition)
-  statement
+  single-statement IF statements are permitted.
 
-- Subscripted variables may be used within the block.  These  are  variables  that  have  been  declared arrays using the $ABBR statement, or subscripted reserved variables such as THETA.  Subscripts may be integer  expressions  using declared integer variables and integer values. E.g.
+- Subscripts variables may be used within the block.  These  are  variables  that  have  been  declared arrays using the $ABBR statement, or subscripted reserved variables such as THETA.  Subscripts may be integer  expressions  using declared integer variables and integer values. E.g.
   #+begin_src perl
     $ABBR DECLARE X(10)
     $ABBR DECLARE DOWHILE ILOOP
@@ -191,8 +152,8 @@ Usually, the looping variable will be tested  in  the  condition,  but this is n
     SUM=0
     ILOOP=1
     DO WHILE(ILOOP<=IMAX)
-    SUM=SUM+TERM
-    ILOOP=ILOOP+1
+      SUM=SUM+TERM
+      ILOOP=ILOOP+1
     ENDDO
   #+end_src
 
@@ -233,12 +194,8 @@ The non-FORTRAN syntax DO WHILE(DATA) is permitted  in  $PRED  initialization  a
 finalization blocks, and in the $INFN record. (See [[file:/docs/reference-manual/abbr/#initialization-finalization-block][Initialization-Finalization block]]).
 
 ** Conditional
-Conditional statements have one of two forms:
-
-#+begin_src f90
-    IF (condition) assignment statement
-#+end_src
-or
+The ~IF~ Conditional statements can be paired with ~ELSE/ELSEIF/ENDIF~
+or used in one line.
 #+begin_src f90
     IF (condition) THEN
        abbreviated code ...
@@ -247,6 +204,8 @@ or
     ELSE
        abbreviated code ...
     ENDIF
+
+    IF (condition) assignment statement
 #+end_src
 
 See below for a restriction on ELSEIF.
@@ -270,7 +229,8 @@ argument.   However,  if  the test is IF (ICALL.EQ.2), then ELSE may
 not be used.  Special rules apply.  For  more  detail,  see  SPECIAL
 STATEMENTS (below), and help entries for these records.
 
-A condition may also test certain variables defined in modules (See [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/][NONMEM modules]]).
+A condition may also test certain variables defined in modules (See
+[[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/][NONMEM modules]]).
 
 Abbreviated code in a particular THEN or ELSE clause may not contain
 multiple definitions of the same random variable.  The code below is
@@ -361,42 +321,27 @@ is  also  possible, as are other ways the dowhile recursive variable
    can be used, so long as the variable appears on both  sides  of  the
    equal sign within the DOWHILE loop: V= ... V ...
 
-** Vectors
-The $ABBR FUNCTION and $ABBR  VECTOR  feature  allows  the  user  to
-declare the names of user-defined functions and  the names and sizes
-of user-defined argument vectors.  Restrictions such as  the  number
-of  user functions, the number of elements in a vector, and the number of times a given function may appear  in  abbreviated  code  are
-more flexible and may be modified by the user.
-
-Reserved variable names VECTRA, VECTRB, VECTRC, etc. may be used for
-pre-defined  vectors.   Elements  can  be defined in any order.
-Vectors that are defined outside of $DES (or $AES) may not  be used in
-the  $DES (or $AES) code. Namely, a vector may not be an implicit
-basic PK parameter.
-
 ** Functions
 :PROPERTIES:
 :CUSTOM_ID: abbreviated-function
 :END:
-User-defined function's names must be of form =FUNCx=, with =x=
-being =A=, =B=, ... etc. [fn:3]
- #+begin_src f90
+User-defined function =FUNCx=, with =x=
+being =A=, =B=, ... etc. [fn:3] can be used in abbreviated code as
+#+begin_src f90
+A=FUNCA(X)  ;! similar for FUNCB, FUNCC, etc.
+#+end_src
+The ~X~ is the vector argument corresponding to the ~X~ argument in
+the Fortran definition (see below).
+The function should be defined with Fortran signature:
+#+begin_src f90
    FUNCTION FUNCA(X,X1,X2)
    DOUBLE PRECISION X,X1,X2,FUNCA
    DIMENSION X(9),X1(9),X2(9,9)    ! dimension must be 9.
    ...
- #+end_src
-
-In abbreviated code, the function is referenced with a single
-argument, either a (scalar) expression  or a vector.  Certain reserved
-names such as VECTRA, VECTRB, etc.  may be used in the function
-definition, but they are not passed to the function as arguments. The
-function returns =FUNCx= and has three arguments:
-
+#+end_src
   - =X=:  input argument (can be a vector).
-  - =X1=:  =X1(n)= is  the  first-partial  derivative  of  the  function  with
-      respect to the nth element of =X=, =X(n)=.
-      If  the  value  of =X(n)= is not value of a random variable, =X1(n)= need not be set.
+  - =X1=:  =X1(n)= is  the  first-order partial derivative of the function with
+      respect =X(n)=. If  the  value  of =X(n)= is not value of a random variable, =X1(n)= need not be set.
       If the argument X is a (scalar) expression, only X1(1) is needed.
   - =X2=: =X2(n,m)= is the second-partial derivative  of  the  function  with
       respect to the nth and mth elements of the argument.
@@ -407,39 +352,37 @@ function returns =FUNCx= and has three arguments:
     the value of =X2(n,m)= is needed, then the value of =X2(m,n)=  is
     needed  as  well,  even though these two values will be identical.
 
- The  Fortran  code  for  the functions should be placed in one or more
- files.  Suppose there is one such file and its name  is funcfile.   It
- should be listed on the $SUBROUTINES record.  It may contain more than
- one FUNCTION.  E.g.,
- #+begin_src perl
- $SUBROUTINES ... OTHER=funcfile
- #+end_src
-
-If the abbreviated code uses one of these reserved function names, but
- the  user  does  not  supply the code via $SUBR OTHER, the NONMEM
- executable will be created with an  error  message  in  the
- report file such as:
- #+begin_src
- FUNCA WAS CALLED, BUT NO CODE WAS SUPPLIED.
- #+end_src
-
-(See Abbreviated function example).
-
-In NONMEM v7.4+, the  $ABBR  FUNCTION  allows the user to declare the
-name of the function, the name of the vector of input arguments (which
-is of no use to the  function), and the length of the vector of input
-arguments, which is passed to the function as argument NDIM.  Constant
-NVECX  in  SIZES gives the maximum value size of the vector of input
-arguments.
-
+The  Fortran  code  for  the functions should be placed in one or more files.  Suppose there is one such file and its name  is funcfile.   It should be listed on the $SUBROUTINES record.  It may contain more than one FUNCTION,  e.g.,
 #+begin_src perl
- $ABBR FUNCTION function_name(input_vector_name,dimension,usage)
+ $SUBROUTINES ... OTHER=funcfile
+#+end_src
+If the reserved function names are used without but not define by ~$SUBR OTHER~, NONMEM
+will emit error such as:
+#+begin_src
+ FUNCA WAS CALLED, BUT NO CODE WAS SUPPLIED.
 #+end_src
 
-(See [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]]).
+NONMEM provides reserved variable VECTRA, VECTRB, VECTRC, etc. to be
+used as the vector argument ~X~, e.g.
+#+begin_src perl
+  $PK
+  ;#...
+  VECTRA(1)=CL
+  VECTRA(2)=V
+  VECTRA(3)=Q
+  VECTRA(4)=V2
+  ;#...
+  W=FUNCA(VECTRA)
+#+end_src
+Note that Vectors defined outside of
+$DES (or $AES) may not  be used in the $DES (or $AES) block.
 
-The function should be coded as follows:
-
+NONMEM v7.4+ provides a more flexible way to declare functions and
+vector arguments through ~$ABBR FUNCTION~ and ~$ABBR VECTOR~ (see [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]]).
+#+begin_src perl
+ $ABBR FUNCTION function_name(input_vector_name,dimension[,usage])
+#+end_src
+and define the corresponding Fortran function
 #+begin_src f90
  FUNCTION function_name(X,X1,X2,NDIM)
  USE SIZES, ONLY: DPSIZE,ISIZE
@@ -449,51 +392,70 @@ The function should be coded as follows:
  REAL(KIND=DPSIZE):: function_name
  DIMENSION X(NDIM),X1(NDIM),X2(NDIM,NDIM)
 #+end_src
+The ~Function_name~ must be exactly as specified via ~$ABBR FUNCTION~,
+and the same as defined in Fortran source file; the
+~input_vector_name~ is the name corresponding to ~X~ in the Fortran
+definition that one can use in the abbreviated code; the ~dimension~
+is passed as ~NDIM~; ~usage~ is the maximum number of the function to
+be used in the abbreviated code (default to 999). For example, one can
+declare
+#+begin_src perl
+  $ABBR FUNCTION BIVARIATE(VBI,5,3) ;# NDIM=5, usage=3
+#+end_src
+and use it as
+#+begin_src perl
+$PK
+;#...
+  VBI(1)=RHO
+  VBI(2)=5
+  VBI(3)=6
+  VBI(4)=1
+  VBI(5)=1
+  BV=BIVARIATE(VBI)
+#+end_src
+Alternatively, one can declare a vector with ~$ABBR VECTOR~ and use it
+in the functions. In this case, use "*" for the function argument,
+e.g.
+#+begin_src perl
+  $ABBR FUNCTION BIVARIATE(*,5)
+  $ABBR FUNCTION BIVARIATEQ(*,10)
+  $ABBR VECTOR VQI(15)
+  ;#...
+  $PK
+    VQI(1)=RHO
+    VQI(2)=MX
+    BVAL=BIVARIATE(VQI)
+    RVAL=BIVARIATEQ(VQI)
+    VECTRA(1)=RHO
+    VECTRA(2)=MX2
+    YVAL=FUNCB(VECTRA)
+    QVAL=BIVARIATEQ(VECTRA)
+#+end_src
+Note that ~VQI~ is shared by the two functions. As shown one can also
+use the old pattern.
 
-Function_name  must  be  exactly as specified via $ABBR FUNCTION.  The
-value coded as "dimension" is passed to the function  as  NDIM.   (The
-value coded as "usage" is optional and does not appear in code for the
-function.)
-
-The value of the function is to be stored  in  function_name.
-Otherwise, the function is coded exactly as described above, with X1
-and X2 as output arguments. The input_vector_name is never used in
-the  Fortran code for the function.
-
-If FUNCA, FUNCB, FUNCC, etc.  is defined without a subscript, it  is
-understood  to  be a simple variable, and then it may appear as such
-as a right-hand quantity.  If FUNCx appears for the first time as  a
-right-hand  quantity, it is understood to be the reserved name of an
-abbreviated function, and then it must include  a  single  argument,
-e.g.   FUNCA(VECTRA)) or FUNCA(THETA(1)).  Complete FORTRAN code for
-an abbreviated function is supplied by  the  user  (see [[file:/docs/reference-manual/abbr/#abbreviated-function][abbreviated function]]).
-
-
-** Pseudo assignment
-
-   Pseudo-assignment  statements  are optional and provide certain special instructions.  If present, they must appear (in any  order)  at
-   the beginning of a record, before the rest of the essential abbreviated code comprising that record.  They may be enclosed in parentheses, but two or more pseudo-assignment statements enclosed by parentheses must be separated by a semicolon ";".  The following  pseudostatement may be used in all records except $MIX.
-
-   COMRES=-1  :  All  quantities  defined in abbreviated code are to be
-   stored locally; they are not to be stored  in  the  (global)  MODULE
-   NMPRD4.
-   (Variables  in  MODULE  NMPRD4 can be used for communication between
-   various user-routines, and can be displayed in tables  and  scatterplots.)
-
-   See  the  entries for specific records for information about pseudo-assignment statements special to those records.
+** Pseudo-assignment
+Pseudo-assignment statements provide special instructions and must
+appear at the beginning of a control record.  They may be enclosed in
+parentheses. Multiple pseudo-assignment statements enclosed by
+parentheses must be semicolon-separated. A common example (may be used
+in all records except $MIX) is
+#+begin_src f90
+COMRES=-1
+#+end_src
+It specifies that all quantities  defined in abbreviated code are to
+be stored locally instead of by default in the (global) MODULE NMPRD4.
+(Variables  in  MODULE  NMPRD4 can be used for communication between
+various user-routines, and can be displayed in tables and
+scatterplots.)
 
 ** Reserved variables
 Entries for $PRED, $PK,  $ERROR,  $DES,
 $AES, $AESINITIAL, and $TOL describe the reserved variable names for
-these abbreviated codes.
+these abbreviated codes. A reserved variable name cannot be used for user-defined variables
+unless the pseudo-assignment statement ~COMRES=-1~ is used.
 
-A variable name that is reserved in an abbreviated code may  not  be
-used as the name of a variable defined in this code, or in any other
-abbreviated code unless the pseudo-assignment statement COMRES=-1 is
-used (in some code).  If a reserved variable name is inappropriately
-used, NM-TRAN will generate an error message.
-
-See a list of reserved variables [[/docs/reference-manual/api/modules/#module-variables-list][here]], and their details in [[file:/docs/reference-manual/api/variables/][variables]].
+See a list of reserved variables in [[file:/docs/reference-manual/api/modules/#module-variables-list][Module variables]], and details in [[file:/docs/reference-manual/api/variables/][variables]].
 
 ** Subscripts
 Subscripts may be used with user-defined variables that are declared

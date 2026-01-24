@@ -1,0 +1,128 @@
+---
+title: "User-defined functions"
+author: ["Yi Zhang"]
+draft: false
+bookCollapseSection: false
+---
+{{< katex >}}{{< /katex >}}
+
+* User-defined functions
+In this example we implementation a [[file:/docs/reference-manual/abbr/#abbreviated-function][user-defined function]] for the
+one-compartment model. The function takes time and elimination rate
+constant arguments and outputs the drug amount a given time, so that one can use
+it as
+#+begin_src perl
+  $PRED
+    ;#...
+    VECTRA(1)=THETA(1)*EXP(ETA(1))
+    VECTRA(2)=TIME
+    ;#...
+    A=DOSE*FUNCA(VECTRA)
+    ;#...
+#+end_src
+We define the function in Fortran as below.
+#+begin_src f90
+  FUNCTION FUNCA(X,X1,X2)
+    ! Implements the One Compartment Linear model
+    USE SIZES, ONLY: DPSIZE
+    REAL(KIND=DPSIZE), INTENT(IN)     :: X
+    REAL(KIND=DPSIZE), INTENT(IN OUT) :: X1,X2
+    REAL(KIND=DPSIZE) :: FUNCA
+    DIMENSION :: X(9),X1(9),X2(9,9)
+    REAL(KIND=DPSIZE) :: EXPT
+    ! THE FUNCTION ITSELF
+    EXPT=EXP(-X(1)*X(2))
+    FUNCA=EXPT
+    ! 1ST. PARTIALS
+    X1(1)=-EXPT*X(2)
+    X1(2)=-EXPT*X(1)
+    ! 2ND. PARTIALS
+    X2(1,1)=EXPT*X(2)*X(2)
+    X2(1,2)=EXPT*X(1)*X(2)
+    X2(2,1)=EXPT*X(1)*X(2)
+    X2(2,2)=EXPT*X(1)*X(1)
+    RETURN
+  END FUNCTION FUNCA
+#+end_src
+Note that the function definition requires calculation of the first-
+and second-order derivatives with respect to the arguments
+(elimination rate and time in this case).
+
+To provide the above function definition (assumed stored in file
+"ONE_COMPARTMENT_LINEAR.f90") to NONMEM, we supply its file to NONMEM
+in $SUBROUTINE record:
+#+begin_src perl
+ $SUBROUTINES OTHER=ONE_COMPARTMENT_LINEAR.f90
+#+end_src
+
+To to make the model more readable, one can ~$ABBREVIATED REPLACE~:
+#+begin_src perl
+ $ABBR REPLACE ONE_COMPARTMENT_LINEAR=FUNCA
+    ...
+ $PRED
+    ...
+    VECTRA(1)=THETA(1)*EXP(ETA(1))
+    VECTRA(2)=TIME
+    ...
+    A=DOSE*ONE_COMPARTMENT_LINEAR(VECTRA)
+#+end_src
+
+Alternatively, one can use ~$ABBREVIATED FUNCTION~ to declare the function
+#+begin_src perl
+ $ABBR FUNCTION ONE_COMPARTMENT_LINEAR(KTIME,2)
+      ...
+ $PRED
+    ...
+    KTIME(1)=THETA(1)*EXP(ETA(1))
+    KTIME(2)=TIME
+    ...
+    A=DOSE*ONE_COMPARTMENT_LINEAR(KTIME)
+#+end_src
+Note that here the vector variable is no longer the
+reserved ~VECTRA~ but the ~KTIME~ declared in ~$ABBR FUNCTION~. In
+this case the Fortran definition must match the declared function name:
+#+begin_src f90
+  FUNCTION ONE_COMPARTMENT_LINEAR(X,X1,X2)
+    USE SIZES, ONLY: DPSIZE
+    REAL(KIND=DPSIZE), INTENT(IN)     :: X
+    REAL(KIND=DPSIZE), INTENT(IN OUT) :: X1,X2
+    REAL(KIND=DPSIZE) :: ONE_COMPARTMENT_LINEAR
+    DIMENSION :: X(9),X1(9),X2(9,9)
+    ! ...
+#+end_src
+
+Multiple  functions can be used with the ~$ABBREVIATED REPLACE~
+feature, same for ~$ABBREVIATED FUNCTION~. Suppose two functions,
+~RED~ and ~GREEN~ are needed:
+#+begin_src perl
+ $SUBR OTHER=red.f90 OTHER=green.f90
+  ...
+ $ABBR REPLACE RED=FUNCA
+ $ABBR REPLACE GREEN=FUNCB
+  ...
+ $PRED
+  ...
+    VECTRA(1)=THETA(1)*EXP(ETA(1))
+    VECTRA(2)=TIME
+    A=DOSE*RED(VECTRA)
+    B=DOSE*GREEN(VECTRA)
+  ...
+#+end_src
+With the file "red.f90" for the definition for ~FUNCA~, and "green.f90" for ~FUNCB~.
+
+Similar to ~$ABBREVIATED FUNCTION~, the ~$ABBREVIATED REPLACE~ can be
+used  to  provide  more meaningful  names for reserved vectors. For
+example, suppose the arguments of the functions are different vectors.
+#+begin_src perl
+ $ABBR REPLACE RED=FUNCA, REDARG=VECTRA
+ $ABBR REPLACE GREEN=FUNCB, GREENARG=VECTRB
+  ...
+ $PRED
+  ...
+    REDARG(1)=...
+    REDARG(2)=...
+    GREENARG(1)=...
+    GREENARG(2)=...
+    A=DOSE*RED(REDARG)
+    B=DOSE*GREEN(GREENARG)
+#+end_src

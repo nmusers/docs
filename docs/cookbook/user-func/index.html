@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content=" User-defined functions In this example we implementation a user-defined function for the one-compartment model. The function takes time and elimination rate constant arguments and outputs the drug amount a given time, so that one can use it as
+1 2 3 4 5 6 7 $PRED ;#... VECTRA(1)=THETA(1)*EXP(ETA(1)) VECTRA(2)=TIME ;#... A=DOSE*FUNCA(VECTRA) ;#... We define the function in Fortran as below.
+">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="https://nmusers.github.io/docs/cookbook/user-func/">
+  <meta property="og:site_name" content="NONMEM Documentation">
+  <meta property="og:title" content="User-defined functions">
+  <meta property="og:description" content="User-defined functions In this example we implementation a user-defined function for the one-compartment model. The function takes time and elimination rate constant arguments and outputs the drug amount a given time, so that one can use it as
+1 2 3 4 5 6 7 $PRED ;#... VECTRA(1)=THETA(1)*EXP(ETA(1)) VECTRA(2)=TIME ;#... A=DOSE*FUNCA(VECTRA) ;#... We define the function in Fortran as below.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="cookbook">
+
+
+  <meta itemprop="name" content="User-defined functions">
+  <meta itemprop="description" content="User-defined functions In this example we implementation a user-defined function for the one-compartment model. The function takes time and elimination rate constant arguments and outputs the drug amount a given time, so that one can use it as
+1 2 3 4 5 6 7 $PRED ;#... VECTRA(1)=THETA(1)*EXP(ETA(1)) VECTRA(2)=TIME ;#... A=DOSE*FUNCA(VECTRA) ;#... We define the function in Fortran as below.">
+  <meta itemprop="wordCount" content="424">
+
+<title>User-defined functions | NONMEM Documentation</title>
+<link rel="icon" href="/docs/favicon.png" >
+<link rel="manifest" href="/docs/manifest.json">
+<link rel="canonical" href="https://nmusers.github.io/docs/cookbook/user-func/">
+<link rel="stylesheet" href="/docs/book.min.b4e9a3f1fc56dfa4d9eec66a782dc7a365da01b7875025ed76cc3438fcc58684.css" integrity="sha256-tOmj8fxW36TZ7sZqeC3Ho2XaAbeHUCXtdsw0OPzFhoQ=" crossorigin="anonymous">
+
+
+  <script defer src="/docs/fuse.min.js"></script>
+  <script defer src="/docs/en.search.min.a1ffc8b5371adfb872b0c277b633d13e8c38c714c34a557cf5ea9f2bd002e54c.js" integrity="sha256-of/ItTca37hysMJ3tjPRPow4xxTDSlV89eqfK9AC5Uw=" crossorigin="anonymous"></script>
+
+
+
+  
+</head>
+<body dir="ltr" class="book-kind-page book-type-cookbook">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    
+<aside class="book-menu">
+  <div class="book-menu-content">
+    
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/docs/"><span>NONMEM Documentation</span>
+  </a>
+</h2>
+
+
+<div class="book-search hidden">
+  <input id="book-search-input" type="text" 
+    placeholder="Search"
+    aria-label="Search"
+    maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+<script>document.querySelector(".book-search").classList.remove("hidden")</script>
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/quick-start/" class="">
+      Quick start</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/" class="">
+      User guide</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/introduction/" class="">
+      Introduction</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-44a5ffdb7f06989151f3c4e11083520b" class="toggle"  />
+    <label for="section-44a5ffdb7f06989151f3c4e11083520b" class="flex">
+      <a href="/docs/user-guide/fundamentals/" class="">
+        Fundamentals</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/population/" class="">
+      Population models</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/pkode/" class="">
+      PK and ODEs</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/fundamentals/likelihood/" class="">
+      Likelihood and MLE</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-ac8225f98f95bed71798e0be7ea190cc" class="toggle"  />
+    <label for="section-ac8225f98f95bed71798e0be7ea190cc" class="flex">
+      <a href="/docs/user-guide/nmtran/" class="">
+        Data and model</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/data/" class="">
+      Data</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/control/" class="">
+      Control records</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/nmfe/" class="">
+      Running NONMEM</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/nmtran/output/" class="">
+      Output</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-72ba181ec78d31040713db91ccee5ae1" class="toggle"  />
+    <label for="section-72ba181ec78d31040713db91ccee5ae1" class="flex">
+      <a href="/docs/user-guide/predpp/" class="">
+        PopPK models</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/population_model/" class="">
+      PK parameter model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/general_linear_model/" class="">
+      General linear model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/mm/" class="">
+      Michaelis–Menten elimination</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/pkpd/" class="">
+      PKPD model</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/plasma-urine/" class="">
+      Plasma-urine examples</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/des/" class="">
+      Differential equations</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/exogenous/" class="">
+      Exogenous and endogenous doses</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-3588eec4ae7b05621971d2a7883fa0d8" class="toggle"  />
+    <label for="section-3588eec4ae7b05621971d2a7883fa0d8" class="flex">
+      <a href="/docs/user-guide/advanced/" class="">
+        Advanced topics</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/mu_model/" class="">
+      MU referencing</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/bayesian/" class="">
+      Bayesian methods</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/advanced/discrete/" class="">
+      Discrete observations</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/" class="">
+      Reference manual</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-377f7f7cc3b0210dc0b24704642ecae6" class="toggle"  />
+    <label for="section-377f7f7cc3b0210dc0b24704642ecae6" class="flex">
+      <a href="/docs/reference-manual/control-records/" class="">
+        Control records</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/abbrev/" class="">
+      $ABBREVIATED</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/aes/" class="">
+      $AES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/aesinit/" class="">
+      $AESINIT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/anneal/" class="">
+      $ANNEAL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/bind/" class="">
+      $BIND</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/chain/" class="">
+      $CHAIN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/contr/" class="">
+      $CONTR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/covar/" class="">
+      $COVARIANCE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/data/" class="">
+      $DATA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/default/" class="">
+      $DEFAULT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/des/" class="">
+      $DES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/design/" class="">
+      $DESIGN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/error/" class="">
+      $ERROR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/estimation/" class="">
+      $ESTIMATION</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/etasphis/" class="">
+      $ETAS, $PHIS</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/format/" class="">
+      $FORMAT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/include/" class="">
+      $INCLUDE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/index/" class="">
+      $INDEX</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/infn/" class="">
+      $INFN</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/input/" class="">
+      $INPUT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/ldfold/" class="">
+      $LDFOLD</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/level/" class="">
+      $LEVEL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/mix/" class="">
+      $MIX</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/model/" class="">
+      $MODEL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/msfi/" class="">
+      $MSFI</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/nonpara/" class="">
+      $NONPARAMETRIC</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/omega/" class="">
+      $OMEGA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/omit/" class="">
+      $OMIT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/pk/" class="">
+      $PK</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/pred/" class="">
+      $PRED</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/prior/" class="">
+      $PRIOR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/problem/" class="">
+      $PROBLEM</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/rcov/" class="">
+      $RCOV, $RCOVI</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/scatter/" class="">
+      $SCATTERPLOT</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/sigma/" class="">
+      $SIGMA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/simulation/" class="">
+      $SIMULATION</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/sizes/" class="">
+      $SIZES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/subroutines/" class="">
+      $SUBROUTINES</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/super/" class="">
+      $SUPER</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/table/" class="">
+      $TABLE</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/theta/" class="">
+      $THETA</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/thetai/" class="">
+      $THETAI, $THETAR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/tol/" class="">
+      $TOL</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/control-records/warning/" class="">
+      $WARNINGS</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/abbr/" class="">
+      Abbreviated code</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/data/" class="">
+      Data</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/files/" class="">
+      Output and files</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/" class="">
+      Internals &amp; API</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/modules/" class="">
+      Modules</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/subroutines/" class="">
+      Subroutines</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/reference-manual/api/variables/" class="">
+      Variables</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-4f6a10297c79017aeda62ac22654936a" class="toggle" checked />
+    <label for="section-4f6a10297c79017aeda62ac22654936a" class="flex">
+      <a href="/docs/cookbook/" class="">
+        Cookbook</a>
+      <img src="/docs/icons/chevron-right.svg" class="book-icon" alt="Expand" />
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/mtime/" class="">
+      Change $DES at given time</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/accuracy/" class="">
+      Accuracy control</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/prior/" class="">
+      Bayesian Priors</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/steady_state/" class="">
+      Empirical steady state</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/ignore-accept/" class="">
+      IGNORE/ACCEPT data records</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/indi/" class="">
+      Indicator variables</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/interpolate/" class="">
+      Interpolate covariates</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/etabar_mix/" class="">
+      Mixture model: ETABAR</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/multidose/" class="">
+      Multiple dose types</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/nested/" class="">
+      Nested random effects</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/mcmc-post/" class="">
+      Postprocessing MCMC draws</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/repeated_records/" class="">
+      Repeated Observation Records</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/msf-warmup/" class="">
+      Reuse NUTS warmup results</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/saem-extra-request/" class="">
+      SAEM_EXTRA variables</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/time_vary/" class="">
+      Time-varying covariates</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/user-func/" class="active">
+      User-defined functions</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+
+  </div>
+</aside>
+ 
+
+    <div class="book-page">
+      <header class="book-header hidden">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/docs/icons/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <h3>User-defined functions</h3>
+
+  <label for="toc-control">
+    
+    <img src="/docs/icons/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden">
+    
+  
+<nav id="TableOfContents">
+<ul>
+<li><a href="#headline-1">User-defined functions</a>
+</li>
+</ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown book-article">
+<link rel="stylesheet" href="/docs/katex/katex.min.css" /><script defer src="/docs/katex/katex.min.js"></script><script defer src="/docs/katex/auto-render.min.js" onload="renderMathInElement(document.body, {&#34;delimiters&#34;:[{&#34;left&#34;:&#34;$$&#34;,&#34;right&#34;:&#34;$$&#34;,&#34;display&#34;:true},{&#34;left&#34;:&#34;\\(&#34;,&#34;right&#34;:&#34;\\)&#34;,&#34;display&#34;:false},{&#34;left&#34;:&#34;\\[&#34;,&#34;right&#34;:&#34;\\]&#34;,&#34;display&#34;:true},{&#34;left&#34;:&#34;\\begin{equation}&#34;,&#34;right&#34;:&#34;\\end{equation}&#34;,&#34;display&#34;:true}]});"></script>
+<div id="outline-container-headline-1" class="outline-2">
+<h2 id="headline-1">
+User-defined functions
+</h2>
+<div id="outline-text-headline-1" class="outline-text-2">
+<p>In this example we implementation a <a href="/docs/reference-manual/abbr/#abbreviated-function">user-defined function</a> for the
+one-compartment model. The function takes time and elimination rate
+constant arguments and outputs the drug amount a given time, so that one can use
+it as</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$PRED</span>
+</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e">#...</span>
+</span></span><span style="display:flex;"><span>    VECTRA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))
+</span></span><span style="display:flex;"><span>    VECTRA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span>TIME
+</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e">#...</span>
+</span></span><span style="display:flex;"><span>    A<span style="color:#ff6ac1">=</span>DOSE<span style="color:#ff6ac1">*</span>FUNCA(VECTRA)
+</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e">#...</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>We define the function in Fortran as below.</p>
+<div class="src src-f90">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>  <span style="color:#ff6ac1">FUNCTION</span> FUNCA(X,X1,X2)
+</span></span><span style="display:flex;"><span>    <span style="color:#78787e">! Implements the One Compartment Linear model
+</span></span></span><span style="display:flex;"><span><span style="color:#78787e"></span>    <span style="color:#ff6ac1">USE</span> SIZES, <span style="color:#ff6ac1">ONLY</span>: DPSIZE
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE), <span style="color:#ff6ac1">INTENT</span>(IN)     <span style="color:#ff5c57">::</span> X
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE), <span style="color:#ff6ac1">INTENT</span>(IN OUT) <span style="color:#ff5c57">::</span> X1,X2
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE) <span style="color:#ff5c57">::</span> FUNCA
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">DIMENSION</span> <span style="color:#ff5c57">::</span> X(<span style="color:#ff9f43">9</span>),X1(<span style="color:#ff9f43">9</span>),X2(<span style="color:#ff9f43">9</span>,<span style="color:#ff9f43">9</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE) <span style="color:#ff5c57">::</span> EXPT
+</span></span><span style="display:flex;"><span>    <span style="color:#78787e">! THE FUNCTION ITSELF
+</span></span></span><span style="display:flex;"><span><span style="color:#78787e"></span>    EXPT<span style="color:#ff6ac1">=</span><span style="color:#ff5c57">EXP</span>(<span style="color:#ff6ac1">-</span>X(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>X(<span style="color:#ff9f43">2</span>))
+</span></span><span style="display:flex;"><span>    FUNCA<span style="color:#ff6ac1">=</span>EXPT
+</span></span><span style="display:flex;"><span>    <span style="color:#78787e">! 1ST. PARTIALS
+</span></span></span><span style="display:flex;"><span><span style="color:#78787e"></span>    X1(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=-</span>EXPT<span style="color:#ff6ac1">*</span>X(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>    X1(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=-</span>EXPT<span style="color:#ff6ac1">*</span>X(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#78787e">! 2ND. PARTIALS
+</span></span></span><span style="display:flex;"><span><span style="color:#78787e"></span>    X2(<span style="color:#ff9f43">1</span>,<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>EXPT<span style="color:#ff6ac1">*</span>X(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">*</span>X(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>    X2(<span style="color:#ff9f43">1</span>,<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span>EXPT<span style="color:#ff6ac1">*</span>X(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>X(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>    X2(<span style="color:#ff9f43">2</span>,<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>EXPT<span style="color:#ff6ac1">*</span>X(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>X(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>    X2(<span style="color:#ff9f43">2</span>,<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span>EXPT<span style="color:#ff6ac1">*</span>X(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>X(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">RETURN</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">END</span> <span style="color:#ff6ac1">FUNCTION</span> FUNCA</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>Note that the function definition requires calculation of the first-
+and second-order derivatives with respect to the arguments
+(elimination rate and time in this case).</p>
+<p>
+To provide the above function definition (assumed stored in file
+&#34;ONE_COMPARTMENT_LINEAR.f90&#34;) to NONMEM, we supply its file to NONMEM
+in $SUBROUTINE record:</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span> <span style="color:#ff5c57">$SUBROUTINES</span> OTHER<span style="color:#ff6ac1">=</span>ONE_COMPARTMENT_LINEAR<span style="color:#ff6ac1">.</span>f90</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>
+To to make the model more readable, one can <code>$ABBREVIATED REPLACE</code>:</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span> <span style="color:#ff5c57">$ABBR</span> REPLACE ONE_COMPARTMENT_LINEAR<span style="color:#ff6ac1">=</span>FUNCA
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff5c57">$PRED</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>    VECTRA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))
+</span></span><span style="display:flex;"><span>    VECTRA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span>TIME
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>    A<span style="color:#ff6ac1">=</span>DOSE<span style="color:#ff6ac1">*</span>ONE_COMPARTMENT_LINEAR(VECTRA)</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>
+Alternatively, one can use <code>$ABBREVIATED FUNCTION</code> to declare the function</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span> <span style="color:#ff5c57">$ABBR</span> FUNCTION ONE_COMPARTMENT_LINEAR(KTIME,<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff5c57">$PRED</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>    KTIME(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))
+</span></span><span style="display:flex;"><span>    KTIME(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span>TIME
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>    A<span style="color:#ff6ac1">=</span>DOSE<span style="color:#ff6ac1">*</span>ONE_COMPARTMENT_LINEAR(KTIME)</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>Note that here the vector variable is no longer the
+reserved <code>VECTRA</code> but the <code>KTIME</code> declared in <code>$ABBR FUNCTION</code>. In
+this case the Fortran definition must match the declared function name:</p>
+<div class="src src-f90">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>  <span style="color:#ff6ac1">FUNCTION</span> ONE_COMPARTMENT_LINEAR(X,X1,X2)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">USE</span> SIZES, <span style="color:#ff6ac1">ONLY</span>: DPSIZE
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE), <span style="color:#ff6ac1">INTENT</span>(IN)     <span style="color:#ff5c57">::</span> X
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE), <span style="color:#ff6ac1">INTENT</span>(IN OUT) <span style="color:#ff5c57">::</span> X1,X2
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE) <span style="color:#ff5c57">::</span> ONE_COMPARTMENT_LINEAR
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">DIMENSION</span> <span style="color:#ff5c57">::</span> X(<span style="color:#ff9f43">9</span>),X1(<span style="color:#ff9f43">9</span>),X2(<span style="color:#ff9f43">9</span>,<span style="color:#ff9f43">9</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff5c57">!</span> ...</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>
+Multiple  functions can be used with the <code>$ABBREVIATED REPLACE</code>
+feature, same for <code>$ABBREVIATED FUNCTION</code>. Suppose two functions,
+<code>RED</code> and <code>GREEN</code> are needed:</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span> <span style="color:#ff5c57">$SUBR</span> OTHER<span style="color:#ff6ac1">=</span>red<span style="color:#ff6ac1">.</span>f90 OTHER<span style="color:#ff6ac1">=</span>green<span style="color:#ff6ac1">.</span>f90
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff5c57">$ABBR</span> REPLACE RED<span style="color:#ff6ac1">=</span>FUNCA
+</span></span><span style="display:flex;"><span> <span style="color:#ff5c57">$ABBR</span> REPLACE GREEN<span style="color:#ff6ac1">=</span>FUNCB
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff5c57">$PRED</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>    VECTRA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))
+</span></span><span style="display:flex;"><span>    VECTRA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span>TIME
+</span></span><span style="display:flex;"><span>    A<span style="color:#ff6ac1">=</span>DOSE<span style="color:#ff6ac1">*</span>RED(VECTRA)
+</span></span><span style="display:flex;"><span>    B<span style="color:#ff6ac1">=</span>DOSE<span style="color:#ff6ac1">*</span>GREEN(VECTRA)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">...</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>With the file &#34;red.f90&#34; for the definition for <code>FUNCA</code>, and &#34;green.f90&#34; for <code>FUNCB</code>.</p>
+<p>
+Similar to <code>$ABBREVIATED FUNCTION</code>, the <code>$ABBREVIATED REPLACE</code> can be
+used  to  provide  more meaningful  names for reserved vectors. For
+example, suppose the arguments of the functions are different vectors.</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span> <span style="color:#ff5c57">$ABBR</span> REPLACE RED<span style="color:#ff6ac1">=</span>FUNCA, REDARG<span style="color:#ff6ac1">=</span>VECTRA
+</span></span><span style="display:flex;"><span> <span style="color:#ff5c57">$ABBR</span> REPLACE GREEN<span style="color:#ff6ac1">=</span>FUNCB, GREENARG<span style="color:#ff6ac1">=</span>VECTRB
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff5c57">$PRED</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>    REDARG(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=...</span>
+</span></span><span style="display:flex;"><span>    REDARG(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=...</span>
+</span></span><span style="display:flex;"><span>    GREENARG(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=...</span>
+</span></span><span style="display:flex;"><span>    GREENARG(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=...</span>
+</span></span><span style="display:flex;"><span>    A<span style="color:#ff6ac1">=</span>DOSE<span style="color:#ff6ac1">*</span>RED(REDARG)
+</span></span><span style="display:flex;"><span>    B<span style="color:#ff6ac1">=</span>DOSE<span style="color:#ff6ac1">*</span>GREEN(GREENARG)</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+<div>
+
+</div>
+
+<div>
+
+</div>
+
+</div>
+
+
+
+  
+
+
+
+  
+  
+  
+  <div class="flex flex-wrap justify-between">
+    <span>
+    
+      <a href="/docs/cookbook/time_vary/" class="flex align-center">
+        <img src="/docs/icons/backward.svg" class="book-icon" alt="Backward" />
+        <span>Time-varying covariates</span>
+      </a>
+    
+    </span>
+    <span>
+    
+    </span>
+  </div>
+  
+
+
+ 
+        
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+        
+        
+  
+ 
+        
+  
+  
+    <script>(function(){document.querySelectorAll("pre:has(code)").forEach(e=>{e.addEventListener("click",e.focus),e.addEventListener("copy",function(t){if(t.preventDefault(),navigator.clipboard){const t=window.getSelection().toString()||e.textContent;navigator.clipboard.writeText(t)}})})})()</script>
+  
+
+      </footer>
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+  
+  <aside class="book-toc">
+    <div class="book-toc-content">
+      
+  
+<nav id="TableOfContents">
+<ul>
+<li><a href="#headline-1">User-defined functions</a>
+</li>
+</ul>
+</nav>
+
+
+
+    </div>
+  </aside>
+  
+ 
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
