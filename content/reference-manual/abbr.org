@@ -18,24 +18,45 @@ another record (that begins with "$"), or the end of the
 control stream. The code blocks are case-insensitive (NM72).
 
 ** Comments
-Semicolon character ";" marks the beginning of comments so that the
+Semicolon character ~;~ marks the beginning of comments so that the
  rest of the line is ignored.
 
 ** Line continuation
-Character "&" at the end of a line indicates continuation to the next line.
+Character ~&~ at the end of a line indicates continuation to the next line.
 
-** Variables
-In NONMEM v7+ a user-defined variable can have a name consisting  of
-1-20 (specified by [[file:/docs/reference-manual/api/modules/#sizes-fsizes-prsizes][constant SD in SIZES]]) letters (A-Z), numerals
-(0-9), understore ("_"), and begins
-with a letter. It cannot be one of the reserved variable names or keywords.
-A user-defined variable is of type double precision real. See
-"subscripts" section below on the use of integer variables.
-
-A user-define variable is used as the left-hand quantities in
-assignment.
+** Types
+*** Reals
+User-defined real variables do not require declaration. Using a
+non-reserved (see "Reserved variables" below) word automatically
+declares it a (double precision) real variable. For example, ~TVCL~
+below is recoganized as a real variable.
+#+begin_src perl
+  $PK
+  TVCL=THETA(1)
+#+end_src
+*** Integers
+Integers variables are declared by (see [[file:/docs/reference-manual/control-records/abbrev/#declare][$ABBREVIATED DECLARE]] for details)
+#+begin_src perl
+  $ABBR DECLARE INTEGER variable_name
+#+end_src
+A special index integer declared by
+#+begin_src perl
+  $ABBR DECLARE DOWHILE variable_name
+#+end_src
+must be used for indices of ~DOWHILE~ loops. See "Index" section below.
+*** Real vectors
+One-dimensional real vector can be defined using
+#+begin_src perl
+$ABBR VECTOR variable_name (dimension)
+#+end_src
 
 ** Assignment
+A user-defined variable can have a name of length
+1-20 (length limit defined by [[file:/docs/reference-manual/api/modules/#sizes-fsizes-prsizes][constant SD in SIZES]]),
+consisting of letters (A-Z), numerals (0-9), understore (_), and beginning
+with a letter. It cannot be one of the reserved variable names or
+keywords (see "Reserved variables" below).
+
 A user-defined variable =A= is given value =B= through assignment state =A=B=.
 The right-hand (RHS) quantity =B= can be an expression of:
   - previously  defined  quantities (see [[file:/docs/reference-manual/control-records/abbrev][$ABBREVIATED]]);
@@ -75,12 +96,13 @@ respective to ETA, EPS, and ERR. However, special cases require attention:
     simulation block, initialization block, finalization  block, or
     ~PRED_IGNORE_DATA~ block (see [[file:/docs/reference-manual/abbr/#code-blocks][Code blocks]] below.)
 
-Left-hand quantities =A= can be:
-
+In addition to user-defined variables, left-hand quantities =A= can
+also be:
 - VECTRA(n), VECTRB(n), VECTRC(n): they become elements of
-  pre-defined  vectors  VECTRA,  VECTRB, VECTRC.   If  VECTRA, VECTRB,
-  VECTRC is defined without a subscript, it is understood to be a
-  simple variable.  A subscript  must  be  an integer constant, or a
+  pre-defined  vectors  VECTRA,  VECTRB, VECTRC. If an variable
+  ~VECTRA~ (same for ~VECTRB~, ~VECTRC~, etc) is used without an
+  index, it referrs to a different scalar variable.
+  An index  must  be  an integer constant, or a
   character string that is replaced by an integer constant using the
   $ABBR REPLACE feature.  Whereas  once  it  is defined,  a vector
   element may be used as a right-hand quantity -- in the same way as
@@ -94,12 +116,9 @@ Left-hand quantities =A= can be:
    Even if assigned with a random variables,
    NONMEM does not compute derivatives of =COM()= elements
    with respect to the base random variables).
-- User-defined variables.
 
-Except  in  certain  blocks  of  abbreviated code (i.e. a simulation
-block, an initialization block, or a finalization block), a label in
-an  $INPUT record may not appear on the left in an assignment
-statement.
+In simulation blocks, initialization blocks, finalization blocks, a label
+from $INPUT record can be on the left in an assignment statement.
 
 See also pseudo-assignment below.
 
@@ -130,7 +149,7 @@ the example.
 - DOWHILE  blocks  may  not  include IF/THEN/ENDIF blocks.  Only
   single-statement IF statements are permitted.
 
-- Subscripts variables may be used within the block.  These  are  variables  that  have  been  declared arrays using the $ABBR statement, or subscripted reserved variables such as THETA.  Subscripts may be integer  expressions  using declared integer variables and integer values. E.g.
+- Index variables may be used within the block.  These  are  variables  that  have  been  declared arrays using the $ABBR statement, or indexed reserved variables such as THETA.  Indices may be integer  expressions  using declared integer variables and integer values, e.g.
   #+begin_src perl
     $ABBR DECLARE X(10)
     $ABBR DECLARE DOWHILE ILOOP
@@ -457,11 +476,8 @@ unless the pseudo-assignment statement ~COMRES=-1~ is used.
 
 See a list of reserved variables in [[file:/docs/reference-manual/api/modules/#module-variables-list][Module variables]], and details in [[file:/docs/reference-manual/api/variables/][variables]].
 
-** Subscripts
-Subscripts may be used with user-defined variables that are declared
-   to  be  arrays using the $ABBR DECLARE record, and also with certain
-   reserved variables:
-
+** Index
+Indices may be used with user-defined variables that are declared to  be  arrays using the ~$ABBR DECLARE~ record, and also with certain reserved variables:
 #+begin_src f90
   THETA,THETAFR,SETHET,THSIMP,SETHETR,THSIMPR
   OMEGA,OMEGAF,SEOMEG,OMSIMP
@@ -472,17 +488,17 @@ Subscripts may be used with user-defined variables that are declared
   ETA, EPS, ERR                ! when used in a WRITE OR PRINT statement
 #+end_src
 
-Where a subscript is permitted or necessary, it may  be  an  integer
+Where an index is permitted or necessary, it may  be  an  integer
    expression.   An  integer  expression  is  an  integer  constant,  a
    declared integer variable that has appeared on the left  (i.e.,  has
    been  given  a  value),  a  constant defined in SIZES, an expression
    involving integer constants and  integer  variables  and  arithmetic
    operators +, -, *, /, **.  It may also be a character string that is
    replaced by an integer expression using the $ABBR  REPLACE  feature.
-   The  number of subscripts must be equal to the number of dimensions.
-   If there are two subscripts, either or  both  may  be  constants  or
-   expressions.   If  a  subscripted  variable  may be used on the left
-   side, then the subscript may also be an integer expression.  E.g.,
+   The  number of indices must be equal to the number of dimensions.
+   If there are two indices, either or  both  may  be  constants  or
+   expressions.   If  a  indexed  variable  may be used on the left
+   side, then the index may also be an integer expression.  E.g.,
 
 #+begin_src perl
    $ABBR DECLARE INTEGER IND
@@ -941,14 +957,14 @@ begins with "NONMEM_RESERVED" (case insensitive) at the beginning of
 the control record block. NONMEM provides file ~util/nonmem_reserved_general~
 that has many such variables, including ITER_REPORT, in the form of
 verbatim code:
-#+begin_src f90
+#+begin_src sh
 "C ITER_REPORT: Iteration number that is reported to output
 "C (can be negative, if during a burn period).
 "C BAYES_EXTRA, BAYES_EXTRA_REQUEST, used in example 8
 " USE NMBAYES_REAL, ONLY: OBJI
 " USE NMBAYES_INT, ONLY: ITER_REPORT,BAYES_EXTRA_REQUEST,BAYES_EXTRA
 " USE PNM_CONFIG, ONLY: PNM_NODE_NUMBER
-“ USE NM_INTERFACE, ONLY: TFI,TFD
+" USE NM_INTERFACE, ONLY: TFI,TFD
 #+end_src
 For example, to use ~nonmem_reserved_general~ in $PK, place the file
 in the present run directory, and do (examples/example8):
@@ -1090,8 +1106,10 @@ If NONMEM aborts, and k>0, a user message such as the  following  is
    statement caused NONMEM to abort when more than one  EXIT  statement
    is present in the abbreviated code.
 
-** =WRITE= and =PRINT=
-Example:
+** File and output
+Fortran statements of ~WRITE~, ~PRINT~, ~OPEN~, ~CLOSE~, and ~REWIND~
+may be used in $PRED, $INFN, $PK, $ERROR,  $DES, $AES, $AESINITIAL
+blocks, such as
 #+begin_src f90
    WRITE (50,*) 99,ID,CL,THETA(1),ETA(1)
 
@@ -1099,11 +1117,7 @@ Example:
      WRITE (55,2) BIAS
    ENDIF
 #+end_src
-
-Certain  forms of Fortran WRITE, PRINT, OPEN, CLOSE, and REWIND
-statements may be used anywhere in $PRED, $INFN, $PK, $ERROR,  $DES,
-$AES, $AESINITIAL blocks.
-
+and
 #+begin_src f90
    PRINT list ...
    PRINT *,list ...
@@ -1126,37 +1140,36 @@ if  it  is  enclosed in quotes, and may contain at most 80 characters.
 If the file is opened by NONMEM, filename  may  not  contain  embedded
 spaces, and may contain at most 71 characters.
 
-  - unit 6, n or *
+  - Unit 6, n or *
     + "6" indicates the unit connected to the NONMEM output file.
     + "n" indicates the number of an alternative unit (40<n<2000).
     + "*"  indicates  a FORTRAN system-dependent output (with most systems, this is equivalent to using unit 6, but see  the  FORTRAN documentation) With OPEN, CLOSE and REWIND, the unit may not be 6 or *.
 
-  - format *, 1, 2, 991, or 992  [fn:1] [fn:2]
+  - Format *, 1, 2, 991, or 992  [fn:1] [fn:2]
     + "*" indicates list-directed  output.  (FORTRAN  library
       routines will select a format appropriate for the current
       run-time value of the quantity when displayed.)
     + 1 or 991 requests the built-in format specification: 991  FORMAT (35F14.4)
     + 2 or 992 requests the built-in format specification: 992  FORMAT (35E15.7)
 
-  - list. A  list  of one or more right-hand quantities, i.e.,
+  - List. A  list  of one or more right-hand quantities, i.e.,
     variables or constants that may appear on the right in abbreviated
     code.   May not  include expressions or names of abbreviated
-    functions.  When subscripts are appropriate,  these  must  be
+    functions.  When indices are appropriate,  these  must  be
     integer  constants, declared  integer  variables,  or expressions
     involving such constants and variables.
 
-    With a PRINT statement, a list may also  include  character
-    constants.   A  character  constant is delimited by single or
-    double quotes (' or ").  As with any Fortran character constant, a
-    pair of  adjacent  delimiters  within the constant represents a
-    single character.  E.g.,
-    #+begin_src f90
-    PRINT *,'A isn''t B'
-    #+end_src
-    will output
-    #+begin_src
-    A isn't B
-    #+end_src
+With a PRINT statement, a list may also  include  character constants.
+A  character  constant is delimited by single or double quotes (' or
+").  As with any Fortran character constant, a pair of  adjacent
+delimiters  within the constant represents a single character,  e.g.,
+#+begin_src f90
+  PRINT *,'A isn''t B'
+#+end_src
+will output
+#+begin_src sh
+A isn't B
+#+end_src
 
     In  an  [[file:/docs/reference-manual/abbr/#initialization-finalization-block][Initialization or Finalization block]], a list may include
     elements of the OMEGA and SIGMA arrays.  In a finalization block,
@@ -1165,7 +1178,7 @@ spaces, and may contain at most 71 characters.
 
     Any array whose elements may be listed individually in a WRITE or
     PRINT  statement  may also be written in its entirety, by listing
-    it without any subscripts.  Specifically, one or more of the
+    it without any indices.  Specifically, one or more of the
     following may be included in a list:
 
   #+begin_src f90
@@ -1209,7 +1222,7 @@ spaces, and may contain at most 71 characters.
        IF (ICALL.EQ.3) WRITE (99,*) OMEGA(BLOCK),SEOMEG(BLOCK)
   #+end_src
 
- A  list  may  also  include  a vector element or the entire vector (by listing the vector without a subscript).
+ A  list  may  also  include  a vector element or the entire vector (by listing the vector without an index).
 
  The OPEN, CLOSE, and REWIND statements are part of  the  FORTRAN
  language.  For  details  (i.e.,  the  relationship  of  external
@@ -1266,17 +1279,7 @@ may be truncated:
 #+end_src
 may  be  used in all special blocks.  RETURN statements must be used
 with caution because they by-pass certain normal  final  actions  of
-the routine.
-
-** =PRED_IGNORE_DATA= block
-Another  kind  of special block is the pred_ignore_data block, which
-may be part of $PRED,$PK, or $INFN blocks.   It  uses  the  reserved
-variables  PRED_IGNORE_DATA_TEST  and  PRED_IGNORE_DATA.  By setting
-values of PRED_IGNORE_DATA=1 for certain  data  records,  it  causes
-these records to be dropped from the NONMEM data set.  Ordinary
-Fortran syntax is used in such blocks.
-
-(See [[file:/docs/reference-manual/abbr/#pred_ignore_data_block][PRED_IGNORE_DATA]] block)
+the routine. See code blocks below for its use.
 
 * Code blocks
 :PROPERTIES:
@@ -2055,7 +2058,7 @@ In addition, these rules apply:
   #+end_src
   The following variables may be referenced as right-hand quantities
   in initialization and finalization blocks.  (Note also that
-  unsubscripted arrays may appear in a WRITE statement.)
+  unindexed arrays may appear in a WRITE statement.)
 
   #+begin_src perl
      OMEGA(n,m)
@@ -2065,7 +2068,7 @@ In addition, these rules apply:
      (See write print).
 - The following variables may be referenced as right-hand quantities  in
   finalization blocks.
-  (Note also that unsubscripted arrays may appear in a WRITE statement.)
+  (Note also that unindexed arrays may appear in a WRITE statement.)
 
   #+begin_src perl
       SETHET(n)
