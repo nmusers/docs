@@ -5,6 +5,7 @@ draft: false
 bookCollapseSection: false
 weight: 15
 ---
+
 {{< katex >}}{{< /katex >}}
 
 ** General linear model
@@ -58,9 +59,51 @@ $EST MAXEVAL=450 PRINT=5
 $COV
 $TABLE ID DOSE WT TIME
 #+end_src
-Note
 - ~CALLFL=1~ indicates $PK block is only evaluated once per subject,
   at the first record of each subject.
 - Subscript "0" for /K/ is for output compartment, thus \(K_{20}\)
   is the rate of drug transport from central to a virtual output
   compartment, representing elimination rate constant.
+- The use of the DEFDOSE attribute on the following $MODEL record
+  specifies that if the CMT data item is null on a given dose event
+  record, then the dose(s) specified by that record are to be placed
+  in the depot compartment. The use of the INITIALOFF attribute
+  specifies that the depot compartment is to be off until a dose is
+  placed in it.
+- The use of the DEFOBS attribute on the $MODEL record specifies that
+  if the CMT data item is null on a given observation event record,
+  then the quantity F which is available as a right-hand quantity in
+  $ERROR is to be the scaled drug amount in the central compartment.
+
+Similarly, we can use ADVAN7 to implement a three-compartment model
+with first-order absorption, where elimination occurs from a central compartment
+and one of two peripheral compartments.
+#+begin_src perl
+$PROBLEM EXAMPLE OF A THREE COMPARTMENT MODEL WITH ABSORPTION
+$INPUT ID TIME AMT DV CMT
+$DATA datafile
+$SUBROUTINES ADVAN7
+$MODEL COMP = (DEPOT,DEFDOSE,INITIALOFF)
+COMP = (CENTRAL,DEFOBS)
+COMP = PERIPH1, COMP = PERIPH2
+$PK
+;# There are other reasonable ways that ETAs can be assigned.
+;# Elaborate these expressions for the K’s as is appropriate.
+K12 = THETA(1)*EXP(ETA(1))	;#  depot to central
+K23 = THETA(2)			;#  central to periph1
+K32 = THETA(3)			;#  periph1 to central
+K30 = THETA(4)*EXP(ETA(2))
+K24 = THETA(5)			;#  central to periph2
+K42 = THETA(6)			;#  periph2 to central
+K20 = THETA(7)*EXP(ETA(3))	;#  elimination from central
+S2  = THETA(8)*EXP(ETA(4))	;#  scale for central
+;# ...
+#+end_src
+Other parameterizations are possible, as long as the above set of micro-constants is
+defined, e.g., the definitions of ~K20~ and ~S2~ can be replaced by the following.
+#+begin_src f90
+CL = THETA(7)*EXP(ETA(3))
+V = THETA(8)*EXP(ETA(4))
+K20 = CL/V
+S2 = V
+#+end_src

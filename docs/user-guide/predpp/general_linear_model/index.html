@@ -28,7 +28,7 @@ Here \(K\) is a \(n\times n\) matrix that could depend on \(x\). \(K(i, j)\) qua
   <meta itemprop="description" content="General linear model Recall that NONMEM supports general linear ODE model $$ \frac{dA(t)}{dt}=K^TA(t). $$
 Here \(K\) is a \(n\times n\) matrix that could depend on \(x\). \(K(i, j)\) quantifies the first-order distribution of drug from compartment number i to compartment number j. NONMEM provides ADVAN5 and ADVAN7 for this type of model. In particular, ADVAN7 targets problems in which \(K\) has real eigenvalues, suitable for most PK applications.">
   <meta itemprop="dateModified" content="2026-01-18T16:51:20-08:00">
-  <meta itemprop="wordCount" content="325">
+  <meta itemprop="wordCount" content="632">
 
 <title>General linear model | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -38,7 +38,7 @@ Here \(K\) is a \(n\times n\) matrix that could depend on \(x\). \(K(i, j)\) qua
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.a1ffc8b5371adfb872b0c277b633d13e8c38c714c34a557cf5ea9f2bd002e54c.js" integrity="sha256-of/ItTca37hysMJ3tjPRPow4xxTDSlV89eqfK9AC5Uw=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.d62c4ce9c8a90f99cc695bc1205d8547d01af337703e07e5d6a1776130029be1.js" integrity="sha256-1ixM6cipD5nMaVvBIF2FR9Aa8zdwPgfl1qF3YTACm&#43;E=" crossorigin="anonymous"></script>
 
 
 
@@ -1537,7 +1537,8 @@ Here \(K\) is a \(n\times n\) matrix that could depend on \(x\). \(K(i, j)\) qua
       
       
   <article class="markdown book-article">
-<link rel="stylesheet" href="/docs/katex/katex.min.css" /><script defer src="/docs/katex/katex.min.js"></script><script defer src="/docs/katex/auto-render.min.js" onload="renderMathInElement(document.body, {&#34;delimiters&#34;:[{&#34;left&#34;:&#34;$$&#34;,&#34;right&#34;:&#34;$$&#34;,&#34;display&#34;:true},{&#34;left&#34;:&#34;\\(&#34;,&#34;right&#34;:&#34;\\)&#34;,&#34;display&#34;:false},{&#34;left&#34;:&#34;\\[&#34;,&#34;right&#34;:&#34;\\]&#34;,&#34;display&#34;:true},{&#34;left&#34;:&#34;\\begin{equation}&#34;,&#34;right&#34;:&#34;\\end{equation}&#34;,&#34;display&#34;:true}]});"></script>
+<p>
+<link rel="stylesheet" href="/docs/katex/katex.min.css" /><script defer src="/docs/katex/katex.min.js"></script><script defer src="/docs/katex/auto-render.min.js" onload="renderMathInElement(document.body, {&#34;delimiters&#34;:[{&#34;left&#34;:&#34;$$&#34;,&#34;right&#34;:&#34;$$&#34;,&#34;display&#34;:true},{&#34;left&#34;:&#34;\\(&#34;,&#34;right&#34;:&#34;\\)&#34;,&#34;display&#34;:false},{&#34;left&#34;:&#34;\\[&#34;,&#34;right&#34;:&#34;\\]&#34;,&#34;display&#34;:true},{&#34;left&#34;:&#34;\\begin{equation}&#34;,&#34;right&#34;:&#34;\\end{equation}&#34;,&#34;display&#34;:true}]});"></script></p>
 <div id="outline-container-headline-1" class="outline-3">
 <h3 id="headline-1">
 General linear model
@@ -1622,14 +1623,90 @@ one-compartment model ADVAN2.</p>
 </div>
 </div>
 </div>
-<p>Note</p>
 <ul>
 <li><code>CALLFL=1</code> indicates $PK block is only evaluated once per subject,
 at the first record of each subject.</li>
 <li>Subscript &#34;0&#34; for <em>K</em> is for output compartment, thus \(K_{20}\)
 is the rate of drug transport from central to a virtual output
 compartment, representing elimination rate constant.</li>
+<li>The use of the DEFDOSE attribute on the following $MODEL record
+specifies that if the CMT data item is null on a given dose event
+record, then the dose(s) specified by that record are to be placed
+in the depot compartment. The use of the INITIALOFF attribute
+specifies that the depot compartment is to be off until a dose is
+placed in it.</li>
+<li>The use of the DEFOBS attribute on the $MODEL record specifies that
+if the CMT data item is null on a given observation event record,
+then the quantity F which is available as a right-hand quantity in
+$ERROR is to be the scaled drug amount in the central compartment.</li>
 </ul>
+<p>Similarly, we can use ADVAN7 to implement a three-compartment model
+with first-order absorption, where elimination occurs from a central compartment
+and one of two peripheral compartments.</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$PROBLEM</span> EXAMPLE OF A THREE COMPARTMENT MODEL WITH ABSORPTION
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$INPUT</span> ID TIME AMT DV CMT
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$DATA</span> datafile
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SUBROUTINES</span> ADVAN7
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$MODEL</span> COMP <span style="color:#ff6ac1">=</span> (DEPOT,DEFDOSE,INITIALOFF)
+</span></span><span style="display:flex;"><span>COMP <span style="color:#ff6ac1">=</span> (CENTRAL,DEFOBS)
+</span></span><span style="display:flex;"><span>COMP <span style="color:#ff6ac1">=</span> PERIPH1, COMP <span style="color:#ff6ac1">=</span> PERIPH2
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># There are other reasonable ways that ETAs can be assigned.</span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># Elaborate these expressions for the K’s as is appropriate.</span>
+</span></span><span style="display:flex;"><span>K12 <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))	;<span style="color:#78787e">#  depot to central</span>
+</span></span><span style="display:flex;"><span>K23 <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">2</span>)			;<span style="color:#78787e">#  central to periph1</span>
+</span></span><span style="display:flex;"><span>K32 <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">3</span>)			;<span style="color:#78787e">#  periph1 to central</span>
+</span></span><span style="display:flex;"><span>K30 <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">4</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">2</span>))
+</span></span><span style="display:flex;"><span>K24 <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">5</span>)			;<span style="color:#78787e">#  central to periph2</span>
+</span></span><span style="display:flex;"><span>K42 <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">6</span>)			;<span style="color:#78787e">#  periph2 to central</span>
+</span></span><span style="display:flex;"><span>K20 <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">7</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">3</span>))	;<span style="color:#78787e">#  elimination from central</span>
+</span></span><span style="display:flex;"><span>S2  <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">8</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">4</span>))	;<span style="color:#78787e">#  scale for central</span>
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># ...</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>Other parameterizations are possible, as long as the above set of micro-constants is
+defined, e.g., the definitions of <code>K20</code> and <code>S2</code> can be replaced by the following.</p>
+<div class="src src-f90">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>CL <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">7</span>)<span style="color:#ff6ac1">*</span><span style="color:#ff5c57">EXP</span>(ETA(<span style="color:#ff9f43">3</span>))
+</span></span><span style="display:flex;"><span>V <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">8</span>)<span style="color:#ff6ac1">*</span><span style="color:#ff5c57">EXP</span>(ETA(<span style="color:#ff9f43">4</span>))
+</span></span><span style="display:flex;"><span>K20 <span style="color:#ff6ac1">=</span> CL<span style="color:#ff6ac1">/</span>V
+</span></span><span style="display:flex;"><span>S2 <span style="color:#ff6ac1">=</span> V</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
 </div>
 </div>
 </article>

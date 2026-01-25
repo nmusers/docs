@@ -84,7 +84,7 @@ alternatively,  labels  ETA1, ETA2, ... ,ETA10, ... , ETA70, etc.,
 corresponding to eta(1), eta(2), etc. The labels in the output will be
 ETA1, ETA2, ...  ,  ET10,  ...  ET70, etc.
 
-With NONMEM 7.3, a range of etas may be requested:
+With NONMEM 7.3, a range of ETAs may be requested:
 #+begin_src perl
   ETAS(k:n)
 #+end_src
@@ -98,19 +98,19 @@ where  n  >  k.  LAST can be used in place of n, and requests the
       The word TO may be used in place of ":".
       The BY expression may be used:
 
-      ETAS(1 TO 10 by 3) prints out etas 1,4,7,10
+      ETAS(1 TO 10 by 3) prints out ETAs 1,4,7,10
 
-      ETAS(LAST TO 1 by -3) prints out etas 10,7,4,1 (assuming LAST=10)
+      ETAS(LAST TO 1 by -3) prints out ETAs 10,7,4,1 (assuming LAST=10)
 
       A number list may be given:
 
-      ETAS(1,5,12,4) prints out etas 1, 5, 12, 4.
+      ETAS(1,5,12,4) prints out ETAs 1, 5, 12, 4.
 
-      ETAS(4:1) prints etas 4, 3, 2, 1
+      ETAS(4:1) prints ETAs 4, 3, 2, 1
 
-      ETAS(4:1 by -2) prints etas 4, 2
+      ETAS(4:1 by -2) prints ETAs 4, 2
 
-      ETAS(1:4 by -1) prints etas 4, 3, 2, 1 (the by value sets the direction).
+      ETAS(1:4 by -1) prints ETAs 4, 3, 2, 1 (the by value sets the direction).
 
 With NONMEM 7.4, a symbolic label specified in $ABBR REPLACE  may be
 listed in $TABLE. For example:
@@ -184,7 +184,7 @@ $TABLE G11 G21 G31 H11 H21
  series A00nnn, C00nn, or D00nnn) with the appropriate synonym such  as
  G11.   If there is no such variable, this is an error. NMTRAN will not
  display variables that are not computed , e.g.,  G41  when  there  are
- only  3  etas in the problem, or when there are 4 etas but ETA(4) does
+ only  3  ETAs in the problem, or when there are 4 ETAs but ETA(4) does
  not contribute to the value of Y.
  [There is a workaround if the zero is wanted as a place holder in  the
  table.  In abbreviated code ($ERROR or $PRED or $PK)
@@ -444,8 +444,8 @@ addition, full variances-covariances among all user-defined variables
 and PREDPP parameters will be outputted  to  file  root.vpd (the
 FORMAT used for this file is that defined in the $EST statement).
 With NONMEM 7.5, file root.vpt  is  also  created.   This contains
-variance-covariances  associated with thetas (or omegas and sigmas) as
-well  as  those  associated  with  etas/individual parameters.   To
+variance-covariances  associated with THETAs (or OMEGAs and SIGMAs) as
+well  as  those  associated  with  ETAs/individual parameters.   To
 append  the  comparable  total  standard errors item_SE to tables, set
 $TABLE ...VARCALC=3.  To only  create  the vpd  and  vpt  files,  and
 not report SE's to the table, set VARCALC=2.  This option must be
@@ -474,11 +474,11 @@ The variances are based on variance-covariance of the ETAs/PHIs in the
 
 The standard errors in the .vpt table are most accurately assessed if
 the problem is MU modeled.  If it is not MU modeled, then only
-standard errors of variables that do not vary with etas (variables
+standard errors of variables that do not vary with ETAs (variables
 derived exclusively from THETAs, for example), are assured to be
 correctly calculated.  It also takes into account that the .phi tables
-contain variances to phi’s and etas under fixed theta conditions for
-all methods except BAYES, where the variances to phis or etas are
+contain variances to phi’s and ETAs under fixed theta conditions for
+all methods except BAYES, where the variances to phis or ETAs are
 sampled under varying theta conditions.
 
 Note that to obtain the PRED and its error, one should define a
@@ -498,8 +498,8 @@ $TABLE …  PREDU … VARCALC=3
 
 Keep in mind that PREDU has only statistical errors associated with
 THETAS (and SIGMAS, depending on how PREDU is evaluated, based on the
-variance-covariance in the .cov file), and not etas (the phc()
-variances in the .phi file do not contribute to PREDU, since etas=0
+variance-covariance in the .cov file), and not ETAs (the phc()
+variances in the .phi file do not contribute to PREDU, since ETAs=0
 when COMACT=1), so VARCALC=3 is required.  No statistical errors are
 evaluated for weighted residual diagnostics (WRES, NPD’s, etc).
 
@@ -531,7 +531,7 @@ define a COMACT=1 evaluated variable in the control stream, as you can
 get it from IPRED on the COMACT=1 rows in the .vpt table.  But if you
 want the appropriate PRED variable with standard error presented in
 the user-requested $TABLE table, then the PREDU must be defined as
-above.  For non-parametric estimated etas, when $NONPARAMETRIC ETAS is
+above.  For non-parametric estimated ETAs, when $NONPARAMETRIC ETAS is
 used, then a COMACT 3 pass will be made, and their values will be
 presented in the vpt table with the COMACT set to 3.
 
@@ -541,20 +541,20 @@ predu.vpd), and one can compare their values and associated standard
 errors.
 
 *** FIXEDETAS=(list)(NM74)
-      Specified  etas  may be treated as if they are fixed effects when
+      Specified  ETAs  may be treated as if they are fixed effects when
       evaluating population diagnostics during the $TABLE  step.   This
-      is  particularly  suitable  for  super-ID  $LEVEL  etas that span
+      is  particularly  suitable  for  super-ID  $LEVEL  ETAs that span
       groups of subjects, as if they were a fixed effect when  evaluating  populations  characteristics during the $TABLE step, such as
       PRED, CWRES, NPDE, etc. In this way, the PRED evaluated will  be,
       not  of  the total population, but of a given site level for that
-      subject.  List is a number-list of etas.   For  example,  FIXEDETAS=(3-6)
+      subject.  List is a number-list of ETAs.   For  example,  FIXEDETAS=(3-6)
 
       A  number-list  may contain a single integer, a range of integers
       (with -), or a series of integers and ranges separated by comma.
 
 *** NPDTYPE=1
       The strict stochastic (Monte Carlo) method over the data y domain
-      as well as etas is implemented for NPD diagnostics.
+      as well as ETAs is implemented for NPD diagnostics.
 
 *** NPDTYPE=0
       An  asymptotic  assessment  of  the residual variability is used.

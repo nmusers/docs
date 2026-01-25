@@ -13,8 +13,8 @@ implementations (that do nothing) of these routines, to be replaced by user-writ
  | MIX    | Describes the mixing parameter of a mixture model.                                  |
  | PRIOR  | Allows a Bayesian penalty to be included  in  the  objective function.              |
  | SPTWO  | SPTWO  can  be  used  to redefine the RES and WRES items for observation records.   |
- | THETAI | THETAI is used to transform initial thetas.                                         |
- | THETAR | THETAR is used to transform final thetas for reporting.                             |
+ | THETAI | THETAI is used to transform initial THETAs.                                         |
+ | THETAR | THETAR is used to transform final THETAs for reporting.                             |
 
 - User-defined subroutines for PREDPP
 
@@ -114,7 +114,7 @@ to  the  objective function from an L1 record.  It is used to override
 the NONMEM default objective function.
 
 A user-supplied CONTR routine may be used when the dimension of  OMEGA
-is  zero,  i.e.,  when  there are no etas in the problem, and in other
+is  zero,  i.e.,  when  there are no ETAs in the problem, and in other
 situations, e.g., with categorical data.
 
 
@@ -185,7 +185,7 @@ NONMEM could output error message:
  USER CCONTR ROUTINE NOT USED, BUT THERE ARE NO EPSILONS,
  AND ETAS ARE TO BE ESTIMATED
 #+end_src
-This can happen when POSTHOC etas are requested, but the data are single-subject data.  The user may have included the  POSTHOC  option  in error.
+This can happen when POSTHOC ETAs are requested, but the data are single-subject data.  The user may have included the  POSTHOC  option  in error.
 
 The CCONTR routine may contain the following code:
 #+begin_src f90
@@ -625,7 +625,7 @@ Input/Output argument:
       (See [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
 
 - G:  On  input,  at  ICALL=2 when the data are population, an array of
-      partial derivatives of F with respect to etas
+      partial derivatives of F with respect to ETAs
       G (i,1) is the partial derivative of F with respect to eta(i).
       G (i,j+1) is the second derivative of F with respect  to  eta(i),
       eta(j) (lower-triangular; j=1, ..., i).
@@ -633,16 +633,16 @@ Input/Output argument:
       On input, G contains zeros when the data are single-subject data.
       At ICALL=2, ERROR must modify G when it has  changed  F  and  has
       thus  changed the derivatives of F with respect to the population
-      etas.
+      ETAs.
 
-- HH:  An array of partial derivatives of F with respect to  etas  (when
-      the  data are single-subject data) or epsilons (when the data are
+- HH:  An array of partial derivatives of F with respect to  ETAs  (when
+      the  data are single-subject data) or EPSILONs (when the data are
       population).  Values should be stored when ICALL=2 and also  when
       ICALL=1 if ERROR sets IDEF(2)=2.
       HH(i,1) is the derivative of F with respect to eta(i) or eps(i).
       HH(i,j+1) is the derivative of H(i,1) with respect to eta(j) (but
       are only needed with conditional estimation when  the  dependence
-      on  etas  of the variance of intra-individual random error should
+      on  ETAs  of the variance of intra-individual random error should
       be preserved in the computation of the  objective  function;  see
       the INTERACTION option of [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
 
@@ -1228,7 +1228,7 @@ block.
     position 12, the first position beyond those positions used by
     PREDPP itself).
 
-  - NETAS: the number of population etas in the problem.
+  - NETAS: the number of population ETAs in the problem.
 
 Output argument:
 
@@ -1503,7 +1503,7 @@ Output argument:
       the  simulated  observation.   With  discrete data, ~F~ is ignored;
       PRED should directly set the DV item to the value  of  the  simulated observation.
 
-- G   An array of derivatives of F with respect to etas.  Values should
+- G   An array of derivatives of F with respect to ETAs.  Values should
       be set when ICALL=2.
       G(i,1) is the partial derivative of F with respect to eta(i).
       When the data are population, G(i,j+1) is the second partial  derivative  of  F with respect to eta(i), eta(j) (lower-triangular;
@@ -1511,7 +1511,7 @@ Output argument:
       Second derivatives are needed only when the Laplacian  method  is
       used to estimate parameters.
 
-- H   An  array  of  partial derivatives of F with respect to epsilons.
+- H   An  array  of  partial derivatives of F with respect to EPSILONs.
       When the data are population, values should be set when ICALL=2.
       H(i,1) is the derivative of F with respect to eps(i).
       H(i,j+1) is the partial derivative  of  H(i,1)  with  respect  to
@@ -1622,7 +1622,7 @@ Output argument:
 
 ETA: an  array  into  which SIMETA stores simulated ETA values ETA(1),
       ETA(2), ...  The dimension of the array may be smaller  than  the
-      maximum, e.g., it may equal the number of etas in the problem.
+      maximum, e.g., it may equal the number of ETAs in the problem.
 
 Simulated  ETA  values  arise from a multivariate normal pseudo-random
 distribution with mean 0  and  variance-covariance  as  specified  for
@@ -1649,11 +1649,11 @@ than 5 in absolute value; that is, values can be obtained from a
 truncated distribution (see below).  With any particular call  to
 SIMETA, the effect of the NEW option can, though, be overridden; (See
 Simulation:_IETAOL_IEPSOL) So  that  simple simulation can be easily
-implemented with abbreviated code, values of etas are obtained by
+implemented with abbreviated code, values of ETAs are obtained by
 calls to SIMETA occurring in  the generated  subroutine.   When  the
 data are population data, SIMETA is called once per individual record
 by PRED (or PK if PREDPP  is  used). (In  the  case  of  PK, the array
-of etas is stored in a common and is available to the ERROR subroutine
+of ETAs is stored in a common and is available to the ERROR subroutine
 as well.)  When the data are single- subject  data,  SIMETA  is
 called once at every call to PRED (once at every call to ERROR if
 PREDPP is used).
@@ -1786,7 +1786,7 @@ on the estimates of THETA, OMEGA, and SIGMA and thus as a way for
 stable estimates to be obtained with insufficient data.
 
 When  the  Simulation  Step is implemented, THETA and OMEGA, and SIGMA
-may also be simulated (along with etas and epsilons, should  any  such
+may also be simulated (along with ETAs and EPSILONs, should  any  such
 appear  in  the model and have nonzero-variances) in the [[file:/docs/reference-manual/api/subroutines/#prior][PRIOR]]
 subroutine.  However, this  need
 not  be done  (simply execute a return in PRIOR at ICALL=4), in which
@@ -2020,7 +2020,7 @@ of  $THETA records  giving  the  mean  of the multivariate normal.
 The values on these records must be fixed.  They should number NTHP
 altogether. After the usual set of $OMEGA records, add  a  second  set
 of  $OMEGA records giving the variance-covariance matrix of the
-multivariate normal.  (If there are no etas in the model, there will
+multivariate normal.  (If there are no ETAs in the model, there will
 not  be  a  usual set  of  $OMEGA  records.)  The values on these
 records must be fixed. They should number (NTHP+1)xNTHP/2 altogether,
 including implicit 0's, which  may  occur because the
@@ -2596,7 +2596,7 @@ Input argument:
 Certain variables are available in modules.  Their use is optional.
 
 - Variables in read/write modules: IERPRD NETEXT ETEXT (See [[file:/docs/reference-manual/api/variables/#pred-exit][PRED Exit Code]], [[file:/docs/reference-manual/api/variables/#pred-error][PRED Error Message]]).
-- Variables in read-only commons: NOETAS, SECOND (see [[file:/docs/reference-manual/api/variables/#partial-derivative-indicators][Partial Derivative Indicators]]). When  SECOND  is  true,  PREDPP requires second-partial derivatives of etas.
+- Variables in read-only commons: NOETAS, SECOND (see [[file:/docs/reference-manual/api/variables/#partial-derivative-indicators][Partial Derivative Indicators]]). When  SECOND  is  true,  PREDPP requires second-partial derivatives of ETAs.
 
 REFERENCES: Guide VI, section III.M
 

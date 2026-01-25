@@ -1348,63 +1348,14 @@ IF (A_0FLG.EQ.1) THEN
 ENDIF
 #+end_src
 
-A  "compartment  initialization  block" is a block of abbreviated code
-that sets the initial state of the kinetic system.  It is to  be
-executed  only  when  A_0FLG=1.  Such a block may be present only in
-$PK. PREDPP sets A_0FLG to 1 at a call to PK with the first event
+A "compartment  initialization  block" is abbreviated code in $PK block
+that sets [[file:/docs/reference-manual/api/variables/#a_0][~A_0~]], the initial state of the kinetic system, when
+the read-only global variable [[file:/docs/reference-manual/api/variables/#a_0flg][~A_0FLG~]] has value 1. PREDPP sets ~A_0FLG=1~ at a call to PK with the first event
 record of an individual record (if the data are population data), with
 the first event record of the data set (if the data  are
 single-subject  data), and with a reset record.
 
-*** =A_0FLG=
-Read-only global variable =A_0FLG= can be used in $PK record or User-supplied PK routine.
-#+begin_src f90
- USAGE:
-      USE PROCM_INT, ONLY: A_0FLG
-
- GLOBAL DECLARATION:
-      INTEGER(KIND=ISIZE) :: A_0FLG
-#+end_src
-- When  ICALL>=2,  at  a  call to PK with the first record of of an
-  individual record or with a reset record, PREDPP sets  A_0FLAG=1. At
-  such  a call, the state vector A and its first and second eta
-  partials (DAETA and D2AETA) have been set to zero.   A_0FLG=0  at
-  all other calls to PK.
-
-- When  A_0FLG=1,  PK  may  initialize  compartments.  It can do this
-  by storing the initial values for the state vector and  its
-  partials  in A_0,DA_0,D2A_0.
-
-- NM-TRAN  includes A_0FLG in the PK routine when the $PK block
-  includes references to variables A_0FLG, A_0(n), or A_INITIAL(n), or
-  when  verbatim code is present.
-*** =A_0=
-#+begin_src f90
- USAGE:
-      USE PRMOD_REAL, ONLY: A_0,DA_0,D2A_0
-
- GLOBAL DECLARATION:
-      USE SIZES, ONLY: PC,LVR,DPSIZE
-      REAL(KIND=DPSIZE) :: A_0(PC),DA_0(PC,LVR),D2A_0(PC,LVR,LVR)
-#+end_src
-When =A_0FLG==1= the amounts in the various compartments can be set by
-the PK routine.  It can do this by storing  the  initial  values  for
-the state  vector  and its partials in A_0,DA_0,D2A_0.   The amount in
-the output compartment can not be set.
-- A_0: A_0(n) = the amount for compartment n
-
-- DA_0: DA_0(n,i) = the derivative of A_0(n) w.r.t. ETA(i)
-
-- D2A_0: D2A_0(n,i,j) = the second derivative of A_0(n) w.r.t. ETA(i), ETA(j) (lower-triangular; j=1, ..., i)
-
-- There  is  a  one-to-one  correspondence  between  A_0,DA_0,D2A_0
-  and A,DAETA,D2AETA.
-
-- NM-TRAN includes A_0,DA_0,D2A_0 in the PK routine when the  $PK
-  block includes  references  to  variables A_0FLG, A_0, or A_INITIAL,
-  or when verbatim code is present. (See [[file:/docs/reference-manual/api/variables/#state-vec-a][State Vector A]].)
-
-*** Special rules
+Special rules:
 - Values may be assigned to reserved variables A_0(n), but only in a
   compartment initialization block.  The value of the  amount  in the
   nth compartment (the nth element of the state vector) is set to the
@@ -1445,16 +1396,16 @@ the output compartment can not be set.
   blocks, but not reserved variables such as  basic  or  additional
   PK parameters.
 
-*** Examples
+Consider the following examples.
 - The following two fragments of code yield identical results:
   Explicit compartment initialization block:
-  #+begin_src perl
+  #+begin_src f90
   IF (A_0FLG.EQ.1) THEN
    A_0(1)=THETA(1)*(1+ETA(1))
   ENDIF
   #+end_src
   Implicit compartment initialization block:
-  #+begin_src perl
+  #+begin_src f90
    A_0(1)=THETA(1)*(1+ETA(1))
   #+end_src
 
@@ -1542,7 +1493,7 @@ to 0.  An un-assigned A_U(k) should retain its value, A_u(k)=A_u(k).
   converts A_U() in abbreviated code to A_0() during FSUBS  code
   construction.
 
-See "Reference Manual: $PK" for details.
+See [[file:/docs/reference-manual/control-records/pk][$PK]] for details.
 
 ** Data average
 :PROPERTIES:
@@ -2177,50 +2128,9 @@ the $ABBREV record.  This option may be used in three ways:
 - COMSAV=-1.  There is to be no SAVE region.  Variables defined  in a
   copying block will not be SAVE variables.
 
-*** COMACT, COMSAV
-Usage (in user-defined function)
-#+begin_src f90
- USAGE:
-      USE NMPRD_INT, ONLY: COMACT,COMSAV
+See [[file:/docs/reference-manual/api/variables/#comact][COMACT]], [[file:/docs/reference-manual/api/variables/#comres-comsav][COMSAV]], and [[file:/docs/reference-manual/api/variables/#pred-defined-variables][PRED-Defined Variables]]  for details.
 
- GLOBAL DECLARATION:
-      INTEGER(KIND=ISIZE) :: COMACT,COMSAV
-#+end_src
-COMACT is set by NONMEM; COMSAV by PRED.
-
-- COMACT
-      + COMACT=0:  NONMEM is not making a copying pass, i.e., values
-        from NMPRD4 will not be copied for tables and  scatterplots.
-        (NONMEM only  makes  a copying pass when PRED-defined items
-        are listed in $TABLE or $SCATTER records.)
-
-      + COMACT=1: This is a copying pass  with  final  thetas;  etas  are zero.
-      + COMACT=2: This  is  a  copying pass with final thetas and conditional ETA estimates.
-      + COMACT=3: This is a copying pass with conditional
-        (nonparametric) estimates  of  ETAS.   Such  a  pass takes
-        place when the control stream includes this record:
-        #+begin_src perl
-	  $NONPARAMETRIC ETAS
-	#+end_src
-
-
-- COMSAV: set by PRED at ICALL<=1 or at COMACT=1 with the very  first
-  data record.  The Save Region is an initial part of NMPRD4.  If with
-  a given data record, the value of a PRED-defined variable is stored
-  in  this  region,  then  during  a copy pass with COMACT = 2, the
-  value of the variable is initialized to the value obtained during
-  the  copy  pass with the same data record and COMACT=1. COMSAV is
-  the size of this region, i.e., the number of variables whose values
-  are stored in this region.
-
-  When NM-TRAN is used, COMACT may be tested in abbreviated code.
-  COMSAV may not be referenced in abbreviated code.  Instead, the
-  COMSAV option of  the $ABBREVIATED record is coded, and NM-TRAN
-  causes the specified value to be stored in COMSAV.
-
-See [[file:/docs/reference-manual/api/variables/#comact][COMACT]], [[file:/docs/reference-manual/api/variables/#comres-comsav][COMSAV]] for details.
-
-*** Examples
+Consider the following example.
 #+begin_src perl
  $ERROR
  Y=F+F*EPS(1)
@@ -2246,7 +2156,7 @@ be the reciprocal of this FT value, while IPRED is computed from
 conditional  estimates of the ETA variables and thus its value applies
 to to the individual with these estimates, rather  than  to  the
 typical individual.   The  values  of  IPRED and WR appearing in the
-table are those obtained during the last copying pass.    The  tabled
+table are those obtained during the last copying pass. The tabled
 value  of IPRED is based on the conditional estimate of ETA.  The
 value of FT is also the value obtained during the last copying pass,
 but it  in  turn is  also  the value obtained from the first copying
@@ -2257,8 +2167,6 @@ Since  FT  is  a SAVE variable, a SAVE region will have been allocated
 where this variable will be stored, and (unless there is  some  reason
 to  use  the  COMSAV option other than to insure this) the user not be
 concerned about this option.
-
- (See PRED-Defined Variables).
 
 ** Simulation
 :PROPERTIES:

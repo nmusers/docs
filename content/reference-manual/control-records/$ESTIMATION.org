@@ -196,15 +196,15 @@ We discuss the METHOD option first, since many other options are
 context-dependent on the estimation method used.
 
 *** METHOD=kind
-  - kind=0 or ZERO: always set etas to 0 during the computation of the
+  - kind=0 or ZERO: always set ETAs to 0 during the computation of the
     objective function.  Also called the "first order (FO) method."
     This is the default.
-  - kind=1 or CONDITIONAL: use  conditional  estimates for the etas
+  - kind=1 or CONDITIONAL: use  conditional  estimates for the ETAs
     during the computation of  the  objective  function.   METHOD=1
     (without  the LAPLACIAN  option)  is  also  called the "first
     order conditional estimation (FOCE) method."  The conditional
-    estimates of  the  etas are referred to as Conditional Parametric
-    Etas (CPE).
+    estimates of  the  ETAs are referred to as Conditional Parametric
+    ETAs (CPE).
     #+begin_src perl
       METH=COND NOLAPLACIAN         ;# the FOCE method.
       METH=COND LAPLACE             ;# the Laplace method.
@@ -212,9 +212,9 @@ context-dependent on the estimation method used.
       METH=COND LAPLACE CENTERING   ;# the Centering Laplace method.
     #+end_src
 
-  - HYBRID: use conditional estimates for the etas during  the
+  - HYBRID: use conditional estimates for the ETAs during  the
      computation  of the objective function, with the exception of
-     those etas listed in the ZERO option.  Cannot be used with
+     those ETAs listed in the ZERO option.  Cannot be used with
      LAPLACIAN or CENTERING.
 
 The  following  methods  are  new to NONMEM 7.  When any of these
@@ -437,7 +437,7 @@ The example stanrb10.ctl shows another setup for using NUTS:
 $EST METHOD=ITS NITER=0 file=stanrb10_its.ext
 $EST METHOD=NUTS NBURN=1000 NITER=2000 PRINT=20 OLKJDF=3.0 file=stanrb10.ext
 #+end_src
-The OLKJDF option specifies the degrees of freedom to the LKJ decorrelation density for the OMEGA prior.  The OLKJDF should be set to a value greater than 0 to use the LKJ decorrelation prior for OMEGAs, as recommended by the STAN group.  Also see comment below about using LKJ decorrelation versus inverse Wishart prior.  Experience has shown that a low non- or weakly-informative OLKJDF should be at least 2, and no greater than the number of the Omega diagonals.  If OLKJDF is set to 1, then there may be considerable pull towards high correlations which reduces efficiency of sampling.  A single iteration of ITS is helpful to center the initial etas at their modes, as a good facilitator for initiating the NUTS run that follows it (NITER=0, so population parameters are not advanced).
+The OLKJDF option specifies the degrees of freedom to the LKJ decorrelation density for the OMEGA prior.  The OLKJDF should be set to a value greater than 0 to use the LKJ decorrelation prior for OMEGAs, as recommended by the STAN group.  Also see comment below about using LKJ decorrelation versus inverse Wishart prior.  Experience has shown that a low non- or weakly-informative OLKJDF should be at least 2, and no greater than the number of the Omega diagonals.  If OLKJDF is set to 1, then there may be considerable pull towards high correlations which reduces efficiency of sampling.  A single iteration of ITS is helpful to center the initial ETAs at their modes, as a good facilitator for initiating the NUTS run that follows it (NITER=0, so population parameters are not advanced).
 
 An alternative method is to use the traditional BAYES method to rapidly generate samples for an initial mass matrix, which can then be passed on to the NUTS algorithm (example stanrb9):
 
@@ -773,7 +773,7 @@ iteration are not stored.  However, if you set
 #+begin_src perl
 $EST ... BAYES_PHI_STORE=1
 #+end_src
-then PHI and ETA values from each BAYES iteration will be stored in root.iph.  For non-mixture problems, only records of SUBP=0 are recorded, as there are no sub-population divisions.  For mixture problems, the SUBP=0 records contain the composite phis and etas (the average of these across all non-negative iterations are in the root.phi table), and the SUBP>0 records contain the phis and etas appropriate to each sub-population SUBP (the average of these across all non-negative iterations are in the root.phm table).  The root.iph file can become quite large, so it should be used only on the final analysis.  This root.iph file can be read by the utility program NEFFI (see I.103 NEFF and NEFFI Utility Programs (NM74)).
+then PHI and ETA values from each BAYES iteration will be stored in root.iph.  For non-mixture problems, only records of SUBP=0 are recorded, as there are no sub-population divisions.  For mixture problems, the SUBP=0 records contain the composite phis and ETAs (the average of these across all non-negative iterations are in the root.phi table), and the SUBP>0 records contain the phis and ETAs appropriate to each sub-population SUBP (the average of these across all non-negative iterations are in the root.phm table).  The root.iph file can become quite large, so it should be used only on the final analysis.  This root.iph file can be read by the utility program NEFFI (see I.103 NEFF and NEFFI Utility Programs (NM74)).
 
 *** BIONLY=[0|1] (NM75)
 BIONLY stands for Bayesian individual parameters only,  and  when set
@@ -917,16 +917,16 @@ classical methods FO/FOCE/Laplacean.)
 *** DERCONT=[0|1] (NM73)
 The  derivative  continuity test (DERCONT) by default is off (0). When
 DERCONT=1, the partial derivative of the objective  function with
-respect to thetas will perform an additional test to determine if a
+respect to THETAs will perform an additional test to determine if a
 backward difference assessment is more accurate than  a forward
 difference assessment.  The forward difference assessment can differ
 greatly from the  backward  difference  assessment  in cases  of
-extreme  discontinuity  when varying certain thetas by even just a
+extreme  discontinuity  when varying certain THETAs by even just a
 small amount in the model results in a  large  change in  objective
 function,  (such  as a viral model in which a very small change in the
 potency of an  anti-viral  agent  results  in widely  varying  time
 of return of viral load).  This results in standard errors being
-poorly assessed for thetas that do not have inter-subject  variances
+poorly assessed for THETAs that do not have inter-subject  variances
 associated with them.  Setting DERCONT=1 slows the analysis, but can
 provide more accurate assessments  of SE in such models.  The DERCONT
 works only for the Monte Carlo EM algorithms such as IMP, DIRECT,
@@ -982,12 +982,12 @@ needed.
     by NM-TRAN or in user supplied code.
 
   - ETADER=3: 2nd derivative method of evaluating V, using numerical
-    second  derivatives  of  -log(L) with respect to etas.  This is
+    second  derivatives  of  -log(L) with respect to ETAs.  This is
     equivalent to using the  "Laplace  NUMERICAL"  method,  even
     though FOCE may be selected.
 *** ETASAMPLES=[0|1] (NM74)
 :PROPERTIES:
-:CUSTOM_ID: etasamples
+:CUSTOM_ID: ETAsamples
 :END:
 Used with SAEM or BAYES. Default ETASAMPLES=0. ETASAMPLES=1 causes individual ISAMPLE  random  ETA samples
 per subject, output to "root.ets". To do this, perform an SAEM
@@ -1051,7 +1051,7 @@ MAXEVAL=0, then set EVALSHRINK=1 on the $EST record.
 *** FNLETA=n (NM72)
 Set FNLETA to 0 if you do not want it to spend time performing the end
 FNLMOD (which evaluates final mixture proportions for each subject in
-mixture models) and FNLETA (which evaluates final etas) routines using
+mixture models) and FNLETA (which evaluates final ETAs) routines using
 the original algorithm after the estimation and covariance steps are
 completed.  You may want to turn this off if each objective function
 call takes a long time, with very complex problems or large data sets.
@@ -1062,7 +1062,7 @@ FNLETA steps are omitted.
 Normally, when you do not set FNLETA, or when you set FNLETA to 1,
 regardless of the method that was used (classical or EM/Monte Carlo)
 to obtain the THETAs, OMEGAs and SIGMAs in the last $EST step, $TABLE
-parameters are estimated based on a “post-hoc” evaluation of the etas
+parameters are estimated based on a “post-hoc” evaluation of the ETAs
 at the mode of the posterior density position (eta hat), and using the
 final theta/OMEGAs/sigma estimates (classical and EM), or at the
 posterior means of THETAs/OMEGAs/SIGMAs (BAYES) (so, population
@@ -1077,7 +1077,7 @@ last iteration of the last $EST method implemented (those listed in
 the .phi file), which are mode of posterior values for
 ITS/FOCE/Laplace, and conditional means for IMP/SAEM.
 
-Before nm75, the phis/etas after a BAYES analysis yields single sample
+Before nm75, the phis/ETAs after a BAYES analysis yields single sample
 position values of the very last iteration, and had limited use. With
 nm75, $TABLE parameters use final MCMC posterior means (those listed
 in the .phi file, collected during the stationary phase) for the phis,
@@ -1116,10 +1116,10 @@ methods, Monte Carlo assessed conditional means and conditional
 variances for SAEM/IMP methods).
 
 If you set FNLETA=2 (NM73), then the estimation step is not done, and
-whatever etas are stored in memory at the time are used in any
-subsequent $TABLE’s.  This has value if you loaded the individual etas
+whatever ETAs are stored in memory at the time are used in any
+subsequent $TABLE’s.  This has value if you loaded the individual ETAs
 from an MSF file, or from a $PHIS/$ETAS record, and you want to
-calculate $TABLE items based on those etas, rather than from a new
+calculate $TABLE items based on those ETAs, rather than from a new
 estimation.  For example:
 
 #+begin_src perl
@@ -1154,7 +1154,7 @@ FO: requests that the First-Order Model be  used  with  METHOD=1  and CENTERING.
 NOFO: requests that the First-Order Model not be used with METHOD=1 and centering.  This is the default.
 
 *** FPARAFILE (NM74)
-Final etas (empirical Bayes estimates; EBE's) are evaluated after
+Final ETAs (empirical Bayes estimates; EBE's) are evaluated after
       the  last  Estimation  Step (when FNLETA=1).  This computation is
       parallelized if parallelization is on for  the  final  Estimation
       Step.
@@ -1187,8 +1187,8 @@ GRD=t1v1(n1):t2v2(n2):t3v3(n3)...
 #+end_src
 T is parameter  type  (T  for
 theta,  S for sigma-like theta).  V is a letter (S,D or N), and n is a
-number list.  For  example,  to  specify  thetas  3,  and  5 through
-8 to be Gibbs samples, theta 4 is sigma-like, and sigmas 1-3 are to be
+number list.  For  example,  to  specify  THETAs  3,  and  5 through
+8 to be Gibbs samples, theta 4 is sigma-like, and SIGMAs 1-3 are to be
 Metropolis-Hastings processed,
 #+begin_src f90
 GRD=TG(3,5-8):TS(4):SN(1-3)
@@ -1269,14 +1269,14 @@ sometimes provide an improved decorrelation efficiency when performing
 standard Bayesian analysis.
 
 *** INTERACTION | NOINTERACTION
-INTERACTION: The dependence on etas of the model for  intra-individual
+INTERACTION: The dependence on ETAs of the model for  intra-individual
 random error is preserved in the computation of the objective
 function. INTERACTION cannot  be  used  with  CENTERING.   With NONMEM
 7.3, This is the default with EM/Bayes methods and is supplied if
 NOINTERACTION is not  specified  by the user.  With NONMEM 7.4,
 INTERACTION is not supplied if LIKELIHOOD is present.
 
-NOINTERACTION: Always set etas to 0 during the  computation  of  the
+NOINTERACTION: Always set ETAs to 0 during the  computation  of  the
 model  for intraindividual  random  error.   This  is  the default
 with non-EM and non-Bayes methods.
 
@@ -1287,7 +1287,7 @@ determine the best ISAMPLE value. For the ISAMPLE preprocessing the
 used entered ISAMPLE value must be at least 2.  It will perform 200
 iterations during the ISAMPLE preprocess, and the last 50 iterations
 will be used to obtain average conditional variance/OMEGA (eta
-shrinkage) for each subject.  The largest etashrinkage fraction*10 is
+shrinkage) for each subject.  The largest ETAshrinkage fraction*10 is
 the ISAMPLE for that subject.  Thus,
 #+begin_src perl
 ISAMPLE=2 ISAMPEND=10
@@ -1425,22 +1425,22 @@ NOLAPLACIAN: do not use the Laplacian method.  This is the default.
 
 *** LEVCENTER=[0|1] (NM75)
 There is no default.  Required with $LEVEL and  $ESTIMATION.   If
-LEVCENTER=1,  this ensures the etas of super ID random levels sum
+LEVCENTER=1,  this ensures the ETAs of super ID random levels sum
 to 0. In earlier versions of NONMEM, this was  the  default  (and
 only)  action.  To  obtain similar results as earlier versions of
 NONMEM, set LEVCENTER=1.
 
-If LEVCENTER=0, level etas are not forced to sum to 0.
+If LEVCENTER=0, level ETAs are not forced to sum to 0.
 
 See [[file:/docs/cookbook/nested/][Cookbook: Nested random effects]] for examples.
 
 *** LEVOBJTYPE=[0|1] (NM751)
 If LEVOBJTYPE=0,  then  for  IMP/ITS/FOCE/Laplace,  the  reported
 ojective  function (and what is used for estimation) is the average of
-two cycles of optimization.  The first optimization floats all  etas,
-and the second optimization fixes the super-ID etas to the appropriate
-average of etas per super-id group from the first optimization,  and
-then floats the ID (and below) level etas.  If LEVOBJTYPE=1, then the
+two cycles of optimization.  The first optimization floats all  ETAs,
+and the second optimization fixes the super-ID ETAs to the appropriate
+average of ETAs per super-id group from the first optimization,  and
+then floats the ID (and below) level ETAs.  If LEVOBJTYPE=1, then the
 OBJ reported (and used for estimation)  is only that of the second
 optimization cycle. The LEVOBJTYPE=0 provides the most consistent
 results between FOCE/Laplace and the EM and  Bayes methods,
@@ -1473,8 +1473,8 @@ See [[file:/docs/cookbook/nested/][Cookbook: Nested random effects]] for example
   abbreviated code) or F (with a user-supplied PRED or ERROR code)
   will be set to a (conditional)  likelihood.   Upon simulation  it
   will be ignored, and the DV data item will be set directly to the
-  simulated value  in  abbreviated  or  user  code. Also etas, if any,
-  are understood to be population etas.  Epsilon variables and the
+  simulated value  in  abbreviated  or  user  code. Also ETAs, if any,
+  are understood to be population ETAs.  Epsilon variables and the
   $SIGMA record may not be  used.   The  L2  data item  may not be
   used.  The CONTR and CCONTR options of the $SUBROUTINES record may
   not be used.  NONMEM cannot obtain  the  initial  estimate  for
@@ -1662,8 +1662,8 @@ An  alternative syntax may be used:
 MUM=v1(n1):v2(n2):v3(n3)...
 #+end_src
 V is a letter (N,M,D, or X), and n is a number list.  For example, to
-specify  that  thetas  3 and 5 through 8 should not be MU modeled,
-theta 2 is a population mixture parameter, and thetas 6 and 12 are to
+specify  that  THETAs  3 and 5 through 8 should not be MU modeled,
+theta 2 is a population mixture parameter, and THETAs 6 and 12 are to
 be MU modeled:
 #+begin_src perl
 MUM=N(3,5-8):X(2):M(6,12)
@@ -1724,8 +1724,8 @@ distribution.  Default n=10000.  NITER  may  also  be coded NSAMPLE.
 
 *** NONINFETA=[0|1] (NM73)
 NONMEM has traditionally not assessed post-hoc eta hat (also known as
-empirical Bayes Estimates, EBE’s, conditional mode etas, or
-conditional parametric etas (CPE)), if the derivative of the data
+empirical Bayes Estimates, EBE’s, conditional mode ETAs, or
+conditional parametric ETAs (CPE)), if the derivative of the data
 likelihood with respect to that eta is zero for a given subject, and
 simply specified that eta as zero. This eta is called a
 non-influential eta.  The true EBE is zero anyway, if this eta is not
@@ -1733,17 +1733,17 @@ correlated by an off-diagonal omega element with an eta that is
 influential.  If the non-influential eta is correlated with an
 influential eta, then the true EBE of the non-influential eta will in
 general not be 0.  When NONINFETA=0, the default, then this
-traditional algorithm is in effect, so that all non-influential etas,
-even those correlated with influential etas, will be reported as 0
-when outputted with $TABLE.  However, if NONINFETA=1, then all etas
+traditional algorithm is in effect, so that all non-influential ETAs,
+even those correlated with influential ETAs, will be reported as 0
+when outputted with $TABLE.  However, if NONINFETA=1, then all ETAs
 are involved in the MAP estimation, regardless of their influence.
-This will result in non-influential etas reported as a non-zero value,
-if it is correlated with influential etas.  From a pure statistical
+This will result in non-influential ETAs reported as a non-zero value,
+if it is correlated with influential ETAs.  From a pure statistical
 stand-point, this is the true EBE, although intuitively it may be
 puzzling for some users.  Whether NONINFETA=1 or 0, the individual’s
 objective function will change very little if at all, because NONMEM
 provides a corrective algorithm to assess the correct objective
-function.  But for purposes of post-hoc evaluated etas, one may wish
+function.  But for purposes of post-hoc evaluated ETAs, one may wish
 to set NONINFETA depending on the desired interpretation. The
 NONINFETA option applies only to FO/FOCE/Laplace.  The Monte Carlo and
 EM methods have always used (even with earlier versions of NONMEM 7)
@@ -1814,7 +1814,7 @@ This is essentially the sample acceptance rate  for the NUTS sampling process, e
 When NUTS_EPARAM=0, parameters are entered into the NUTS algorithm
 parameterized as THETAs and phis, Cholesky.  When NUTS_EPARAM=1,
 parameters are entered into the NUTS algorithm parameterized as THETAs
-and etas.  When NUTS_EPARAM=2, parameters are entered into the NUTS
+and ETAs.  When NUTS_EPARAM=2, parameters are entered into the NUTS
 algorithm parameterized as THETAs and Choleksy of OMEGA inverse*ETA.
 Default 0.
 
@@ -1871,7 +1871,7 @@ NUTS_EPARAM, NUTS_OPARAM, and NUTS_SPARAM options.
     more details on the AUTO feature, AUTO=0 (default) (NM73)).
     Example stanrb42.ctl uses the AUTO=1 feature.
   - NUTS_EPARAM=1, NUTS_MASS=D
-    When the problem is submitted to the NUTS algorithms with etas
+    When the problem is submitted to the NUTS algorithms with ETAs
     rather than phis (NUTS_REPARAM=1), the NUTS_MASS=B does not yield
     good efficiencies on THETAs.  Therefore, NUTS_MASS=D needs to be
     used.  However, this reduces speed efficiencies by about 5 fold,
@@ -1891,7 +1891,7 @@ NUTS_EPARAM, NUTS_OPARAM, and NUTS_SPARAM options.
     analysis community is used to: It drops the NIND*LOG(DET(OMEGA))
     term (where NIND=number of subjects), resulting in a conditional
     likelihood that has very different distribution properties and
-    does not fully represent the contribution of the individual etas
+    does not fully represent the contribution of the individual ETAs
     to the likelihood.  An example of using NUTS_EPARAM=2 is
     ..\examples\stanrb19.  The AUTO=2 option allows an easy setup of
     this configuration, and example ..\examples\stanbrb39 uses this
@@ -1961,7 +1961,7 @@ Used with NUTS  method,  OLKJDF  stands  for  OMEGA  LKJ  density
       the  prior,  with OLKJDF degrees of freedom for all omega blocks.
       In addition, only diagonal elements of the OMEGA prior are  used,
       assuming  a  density  dependent on the OVARF value. OLKJDF may be
-      set >0 when using METHOD=BAYES as well, but thetas will  then  be
+      set >0 when using METHOD=BAYES as well, but THETAs will  then  be
       M-H sampled using the OSAMPLE_M1, OSAMPLE_M2, and OSAMPLE_M3 settings.
       Default is 0.
 
@@ -1990,7 +1990,7 @@ prior in terms of quality and lack of bias.
 When using OMEGA information from a previous study to supply as an
 informative prior to a present study, the Inverse Wishart format of
 the prior information conjugates well with the information in the
-cross products of etas provided by the present study, and the
+cross products of ETAs provided by the present study, and the
 informative prior information from the previous study offers a natural
 statistical support, as if the data of the previous study were added
 to the present study.  Furthermore, the inverse Wishart prior supplies
@@ -2005,7 +2005,7 @@ Wishart distribution.
 *** OLNTWOPI (NM74)
       The    objective    function    is    reported    including   the
       NETA*NIND*LOG(2pi) constant term for SAEM and BAYES,  where  NETA
-      is  the  number of etas, and NIND is number of individuals.  Compare LNTWOPI. Either or both may be used.
+      is  the  number of ETAs, and NIND is number of individuals.  Compare LNTWOPI. Either or both may be used.
 
 *** THETABOUNDTEST, OMEGABOUNDTEST, SIGMABOUNDTEST
       With NONMEM VI, the estimation step sometimes terminates with the
@@ -2036,13 +2036,13 @@ option may be needed.
     and Shanno  (BFGS))  optimization  method used by NONMEM to find
     optimal eta values (referred to as eta hat) for each subject at  the
     mode of their posterior densities, using analytical derivatives of F
-    with respect to etas  (G),  and  analytical derivatives  of  F  with
-    respect to etas (H), that were supplied by NMTRAN or by the user.
+    with respect to ETAs  (G),  and  analytical derivatives  of  F  with
+    respect to ETAs (H), that were supplied by NMTRAN or by the user.
     This is the default.
 
   - OPTMAP=1: variable metric method  using  numerical  finite
     difference methods  for  first  derivatives  of F with respect to
-    etas. Necessary when not all code used in evaluating F,  G  and  H
+    ETAs. Necessary when not all code used in evaluating F,  G  and  H
     for  observation event records is abbreviated code (some may be in
     verbatim code), and/or some portions of  the  computation  of   F,
     G  and H are evaluated in a hidden subroutine specified by
@@ -2177,15 +2177,15 @@ Note  that  the  ORDER  option does not affect the NONMEM report file,
 Default is 0.  By default, after an estimation is performed,  the
 phi(),  conditional means of the individual parameters, and their
 variances, are reported in the "root.phi" file. If you wish to have
-conditional mean etas reported, set PHITYPE=1.
+conditional mean ETAs reported, set PHITYPE=1.
 
 *** POSTHOC | NOPOSTHOC
 POSTHOC: used when the FO method is used.  After the Estimation Step
 terminates, the eta values are estimated for each individual.   To
-estimate the etas based on the initial estimates of THETA, OMEGA, and
+estimate the ETAs based on the initial estimates of THETA, OMEGA, and
 SIGMA (found either in the control stream or in  a  model
 specification  file), also specify MAXEVAL=0 (which omits the
-Estimation Step).  The  conditional  estimates  of  the etas are
+Estimation Step).  The  conditional  estimates  of  the ETAs are
 referred to as Conditional Parametric ETAs (CPE).
 
 NOPOSTHOC: ETAs  are not estimated.  This is the default with METHOD=0.  May not be used with METHOD=1.
@@ -2196,8 +2196,8 @@ user-supplied  PRED  or  ERROR  code)  will serve as a prediction
 variable, i.e., it will be set to a prediction.  Upon simulation, the
 simulated  observation is possibly also being set in Y or F. (However,
 the DV data item may instead be  set  directly  to  the simulated
-observation.)  Also, etas (if any) are population etas only if
-epsilons also appear.  This is the default.  Compare with
+observation.)  Also, ETAs (if any) are population ETAs only if
+EPSILONs also appear.  This is the default.  Compare with
 ~LIKELIHOOD | -2LOGLIKELIHOOD~ options.
 
 *** PRINT=n
@@ -2452,7 +2452,7 @@ Used with METHOD=CHAIN and $CHAIN to specify how  the  sample  is selected.
       It is not used by the SAEM or BAYES methods.
 
 *** SIGLO=n (NM72)
-The precision to which the individual etas  are  optimized.   The SIGL
+The precision to which the individual ETAs  are  optimized.   The SIGL
 value  set  by  the  user continues to be the precision (or delta )
 setting for  the  finite  difference  algorithms  in  the higher
 level  estimation process for THETAS, OMEGAS, and SIGMAS. By default,
@@ -2534,7 +2534,7 @@ A  set of tentative population estimates are first obtained using
       coordinates, the length of a point P is given in fractile units the  first-stage  estimate  of the fraction of area enclosing all
       points with same or less length as that of  P.   A  direction  is
       specified  by  m=n-1  angles,  where  n is the number of (active)
-      etas.  At the second stage, the fraction of  area  enclosing  all
+      ETAs.  At the second stage, the fraction of  area  enclosing  all
       points  of  length  less than r0 is taken to be identical to that
       computed at the first-stage.  To  obtain  the  fraction  of  area
       enclosing points of length greater than r0, numerical integration
@@ -2599,7 +2599,7 @@ PSAMPLE_M2, and PSAMPLE_M3 settings.
 See also [[file:/docs/reference-manual/control-records/ttdf/][$TTDF]] control record to specify degrees of  freedom for each THETA. The value of TTDF overrides $TTDF.
 
 *** ZERO=list
-      Required  with  METHOD=HYBRID.   A list of indices for etas which
+      Required  with  METHOD=HYBRID.   A list of indices for ETAs which
       are fixed to zero during the Estimation  Step.   "list"  contains
       one  or more integers.  If more than one, they must be surrounded
       by parentheses.  The list must be contained entirely on one line.

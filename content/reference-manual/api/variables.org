@@ -41,9 +41,9 @@ in tables and scatterplots  are  those copied from NMPRD4 with the
 last copying pass.
 
   - COMACT=0: not a copying pass.
-  - COMACT=1: a copying pass with final thetas and zero-valued etas.
-  - COMACT=2: a copying pass with  final  thetas  and  conditional estimates of etas.
-  - COMACT=3: a copying pass with conditional (nonparametric) estimates of etas.
+  - COMACT=1: a copying pass with final THETAs and zero-valued ETAs.
+  - COMACT=2: a copying pass with  final  THETAs  and  conditional estimates of ETAs.
+  - COMACT=3: a copying pass with conditional (nonparametric) estimates of ETAs.
 Such a pass takes place when the  control  stream  includes  this record:
 #+begin_src perl
   $NONPARAMETRIC ETAS
@@ -544,11 +544,11 @@ and in an $INFN block in conjunction with PASS.
  not take into account within-subject correlations)
 
 - EWRES_  and NPDE_  and NPD_ are evaluated using predicted function and
- residual variances evaluated over a Monte Carlo sampled range of  etas
+ residual variances evaluated over a Monte Carlo sampled range of  ETAs
  with population variance Omega.
 
 - ECWRES_ is evaluated with only the predicted function evaluated over a
- Monte Carlo sampled range of  etas  with  population  variance  Omega,
+ Monte Carlo sampled range of  ETAs  with  population  variance  Omega,
  while  residual  variance  is  always evaluated at conditional mode or
  mean.  Thus, ECWRES is the Monte Carlo version of CWRES,  while  EWRES
  is the Monte Carlo version of CWRESI.
@@ -1144,7 +1144,7 @@ For PRED and ERROR routines.
 An  individual  record  is  divided into L2 records.  An L2 record may
 contain one or more observations (on one or more separate data records
 respectively),  in  which  case it is called an observation-L2 record.
-The values of epsilons used in the intraindividual model may be
+The values of EPSILONs used in the intraindividual model may be
 correlated across the observations contained in the L2 record, and
 thus the L2 record may define a multivariate observation - the L2
 observation. (When  all  L2  observations  in  the data set are
@@ -1155,9 +1155,9 @@ record.)
 By default, the values of a given epsilon are statistically
 independent across  L2  observations  within  an  individual  record.
 Using CORRL2,  however, these values may be correlated.  More
-precisely, the values of the epsilons associated with the mth diagonal
+precisely, the values of the EPSILONs associated with the mth diagonal
 block of SIGMA may  be  correlated  across L2 observations, and it
-will be understood that for two different epsilons (eps1 and eps2,
+will be understood that for two different EPSILONs (eps1 and eps2,
 say)  associated  with the  mth  block,  the  correlation  between
 the values of eps1 for L2 observations A and B will be taken to be the
 same as  the  correlation between the values of eps2 for these same
@@ -1167,7 +1167,7 @@ With NONMEM 7.3, reserved variable CORRL2 is used and code such as the
 following may be used in $ERROR and $PRED blocks.
 
 Proceed as follows.  With the first data record of  the  nth
-observation-L2 record, and with respect to the values of the epsilons
+observation-L2 record, and with respect to the values of the EPSILONs
 associated with the mth diagonal block of SIGMA, the PRED routine
 should set CORRL2(k,m), for k=1,...,n, to the correlation  between the
 values for the kth L2 observation  and  the  nth  L2  observation.
@@ -1179,8 +1179,8 @@ For example, assume bivariate L2 observations chronologically ordered
 by TIME, additionally that the intraindividual model has two Epsilons
 (one for each element of the bivariate  L2 observation),  each
 associated with the same diagonal block of SIGMA. Then the values of
-these epsilons may be autocorrelated across the  L2 observations,  as
-specified by the above code. But if the two epsilons are associated
+these EPSILONs may be autocorrelated across the  L2 observations,  as
+specified by the above code. But if the two EPSILONs are associated
 with two different diagonal blocks, then one might  use this  code,
 in  which  each sigma  block has its own autocorrelation parameter
 theta(4) or theta(5):
@@ -1261,7 +1261,7 @@ the observtation in the 10 hour L2 record that uses Sigma block 1 will
 not be CORRL2 modeled.  In the above example, Sigma block  1  consists
 of EPS(1) and EPS(2), and Sigma block 2 consists of EPS(3) and EPS(4),
 with the CMT value determining which  data  records  use  which  Sigma
-blocks (epsilons sets) based on how Y is evaluated.
+blocks (EPSILONs sets) based on how Y is evaluated.
 
  RESTRICTIONS:
 
@@ -1578,7 +1578,7 @@ shrinkage  is averaged only among subjects with non-zero derivative of
 their data likelihood with  respect  to that ETA.
 
 - ETASXI(i): used to specify certain ETAs of particular subjects to be
-  included, or to specify certain etas of certain  subjects  to be
+  included, or to specify certain ETAs of certain  subjects  to be
   excluded, from the average eta shrinkage assessment.  ETASXI stands
   for eta shrinkage exclude/include.  The index /i/ refers to
   ETA(i). ETASXI(i) overrides ETASTYPE.
@@ -1664,7 +1664,7 @@ containing the observation, one specifies the mean and variance of
 the  variable for  NONMEM,  as usual, and one sets CTLO to the lower
 endpoint of the interval.  If with population data, this endpoint
 depends  on  an  eta variable,  then the first- and second-derivatives
-of the endpoint with respect to etas should also be set.  Derivatives
+of the endpoint with respect to ETAs should also be set.  Derivatives
 equal to 0  need  not be  explicitly  set,  and the only elements of
 DDCTLO that need be set are those in the lower triangle.  CTLO may be
 set in a $PRED or $ERROR abbreviated code, and then NM-TRAN
@@ -1795,7 +1795,7 @@ A nonzero value of F_FLAG has no effect during a Simulation Step.  But
   In that case RES and WRES will be 0 for all data records for the individual.
 
 - When F_FLAG/=0 for an observation within an individual record,
-  inter-L2 correlated epsilons are not  allowed  with the observations
+  inter-L2 correlated EPSILONs are not  allowed  with the observations
   within the individual record. (See [[file:/docs/reference-manual/api/variables/#corrl2][Correlation Across L2 Records]]).
 
 - If  the  data are population data, a nonzero F_FLAG cannot be used
@@ -2137,13 +2137,13 @@ In generated subroutines, ETA values are automatically stored in variale ETA.
 When using the PRED repetition feature, epsilon  values  generated  in
 PRED for simulation purposes (with or without the use of the
 ONLYSIMULATION option) should be  stored  in  EPS.    Then  when
-records  are repeated,  these  same  epsilons  values  will  be
+records  are repeated,  these  same  EPSILONs  values  will  be
 available in EPS as input.  In particular, with every repeated
 record,  the  values  that were  stored  in  EPS  the  last  time the
 record was passed, are made available as input to PRED.
 
 In generated subroutines, epsilon values are automatically  stored  in
-EPS,  and  thus automatically, the simulated epsilons are available as
+EPS,  and  thus automatically, the simulated EPSILONs are available as
 input with repeated records.
 
 When using the repetition feature with single-subject data, eta values
@@ -2152,7 +2152,7 @@ What happens in this case is analogous to what happens in the case  of
 population data with epsilon values.
 
 In  generated subroutines, eta values are automatically stored in ETA,
-and thus automatically, the simulated etas are available as input with
+and thus automatically, the simulated ETAs are available as input with
 repeated records.
 
 
@@ -2488,7 +2488,7 @@ conditionally in the $PK block, NM-TRAN inserts statements setting it
 to 0 so that, if it is not set by the $PK block, its value is 0. In
 the code that does not work, MTIME(1) does not retain its value from
 one call to the next. In the code that does work, TEMP (being a
-PK-defined item that does not depend on etas) does retain its value.
+PK-defined item that does not depend on ETAs) does retain its value.
 See [[file:/docs/cookbook/mtime/][model time examples]] for details.
 
 
@@ -2631,7 +2631,7 @@ PREDPP to various user-subroutines PK, ERROR, DES and AES.
       Compartment amounts and derivatives, for PK and ERROR
 
 - PROCM_INT (PROCM5)
-      Number and map of active etas, for PK and ERROR (and TRANS)
+      Number and map of active ETAs, for PK and ERROR (and TRANS)
 
 - PROCM_REAL (PROCM6)
       Theta vector from NONMEM, for DES and AES
@@ -2696,6 +2696,58 @@ Each has its own entry in the Help document.
 
 For an example, see Guide VI, Figure 14.
 
+** =A_0=
+:PROPERTIES:
+:CUSTOM_ID: a_0
+:END:
+#+begin_src f90
+ ! USAGE:
+      USE PRMOD_REAL, ONLY: A_0,DA_0,D2A_0
+
+ ! GLOBAL DECLARATION:
+      USE SIZES, ONLY: PC,LVR,DPSIZE
+      REAL(KIND=DPSIZE) :: A_0(PC),DA_0(PC,LVR),D2A_0(PC,LVR,LVR)
+#+end_src
+When =A_0FLG==1= the amounts in the various compartments can be set by
+the PK routine.  It can do this by storing  the  initial  values  for
+the state  vector  and its partials in A_0, DA_0, D2A_0.   The amount in
+the output compartment can not be set.
+- A_0: A_0(n) = the amount for compartment n
+
+- DA_0: DA_0(n,i) = the derivative of A_0(n) w.r.t. ETA(i)
+
+- D2A_0: D2A_0(n,i,j) = the second derivative of A_0(n) w.r.t. ETA(i), ETA(j) (lower-triangular; j=1, ..., i)
+
+- There  is  a  one-to-one  correspondence  between  A_0,DA_0,D2A_0
+  and A,DAETA,D2AETA.
+
+- NM-TRAN includes A_0,DA_0,D2A_0 in the PK routine when the  $PK
+  block includes  references  to  variables A_0FLG, A_0, or A_INITIAL,
+  or when verbatim code is present. (See [[file:/docs/reference-manual/api/variables/#state-vec-a][State Vector A]].)
+
+** Compartment initialization: ~A_0FLG~
+:PROPERTIES:
+:CUSTOM_ID: a_0flg
+:END:
+
+#+begin_src f90
+ ! USAGE:
+      USE PROCM_INT, ONLY: A_0FLG
+
+ ! GLOBAL DECLARATION:
+      INTEGER(KIND=ISIZE) :: A_0FLG
+#+end_src
+When ~ICALL>=2~,  at  a call to PK with the first record of of an
+individual record or with a reset record, PREDPP sets ~A_0FLAG=1~. At
+such  a call, the state vector ~A~ and its first- and second-order
+~ETA~ derivatives (DAETA and D2AETA) are set to zero. ~A_0FLG=0~  at
+all other calls to PK.
+
+User can initialize PK compartments conditional on ~A_0FLG=1~, by
+setting the initial values and partial derivatives in ~A_0~, ~DA_0~, ~D2A_0~.
+
+NM-TRAN includes ~A_0FLG~ in the PK routine when the $PK block uses variables ~A_0FLG~, ~A_0(n)~, or ~A_INITIAL(n)~, or verbatim code is used.
+
 ** Active ETAs: NACTIV
 #+begin_src f90
  ! USAGE:
@@ -2746,7 +2798,7 @@ These  error  messages  arise when the computations of the eigenvalues
  complex) in which case ADVAN5 must be used, or whether trivially small
  quantities have been produced by the accumulation of rounding error in
  the floating point computation, in which ADVAN7 can  be  used.   (Nonreal eigenvalues result when the system is non-mamillary, and may also
- occasionally occur when there are etas associated with rate  constants
+ occasionally occur when there are ETAs associated with rate  constants
  Kij).
 
  If the maximum value printed is very small (e.g., E-15), then the computations will proceed correctly using a value of FACTOR such as 10 or
@@ -2870,7 +2922,7 @@ ADVAN17, ADVAN18, SS6, and SS9.
   smaller  number  of derivatives obtained with each call, result in
   longer run times, but might also produce more  accurate derivatives.
   Also, it might provide more consistent computations when the number of
-  compartments and/or etas is to be changed.
+  compartments and/or ETAs is to be changed.
 
   Default is -1.  User may set to any other value  in  user-written code
   (e.g., with verbatim code in $PK).
@@ -2886,7 +2938,7 @@ ADVAN17, ADVAN18, SS6, and SS9.
   6,8,13,14,16,18   and SS6 calculate second derivatives "one group at a
   time".
 
-  E.g., with ADVAN6, suppose etas 1, 2, 3 are active.
+  E.g., with ADVAN6, suppose ETAs 1, 2, 3 are active.
 
     1. call DVERK to obtain 2nd derivatives 1,1
     2. call DVERK to obtain 2nd derivatives 1,2 and 2,2
@@ -2901,7 +2953,7 @@ ADVAN17, ADVAN18, SS6, and SS9.
   #+begin_src f90
     PW=2*PE*PM+PM
   #+end_src
-  Where: (PE is the maximum number of etas; currently 10) (PM is the
+  Where: (PE is the maximum number of ETAs; currently 10) (PM is the
   maximum number of compartments - 1; currently 9) PW is the size
   defined for various work arrays in the source code. It is currently
   defined as above (189).
@@ -2909,7 +2961,7 @@ ADVAN17, ADVAN18, SS6, and SS9.
   When INTFLG is -1, the ADVAN routines  and  SS6  makes  the  most
   efficient  use  of  the work arrays when computing second derivatives, to reduce the number of calls to DVERK.
 
-  At NEWIND=0 or 1, PREDPP looks at the number of active  etas  for
+  At NEWIND=0 or 1, PREDPP looks at the number of active  ETAs  for
   this  individual  and  the  number  of  user-defined compartments
   defined by the MODEL subroutine (NCM), and creates  a  scheme  to
   calculate  as  many groups of 2nd. derivatives at once as it can.
@@ -2917,18 +2969,18 @@ ADVAN17, ADVAN18, SS6, and SS9.
   set, PREDPP does not revise the scheme of integration each time.)
 
   E.g.,  with  the  current values of PE, PM, and PW, here are some
-  schemes of integration.  Under "nth. call" are the etas whose
+  schemes of integration.  Under "nth. call" are the ETAs whose
   second  derivatives  are  computed  with that call to DVERK.
 
   #+begin_src r
     # compts.  1st. call     2nd. call    3d. call  4th. call
-       9       etas 1 - 5    etas 6 - 7   eta 8     eta 9
-       8       etas 1 - 5    etas 6 - 7   eta 8     eta 9
-       7       etas 1 - 5    etas 6 - 7   eta 8 - 9
-       6       etas 1 - 6    etas 7 - 8   eta 9
-       5       etas 1 - 7    etas 8 - 9
-       4       etas 1 - 8    etas 9
-       3       etas 1 - 9
+       9       ETAs 1 - 5    ETAs 6 - 7   eta 8     eta 9
+       8       ETAs 1 - 5    ETAs 6 - 7   eta 8     eta 9
+       7       ETAs 1 - 5    ETAs 6 - 7   eta 8 - 9
+       6       ETAs 1 - 6    ETAs 7 - 8   eta 9
+       5       ETAs 1 - 7    ETAs 8 - 9
+       4       ETAs 1 - 8    ETAs 9
+       3       ETAs 1 - 9
   #+end_src
 
   Changing the size of the work arrays:
@@ -2938,7 +2990,7 @@ ADVAN17, ADVAN18, SS6, and SS9.
   be computed with a single call to DVERK, the source code  must be
   changed to define a larger value for PW.
 
-  To  integrate  the maximum number of etas and compartments in one call, set:
+  To  integrate  the maximum number of ETAs and compartments in one call, set:
   #+begin_src f90
     PW=PM*(1+PE+PE*(PE+1)/2)
   #+end_src
@@ -2947,7 +2999,7 @@ ADVAN17, ADVAN18, SS6, and SS9.
 
   Suppose PW is changed, but by accident is made smaller  than  the
   default  (2*PE*PM+PM=189).   Then for problems with large numbers of
-  compartments and/or etas, the work arrays will  not  be  large
+  compartments and/or ETAs, the work arrays will  not  be  large
   enough, with either INTFLG=-1 or INTFLG!=-1.
 
    A new error message exists in PREDPP, for which PRED exit code is 2 (always abort).
@@ -3149,14 +3201,14 @@ verbatim code is present.
 - ICALL: identical to the argument ICALL passed by NONMEM to PREDPP.
 
 - IDEFD: DES may set IDEFD when ICALL = 1, as follows.
-  + IDEFD(1) may optionally be set by DES to indicate how many thetas
+  + IDEFD(1) may optionally be set by DES to indicate how many THETAs
     it uses.  Set to 0 if none.  Otherwise, set to the index  of  the
     highest   numbered  theta  used.   IDEFD(1)=-9  means  "unknown".
     PREDPP determines from the value stored in IDEFD(1) how many
     elements of theta to copy from its input argument THETA to THETAS.
     (See [[file:/docs/reference-manual/api/variables/#des-aes-theta][DES_AES:THETA]]).
 
-  + When IDEFD(1)  is  set by DES to -9, PREDPP copies all thetas in
+  + When IDEFD(1)  is  set by DES to -9, PREDPP copies all THETAs in
     the  problem  to  THETAS  (See [[file:/docs/reference-manual/api/variables/#des-aes-theta][DES_AES:THETA]]).   With   NM-TRAN,
     IDEFD(1) is set to -9 when the $DES block contains verbatim code.
     If a user-written DES leaves IDEFD(1) unchanged, it  defaults  to
@@ -3168,7 +3220,7 @@ verbatim code is present.
     (the default).
 
 - IDEFA: AES may set IDEFA when ICALL is 1, as follows.
-  + IDEFA(1) is set by AES to indicate how many thetas it uses. See above remarks for IDEFD and DES.
+  + IDEFA(1) is set by AES to indicate how many THETAs it uses. See above remarks for IDEFD and DES.
   + IDEFA(2) for the calling protocol for ADVAN9 and ADVAN15 and
     ADVAN17. AES sets this as follows: IDEFA(2)=-1 "call with every
     event record" (the default); IDEFA(2)=1 "call once per individual

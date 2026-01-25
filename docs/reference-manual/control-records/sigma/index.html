@@ -21,13 +21,13 @@ https://github.com/alex-shpak/hugo-book
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="reference-manual">
-    <meta property="article:modified_time" content="2026-01-16T17:04:42-08:00">
+    <meta property="article:modified_time" content="2026-01-25T08:38:32-08:00">
 
 
   <meta itemprop="name" content="$SIGMA">
   <meta itemprop="description" content="$SIGMA Supplies initial estimates for the NONMEM SIGMA Matrix.
 1 2 3 4 5 6 7 8 9 10 11 12 $SIGMA [DIAGONAL(n) | BLOCK(n) | BLOCK(n) SAME(m) | BLOCK SAME(m)] [[value1] [value2] [value3] ... [(value,value...) xn] [BLOCK(n) VALUES(diag,odiag)] [label=value] ... [BLOCK(n) [NAMES (label1,...,labeln)] [VALUES (diag,odiag)] [FIXED] [UNINT] [VARIANCE|STANDARD] [COVARIANCE|CORRELATON] [CHOLESKY] [SCALE(scalevalue)] ;# Example $SIGMA BLOCK(3) 6. .005 .3 .0002 .006 .4 Discussion Gives initial estimates and constraints for elements of one or several blocks of the SIGMA matrix, i.e., the matrix of variances and covari- ances of the eps variables in the statistical model. This record should appear only if the statistical model contains eps variables. Multiple $SIGMA records may be used to define multiple blocks of SIGMA. The order of the appearance of all blocks over all records corresponds to the order of the blocks in SIGMA.">
-  <meta itemprop="dateModified" content="2026-01-16T17:04:42-08:00">
+  <meta itemprop="dateModified" content="2026-01-25T08:38:32-08:00">
   <meta itemprop="wordCount" content="1874">
 
 <title>$SIGMA | NONMEM Documentation</title>
@@ -38,7 +38,7 @@ https://github.com/alex-shpak/hugo-book
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.a1ffc8b5371adfb872b0c277b633d13e8c38c714c34a557cf5ea9f2bd002e54c.js" integrity="sha256-of/ItTca37hysMJ3tjPRPow4xxTDSlV89eqfK9AC5Uw=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.d62c4ce9c8a90f99cc695bc1205d8547d01af337703e07e5d6a1776130029be1.js" integrity="sha256-1ixM6cipD5nMaVvBIF2FR9Aa8zdwPgfl1qF3YTACm&#43;E=" crossorigin="anonymous"></script>
 
 
 
@@ -1733,10 +1733,10 @@ The  following  options  apply to the entire block and may appear
   elements are understood to be initial estimates of  variances  of
   eps.  This is the default.</li>
 <li>STANDARD  indicates that all initial estimates given for diagonal
-  elements are understood to be initial estimates of standard deviations of epsilons.  May also be coded SD.</li>
+  elements are understood to be initial estimates of standard deviations of EPSILONs.  May also be coded SD.</li>
 <li>COVARIANCE  indicates  that  all  initial estmates given for offdiagonal elements are  understood  to  be  initial  estimates  of
-  covariances of epsilons.  This is the default.</li>
-<li>CORRELATON  indicates  that  all  initial estmates given for offdiagonal elements are understood to be initial estimates of  correlations of epsilons.</li>
+  covariances of EPSILONs.  This is the default.</li>
+<li>CORRELATON  indicates  that  all  initial estmates given for offdiagonal elements are understood to be initial estimates of  correlations of EPSILONs.</li>
 <li>CHOLESKY  indicates  that  the block is specified in its Cholesky
   form.</li>
 <li>VARIANCE or STANDARD may be combined with  COVARIANCE  or
@@ -1981,8 +1981,8 @@ label=value (NM75)
 <p>The  symbolic  label substitution feature is new with NONMEM 7.5. This
 is a compact method of defining an EPS (an element of SIGMA)
 specifying  its  initial estimate, and specifying a label for the
-subscript for this element of SIGMA.  The label may be used as  a
-subscript  for  EPS  in  abbreviated code, and will also identify this
+index for this element of SIGMA.  The label may be used as  a
+index  for  EPS  in  abbreviated code, and will also identify this
 element of SIGMA  in  the  NONMEM  output.   If  new  $SIGMA records
 change the ordering, the abbreviated code does  not have to be
 changed.  For example, suppose the first element  of  SIGMA that is
@@ -2011,8 +2011,8 @@ defined happens to be</p>
 </div>
 </div>
 <p>and  EPS(RSW)  rather than EPS1 will appear in the NONMEM report.
-      The abbreviated code can use this symbolic subscript  instead  of
-      the numeric subscript.</p>
+      The abbreviated code can use this symbolic index  instead  of
+      the numeric index.</p>
 <p>
 As  with  $OMEGA, $SIGMA and $THETA records (if elements of THETA
       are used) must be placed ahead of any records that use  the  symbolic label.</p>
@@ -2135,9 +2135,9 @@ Yet another example using labels for all parameters:</p>
 any records that use the symbolic label. So, these records must be
 placed before $THI, $THR, $PK, and $ERROR.  Also, notice that the
 position of CL V1 in $PK in reverse order relative to the associated
-etas in $OMEGA.  Thus, the inter-subject variability of CL is ETA(1),
+ETAs in $OMEGA.  Thus, the inter-subject variability of CL is ETA(1),
 and its fixed effect is THETA(2).  The user no longer needs to
-consider the numeric ordering of THETAs and etas, however, and just
+consider the numeric ordering of THETAs and ETAs, however, and just
 utilize the symbols, and NMTRAN will map out everything correctly in
 the final FSUBS routine.  If later, you wish to add a theta, you can
 place it anywhere in the $THETA record (its position in $THETA defines
@@ -2162,7 +2162,7 @@ BLOCK(n) NAMES VALUES
 </div>
 <p>With NONMEM 7.5, Symbolic label substitution may be specified for an
 entire block using the NAMES option.  This is a compact way of
-defining one or more epsilons with labels and, when combined with
+defining one or more EPSILONs with labels and, when combined with
 VALUES, with initial values. For example</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
@@ -2317,9 +2317,9 @@ change the scale on the fly.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/1fbe5fdfc154f4b410e58fae35e11114eda477c1" title='Last modified by Yi Zhang | 2026 Jan 16' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/75f746f1d521f67bde10c1e21cc202c6e736674a" title='Last modified by Yi Zhang | 2026 Jan 25' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Jan 16</span>
+    <span>2026 Jan 25</span>
   </a>
 
 </div>

@@ -371,7 +371,7 @@ also produced.  As of NONMEM 7.4, if
 #+begin_src perl
 $EST PHITYPE=1
 #+end_src
-is specified, then conditional mean etas are reported in the PHI
+is specified, then conditional mean ETAs are reported in the PHI
 table. regardless  of  the  analysis method.
 
 *** .iph (NM75)
@@ -388,9 +388,9 @@ values from each iteration are not stored.  However,  if you set
 then PHI and ETA values from each BAYES iteration will be stored in
 root.iph. For non-mixture problems, only records of SUBP=0 are
 recorded,  as  there are no sub-population divisions. For mixture
-problems, the SUBP=0 records contain the composite phis and  etas (the
+problems, the SUBP=0 records contain the composite phis and  ETAs (the
 average  of these across all non-negative iterations are in the
-root.phi table), and the SUBP>0 records contain the phis  and etas
+root.phi table), and the SUBP>0 records contain the phis  and ETAs
 appropriate  to  each  sub-population  SUBP (the average of these
 across all non- negative iterations are in the root.phm table).  The
 root.iph file can become quite large, so it should be used only on the
@@ -464,7 +464,7 @@ OMEGAs. Same  as "CORRELATION   MATRIX  OF  ESTIMATE".
       present.
 
 "root.coi" contains full inverse covariance matrix (Fischer information  matrix)  for
-      thetas,  sigmas,  and omegas.  Same as "INVERSE COVARIANCE MATRIX
+      THETAs,  SIGMAs,  and OMEGAs.  Same as "INVERSE COVARIANCE MATRIX
       OF ESTIMATE" except as described for "root.cov".
 
 "root.smt" (NM72) contains the S matrix, if  $COV step failed.
@@ -490,7 +490,7 @@ selected.  If ETAS was selected, then instead of cumulative
 probabilities, the support point eta vector that best fits that
 subject (ETM) is listed.
 
-"root.npe" contains the expected value etas and expected value ETA
+"root.npe" contains the expected value ETAs and expected value ETA
 covariances (ETC) for each problem or sub-problem.  Because
 only one line is written per problem or sub-problem, the column header
 is displayed (unless NOLABEL=1) only once for the entire NONMEM run.
@@ -555,9 +555,9 @@ with respect to eta, where
 #+end_src
 The values are those used in the Estimation Step.   Values  of  F are
 computed  by PRED with eta=0 if METHOD=0 is used;  otherwise they are
-computed with non-zero etas: the Conditional (CPE) etas, empirical
+computed with non-zero ETAs: the Conditional (CPE) ETAs, empirical
 bayes  estimates  (EBE), mode a posteriori (MAP) estimates) or
-conditional mean  etas,  depending  on  the  Estimation Method.
+conditional mean  ETAs,  depending  on  the  Estimation Method.
 Values  of  G are computed by NONMEM via finite differences using
 these values of F and eta.  Values of H are  computed by  NONMEM  with
 the  same values of F and eta if INTERACTION is specified; otherwise,
@@ -572,7 +572,7 @@ arguments F, G, and H.  These are 0 if not computed  by  PRED. (E.g.
 second  derivatves  are  not  computed analytically with a method
 other than  LAPLACIAN.)   Values  in  root.agh  correspond exactly  to
 those  in  root.fgh.  That is, values of F and G are from calls to
-PRED with ETA=0 or with non-zero etas, as described above.   Values
+PRED with ETA=0 or with non-zero ETAs, as described above.   Values
 of H are from calls to PRED with the same values of eta if INTERACTION
 is  specified;  otherwise,  they  are  from calls to PRED with ETA=0,
 regardless of the Estimation method.
@@ -596,12 +596,12 @@ these items (labled VAR1_VAR2, wher VAR1 and VAR2 are the particular
 table items).  The variance IPRED_IPRED for a record with COMACT=1
 would then have essentially the statistical error associated with the
 variance-covariance of the appropriate THETAs.  When COMACT=2, table
-variables are evaluated having the etas set to the empirical bayes
+variables are evaluated having the ETAs set to the empirical bayes
 estimates (depending on the last estimation method used, and what the
 FNLETA value is set to), variance-covariance of these items are
 evaluated based on conditional individual variances of the .phi table,
 and variance-covariance of the appropriate THETAs, SIGMAs, and OMEGAs,
-as applicable.  If COMACT=3, then non-parametric estimated etas are
+as applicable.  If COMACT=3, then non-parametric estimated ETAs are
 used.
 
 *** .ets (NM74)
@@ -626,13 +626,13 @@ When MSF or MSFO option is used to specify an MSFO file in the $EST record:
 $EST … MSFO=msfroot.msf
 #+end_src
 then in addition to the main MSF file msfroot.msf, file
-msfroot_ETAS.msf containing individual etas and phis generated during
-estimation (except FO, which does not generate non-zero etas during
+msfroot_ETAS.msf containing individual ETAs and phis generated during
+estimation (except FO, which does not generate non-zero ETAs during
 estimation), will also be produced, and provide additional information
 when a $MSFI record is used in a subsequent problem or control stream.
 In addition, this files stores information useful for resuming an
 interrupted EM/BAYES estimation.  The _ETAS file does not contain
-POSTHOC evaluated etas, only estimated (during $EST) evaluated etas.
+POSTHOC evaluated ETAs, only estimated (during $EST) evaluated ETAs.
 Also, ensure that the ordering of subjects in the present problem
 matches that of the problem when the msf file was generated (for
 example, do not change the data file structure or IGNORE/ACCEPT
@@ -686,9 +686,9 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
  | $NONPARAMETRIC ETAS               | final   | nonparametric (CNPE) | nonparametric (CNPE) |
  |-----------------------------------+---------+----------------------+----------------------|
 
-- Displayed etas are the simulated etas  if  the  simulated  etas  are
+- Displayed ETAs are the simulated ETAs  if  the  simulated  ETAs  are
   stored  in  common  NMPRD7. This is the case when NM-TRAN is used.
-  If they are not stored in NMPRD7, displayed etas are all 0.
+  If they are not stored in NMPRD7, displayed ETAs are all 0.
 
 
 - Displayed values of PRED, RES, and WRES are always computed with
@@ -761,7 +761,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
    $TABLE TVCL CL
   #+end_src
   TVCL  is  a  SAVE  variable  because it is defined in a [[file:/docs/reference-manual/abbr/#copying-block][copying block]]. During the copying pass with COMACT=1, it is set to the
-  typical  value of CL, because when COMACT=1, etas are 0.  Were the
+  typical  value of CL, because when COMACT=1, ETAs are 0.  Were the
   values of TVCL not stored in the SAVE region, then during the
   copying pass to obtain values for tables and with COMACT=2, TVCL
   would retain its value set with the previous data record. The first
@@ -817,7 +817,7 @@ ETA(1) and the PRED-defined item CL that are displayed depend on task specificat
   IPRED is the conditional estimate of F.
   FT is a SAVE variable because it is defined in a [[file:/docs/reference-manual/abbr/#copying-block][copying block]].
   During  the copying pass with COMACT=1, it is set to the typical
-  value of F, because when COMACT=1, etas are 0.   Were  the  values
+  value of F, because when COMACT=1, ETAs are 0.   Were  the  values
   of  FT  not stored in the SAVE region, then during the copying pass
   to obtain values for tables and with COMACT=2, FT would retain its
   value  set  with the previous data record.
@@ -1371,12 +1371,12 @@ is not well-specifed.  To obtain EB2, a data set is simulated under
 the  fitted  model, and EB2 is obtained using this data set.  Both EB1
 and EB2 are (univariate) measures of central tendency of the
 distribution  of interindividual  "residuals", i.e. the distribution
-of the conditional estimates of the etas.  In both cases the
+of the conditional estimates of the ETAs.  In both cases the
 residuals  are  defined  in terms  of  the  data-analytic model.  But
 for EB1, the distribution is governed by the true (unknown) model, and
 for EB2, the distribution is governed by the fitted  model.  If the
 two models are "close", EB1 and EB2 will be close.  The conditional
-estimates of  the  etas  from  the simulated  data  should be based on
+estimates of  the  ETAs  from  the simulated  data  should be based on
 the population parameter estimates from these data.  It may cost
 considerable CPU  time  to  obtain  this second  set of parameter
 estimates, and so it may not always be feasible to compute EB2.
@@ -1615,7 +1615,7 @@ As of nm73, if the eta shrinkage is less than 0, it will reported as a
 value of 1.0E-10.  Less than 0 shrinkage can occur due to limited
 precision evaluations, and/or sometimes with classical NONMEM methods.
 
-ETA shrinkage is averaged for all individuals if ETASTYPE=0.  As of nm73, should you wish to correct for some individuals not contributing at all to one or more etas (this may or may not be desirable, depending on your needs), the shrinkage can be calculated by NONMEM to not include these etas by setting ETASTYPE=1 in the $EST record. This will average shrinkage information only among individuals that provided a non-zero derivative of their data likelihood with respect to that eta, and will not include subjects with a non-influential eta, that is in which the derivative of the data likelihood is zero.  Furthermore, you may specify eta i of particular subjects to be excluded, by setting a reserved variable ETASXI(i) to 1 in $PK or $PRED, or specify eta i of certain subjects to be included, by setting ETASXI(i)=2 (ETASXI stands for eta shrinkage exclude/include):
+ETA shrinkage is averaged for all individuals if ETASTYPE=0.  As of nm73, should you wish to correct for some individuals not contributing at all to one or more ETAs (this may or may not be desirable, depending on your needs), the shrinkage can be calculated by NONMEM to not include these ETAs by setting ETASTYPE=1 in the $EST record. This will average shrinkage information only among individuals that provided a non-zero derivative of their data likelihood with respect to that eta, and will not include subjects with a non-influential eta, that is in which the derivative of the data likelihood is zero.  Furthermore, you may specify eta i of particular subjects to be excluded, by setting a reserved variable ETASXI(i) to 1 in $PK or $PRED, or specify eta i of certain subjects to be included, by setting ETASXI(i)=2 (ETASXI stands for eta shrinkage exclude/include):
 
 #+begin_src perl
 IF(ID==3)  ETASXI(1)=1
@@ -1642,13 +1642,13 @@ residuals.  If they are related by an off-diagonal SIGMA, then their
 shrinkage is related, and they will have similar or identical
 shrinkage values.
 
-If two epsilons pertain to the same data, such as proportional EPS and additive EPS for PK data:
+If two EPSILONs pertain to the same data, such as proportional EPS and additive EPS for PK data:
 $$
 y=f+f\epsilon(1)+\epsilon(2),
 $$
 then the same epsilon shrinkage is associated with EPS(1) and EPS(2).  However, if F=0 for some data, then such values contribute to EPS(2) shrinkage assessment, but not to EPS(1) shrinkage assessment.  In such cases, shrinkage to EPS(1) and EPS(2) may differ slightly, where EPS(1) shrinkage incorporates only residuals to data with predicted values that are non-zero, and EPS(2) shrinkage incorporates residuals to all PK data.
 
-See also [[file:/docs/reference-manual/control-records/estimation/#etasamples][ETASAMPLES=0]] option for SAEM method for diagnostics.
+See also [[file:/docs/reference-manual/control-records/estimation/#ETAsamples][ETASAMPLES=0]] option for SAEM method for diagnostics.
 
 The reported shrinkage information from an MCMC Bayesian analysis is based on the average of the shrinkage across all individuals across all stationary iterations (positive numbered iterations in the .ext file).
 
@@ -1678,7 +1678,7 @@ With NONMEM 7.3, when MSF or MSFO option is used to  specify  an  MSFO file in t
  #+begin_src perl
  $EST ... MSFO=msfroot.msf
  #+end_src
- then  in addition to the main MSF file msfroot.msf, an extra file msfroot_ETAS.msf will also be produced, and provide  additional  information  when  a  $MSFI record is used in a subsequent problem or control stream.  File msfroot_ETAS.msf contains individual etas and phis  gen- erated  during  estimation  (except FO method, which does not generate non-zero etas during estimation, and not POSTHOC evaluated etas.)  The use  of  an  extension  in the file name, e.g., .msf, is optional.  If file _ETAS does not exist, NONMEM issues a warning, e.g.,
+ then  in addition to the main MSF file msfroot.msf, an extra file msfroot_ETAS.msf will also be produced, and provide  additional  information  when  a  $MSFI record is used in a subsequent problem or control stream.  File msfroot_ETAS.msf contains individual ETAs and phis  gen- erated  during  estimation  (except FO method, which does not generate non-zero ETAs during estimation, and not POSTHOC evaluated ETAs.)  The use  of  an  extension  in the file name, e.g., .msf, is optional.  If file _ETAS does not exist, NONMEM issues a warning, e.g.,
 
  #+begin_src
  WARNING: EXTRA MSF FILE COULD NOT BE OPENED: c5msf2x_ETAS
@@ -1736,7 +1736,7 @@ relative to the variance estimates.)
  USER  CCONTR ROUTINE NOT USED, BUT THERE ARE NO EPSILONS, AND ETAS ARE
  TO BE ESTIMATED
 #+end_src
-This can happen when POSTHOC etas are requested, but the data are
+This can happen when POSTHOC ETAs are requested, but the data are
 single-subject  data.   The  user  may  have included the POSTHOC
 option in error.
 
@@ -1888,9 +1888,9 @@ The same when the following error occurs.
     MESSAGE ISSUED FROM COVARIANCE STEP
 #+end_src
 
-[fn:1] Displayed etas are the simulated etas if the simulated etas are
+[fn:1] Displayed ETAs are the simulated ETAs if the simulated ETAs are
 stored in common NMPRD7. This is the case when NM-TRAN is used. If
-they are not stored in NMPRD7, displayed etas are all 0.
+they are not stored in NMPRD7, displayed ETAs are all 0.
 [fn:2] NONMEM Users Guide  I Sections  C.3.5.1 "ESTIMATION" and G.3
 "Messages from the Estimation Step" refer to the UCP as "scaled
 transformed parameters" or STP. NONMEM  Users Guide II Section F

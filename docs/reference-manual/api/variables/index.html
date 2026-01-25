@@ -21,14 +21,14 @@ NONMEM variables COM(n) COM, COMACT, COMSAV, and COMRES, these reserved labels s
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="reference-manual">
-    <meta property="article:modified_time" content="2026-01-22T08:44:29-08:00">
+    <meta property="article:modified_time" content="2026-01-25T08:38:32-08:00">
 
 
   <meta itemprop="name" content="Variables">
   <meta itemprop="description" content="Module variables For every module variable documented here, Fortran code block &#34;USAGE&#34; shows how it can be used. &#34;GLOBAL DECLARATION&#34; block shows its definition to help advanced users understand the implementation.
 NONMEM variables COM(n) COM, COMACT, COMSAV, and COMRES, these reserved labels starting COM are related to each other. They all refer in some manner to the module NMPRD4. (This module was originally a global COMMON; hence the use of the letters &#34;COM&#34;.)">
-  <meta itemprop="dateModified" content="2026-01-22T08:44:29-08:00">
-  <meta itemprop="wordCount" content="18447">
+  <meta itemprop="dateModified" content="2026-01-25T08:38:32-08:00">
+  <meta itemprop="wordCount" content="18701">
 
 <title>Variables | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -38,7 +38,7 @@ NONMEM variables COM(n) COM, COMACT, COMSAV, and COMRES, these reserved labels s
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.a1ffc8b5371adfb872b0c277b633d13e8c38c714c34a557cf5ea9f2bd002e54c.js" integrity="sha256-of/ItTca37hysMJ3tjPRPow4xxTDSlV89eqfK9AC5Uw=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.d62c4ce9c8a90f99cc695bc1205d8547d01af337703e07e5d6a1776130029be1.js" integrity="sha256-1ixM6cipD5nMaVvBIF2FR9Aa8zdwPgfl1qF3YTACm&#43;E=" crossorigin="anonymous"></script>
 
 
 
@@ -1642,9 +1642,13 @@ NONMEM variables COM(n) COM, COMACT, COMSAV, and COMRES, these reserved labels s
 </li>
 <li><a href="#headline-58">PREDPP variables</a>
 <ul>
-<li><a href="#headline-59">Active ETAs: NACTIV</a>
+<li><a href="#a_0"><code class="verbatim">A_0</code></a>
 </li>
-<li><a href="#headline-60">ADVAN7: FACTOR</a>
+<li><a href="#a_0flg">Compartment initialization: <code>A_0FLG</code></a>
+</li>
+<li><a href="#headline-61">Active ETAs: NACTIV</a>
+</li>
+<li><a href="#headline-62">ADVAN7: FACTOR</a>
 </li>
 <li><a href="#des-solver-settings">DEs solver settings</a>
 </li>
@@ -1656,13 +1660,13 @@ NONMEM variables COM(n) COM, COMACT, COMSAV, and COMRES, these reserved labels s
 </li>
 <li><a href="#newind">New individual indicator: NEWIND</a>
 </li>
-<li><a href="#headline-66">Write formats</a>
+<li><a href="#headline-68">Write formats</a>
 </li>
-<li><a href="#headline-67">State Vector time: TSTATE</a>
+<li><a href="#headline-69">State Vector time: TSTATE</a>
 </li>
 <li><a href="#state-vec-a">State Vector: A</a>
 </li>
-<li><a href="#headline-69">DES AES: ISFINL</a>
+<li><a href="#headline-71">DES AES: ISFINL</a>
 </li>
 <li><a href="#des-aes-icall">DES AES: ICALL,IDEFD,IDEFA</a>
 </li>
@@ -1670,17 +1674,17 @@ NONMEM variables COM(n) COM, COMACT, COMSAV, and COMRES, these reserved labels s
 </li>
 </ul>
 </li>
-<li><a href="#headline-72">PK variables</a>
+<li><a href="#headline-74">PK variables</a>
 <ul>
 <li><a href="#initial-steady-state-i_ss-issmod">Initial steady state: I_SS,ISSMOD</a>
 </li>
-<li><a href="#headline-74">PASTZERO (NM75)</a>
+<li><a href="#headline-76">PASTZERO (NM75)</a>
 </li>
 <li><a href="#mxstep">MXSTEP</a>
 </li>
-<li><a href="#headline-76">STOP_TIME,ITASK_ (NM75)</a>
+<li><a href="#headline-78">STOP_TIME,ITASK_ (NM75)</a>
 </li>
-<li><a href="#headline-77">HINIT_,HMIN_,HMAX_ (NM760)</a>
+<li><a href="#headline-79">HINIT_,HMIN_,HMAX_ (NM760)</a>
 </li>
 </ul>
 </li>
@@ -1764,9 +1768,9 @@ in tables and scatterplots  are  those copied from NMPRD4 with the
 last copying pass.</p>
 <ul>
 <li>COMACT=0: not a copying pass.</li>
-<li>COMACT=1: a copying pass with final thetas and zero-valued etas.</li>
-<li>COMACT=2: a copying pass with  final  thetas  and  conditional estimates of etas.</li>
-<li>COMACT=3: a copying pass with conditional (nonparametric) estimates of etas.</li>
+<li>COMACT=1: a copying pass with final THETAs and zero-valued ETAs.</li>
+<li>COMACT=2: a copying pass with  final  THETAs  and  conditional estimates of ETAs.</li>
+<li>COMACT=3: a copying pass with conditional (nonparametric) estimates of ETAs.</li>
 </ul>
 <p>Such a pass takes place when the  control  stream  includes  this record:</p>
 <div class="src src-perl">
@@ -2045,7 +2049,7 @@ INFN-defined variables
  Variables from PRINFN can be used in a user-written code. MODULE INFNP
  must be defined as above prior to the SUBROUTINE statement.  The variables have names TLCOM(1), TLCOM(2), etc.
  E.g.,  X=TLCOM(1)/TLCOM(2).   It is possible to give the variables the
- same (non-subscripted) names that they had in $INFN. Suppose variables
+ same (no index) names that they had in $INFN. Suppose variables
  X1  and X2 are used in $INFN, and the following is present in the generated INFN routine:
       X1=&gt;TLCOM(00001); X2=&gt;TLCOM(00002)</p>
 <p>
@@ -2579,10 +2583,10 @@ account within-subject correlations)</li>
 <li>NPD_ is the correlated normalized prediction distribution error  (does
 not take into account within-subject correlations)</li>
 <li>EWRES_  and NPDE_  and NPD_ are evaluated using predicted function and
-residual variances evaluated over a Monte Carlo sampled range of  etas
+residual variances evaluated over a Monte Carlo sampled range of  ETAs
 with population variance Omega.</li>
 <li>ECWRES_ is evaluated with only the predicted function evaluated over a
-Monte Carlo sampled range of  etas  with  population  variance  Omega,
+Monte Carlo sampled range of  ETAs  with  population  variance  Omega,
 while  residual  variance  is  always evaluated at conditional mode or
 mean.  Thus, ECWRES is the Monte Carlo version of CWRES,  while  EWRES
 is the Monte Carlo version of CWRESI.</li>
@@ -3252,8 +3256,8 @@ In abbreviated code, MIXP may be coded in either of three ways:</p>
 </div>
 </div>
 <p>
-The first two ways are identical; i.e., when no  subscript  is  coded,
-NM-TRAN supplies the subscript MIXNUM.</p>
+The first two ways are identical; i.e., when no index is coded,
+NM-TRAN supplies the index MIXNUM.</p>
 <p>
 With  the third, the index i must not exceed the value of MMX in SIZES
 (or as set by $SIZES record).</p>
@@ -3484,7 +3488,7 @@ Correlation across L2 records
 An  individual  record  is  divided into L2 records.  An L2 record may
 contain one or more observations (on one or more separate data records
 respectively),  in  which  case it is called an observation-L2 record.
-The values of epsilons used in the intraindividual model may be
+The values of EPSILONs used in the intraindividual model may be
 correlated across the observations contained in the L2 record, and
 thus the L2 record may define a multivariate observation - the L2
 observation. (When  all  L2  observations  in  the data set are
@@ -3495,9 +3499,9 @@ record.)</p>
 By default, the values of a given epsilon are statistically
 independent across  L2  observations  within  an  individual  record.
 Using CORRL2,  however, these values may be correlated.  More
-precisely, the values of the epsilons associated with the mth diagonal
+precisely, the values of the EPSILONs associated with the mth diagonal
 block of SIGMA may  be  correlated  across L2 observations, and it
-will be understood that for two different epsilons (eps1 and eps2,
+will be understood that for two different EPSILONs (eps1 and eps2,
 say)  associated  with the  mth  block,  the  correlation  between
 the values of eps1 for L2 observations A and B will be taken to be the
 same as  the  correlation between the values of eps2 for these same
@@ -3507,7 +3511,7 @@ With NONMEM 7.3, reserved variable CORRL2 is used and code such as the
 following may be used in $ERROR and $PRED blocks.</p>
 <p>
 Proceed as follows.  With the first data record of  the  nth
-observation-L2 record, and with respect to the values of the epsilons
+observation-L2 record, and with respect to the values of the EPSILONs
 associated with the mth diagonal block of SIGMA, the PRED routine
 should set CORRL2(k,m), for k=1,…,n, to the correlation  between the
 values for the kth L2 observation  and  the  nth  L2  observation.
@@ -3519,8 +3523,8 @@ For example, assume bivariate L2 observations chronologically ordered
 by TIME, additionally that the intraindividual model has two Epsilons
 (one for each element of the bivariate  L2 observation),  each
 associated with the same diagonal block of SIGMA. Then the values of
-these epsilons may be autocorrelated across the  L2 observations,  as
-specified by the above code. But if the two epsilons are associated
+these EPSILONs may be autocorrelated across the  L2 observations,  as
+specified by the above code. But if the two EPSILONs are associated
 with two different diagonal blocks, then one might  use this  code,
 in  which  each sigma  block has its own autocorrelation parameter
 theta(4) or theta(5):</p>
@@ -3671,7 +3675,7 @@ the observtation in the 10 hour L2 record that uses Sigma block 1 will
 not be CORRL2 modeled.  In the above example, Sigma block  1  consists
 of EPS(1) and EPS(2), and Sigma block 2 consists of EPS(3) and EPS(4),
 with the CMT value determining which  data  records  use  which  Sigma
-blocks (epsilons sets) based on how Y is evaluated.</p>
+blocks (EPSILONs sets) based on how Y is evaluated.</p>
 <p>
  RESTRICTIONS:</p>
 <p>
@@ -4207,9 +4211,9 @@ their data likelihood with  respect  to that ETA.</p>
 <ul>
 <li>
 <p>ETASXI(i): used to specify certain ETAs of particular subjects to be
-included, or to specify certain etas of certain  subjects  to be
+included, or to specify certain ETAs of certain  subjects  to be
 excluded, from the average eta shrinkage assessment.  ETASXI stands
-for eta shrinkage exclude/include.  The subscript i refers to
+for eta shrinkage exclude/include.  The index <em>i</em> refers to
 ETA(i). ETASXI(i) overrides ETASTYPE.</p>
 <ul>
 <li>If ETASXI(i) is set to 2, ETA(i) is included.</li>
@@ -4354,7 +4358,7 @@ containing the observation, one specifies the mean and variance of
 the  variable for  NONMEM,  as usual, and one sets CTLO to the lower
 endpoint of the interval.  If with population data, this endpoint
 depends  on  an  eta variable,  then the first- and second-derivatives
-of the endpoint with respect to etas should also be set.  Derivatives
+of the endpoint with respect to ETAs should also be set.  Derivatives
 equal to 0  need  not be  explicitly  set,  and the only elements of
 DDCTLO that need be set are those in the lower triangle.  CTLO may be
 set in a $PRED or $ERROR abbreviated code, and then NM-TRAN
@@ -4553,7 +4557,7 @@ method must be used.</li>
 <li>F_FLAG=0 except with all observations within an individual record.
 In that case RES and WRES will be 0 for all data records for the individual.</li>
 <li>When F_FLAG/=0 for an observation within an individual record,
-inter-L2 correlated epsilons are not  allowed  with the observations
+inter-L2 correlated EPSILONs are not  allowed  with the observations
 within the individual record. (See <a href="/docs/reference-manual/api/variables/#corrl2">Correlation Across L2 Records</a>).</li>
 <li>If  the  data are population data, a nonzero F_FLAG cannot be used
 within a multiple-observation L2 record.  If the data are
@@ -5062,13 +5066,13 @@ In generated subroutines, ETA values are automatically stored in variale ETA.</p
 When using the PRED repetition feature, epsilon  values  generated  in
 PRED for simulation purposes (with or without the use of the
 ONLYSIMULATION option) should be  stored  in  EPS.    Then  when
-records  are repeated,  these  same  epsilons  values  will  be
+records  are repeated,  these  same  EPSILONs  values  will  be
 available in EPS as input.  In particular, with every repeated
 record,  the  values  that were  stored  in  EPS  the  last  time the
 record was passed, are made available as input to PRED.</p>
 <p>
 In generated subroutines, epsilon values are automatically  stored  in
-EPS,  and  thus automatically, the simulated epsilons are available as
+EPS,  and  thus automatically, the simulated EPSILONs are available as
 input with repeated records.</p>
 <p>
 When using the repetition feature with single-subject data, eta values
@@ -5077,7 +5081,7 @@ What happens in this case is analogous to what happens in the case  of
 population data with epsilon values.</p>
 <p>
 In  generated subroutines, eta values are automatically stored in ETA,
-and thus automatically, the simulated etas are available as input with
+and thus automatically, the simulated ETAs are available as input with
 repeated records.</p>
 </div>
 </div>
@@ -5685,7 +5689,7 @@ conditionally in the $PK block, NM-TRAN inserts statements setting it
 to 0 so that, if it is not set by the $PK block, its value is 0. In
 the code that does not work, MTIME(1) does not retain its value from
 one call to the next. In the code that does work, TEMP (being a
-PK-defined item that does not depend on etas) does retain its value.
+PK-defined item that does not depend on ETAs) does retain its value.
 See <a href="/docs/cookbook/mtime/">model time examples</a> for details.</p>
 <p>
 When MTIME values contains coincidence of times, the following rules apply.</p>
@@ -5984,7 +5988,7 @@ PREDPP to various user-subroutines PK, ERROR, DES and AES.</p>
 <li>PROCM_REAL (PROCM4)
     Compartment amounts and derivatives, for PK and ERROR</li>
 <li>PROCM_INT (PROCM5)
-    Number and map of active etas, for PK and ERROR (and TRANS)</li>
+    Number and map of active ETAs, for PK and ERROR (and TRANS)</li>
 <li>PROCM_REAL (PROCM6)
     Theta vector from NONMEM, for DES and AES</li>
 <li>PROCM_REAL (PROCM7)
@@ -6034,11 +6038,87 @@ PREDPP to various user-subroutines PK, ERROR, DES and AES.</p>
 <p>Each has its own entry in the Help document.</p>
 <p>
 For an example, see Guide VI, Figure 14.</p>
-<div id="outline-container-headline-59" class="outline-3">
-<h3 id="headline-59">
+<div id="outline-container-a_0" class="outline-3">
+<h3 id="a_0">
+<code class="verbatim">A_0</code>
+</h3>
+<div id="outline-text-a_0" class="outline-text-3">
+<div class="src src-f90">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span> <span style="color:#78787e">! USAGE:
+</span></span></span><span style="display:flex;"><span><span style="color:#78787e"></span>      <span style="color:#ff6ac1">USE</span> PRMOD_REAL, <span style="color:#ff6ac1">ONLY</span>: A_0,DA_0,D2A_0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#78787e">! GLOBAL DECLARATION:
+</span></span></span><span style="display:flex;"><span><span style="color:#78787e"></span>      <span style="color:#ff6ac1">USE</span> SIZES, <span style="color:#ff6ac1">ONLY</span>: PC,LVR,DPSIZE
+</span></span><span style="display:flex;"><span>      <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE) <span style="color:#ff5c57">::</span> A_0(PC),DA_0(PC,LVR),D2A_0(PC,LVR,LVR)</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>When <code class="verbatim">A_0FLG==1</code> the amounts in the various compartments can be set by
+the PK routine.  It can do this by storing  the  initial  values  for
+the state  vector  and its partials in A_0, DA_0, D2A_0.   The amount in
+the output compartment can not be set.</p>
+<ul>
+<li>A_0: A_0(n) = the amount for compartment n</li>
+<li>DA_0: DA_0(n,i) = the derivative of A_0(n) w.r.t. ETA(i)</li>
+<li>D2A_0: D2A_0(n,i,j) = the second derivative of A_0(n) w.r.t. ETA(i), ETA(j) (lower-triangular; j=1, …, i)</li>
+<li>There  is  a  one-to-one  correspondence  between  A_0,DA_0,D2A_0
+and A,DAETA,D2AETA.</li>
+<li>NM-TRAN includes A_0,DA_0,D2A_0 in the PK routine when the  $PK
+block includes  references  to  variables A_0FLG, A_0, or A_INITIAL,
+or when verbatim code is present. (See <a href="/docs/reference-manual/api/variables/#state-vec-a">State Vector A</a>.)</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-a_0flg" class="outline-3">
+<h3 id="a_0flg">
+Compartment initialization: <code>A_0FLG</code>
+</h3>
+<div id="outline-text-a_0flg" class="outline-text-3">
+<div class="src src-f90">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span> <span style="color:#78787e">! USAGE:
+</span></span></span><span style="display:flex;"><span><span style="color:#78787e"></span>      <span style="color:#ff6ac1">USE</span> PROCM_INT, <span style="color:#ff6ac1">ONLY</span>: A_0FLG
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#78787e">! GLOBAL DECLARATION:
+</span></span></span><span style="display:flex;"><span><span style="color:#78787e"></span>      <span style="color:#ff6ac1">INTEGER</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>ISIZE) <span style="color:#ff5c57">::</span> A_0FLG</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>When <code>ICALL&gt;=2</code>,  at  a call to PK with the first record of of an
+individual record or with a reset record, PREDPP sets <code>A_0FLAG=1</code>. At
+such  a call, the state vector <code>A</code> and its first- and second-order
+<code>ETA</code> derivatives (DAETA and D2AETA) are set to zero. <code>A_0FLG=0</code>  at
+all other calls to PK.</p>
+<p>
+User can initialize PK compartments conditional on <code>A_0FLG=1</code>, by
+setting the initial values and partial derivatives in <code>A_0</code>, <code>DA_0</code>, <code>D2A_0</code>.</p>
+<p>
+NM-TRAN includes <code>A_0FLG</code> in the PK routine when the $PK block uses variables <code>A_0FLG</code>, <code>A_0(n)</code>, or <code>A_INITIAL(n)</code>, or verbatim code is used.</p>
+</div>
+</div>
+<div id="outline-container-headline-61" class="outline-3">
+<h3 id="headline-61">
 Active ETAs: NACTIV
 </h3>
-<div id="outline-text-headline-59" class="outline-text-3">
+<div id="outline-text-headline-61" class="outline-text-3">
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -6082,11 +6162,11 @@ k=1,…,NACTIV).</li>
 </div>
 </div>
 </div>
-<div id="outline-container-headline-60" class="outline-3">
-<h3 id="headline-60">
+<div id="outline-container-headline-62" class="outline-3">
+<h3 id="headline-62">
 ADVAN7: FACTOR
 </h3>
-<div id="outline-text-headline-60" class="outline-text-3">
+<div id="outline-text-headline-62" class="outline-text-3">
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -6131,7 +6211,7 @@ These  error  messages  arise when the computations of the eigenvalues
  complex) in which case ADVAN5 must be used, or whether trivially small
  quantities have been produced by the accumulation of rounding error in
  the floating point computation, in which ADVAN7 can  be  used.   (Nonreal eigenvalues result when the system is non-mamillary, and may also
- occasionally occur when there are etas associated with rate  constants
+ occasionally occur when there are ETAs associated with rate  constants
  Kij).</p>
 <p>
  If the maximum value printed is very small (e.g., E-15), then the computations will proceed correctly using a value of FACTOR such as 10 or</p>
@@ -6273,7 +6353,7 @@ and accuracy of computation.  More calls to the  integrator, with  a
 smaller  number  of derivatives obtained with each call, result in
 longer run times, but might also produce more  accurate derivatives.
 Also, it might provide more consistent computations when the number of
-compartments and/or etas is to be changed.</p>
+compartments and/or ETAs is to be changed.</p>
 <p>
 Default is -1.  User may set to any other value  in  user-written code
 (e.g., with verbatim code in $PK).</p>
@@ -6289,7 +6369,7 @@ When  INTFLG  is  set  to  any  other  value   than   -1,   ADVAN
 6,8,13,14,16,18   and SS6 calculate second derivatives &#34;one group at a
 time&#34;.</p>
 <p>
-E.g., with ADVAN6, suppose etas 1, 2, 3 are active.</p>
+E.g., with ADVAN6, suppose ETAs 1, 2, 3 are active.</p>
 <ol>
 <li>call DVERK to obtain 2nd derivatives 1,1</li>
 <li>call DVERK to obtain 2nd derivatives 1,2 and 2,2</li>
@@ -6311,7 +6391,7 @@ ever be integrated at one time is</p>
 </div>
 </div>
 </div>
-<p>Where: (PE is the maximum number of etas; currently 10) (PM is the
+<p>Where: (PE is the maximum number of ETAs; currently 10) (PM is the
 maximum number of compartments - 1; currently 9) PW is the size
 defined for various work arrays in the source code. It is currently
 defined as above (189).</p>
@@ -6319,7 +6399,7 @@ defined as above (189).</p>
 When INTFLG is -1, the ADVAN routines  and  SS6  makes  the  most
 efficient  use  of  the work arrays when computing second derivatives, to reduce the number of calls to DVERK.</p>
 <p>
-At NEWIND=0 or 1, PREDPP looks at the number of active  etas  for
+At NEWIND=0 or 1, PREDPP looks at the number of active  ETAs  for
 this  individual  and  the  number  of  user-defined compartments
 defined by the MODEL subroutine (NCM), and creates  a  scheme  to
 calculate  as  many groups of 2nd. derivatives at once as it can.
@@ -6327,7 +6407,7 @@ calculate  as  many groups of 2nd. derivatives at once as it can.
 set, PREDPP does not revise the scheme of integration each time.)</p>
 <p>
 E.g.,  with  the  current values of PE, PM, and PW, here are some
-schemes of integration.  Under &#34;nth. call&#34; are the etas whose
+schemes of integration.  Under &#34;nth. call&#34; are the ETAs whose
 second  derivatives  are  computed  with that call to DVERK.</p>
 <div class="src src-r">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
@@ -6343,13 +6423,13 @@ second  derivatives  are  computed  with that call to DVERK.</p>
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>  <span style="color:#78787e"># compts.  1st. call     2nd. call    3d. call  4th. call</span>
-</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">9</span>       etas <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">5</span>    etas <span style="color:#ff9f43">6</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">7</span>   eta <span style="color:#ff9f43">8</span>     eta <span style="color:#ff9f43">9</span>
-</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">8</span>       etas <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">5</span>    etas <span style="color:#ff9f43">6</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">7</span>   eta <span style="color:#ff9f43">8</span>     eta <span style="color:#ff9f43">9</span>
-</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">7</span>       etas <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">5</span>    etas <span style="color:#ff9f43">6</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">7</span>   eta <span style="color:#ff9f43">8</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">9</span>
-</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">6</span>       etas <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">6</span>    etas <span style="color:#ff9f43">7</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">8</span>   eta <span style="color:#ff9f43">9</span>
-</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">5</span>       etas <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">7</span>    etas <span style="color:#ff9f43">8</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">9</span>
-</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">4</span>       etas <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">8</span>    etas <span style="color:#ff9f43">9</span>
-</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">3</span>       etas <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">9</span></span></span></code></pre></td></tr></table>
+</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">9</span>       ETAs <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">5</span>    ETAs <span style="color:#ff9f43">6</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">7</span>   eta <span style="color:#ff9f43">8</span>     eta <span style="color:#ff9f43">9</span>
+</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">8</span>       ETAs <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">5</span>    ETAs <span style="color:#ff9f43">6</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">7</span>   eta <span style="color:#ff9f43">8</span>     eta <span style="color:#ff9f43">9</span>
+</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">7</span>       ETAs <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">5</span>    ETAs <span style="color:#ff9f43">6</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">7</span>   eta <span style="color:#ff9f43">8</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">9</span>
+</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">6</span>       ETAs <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">6</span>    ETAs <span style="color:#ff9f43">7</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">8</span>   eta <span style="color:#ff9f43">9</span>
+</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">5</span>       ETAs <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">7</span>    ETAs <span style="color:#ff9f43">8</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">9</span>
+</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">4</span>       ETAs <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">8</span>    ETAs <span style="color:#ff9f43">9</span>
+</span></span><span style="display:flex;"><span>     <span style="color:#ff9f43">3</span>       ETAs <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-</span> <span style="color:#ff9f43">9</span></span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
@@ -6361,7 +6441,7 @@ one call to DVERK, and the user would like all second derivatives to
 be computed with a single call to DVERK, the source code  must be
 changed to define a larger value for PW.</p>
 <p>
-To  integrate  the maximum number of etas and compartments in one call, set:</p>
+To  integrate  the maximum number of ETAs and compartments in one call, set:</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -6377,7 +6457,7 @@ With the current values of PE and PM, PW=594</p>
 <p>
 Suppose PW is changed, but by accident is made smaller  than  the
 default  (2*PE*PM+PM=189).   Then for problems with large numbers of
-compartments and/or etas, the work arrays will  not  be  large
+compartments and/or ETAs, the work arrays will  not  be  large
 enough, with either INTFLG=-1 or INTFLG!=-1.</p>
 <p>
  A new error message exists in PREDPP, for which PRED exit code is 2 (always abort).</p>
@@ -6548,11 +6628,11 @@ NEWIND  is  of interest only when ICALL=2, 4, 5, or 6.  It is the same
 as the NEWIND argument passed by NONMEM to PREDPP.</p>
 </div>
 </div>
-<div id="outline-container-headline-66" class="outline-3">
-<h3 id="headline-66">
+<div id="outline-container-headline-68" class="outline-3">
+<h3 id="headline-68">
 Write formats
 </h3>
-<div id="outline-text-headline-66" class="outline-text-3">
+<div id="outline-text-headline-68" class="outline-text-3">
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -6584,11 +6664,11 @@ Write formats
 </ul>
 </div>
 </div>
-<div id="outline-container-headline-67" class="outline-3">
-<h3 id="headline-67">
+<div id="outline-container-headline-69" class="outline-3">
+<h3 id="headline-69">
 State Vector time: TSTATE
 </h3>
-<div id="outline-text-headline-67" class="outline-text-3">
+<div id="outline-text-headline-69" class="outline-text-3">
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -6664,11 +6744,11 @@ abbreviated code.</p>
 For an example, see Guide VI, Figure 14.</p>
 </div>
 </div>
-<div id="outline-container-headline-69" class="outline-3">
-<h3 id="headline-69">
+<div id="outline-container-headline-71" class="outline-3">
+<h3 id="headline-71">
 DES AES: ISFINL
 </h3>
-<div id="outline-text-headline-69" class="outline-text-3">
+<div id="outline-text-headline-71" class="outline-text-3">
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -6725,13 +6805,13 @@ DES AES: ICALL,IDEFD,IDEFA
 <li>
 <p>IDEFD: DES may set IDEFD when ICALL = 1, as follows.</p>
 <ul>
-<li>IDEFD(1) may optionally be set by DES to indicate how many thetas
+<li>IDEFD(1) may optionally be set by DES to indicate how many THETAs
 it uses.  Set to 0 if none.  Otherwise, set to the index  of  the
 highest   numbered  theta  used.   IDEFD(1)=-9  means  &#34;unknown&#34;.
 PREDPP determines from the value stored in IDEFD(1) how many
 elements of theta to copy from its input argument THETA to THETAS.
 (See <a href="/docs/reference-manual/api/variables/#des-aes-theta">DES_AES:THETA</a>).</li>
-<li>When IDEFD(1)  is  set by DES to -9, PREDPP copies all thetas in
+<li>When IDEFD(1)  is  set by DES to -9, PREDPP copies all THETAs in
 the  problem  to  THETAS  (See <a href="/docs/reference-manual/api/variables/#des-aes-theta">DES_AES:THETA</a>).   With   NM-TRAN,
 IDEFD(1) is set to -9 when the $DES block contains verbatim code.
 If a user-written DES leaves IDEFD(1) unchanged, it  defaults  to
@@ -6745,7 +6825,7 @@ return compact arrays; when IDEFD(2)=1 DES will return full arrays
 <li>
 <p>IDEFA: AES may set IDEFA when ICALL is 1, as follows.</p>
 <ul>
-<li>IDEFA(1) is set by AES to indicate how many thetas it uses. See above remarks for IDEFD and DES.</li>
+<li>IDEFA(1) is set by AES to indicate how many THETAs it uses. See above remarks for IDEFD and DES.</li>
 <li>IDEFA(2) for the calling protocol for ADVAN9 and ADVAN15 and
 ADVAN17. AES sets this as follows: IDEFA(2)=-1 &#34;call with every
 event record&#34; (the default); IDEFA(2)=1 &#34;call once per individual
@@ -6791,11 +6871,11 @@ IDEFD(1) and IDEFA(1) affect how many elements are copied.</p>
 </div>
 </div>
 </div>
-<div id="outline-container-headline-72" class="outline-2">
-<h2 id="headline-72">
+<div id="outline-container-headline-74" class="outline-2">
+<h2 id="headline-74">
 PK variables
 </h2>
-<div id="outline-text-headline-72" class="outline-text-2">
+<div id="outline-text-headline-74" class="outline-text-2">
 <p>Internal variables used by PREDPP can also be accessed by &#34;using&#34; specific
 Fortran modules within the user-defined PK routine.</p>
 <div id="outline-container-initial-steady-state-i_ss-issmod" class="outline-3">
@@ -6892,11 +6972,11 @@ Example: $PK may include code such as</p>
 </ul>
 </div>
 </div>
-<div id="outline-container-headline-74" class="outline-3">
-<h3 id="headline-74">
+<div id="outline-container-headline-76" class="outline-3">
+<h3 id="headline-76">
 PASTZERO (NM75)
 </h3>
-<div id="outline-text-headline-74" class="outline-text-3">
+<div id="outline-text-headline-76" class="outline-text-3">
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -6973,11 +7053,11 @@ and ADVAN14 and ADVAN15 and ADVAN16 and ADVAN17 and ADVAN18.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-headline-76" class="outline-3">
-<h3 id="headline-76">
+<div id="outline-container-headline-78" class="outline-3">
+<h3 id="headline-78">
 STOP_TIME,ITASK_ (NM75)
 </h3>
-<div id="outline-text-headline-76" class="outline-text-3">
+<div id="outline-text-headline-78" class="outline-text-3">
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -7057,11 +7137,11 @@ integration interval:</p>
 </ul>
 </div>
 </div>
-<div id="outline-container-headline-77" class="outline-3">
-<h3 id="headline-77">
+<div id="outline-container-headline-79" class="outline-3">
+<h3 id="headline-79">
 HINIT_,HMIN_,HMAX_ (NM760)
 </h3>
-<div id="outline-text-headline-77" class="outline-text-3">
+<div id="outline-text-headline-79" class="outline-text-3">
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -7125,9 +7205,9 @@ For a discussion of these variables,
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/9c456ad931f5c8b2c50a1094ce110dd4bcaaeba2" title='Last modified by Yi Zhang | 2026 Jan 22' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/75f746f1d521f67bde10c1e21cc202c6e736674a" title='Last modified by Yi Zhang | 2026 Jan 25' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Jan 22</span>
+    <span>2026 Jan 25</span>
   </a>
 
 </div>
@@ -7319,9 +7399,13 @@ For a discussion of these variables,
 </li>
 <li><a href="#headline-58">PREDPP variables</a>
 <ul>
-<li><a href="#headline-59">Active ETAs: NACTIV</a>
+<li><a href="#a_0"><code class="verbatim">A_0</code></a>
 </li>
-<li><a href="#headline-60">ADVAN7: FACTOR</a>
+<li><a href="#a_0flg">Compartment initialization: <code>A_0FLG</code></a>
+</li>
+<li><a href="#headline-61">Active ETAs: NACTIV</a>
+</li>
+<li><a href="#headline-62">ADVAN7: FACTOR</a>
 </li>
 <li><a href="#des-solver-settings">DEs solver settings</a>
 </li>
@@ -7333,13 +7417,13 @@ For a discussion of these variables,
 </li>
 <li><a href="#newind">New individual indicator: NEWIND</a>
 </li>
-<li><a href="#headline-66">Write formats</a>
+<li><a href="#headline-68">Write formats</a>
 </li>
-<li><a href="#headline-67">State Vector time: TSTATE</a>
+<li><a href="#headline-69">State Vector time: TSTATE</a>
 </li>
 <li><a href="#state-vec-a">State Vector: A</a>
 </li>
-<li><a href="#headline-69">DES AES: ISFINL</a>
+<li><a href="#headline-71">DES AES: ISFINL</a>
 </li>
 <li><a href="#des-aes-icall">DES AES: ICALL,IDEFD,IDEFA</a>
 </li>
@@ -7347,17 +7431,17 @@ For a discussion of these variables,
 </li>
 </ul>
 </li>
-<li><a href="#headline-72">PK variables</a>
+<li><a href="#headline-74">PK variables</a>
 <ul>
 <li><a href="#initial-steady-state-i_ss-issmod">Initial steady state: I_SS,ISSMOD</a>
 </li>
-<li><a href="#headline-74">PASTZERO (NM75)</a>
+<li><a href="#headline-76">PASTZERO (NM75)</a>
 </li>
 <li><a href="#mxstep">MXSTEP</a>
 </li>
-<li><a href="#headline-76">STOP_TIME,ITASK_ (NM75)</a>
+<li><a href="#headline-78">STOP_TIME,ITASK_ (NM75)</a>
 </li>
-<li><a href="#headline-77">HINIT_,HMIN_,HMAX_ (NM760)</a>
+<li><a href="#headline-79">HINIT_,HMIN_,HMAX_ (NM760)</a>
 </li>
 </ul>
 </li>
