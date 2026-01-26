@@ -418,9 +418,14 @@ Notice that since MAPITER=0, the first iteration of IMP method relies on startin
 
 
 *** METHOD=NUTS (NM74)
-The No-U-Turn Sampling (NUTS) algorithm was developed by Hoffman,
-Gelman, and others of the Stan Development Team ([19,20], and
-communications with Bob Carpenter, Andrew Gelman, Matt Hoffman, Michael Betancourt, and Sebastian Weber.).  The algorithm developed in NONMEM is a limited version of NUTS in Stan, focused on analyzing population PK/PD models, with normally distributed THETA priors (or t-distributed theta priors, see TTDF), and Wishart/Gamma distributed OMEGA and SIGMA priors, or using the LKJ correlation prior (see OLKJDF and SLKJDF options) for OMEGAS and SIGMAS.
+The No-U-Turn Sampling (NUTS) algorithm is a limited version of NUTS
+in Stan [1, 2], focused on analyzing population PK/PD models, with normally
+distributed THETA priors (or t-distributed theta priors, see TTDF),
+and Wishart/Gamma distributed OMEGA and SIGMA priors, or using the LKJ
+correlation prior (see OLKJDF and SLKJDF options) for OMEGAS and
+SIGMAS. was developed by Hoffman,
+Gelman, and others of the Stan Development Team ([1, 2], and
+communications with Bob Carpenter, Andrew Gelman, Matt Hoffman, Michael Betancourt, and Sebastian Weber.).  The algorithm developed in NONMEM
 
 Typical Bayesian algorithms search for individual parameters (PHIs or ETAs) and population parameters (THETAs, OMEGAs, and SIGMAs) in separate stages.  While this provides for rapid generation of an MCMC sample, the samples can be heavily correlated, especially if there are high correlations in the OMEGA matrix.  The NUTS sampler uses a directed search using partial derivatives and scaling techniques using posterior density knowledge from previous samples to reduce the correlation of the parameters from one iteration to the next.  While each iteration takes longer to generate with NUTS, the samples may be 10-100 times decorrelated relative to a standard MCMC sampling.  Thus,  10000 samples with NUTS may be worth 100000 samples with traditional MCMC algorithms.  See the NEFF (Number of EFFective samples) utility for analyzing the quality of an MCMC run, I.103 NEFF and NEFFI Utility Programs (NM74).
 
@@ -1322,7 +1327,7 @@ ISAMPLE_M1A mode 1A iterations, testing model parameters from other
 subjects as possible values (by default this is not used,
 ISAMPLE_M1A=0), followed by ISAMPLE_M2 mode 2 iterations, using the
 present parameter vector position as mean, and a scaled variance of
-OMEGA as variance [11].  Next, ISAMPLE_M3 mode 3 iterations are
+OMEGA as variance [5].  Next, ISAMPLE_M3 mode 3 iterations are
 performed, in which samples are generated for each parameter
 separately.  The scaling is adjusted so that samples are accepted
 IACCEPT fraction of the time.  The final sample for a given chain is
@@ -1825,7 +1830,7 @@ Gamma factor in the NUTS algorithm. Should not be changed. Default 0.05.
 When using the STAN algorithm (MADAPT=-1) for mass matrix and step
 size  development during the burn-in (warmup) stage, when NUTS_INIT<1
 serves as the fraction of NBURN iterations for Stage I of the warmup
-period ([20]).  When NUTS_INITS>1, then the explicit number of
+period ([2]).  When NUTS_INITS>1, then the explicit number of
 iterations is interpreted. Similarly, when MADAPT>0, this period is
 also used to accumulate NUTS_INIT*NBURN iterations before using the
 mass matrix. Default 0.075.
@@ -1880,8 +1885,8 @@ NUTS_EPARAM, NUTS_OPARAM, and NUTS_SPARAM options.
     of the NUTS_EPARAM=0 setting. The AUTO=3 option allows an easy
     setup of this configuration.
   - NUTS_EPARAM=2, NUTS_MASS=BD
-    With NUTS_EPEARM=2, this is called the “Matt trick” in the Stan
-    community, and offers very high sampling efficiencies of 3 to 5
+    NUTS_EPEARM=2 requests transformation from a centered to a
+    non-centered parameterzization [2,3], and offers very high sampling efficiencies of 3 to 5
     fold than that of the default settings.  However, the speed is
     about 4-8 times slower from the default settings when performing
     NUTS in NONMEM, so there may or may not be greater overall
@@ -1932,11 +1937,12 @@ iterations. Default 1.
 *** NUTS_TERM (NM74)
 When using the STAN algorithm (MADAPT=-1) for mass matrix and step
 size  development during the burn-in (warmup) stage, NUTS_TERM serves
-as the number of iterations for Stage III of the warmup period ([20]),
+as the number of iterations for Stage III of the warmup period ([2]),
 to make final adjustments in step size. Default 0.05.
 
 *** NUTS_TEST (NM74)
-The acceptance of a sample is tested using an algorithm as originally in algorithm 6 of Hoffman and Gelman [19] (default, NUTSTEST=0), or as performed in STAN (NUTSTEST=1). Default 0.
+NUTS_TEST=0 (default) tests the acceptance as in the original NUTS
+algorithm [1]. NUTS_TEST=1 uses the default Stan algorithm.
 
 *** NUTS_TRANSFORM (NM74)
 When NUTS_TRANSFORM=0, model parameters are transformed using the mass
@@ -2236,12 +2242,11 @@ PSAMPLE_M3, PACCEPT are for the MCMC Metropolis-Hastings algorithm. They only ha
 :CUSTOM_ID: estm-ranmethod
 :END:
 - n: the random number generator used for all Monte  Carlo  EM  and Bayesian methods.
-  + n=0: ran0 of reference [5], minimal standard generator
-  + n=1: ran1 of reference [5], Bays and Durham.
-  + n=2: ran2 of reference [5].
-  + n=3: ran3 of reference [5], Knuth. (Default)
+  + n=0: ran0 of reference [4], minimal standard generator
+  + n=1: ran1 of reference [4], Bays and Durham.
+  + n=2: ran2 of reference [4].
+  + n=3: ran3 of reference [4], Knuth. (Default)
   + n=4: NONMEM's traditional random number generator used in $SIMULATION
-  See INTRODUCTION TO NONMEM 7 REFERENCE [5] for details.
 - S:  Sobol  method  without  scrambling, used during importance or
   direct sampling (methods IMP, IMPMAP, and DIRECT)  and  only  for
   the purpose of creating quasi-random samples of ETAs.
@@ -2635,3 +2640,18 @@ include nonmem_reserved_general
 MUFIRSTREC=1
 OBJQUICK=1
 #+end_src
+
+# comment the following section for latex export
+** Reference
+# use the following to error latex export as a reminder
+#+BEGIN_HTML
+#+END_HTML
+[1] M.D. Hoffman, A. Gelman /The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian Monte Carlo./  J. of Machine Learning Research 2014; 15: 1593-1623.
+
+[2] Stan development team. /Stan User’s Guide and Reference Manual/.  Stan Version 2.32.0.
+
+[3] P. Omiros, G.O. Roberts, and M. Sköld. 2007. /A General Framework for the Parametrization of Hierarchical Models./ Statistical Science 22 (1): 59–73.
+
+[4] W.H. Press, S.A. Teukolsky, W.T. Vettering, B.P. Flannery.  /Numerical Recipes, The Art Of Scientifc Programming./  2nd Edition, Cambridge University Press, New York, 1992, pp. 269-305.
+
+[5] M. Lavielle. /Monolix Users Manual/. Version 2.1. Orsay, France: Laboratoire de Mathematiques, U. Paris-Sud; 2007.
