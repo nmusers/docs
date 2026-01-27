@@ -45,9 +45,23 @@ doses, one can encode such information in $PK block. Consider
  $TABLE MDV ID KG LENG SEX GAGE AGE TAD BY MDV ID NOPRINT FILE=NTABLE.DAT
  $SCATTER PRED VS CP  UNIT
 #+end_src
-$INPUT and $DATA specifies two types of doses, intravenous (IV) and intramuscular (IM).
+The data items are
+#+begin_src r
+ TIME   hours
+ KG     bodyweight(kg)
+ LENG   length(cm)
+ SEX    0 for female and 1 for male
+ GAGE   gestational age at birth
+ AGE    actual age (in days)
+ AGE1   age at start of therapy
+ IMIV   im or iv dose (1.0 is iv and 0.0 is im)
+ CREA   creatinine value
+ TAD    time after last dose (h)
+#+end_src
+In particular, ~IMIV~ is the flag for two types of doses, intravenous (IV) and intramuscular (IM).
 
-data snippet (for one subject) below. The subject received both IM and IV doses.
+Data snippet (for one subject) below. The subject received both IM and IV doses.
+#+begin_src r
      6.0    1.0    0.0   13.0   -2.0
      6.0  2.590   47.0    0.0   36.0    0.0    0.0    1.0   56.0           0.0
      6.0    1.0   24.0   10.4   -2.0
@@ -72,7 +86,7 @@ data snippet (for one subject) below. The subject received both IM and IV doses.
      6.0  2.590   47.0    0.0   36.0    5.0    0.0    0.0   56.0    8.0    0.0
      6.0    0.0  136.0    0.0    0.0   0.75
      6.0  2.590   47.0    0.0   36.0    6.0    0.0    0.0   56.0   16.0    0.0
-
+#+end_src
 This  example is based on work described in Fattinger K. et al.,
  Netilmicin in the neonate-population  pharmacokinetic  analysis  and
  dosing  recommendations, Clinical Pharmacology and Therapeutics, 1991,
@@ -82,19 +96,6 @@ This  example is based on work described in Fattinger K. et al.,
  A FORTRAN format statement is needed to describe the data file because
  each data record spans two FORTRAN records and also because blanks are
  sometimes used for null data items.
-
- Explanation of data items:
-
- TIME   hours
- KG     bodyweight(kg)
- LENG   length(cm)
- SEX    0 for female and 1 for male
- GAGE   gestational age at birth
- AGE    actual age (in days)
- AGE1   age at start of therapy
- IMIV   im or iv dose (1.0 is iv and 0.0 is im)
- CREA   creatinine value
- TAD    time after last dose (h)
 
  All  doses  are  given as zero order infusions.  The RATE data item is
  -2, indicating that duration D1 is modeled in the  $PK  block.   There
