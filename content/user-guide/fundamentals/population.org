@@ -30,7 +30,13 @@ observations \(y_{ij}\) (plasma concentration, drug effect, etc).
 \(f()\) is sometimes referred to as
 /structure model/. Since in reality \(f(x_{ij}, \phi_i)\) cannot
 account for all the variability of \(y_{ij}\), we additively
-complement it with a /residual error/ term. In summary
+complement it with a /residual error/ term.
+
+#+CAPTION: Longitudinal concentration (\(y_{ij}=C\)) data points and error term in an exponential model.
+@@html:<img src="/docs/img/guide_v_fig3.1.ubuntu.epsi.png">@@
+@@latex:\includegraphics[width=0.5\textwidth]{guide_v_fig3.1.ubuntu.epsi.png}@@
+
+In summary
 #+index: Residual error
 #+index: Residual error!EPS
 \begin{equation}
@@ -59,14 +65,19 @@ y_{ij} = f(x_{ij}, \phi_i) + h(x_{ij}, \phi_i)\epsilon_{ij}.
   + \(\epsilon\) is a scalar and \(h()\equiv 1\) a
     constant. It represents
     homoscedastic residual error: all the observations
-    \(y_{ij}\) share a same normally distributed residual error. This is sometimes referred to as additive residual
-    error model;
+    \(y_{ij}\) share a same normally distributed residual error. This is sometimes referred to as additive residual error model.
+    #+CAPTION: Additive residual error model.
+    @@html:<img src="/docs/img/guide_v_fig3.2.ubuntu.epsi.png">@@
+    @@latex:\includegraphics[width=0.5\textwidth]{guide_v_fig3.2.ubuntu.epsi.png}@@
 
   + \(\epsilon\) is a scalar and
     \(h(x_{ij},\phi_i)=f(x_{ij},\phi_i)^{\xi}\). It represents the power
     error model. When \(\xi=1\) it becomes the proportional error
     model in which the residual error variance is
     proportional to the squared prediction;
+    #+CAPTION: Proportional residual error model.
+    @@html:<img src="/docs/img/guide_v_fig3.3.ubuntu.epsi.png">@@
+    @@latex:\includegraphics[width=0.5\textwidth]{guide_v_fig3.3.ubuntu.epsi.png}@@
 
   + \(\epsilon\) is a 2-vector and \(h(x_{ij},
     \phi_i)=[f(x_{ij}, \phi_i), 1]^T\). It combines the additive
@@ -351,9 +362,39 @@ we use NONMEM's built-in models and use
     constraints of \(\theta\), \(\Omega\), and \(\Sigma\), respectively;
   - control record $DES, $AES, and $MODEL for general \(f()\) structures that require
     numerical solutions of differential equation systems.
-
 All the mentioned control records will be discussed in the next part
 of the guide.
+
+To express PK models in the above form, consider the example of
+one-compartment model with dose at the central compartment.
+$$
+y_{ij}=\frac{D}{\text{V}_i}\exp\left(-\frac{\text{CL}_i}{\text{V}_i}t_{ij} \right) + \epsilon_{ij}
+$$
+
+$$
+\text{CL}_i=\theta_1 + \theta_2\text{RF}_i + \eta_i, \quad \text{V}_i=\theta_3
+$$
+Here we have \(x_{ij}=(D, t_{ij})^T\) for dose, \(z_i=\text{RF}_i\) for the
+covariate of certain measurement of renal function. The model assumes
+an interindividual variability for the clearance but not for
+the volume of distribution. Thus the \(\eta\) is a scalar. Then we have
+$$
+y_{ij}=f((D, t)^T, \phi_i=(\text{CL}_i, \text{V}_i)^T),
+$$
+$$
+\phi_i=(\text{CL}_i, \text{V}_i)^T=\mu(z_i=\text{RF}_i,
+\theta=(\theta_1, \theta_2, \theta_3)^T, \eta_i)
+=(\theta_1 + \theta_2\text{RF}_i + \eta_i, \theta_3)^T.
+$$
+Note that the structure model \(f()\) is a scalar function (for
+concentration), \(\mu\) is a 2-vector function for \(\text{CL}\)
+and \(\text{V}\), \(\theta\) is a 3-vector, and both \(\Omega=(\omega_{\text{CL}}^2)\) and
+\(\Sigma=(\sigma^2)\) are
+\(1\times 1\) matrices. Figure below shows the relationship of the
+fixed and random effects
+#+CAPTION: Random and fixed effects influence observation /C/ from the population point of view.
+@@html:<img src="/docs/img/guide_v_fig4.2.ubuntu.epsi.png">@@
+@@latex:\includegraphics[width=0.5\textwidth]{guide_v_fig4.2.ubuntu.epsi.png}@@
 
 [fn:1] The nomenclature can be confusing in statistical literature, as
 often \(\theta\) is also called the "fixed effects",
