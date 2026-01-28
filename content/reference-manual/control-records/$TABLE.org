@@ -26,7 +26,7 @@
          [UNCONDITIONAL|CONDITIONAL] [OMITTED]
 
 ;# EXAMPLE
- $TABLE          ID DOSE WT TIME
+ $TABLE ID DOSE WT TIME
 #+end_src
 
 ** Discussion
@@ -41,37 +41,37 @@
 
   - NPRED, NRES, NWRES Calculated assuming non-conditional estimation and  no  etaepsilon  interaction.   NPRED  and NRES are same as PRED and RES. NWRES is same as WRES when INTERACTION is  not  set  in $EST.
 
-  - PREDI, RESI, WRESI
+  - PREDI, RESI, WRESI.
            Calculated assuming  non-conditional  estimation  with  etaepsilon interaction.  Always same as PRED, RES, and WRES.
 
-  - CPRED, CRES, CWRES
+  - CPRED, CRES, CWRES.
            Calculated  assuming  conditional  estimation  and  no  etaepsilon interaction.
 
-  - CPREDI, CRESI, CWRESI
+  - CPREDI, CRESI, CWRESI.
            Calculated  assuming conditional estimation with eta-epsilon
            interaction.
 
-  - CIPRED, CIRES,CIWRES
+  - CIPRED, CIRES,CIWRES.
            Conditional individual values
 
-  - CIPREDI, CIRESI,CIWRESI
+  - CIPREDI, CIRESI,CIWRESI.
            Conditional individual values with eta-epsilon  interaction.
 
-  - EPRED, ERES, EWRES
+  - EPRED, ERES, EWRES.
            Monte-Carlo  generated  diagnostics  and  are not linearized
            approximations like the other diagnostic types. EWRES is the
            Monte-Carlo version of CWRESI.
 
-  - ECWRES
+  - ECWRES.
            Monte-Carlo version of CWRES.
 
-  - NPDE
+  - NPDE.
            Monte-Carlo generated  normalized  probability  distribution
            error.
 
-  - NPD  The correlated (or non-decorrelated) NPDE value.
+  - NPD.  The correlated (or non-decorrelated) NPDE value.
 
-  - OBJI
+  - OBJI.
            Objective function values for each individual (same as given
            in the root.phi file).  The sum of the individual  objective
            function values is equal to the total objective function.
@@ -92,42 +92,37 @@ is equivalent to
 #+begin_src perl
   ETAk, ..., ETAn
 #+end_src
-where  n  >  k.  LAST can be used in place of n, and requests the
-      last (highest numbered) eta in the problem.  E.g. ETAS(1:LAST)
-      With NONMEM 7.4, more flexible syntax is available:
-      The word TO may be used in place of ":".
-      The BY expression may be used:
+where ~n > k~,  LAST can be used in place of ~n~, and requests the
+last (highest numbered) eta in the problem, e.g. ~ETAS(1:LAST)~.
+NONMEM v7.4+ provides keyword ~TO~ may be used in place of ":", along
+with the ~BY~ expression.
+#+begin_src f90
+  ETAS(1 TO 10 by 3)    ;! ETAs 1,4,7,10
+  ETAS(LAST TO 1 by -3) ;! ETAs 10,7,4,1 (assuming LAST=10)
+#+end_src
+A number list may be given:
+#+begin_src f90
+  ETAS(1,5,12,4)  ;! prints out ETAs 1, 5, 12, 4.
+  ETAS(4:1)	  ;! prints ETAs 4, 3, 2, 1
+  ETAS(4:1 by -2) ;! prints ETAs 4, 2
+  ETAS(1:4 by -1) ;! prints ETAs 4, 3, 2, 1 (the by value sets the direction).
+#+end_src
 
-      ETAS(1 TO 10 by 3) prints out ETAs 1,4,7,10
-
-      ETAS(LAST TO 1 by -3) prints out ETAs 10,7,4,1 (assuming LAST=10)
-
-      A number list may be given:
-
-      ETAS(1,5,12,4) prints out ETAs 1, 5, 12, 4.
-
-      ETAS(4:1) prints ETAs 4, 3, 2, 1
-
-      ETAS(4:1 by -2) prints ETAs 4, 2
-
-      ETAS(1:4 by -1) prints ETAs 4, 3, 2, 1 (the by value sets the direction).
-
-With NONMEM 7.4, a symbolic label specified in $ABBR REPLACE  may be
-listed in $TABLE. For example:
+NONMEM v7.4+ also supports symbolic labels using ~$ABBR REPLACE~ :
 #+begin_src perl
   $ABBR REPLACE ETA(CL)=ETA(1)
    ...
   $TABLE ETA(CL)
 #+end_src
 
-Reserved  positions of MODULE NMPRD4 (See [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]]).  COM(k) or :k
- denotes the kth reserved position.  (There must be  exactly  4  digits
- after ":". Use leading 0's as necessary.)  E.g., COM(3) or :003.
- Labels of the form :k will be used in the output.
+Reserved  positions of MODULE NMPRD4 (See [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]]).  ~COM(k)~ or
+~:k~ denotes the kth reserved position.  (There must be  exactly  4
+digits after ":". Use leading 0's as necessary.)  E.g., ~COM(3)~ or
+~:003~. Labels of the form ~:k~ will be used in the output.
 
-Labels  of  PRED-defined items in MODULE NMPRD4 if abbreviated code is
+Labels of PRED-defined items in MODULE NMPRD4 if abbreviated code is
 present (up to PDT distinct such labels in any one  problem,  for  all
-tables  and  scatterplots.   PDT  is a constant in resource/SIZES.f90;
+tables  and  scatterplots.  PDT is a constant in "resource/SIZES.f90";
 default value is 500.)  These  may  include  labels  of  the
 NM-TRANdefined items:
 #+begin_src perl
@@ -140,20 +135,15 @@ NM-TRANdefined items:
    6nnn     e.g., 6010   ;# stands for P00nnn
 #+end_src
 These may also include:
-   labels  VECTRA(1),  VECTRA(2),  ...  ,VECTRA(9),  or  alternatively,
-   labels VA_1, VA_2, ... ,VA_9, corresponding to VECTRA(1), VECTRA(2),
-   ..., VECTRA(9).
-   The labels in the output will be VA_1, VA_2, ... , VA_9.
-   Similarly, for VECTRB and VECTRC.
+labels  ~VECTRA(1)~,  ~VECTRA(2)~,  ...  ,~VECTRA(9)~,  or  alternatively, labels ~VA_1~, ~VA_2~, ... ,~VA_9~.
 
 Synonyms  may  be  defined on either the $TABLE or $SCATTER record for
- special items PRED, RES, WRES; for PRED-defined  items;  for  NM-TRANdefined items; and for reserved positions of MODULE NMPRD4.
-
-E.g., assume that IWRES is a PRED-defined label, that at least 3
+ special items PRED, RES, WRES; for PRED-defined  items;  for
+ NM-TRANdefined items; and for reserved positions of MODULE NMPRD4.
+ For example, assume that IWRES is a PRED-defined label, that at least 3
 positions of NMPRD4 are reserved, and that NM-TRAN has generated
 A00032 as the  label  for  a  derivative in the generated FSUBS
 routine.  Either $TABLE or $SCATTER records may include:
-
 #+begin_src perl
   WRES=RES1,IWRES=RES2,COM(3)=ABC,0032=DK.
 #+end_src
@@ -162,7 +152,7 @@ For a discussion of the values of ETAs and PRED-defined  items  (e.g.,
  are they based on initial or final values of theta?  Simulated or zero
  or conditional values of eta?), see values.
 
-**** Elements of G and H
+**** Elements of ~G~ and ~H~
 E.g.,
 #+begin_src perl
 $TABLE G11 G21 G31 H11 H21
@@ -212,7 +202,7 @@ Use only:
 (See [[file:/docs/reference-manual/files/#output-pred-defined-items][output PRED-Defined Items]]).
 
 When tables are printed, the maximum number of  labels  permitted in
-list1  is  8;  otherwise,  it  is PDT.  (But see the NOAPPEND option.)
+~list1~  is  8;  otherwise,  it  is in "resource/SIZES.f90".  (But see the NOAPPEND option.)
 
 *** list2
       A list comprised of one or more labels from list1.  The  rows  of
@@ -416,19 +406,13 @@ Alternately,  use  LFORMAT and/or RFORMAT.
       by the FORMAT option) in a subsequent problem.
 
 *** IDFORMAT=s(NM75)
-      By default the ID column has the same format as specified by FORMAT.   IDFORMAT  specifies  the format for the ID column in table
-      files.  If an improper format is given, it defaults  to  that  of
-      FORMAT.  Some examples:
+By default the ID column has the same format as specified by FORMAT.
+IDFORMAT  specifies  the format for the ID column in table files.  If
+an improper format is given, it defaults  to  that  of FORMAT. For example
 
-      IDFORMAT=I
-           Integer value, left adjusted in the field.
-
-      IDFORMAT=I6
-           Integer  value,  right adjusted in the first 6 characters of
-           the field.
-
-      IDFORMAT=F6.1
-           Floating value, with single digit to the right of the  decimal.
+  - IDFORMAT=I. Integer value, left adjusted in the field.
+  - IDFORMAT=I6. Integer  value,  right adjusted in the first 6 characters of the field.
+  - IDFORMAT=F6.1. Floating value, with single digit to the right of the  decimal.
 
 *** VARCALC=[0|1|2|3](NM74,NM75)
 To report standard errors associated with ETAs (individual parameters)
@@ -549,7 +533,7 @@ errors.
       subject.  List is a number-list of ETAs.   For  example,  FIXEDETAS=(3-6)
 
       A  number-list  may contain a single integer, a range of integers
-      (with -), or a series of integers and ranges separated by comma.
+      (with ~-~), or a series of integers and ranges separated by comma.
 
 *** NPDTYPE=1
       The strict stochastic (Monte Carlo) method over the data y domain

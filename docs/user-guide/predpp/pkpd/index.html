@@ -8,16 +8,16 @@ https://github.com/alex-shpak/hugo-book
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content=" PKPD model PKPD model can be performed either sequentially or simultaneously. Let us first consider sequential models in which PD is based on PK results.
-PK/PD sequentially modeled Assume a previous PK model run provides elimination rate constant and volume of distribution prediction as data item KK and V1, then we can use them in the Emax PD model with an effect compartment. We see the virtual effect compartment acts just like the peripheral compartment in two-compartment model, so we can promptly use ADVAN3 to describe this model. The data item DV from the data set is for the effect observations.
+<meta name="description" content=" PKPD model PKPD model can be performed either sequentially or simultaneously. Let us first consider simultaneous model in which PD is based on PK plasma concentration through an effect compartment.
+PK/PD simultaneous modeled Consider data item DV be either concentration in the central compartment (CMT=1), or the drug effect dependent on concentration in the effect compartment (CMT=2). The drug effect is modeled using the Emax model. We use ADVAN3 (LSODA ODE solver) to solve the coupled PK/PD equations numerically.
 ">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
 <meta name="color-scheme" content="light dark"><meta property="og:url" content="https://nmusers.github.io/docs/user-guide/predpp/pkpd/">
   <meta property="og:site_name" content="NONMEM Documentation">
   <meta property="og:title" content="PKPD model">
-  <meta property="og:description" content="PKPD model PKPD model can be performed either sequentially or simultaneously. Let us first consider sequential models in which PD is based on PK results.
-PK/PD sequentially modeled Assume a previous PK model run provides elimination rate constant and volume of distribution prediction as data item KK and V1, then we can use them in the Emax PD model with an effect compartment. We see the virtual effect compartment acts just like the peripheral compartment in two-compartment model, so we can promptly use ADVAN3 to describe this model. The data item DV from the data set is for the effect observations.">
+  <meta property="og:description" content="PKPD model PKPD model can be performed either sequentially or simultaneously. Let us first consider simultaneous model in which PD is based on PK plasma concentration through an effect compartment.
+PK/PD simultaneous modeled Consider data item DV be either concentration in the central compartment (CMT=1), or the drug effect dependent on concentration in the effect compartment (CMT=2). The drug effect is modeled using the Emax model. We use ADVAN3 (LSODA ODE solver) to solve the coupled PK/PD equations numerically.">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="user-guide">
@@ -25,10 +25,10 @@ PK/PD sequentially modeled Assume a previous PK model run provides elimination r
 
 
   <meta itemprop="name" content="PKPD model">
-  <meta itemprop="description" content="PKPD model PKPD model can be performed either sequentially or simultaneously. Let us first consider sequential models in which PD is based on PK results.
-PK/PD sequentially modeled Assume a previous PK model run provides elimination rate constant and volume of distribution prediction as data item KK and V1, then we can use them in the Emax PD model with an effect compartment. We see the virtual effect compartment acts just like the peripheral compartment in two-compartment model, so we can promptly use ADVAN3 to describe this model. The data item DV from the data set is for the effect observations.">
+  <meta itemprop="description" content="PKPD model PKPD model can be performed either sequentially or simultaneously. Let us first consider simultaneous model in which PD is based on PK plasma concentration through an effect compartment.
+PK/PD simultaneous modeled Consider data item DV be either concentration in the central compartment (CMT=1), or the drug effect dependent on concentration in the effect compartment (CMT=2). The drug effect is modeled using the Emax model. We use ADVAN3 (LSODA ODE solver) to solve the coupled PK/PD equations numerically.">
   <meta itemprop="dateModified" content="2026-01-18T16:51:20-08:00">
-  <meta itemprop="wordCount" content="467">
+  <meta itemprop="wordCount" content="369">
 
 <title>PKPD model | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -38,7 +38,7 @@ PK/PD sequentially modeled Assume a previous PK model run provides elimination r
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.e9237c3043d11ffaa636bc2d8181a20cb990c57997642e2689744e4944d8e237.js" integrity="sha256-6SN8MEPRH/qmNrwtgYGiDLmQxXmXZC4miXROSUTY4jc=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.521702df066a89c028ddaca9a5467064ffa09e74e96d2fead8dee30b7483bdab.js" integrity="sha256-UhcC3wZqicAo3ayppUZwZP&#43;gnnTpbS/q2N7jC3SDvas=" crossorigin="anonymous"></script>
 
 
 
@@ -1524,9 +1524,9 @@ PK/PD sequentially modeled Assume a previous PK model run provides elimination r
 <ul>
 <li><a href="#headline-1">PKPD model</a>
 <ul>
-<li><a href="#headline-2">PK/PD sequentially modeled</a>
+<li><a href="#headline-2">PK/PD simultaneous modeled</a>
 </li>
-<li><a href="#headline-3">PK/PD simultaneous modeled</a>
+<li><a href="#headline-3">PK/PD sequentially modeled</a>
 </li>
 </ul>
 </li>
@@ -1551,61 +1551,18 @@ PKPD model
 </h2>
 <div id="outline-text-headline-1" class="outline-text-2">
 <p>PKPD model can be performed either sequentially or simultaneously. Let
-us first consider sequential models in which PD is based on PK
-results.</p>
+us first consider simultaneous model in which PD is based on PK
+plasma concentration through an effect compartment.</p>
 <div id="outline-container-headline-2" class="outline-3">
 <h3 id="headline-2">
-PK/PD sequentially modeled
+PK/PD simultaneous modeled
 </h3>
 <div id="outline-text-headline-2" class="outline-text-3">
-<p>Assume a previous PK model run provides elimination rate constant and volume of
-distribution prediction as data item <code>KK</code> and <code>V1</code>, then we can use them in
-the Emax PD model with an effect compartment. We see the
-virtual effect compartment acts just like the peripheral compartment
-in two-compartment model, so we can promptly use ADVAN3 to
-describe this model. The data item DV from the data set is for the effect observations.</p>
-<div class="src src-perl">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>;<span style="color:#78787e"># ...</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$DATA</span> data
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$INPUT</span> ID TIME DV AMT<span style="color:#ff6ac1">=</span>DOSE CMT KK V1
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SUBROUTINES</span> ADVAN3
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
-</span></span><span style="display:flex;"><span>K <span style="color:#ff6ac1">=</span> KK
-</span></span><span style="display:flex;"><span>K12<span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">.001</span><span style="color:#ff6ac1">*</span>K ;<span style="color:#78787e"># TRIVIAL LOSS TO EFFECT COMPT.</span>
-</span></span><span style="display:flex;"><span>K21<span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))
-</span></span><span style="display:flex;"><span>EMAX<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">2</span>))
-</span></span><span style="display:flex;"><span>C50<span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">3</span>))
-</span></span><span style="display:flex;"><span>S2<span style="color:#ff6ac1">=</span> V1<span style="color:#ff6ac1">*</span>K12<span style="color:#ff6ac1">/</span>K21 ;<span style="color:#78787e"># so that CESS = CPSS</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ERROR</span>
-</span></span><span style="display:flex;"><span>Y <span style="color:#ff6ac1">=</span>EMAX<span style="color:#ff6ac1">*</span>F<span style="color:#ff6ac1">/</span>(C50<span style="color:#ff6ac1">+</span>F)<span style="color:#ff6ac1">*</span>EXP(ERR(<span style="color:#ff9f43">1</span>))
-</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># ...</span></span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
-<p>Note that the transfer rate constant \(K_{12}\) is <em>assumed</em> to be
-small compared to elimination.</p>
-<p>
-Assume instead <em>K</em> and <em>V1</em> are not given in data but merely point
-estimations based on previous PK model, we can introduce them as FIXed
-parameters. Then the above model becomes</p>
+<p>Consider data item DV be either
+concentration in the central compartment (CMT=1), or the drug effect
+dependent on concentration in the effect compartment (CMT=2). The drug
+effect is modeled using the Emax model. We use ADVAN3 (LSODA ODE
+solver) to solve the coupled PK/PD equations numerically.</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1635,34 +1592,96 @@ parameters. Then the above model becomes</p>
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">52
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">53
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">54
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">55
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">56
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">57
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$DATA</span> data
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$INPUT</span> ID TIME DV AMT<span style="color:#ff6ac1">=</span>DOSE CMT
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$SUBROUTINES</span> ADVAN3
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$PROB</span> RUN<span style="color:#78787e"># 702 ADVAN6</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$INPUT</span> C ID AMT TIME DV CMT
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$DATA</span> <span style="color:#ff9f43">006</span><span style="color:#ff6ac1">.</span>csv IGNORE<span style="color:#ff6ac1">=</span>C
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$SUBROUTINE</span> ADVAN13 TRANS<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> TOL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">10</span> ATOL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">10</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$MODEL</span> NCOMP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">3</span>
+</span></span><span style="display:flex;"><span>    COMP<span style="color:#ff6ac1">=</span>(GUT)
+</span></span><span style="display:flex;"><span>    COMP<span style="color:#ff6ac1">=</span>(CENTRAL)
+</span></span><span style="display:flex;"><span>    COMP<span style="color:#ff6ac1">=</span>(EFFECT)
 </span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$PK</span>
-</span></span><span style="display:flex;"><span>  K <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))
-</span></span><span style="display:flex;"><span>  K12<span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">.001</span><span style="color:#ff6ac1">*</span>K ;<span style="color:#78787e"># TRIVIAL LOSS TO EFFECT COMPT.</span>
-</span></span><span style="display:flex;"><span>  K21<span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">2</span>))
-</span></span><span style="display:flex;"><span>  V1<span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">3</span>))
-</span></span><span style="display:flex;"><span>  EMAX<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">4</span>))
-</span></span><span style="display:flex;"><span>  C50<span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">5</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">5</span>))
-</span></span><span style="display:flex;"><span>  S2<span style="color:#ff6ac1">=</span> V1<span style="color:#ff6ac1">*</span>K12<span style="color:#ff6ac1">/</span>K21 ;<span style="color:#78787e"># SO THAT CESS = CPSS</span>
+</span></span><span style="display:flex;"><span>   KA<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))
+</span></span><span style="display:flex;"><span>   KE<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">2</span>))
+</span></span><span style="display:flex;"><span>   V2<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">3</span>))
+</span></span><span style="display:flex;"><span>   S2<span style="color:#ff6ac1">=</span>V2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   KE0<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span>   EMAX<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">5</span>)
+</span></span><span style="display:flex;"><span>   EC50<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">6</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">4</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$DES</span>
+</span></span><span style="display:flex;"><span>   DADT(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=-</span>KA<span style="color:#ff6ac1">*</span>A(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>   DADT(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span>KA<span style="color:#ff6ac1">*</span>A(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">-</span>KE<span style="color:#ff6ac1">*</span>A(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>   DADT(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">=</span>KE0<span style="color:#ff6ac1">*</span>(A(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">/</span>V2<span style="color:#ff6ac1">-</span>A(<span style="color:#ff9f43">3</span>))
+</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ERROR</span>
-</span></span><span style="display:flex;"><span>  Y<span style="color:#ff6ac1">=</span> EMAX<span style="color:#ff6ac1">*</span>F<span style="color:#ff6ac1">/</span>(C50<span style="color:#ff6ac1">+</span>F)<span style="color:#ff6ac1">*</span>EXP(ERR(<span style="color:#ff9f43">1</span>))
+</span></span><span style="display:flex;"><span>  ;TYPE<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0</span> FOR CP (CMT<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">2</span>), TYPE<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> FOR E (CMT<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">3</span>)
+</span></span><span style="display:flex;"><span>  CP<span style="color:#ff6ac1">=</span>A(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">/</span>S2
+</span></span><span style="display:flex;"><span>  CE<span style="color:#ff6ac1">=</span>A(<span style="color:#ff9f43">3</span>)
+</span></span><span style="display:flex;"><span>  TYPE<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>  IF(CMT<span style="color:#ff6ac1">.</span>EQ<span style="color:#ff9f43">.2</span>) TYPE<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0</span>
+</span></span><span style="display:flex;"><span>  YC<span style="color:#ff6ac1">=</span>CP<span style="color:#ff6ac1">*</span>(<span style="color:#ff9f43">1.0</span><span style="color:#ff6ac1">+</span>ERR(<span style="color:#ff9f43">1</span>)) ;PK residual error model
+</span></span><span style="display:flex;"><span>  EE<span style="color:#ff6ac1">=</span>EMAX<span style="color:#ff6ac1">*</span>CE<span style="color:#ff6ac1">/</span>(EC50<span style="color:#ff6ac1">+</span>CE)
+</span></span><span style="display:flex;"><span>  YE<span style="color:#ff6ac1">=</span>EE<span style="color:#ff6ac1">+</span>ERR(<span style="color:#ff9f43">2</span>)     ;PD residual error model
+</span></span><span style="display:flex;"><span>  Y<span style="color:#ff6ac1">=</span> (<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>TYPE)<span style="color:#ff6ac1">*</span>YC <span style="color:#ff6ac1">+</span> TYPE<span style="color:#ff6ac1">*</span>YE
+</span></span><span style="display:flex;"><span>  IPRE<span style="color:#ff6ac1">=</span>CP
+</span></span><span style="display:flex;"><span>  IF(TYPE<span style="color:#ff6ac1">.</span>EQ<span style="color:#ff9f43">.1</span>) IPRE<span style="color:#ff6ac1">=</span>EE
+</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$THETA</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">.124</span> FIXED	;<span style="color:#78787e"># K - FIXED TO PREV EST</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">.1</span>		;<span style="color:#78787e"># KEO - ESTIMATED</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">28.6</span> FIXED	;<span style="color:#78787e"># V1 - FIXED TO PREV EST</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">100</span>		;<span style="color:#78787e"># EMAX- ESTIMATED</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">50</span>		;<span style="color:#78787e"># C50 - ESTIMATED</span>
+</span></span><span style="display:flex;"><span>  (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">2</span>)       ;[KA]
+</span></span><span style="display:flex;"><span>  (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">0.1</span>)     ;[KE]
+</span></span><span style="display:flex;"><span>  (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">32</span>)      ;[V2]
+</span></span><span style="display:flex;"><span>  (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">0.5</span>)     ;[KE0]
+</span></span><span style="display:flex;"><span>  (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">1.2</span>)     ;[EMAX]
+</span></span><span style="display:flex;"><span>  (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">6.7</span>)     ;[EC50]
+</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$OMEGA</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">.113</span> FIXED ;<span style="color:#78787e"># OMEGA(K) - FIXED TO PREV EST</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">.04</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">.627</span> FIXED ;<span style="color:#78787e"># OMEGA(V1)- FIXED TO PREV EST</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">.04</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">.04</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$SIGMA</span> <span style="color:#ff9f43">.16</span></span></span></code></pre></td></tr></table>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">0.03</span> ;[P]
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">0.03</span> ;[P]
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">0.03</span> ;[P]
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">0.03</span> ;[P]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$SIGMA</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">0.01</span> ;[P]
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">0.1</span>  ;[A]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ESTIMATION</span> METHOD<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> INTER MAXEVAL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">5000</span> PRINT<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">5</span> MSF<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">702</span><span style="color:#ff6ac1">.</span>MSF SIGL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">12</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$COV</span> MATRIX<span style="color:#ff6ac1">=</span>R UNCONDITIONAL PRINT<span style="color:#ff6ac1">=</span>E
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$TABLE</span> ID TIME YC YE CP CE IPRE TYPE CMT CWRES FILE<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">702</span><span style="color:#ff6ac1">.</span>tab NOPRINT</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
@@ -1670,13 +1689,12 @@ parameters. Then the above model becomes</p>
 </div>
 <div id="outline-container-headline-3" class="outline-3">
 <h3 id="headline-3">
-PK/PD simultaneous modeled
+PK/PD sequentially modeled
 </h3>
 <div id="outline-text-headline-3" class="outline-text-3">
-<p>Also assumed an effect compartment model, we now describe PK and PD in a
-single NONMEM model. In this case, data item DV can be either
-concentration in the central compartment (CMT=1), or the drug effect in the
-effect compartment (CMT=2).</p>
+<p>Assume a previous PK model run provides individual elimination rate constant and volume of
+distribution prediction as data item <code>KEIN</code> and <code>V2IN</code>, then we can use them in
+the Emax PD model sequentially.</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1699,31 +1717,64 @@ effect compartment (CMT=2).</p>
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  ;<span style="color:#78787e"># ...</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$DATA</span> data
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$INPUT</span> ID TIME DV AMT<span style="color:#ff6ac1">=</span>DOSE CMT
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$SUBROUTINES</span> ADVAN3
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$PK</span>
-</span></span><span style="display:flex;"><span>  K <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))
-</span></span><span style="display:flex;"><span>  K12<span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">.001</span><span style="color:#ff6ac1">*</span>K ;<span style="color:#78787e"># TRIVIAL LOSS TO EFFECT CMPT</span>
-</span></span><span style="display:flex;"><span>  K21<span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">2</span>))
-</span></span><span style="display:flex;"><span>  S1<span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">3</span>))
-</span></span><span style="display:flex;"><span>  EMAX<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">4</span>))
-</span></span><span style="display:flex;"><span>  C50<span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">5</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">5</span>))
-</span></span><span style="display:flex;"><span>  S2<span style="color:#ff6ac1">=</span> S1<span style="color:#ff6ac1">*</span>K12<span style="color:#ff6ac1">/</span>K21 ;<span style="color:#78787e"># SO THAT CESS = CPSS</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ERROR</span>
-</span></span><span style="display:flex;"><span>  IF (CMT<span style="color:#ff6ac1">.</span>EQ<span style="color:#ff9f43">.2</span>) THEN
-</span></span><span style="display:flex;"><span>    Y <span style="color:#ff6ac1">=</span> EMAX<span style="color:#ff6ac1">*</span>F<span style="color:#ff6ac1">/</span>(C50<span style="color:#ff6ac1">+</span>F)<span style="color:#ff6ac1">*</span>EXP(ERR(<span style="color:#ff9f43">2</span>)) ;<span style="color:#78787e"># DV = EFFECT IF CMT=2</span>
-</span></span><span style="display:flex;"><span>  ELSE
-</span></span><span style="display:flex;"><span>    Y <span style="color:#ff6ac1">=</span> F<span style="color:#ff6ac1">*</span>EXP(ERR(<span style="color:#ff9f43">1</span>)) ;<span style="color:#78787e"># DV = CP IF CMT=1 (OR 0)</span>
-</span></span><span style="display:flex;"><span>  ENDIF
-</span></span><span style="display:flex;"><span>  ;<span style="color:#78787e"># ...</span></span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>;<span style="color:#78787e"># ...</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
+</span></span><span style="display:flex;"><span> KA<span style="color:#ff6ac1">=</span>KIND
+</span></span><span style="display:flex;"><span> KE<span style="color:#ff6ac1">=</span>KEIN
+</span></span><span style="display:flex;"><span> V2<span style="color:#ff6ac1">=</span>V2IN
+</span></span><span style="display:flex;"><span> S2<span style="color:#ff6ac1">=</span>V2
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># LINEAR EFFECT MODEL</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> INTR<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span> SLOP<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))
+</span></span><span style="display:flex;"><span> KE0 <span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">3</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$DES</span>
+</span></span><span style="display:flex;"><span> DADT(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=-</span>KA<span style="color:#ff6ac1">*</span>A(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span> DADT(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span>KA<span style="color:#ff6ac1">*</span>A(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">-</span>KE<span style="color:#ff6ac1">*</span>A(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span> DADT(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">=</span>KE0<span style="color:#ff6ac1">*</span>(A(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">/</span>V2<span style="color:#ff6ac1">-</span>A(<span style="color:#ff9f43">3</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ERROR</span>
+</span></span><span style="display:flex;"><span> CE<span style="color:#ff6ac1">=</span>A(<span style="color:#ff9f43">3</span>)
+</span></span><span style="display:flex;"><span> E<span style="color:#ff6ac1">=</span>INTR<span style="color:#ff6ac1">+</span>SLOP<span style="color:#ff6ac1">*</span>CE
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Y<span style="color:#ff6ac1">=</span>E<span style="color:#ff6ac1">+</span>ERR(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>CP<span style="color:#ff6ac1">=</span>A(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">/</span>S2
+</span></span><span style="display:flex;"><span>IPRE<span style="color:#ff6ac1">=</span>E
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$THETA</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">0.1</span>)     ;<span style="color:#78787e"># [INTR]</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#ff9f43">0.5</span>)       ;<span style="color:#78787e"># [SLOP]</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">0.5</span>)     ;<span style="color:#78787e"># [KE0]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGA</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff9f43">0.01</span> ;[P]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIGMA</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ff9f43">.01</span>;[A]
+</span></span><span style="display:flex;"><span>;<span style="color:#78787e"># ...</span></span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>Note that the SIGMA should be specified for dimension 2.</p>
 </div>
 </div>
 </div>
@@ -1813,9 +1864,9 @@ effect compartment (CMT=2).</p>
 <ul>
 <li><a href="#headline-1">PKPD model</a>
 <ul>
-<li><a href="#headline-2">PK/PD sequentially modeled</a>
+<li><a href="#headline-2">PK/PD simultaneous modeled</a>
 </li>
-<li><a href="#headline-3">PK/PD simultaneous modeled</a>
+<li><a href="#headline-3">PK/PD sequentially modeled</a>
 </li>
 </ul>
 </li>

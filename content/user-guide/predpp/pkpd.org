@@ -10,91 +10,114 @@ weight: 17
 
 * PKPD model
 PKPD model can be performed either sequentially or simultaneously. Let
-us first consider sequential models in which PD is based on PK
-results.
-** PK/PD sequentially modeled
-Assume a previous PK model run provides elimination rate constant and volume of
-distribution prediction as data item ~KK~ and ~V1~, then we can use them in
-the Emax PD model with an effect compartment. We see the
-virtual effect compartment acts just like the peripheral compartment
-in two-compartment model, so we can promptly use ADVAN3 to
-describe this model. The data item DV from the data set is for the effect observations.
-#+begin_src perl
-;# ...
-$DATA data
-$INPUT ID TIME DV AMT=DOSE CMT KK V1
-$SUBROUTINES ADVAN3
-$PK
-K = KK
-K12= .001*K ;# TRIVIAL LOSS TO EFFECT COMPT.
-K21= THETA(1)*EXP(ETA(1))
-EMAX=THETA(2)*EXP(ETA(2))
-C50= THETA(3)*EXP(ETA(3))
-S2= V1*K12/K21 ;# so that CESS = CPSS
-$ERROR
-Y =EMAX*F/(C50+F)*EXP(ERR(1))
-;# ...
-#+end_src
-Note that the transfer rate constant \(K_{12}\) is /assumed/ to be
-small compared to elimination.
-
-Assume instead /K/ and /V1/ are not given in data but merely point
-estimations based on previous PK model, we can introduce them as FIXed
-parameters. Then the above model becomes
-
-#+begin_src perl
-  $DATA data
-  $INPUT ID TIME DV AMT=DOSE CMT
-  $SUBROUTINES ADVAN3
-  $PK
-  K = THETA(1)*EXP(ETA(1))
-  K12= .001*K ;# TRIVIAL LOSS TO EFFECT COMPT.
-  K21= THETA(2)*EXP(ETA(2))
-  V1= THETA(3)*EXP(ETA(3))
-  EMAX=THETA(4)*EXP(ETA(4))
-  C50= THETA(5)*EXP(ETA(5))
-  S2= V1*K12/K21 ;# SO THAT CESS = CPSS
-  $ERROR
-  Y= EMAX*F/(C50+F)*EXP(ERR(1))
-  $THETA
-  .124 FIXED	;# K - FIXED TO PREV EST
-  .1		;# KEO - ESTIMATED
-  28.6 FIXED	;# V1 - FIXED TO PREV EST
-  100		;# EMAX- ESTIMATED
-  50		;# C50 - ESTIMATED
-  $OMEGA
-  .113 FIXED ;# OMEGA(K) - FIXED TO PREV EST
-  .04
-  .627 FIXED ;# OMEGA(V1)- FIXED TO PREV EST
-  .04
-  .04
-  $SIGMA .16
-#+end_src
+us first consider simultaneous model in which PD is based on PK
+plasma concentration through an effect compartment.
 
 ** PK/PD simultaneous modeled
-Also assumed an effect compartment model, we now describe PK and PD in a
-single NONMEM model. In this case, data item DV can be either
-concentration in the central compartment (CMT=1), or the drug effect in the
-effect compartment (CMT=2).
+Consider data item DV be either
+concentration in the central compartment (CMT=1), or the drug effect
+dependent on concentration in the effect compartment (CMT=2). The drug
+effect is modeled using the Emax model. We use ADVAN3 (LSODA ODE
+solver) to solve the coupled PK/PD equations numerically.
 #+begin_src perl
-  ;# ...
-  $DATA data
-  $INPUT ID TIME DV AMT=DOSE CMT
-  $SUBROUTINES ADVAN3
+  $PROB RUN# 702 ADVAN6
+  $INPUT C ID AMT TIME DV CMT
+  $DATA 006.csv IGNORE=C
+  $SUBROUTINE ADVAN13 TRANS=1 TOL=10 ATOL=10
+  $MODEL NCOMP=3
+    COMP=(GUT)
+    COMP=(CENTRAL)
+    COMP=(EFFECT)
   $PK
-  K = THETA(1)*EXP(ETA(1))
-  K12= .001*K ;# TRIVIAL LOSS TO EFFECT CMPT
-  K21= THETA(2)*EXP(ETA(2))
-  S1= THETA(3)*EXP(ETA(3))
-  EMAX=THETA(4)*EXP(ETA(4))
-  C50= THETA(5)*EXP(ETA(5))
-  S2= S1*K12/K21 ;# SO THAT CESS = CPSS
+   KA=THETA(1)*EXP(ETA(1))
+   KE=THETA(2)*EXP(ETA(2))
+   V2=THETA(3)*EXP(ETA(3))
+   S2=V2
+
+   KE0=THETA(4)
+   EMAX=THETA(5)
+   EC50=THETA(6)*EXP(ETA(4))
+
+  $DES
+   DADT(1)=-KA*A(1)
+   DADT(2)=KA*A(1)-KE*A(2)
+   DADT(3)=KE0*(A(2)/V2-A(3))
+
   $ERROR
-  IF (CMT.EQ.2) THEN
-    Y = EMAX*F/(C50+F)*EXP(ERR(2)) ;# DV = EFFECT IF CMT=2
-  ELSE
-    Y = F*EXP(ERR(1)) ;# DV = CP IF CMT=1 (OR 0)
-  ENDIF
-  ;# ...
+  ;TYPE=0 FOR CP (CMT=2), TYPE=1 FOR E (CMT=3)
+  CP=A(2)/S2
+  CE=A(3)
+  TYPE=1
+  IF(CMT.EQ.2) TYPE=0
+  YC=CP*(1.0+ERR(1)) ;PK residual error model
+  EE=EMAX*CE/(EC50+CE)
+  YE=EE+ERR(2)     ;PD residual error model
+  Y= (1-TYPE)*YC + TYPE*YE
+  IPRE=CP
+  IF(TYPE.EQ.1) IPRE=EE
+
+  $THETA
+  (0,2)       ;[KA]
+  (0,0.1)     ;[KE]
+  (0,32)      ;[V2]
+  (0,0.5)     ;[KE0]
+  (0,1.2)     ;[EMAX]
+  (0,6.7)     ;[EC50]
+
+  $OMEGA
+  0.03 ;[P]
+  0.03 ;[P]
+  0.03 ;[P]
+  0.03 ;[P]
+
+  $SIGMA
+  0.01 ;[P]
+  0.1  ;[A]
+
+  $ESTIMATION METHOD=1 INTER MAXEVAL=5000 PRINT=5 MSF=702.MSF SIGL=12
+  $COV MATRIX=R UNCONDITIONAL PRINT=E
+  $TABLE ID TIME YC YE CP CE IPRE TYPE CMT CWRES FILE=702.tab NOPRINT
 #+end_src
-Note that the SIGMA should be specified for dimension 2.
+
+** PK/PD sequentially modeled
+Assume a previous PK model run provides individual elimination rate constant and volume of
+distribution prediction as data item ~KEIN~ and ~V2IN~, then we can use them in
+the Emax PD model sequentially.
+#+begin_src perl
+;# ...
+$PK
+ KA=KIND
+ KE=KEIN
+ V2=V2IN
+ S2=V2
+;# LINEAR EFFECT MODEL
+
+ INTR=THETA(1)
+ SLOP=THETA(2)*EXP(ETA(1))
+ KE0 =THETA(3)
+
+$DES
+ DADT(1)=-KA*A(1)
+ DADT(2)=KA*A(1)-KE*A(2)
+ DADT(3)=KE0*(A(2)/V2-A(3))
+
+$ERROR
+ CE=A(3)
+ E=INTR+SLOP*CE
+
+Y=E+ERR(1)
+
+CP=A(2)/S2
+IPRE=E
+$THETA
+(0,0.1)     ;# [INTR]
+(0.5)       ;# [SLOP]
+(0,0.5)     ;# [KE0]
+
+$OMEGA
+0.01 ;[P]
+
+$SIGMA
+ .01;[A]
+;# ...
+#+end_src
