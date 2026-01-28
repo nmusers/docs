@@ -105,20 +105,15 @@ In general, the system can be formulated as
 Here both left-hand-side (LHS) and right-hand-size (RHS) are vectors
 of dimention \(n\): \(A=[A_1, \dots, A_n]^T\), \(g=[g_1, \dots, g_n]^T\).
 
-We can keep increasing the complexity of the system, by increasing the
-dimenion of \(A()\), and/or the complexity of the right-hand-size
-(RHS) function \(g\), then translate it into PRED, to account for more
-complicated models. But it quickly becomes intractable because the solution
-can be either too complicated to write out, or (most likely) does not exist
-in close form to begin with.
-
+As the dimention of \(A()\) and the complexity of RHS increases to
+account for more complicated models it quickly becomes intractable to
+encode it in PRED, most ODEs do not have even close form to begin with.
 NONMEM tackles this problem by allowing user to specify the RHS \(g()\)
-directly, so that it can solve the ODEs /numerically/. That way we do not have to
-write out the solution \(A\) (or \(f\)) manually. In fact, NONMEM
-provides a library of commonly-used PK models. For those models we do
-not even have to specify \(g()\). Since these models describe how
-\(A(t)\) /advances/ in time, NONMEM calls them ADVAN routines, and
-allows users to specify in the $SUBROUTINE control record.
+directly, so that it can solve the ODEs /numerically/. In fact, NONMEM
+provides a library of commonly-used PK models that we need only to
+specify the parameters of \(g()\). Since these models describe how
+\(A(t)\) /advances/ in time, NONMEM calls them ADVAN routines. We
+select ADVAN in the $SUBROUTINE control record.
 
 ** General linear ODE model
 #+index: Differential equations!linear ODE
@@ -149,11 +144,9 @@ related to the \(k\)'s as (\(k_a\) remains the same)
 $$
 k_e=\frac{\text{CL}}{V_1},\quad k_{12}=\frac{\text{Q}}{V_1},\quad k_{21}=\frac{\text{Q}}{V_2}.
 $$
-This /TRANSformation/ of parameters does not change the ODE model, but
-merely /reparameterizes/ it, and NONMEM
-provides routines called TRANS for the built-in PK models. User can choose
-between different TRANS routines for a given PK model. Like ADVAN
-routines, users specify TRANS in the $SUBROUTINE control record.
+NONMEM provides TRANS (for "transformation") routines for this
+/reparameterization/ of the built-in PK models. We make selection of
+TRANS routine along with ADVAN routine, in the $SUBROUTINE control record.
 
 ** Dose
 :PROPERTIES:
@@ -176,19 +169,19 @@ $$
 A_1(t_0) = D.
 $$
 
-Now let us consider the case of infusions. An constant infusion with
-rate \(r\) given
-between time \(t_1\) and \(t_2\) amounts to adding \(r\) to RHS
-\(g()\). Take the above two-compartment model for example. If the
-infusion is given to the central compartment, we have (omitting the other compartments)
+As to an infusion with rate \(r\) given
+between time \(t_1\) and \(t_2\), it is equivalent to adding \(r\) to
+the RHS \(g()\). Then the two-compartment model
+with an infusion to the central compartment becomes (the other
+compartments remain the same)
 $$
 \frac{dA_1}{dt} = k_aA_0(t) - (k_{12}+k_e)A_1(t) + k_{21}A_2(t) + r,\quad t \text{ in } (t_1, t_2).
 $$
-After the infusion, assuming there is no doses given, we return to
+during the infusion, and
 $$
-\frac{dA_1}{dt} = k_aA_0(t) - (k_{12}+k_e)A_1(t) + k_{21}A_2(t) + r,\quad t > t_2.
+\frac{dA_1}{dt} = k_aA_0(t) - (k_{12}+k_e)A_1(t) + k_{21}A_2(t),\quad t > t_2.
 $$
-
+after the infusion.
 
 [fn:1] A function signature specifies the
 function's input (arguments) and output (return). NONMEM's
