@@ -1622,21 +1622,19 @@ appropriate memory for its storage.  See the description of  MADAPT=-1
 
 *** MCETA=n (NM73)
 
-  - MCETA=0: ETA=0 is initial setting for MAP estimation  (eta  optimization).  This is the default.
+  - MCETA=0: ETA=0 is initial setting for MAP estimation  (ETA optimization).  This is the default.
 
   - MCETA=1: ETA=values  of previous iteration is initial setting for MAP estimation, or ETA=0, whichever gives lower objective  function.
 
   - MCETA>1: MCETA-1 Random samples of ETA, using normal random
-    distribution with variance OMEGA, are tested.  Plus previous ETA
-    is tested,  and  ETA=0  is  tested.  Whichever gives the lowest
-    objective function is used as initial setting  for  the  MAP
-    optimization.
-
+    distribution with variance OMEGA, are tested.  In addition the previous ETA
+    as well as ETA=0 are tested. The initial setting is taken as the
+    ETAs that give the lowest OFV.
 
 *** LNTWOPI (NM74)
-      The objective function is reported including the N*LOG(2pi)  constant  term,  where N is the total number of normally distributed
-      data values in the data set.  Compare OLNTWOPI.  Either  or  both
-      may be used.
+The objective function is reported including the \(N\log(2\pi)\)
+constant,  where /N/ is the total number of normally distributed data
+values in the data set. See also OLNTWOPI (can be used at the same time).
 
 *** MSFO=filename
 A  [[file:/docs/reference-manual/files/#msf][Model Specification File]]  is output to a file with the given filename.  Filename may not contain embedded spaces.  If filename contains commas, semicolons, or parentheses, then it must be surrounded by quotes (' or ").   Filename  may  also  contain  equal signs  if it is enclosed in quotes.  Filename may contain at most 71 characters.  If filename is the same  as  any  option  of  the $ESTIMATION  record, it must be enclosed in quotes.  If the $NONPARAMETRIC record is present and also specifies the MSFO  option, the filename is required on the record which appears first in the control stream.  If filename is present on both, it must  be  the same.   If  the  filename  is  omitted  on  the second of the two records, the MSF option must be the final option on that  record. Default: If the MSFO option is not used, no MSF is output.
@@ -2009,9 +2007,11 @@ using NUTS_EPARAM=0 or NUTS_EPARAM=1, and Omega priors with inverse
 Wishart distribution.
 
 *** OLNTWOPI (NM74)
-      The    objective    function    is    reported    including   the
-      NETA*NIND*LOG(2pi) constant term for SAEM and BAYES,  where  NETA
-      is  the  number of ETAs, and NIND is number of individuals.  Compare LNTWOPI. Either or both may be used.
+The objective function is reported including the
+      \(N_{\eta} N_{\text{ind}}\log(2\pi)\) constant term for SAEM and BAYES,
+      where  \(N_{\eta}\) (~NETA~)
+      is the number of ETAs, and \(N_{\text{ind}}\) (~NIND~) is number
+      of individuals. See also LNTWOPI (can be used at the same time).
 
 *** THETABOUNDTEST, OMEGABOUNDTEST, SIGMABOUNDTEST
       With NONMEM VI, the estimation step sometimes terminates with the
