@@ -14,10 +14,10 @@ Inputting Variance-Covariance information from another problem.
 $RCOV FILE=sirsample.cov TBLN=1 DELIM=,
 #+end_src
 
-The $RCOV record can be used to load the variance-covariance matrix of
+The ~$RCOV~ record can be used to load the variance-covariance matrix of
 estimates  results  from a previous problem, and use it for subsequent
 use in assessing total standard errors of table items  without  having
-to re-calculate the variance with a $COV step. Consider the control
+to re-calculate the variance with a ~$COV~ step. Consider the control
 stream snippet below that brings in the covariance-variance of
 estimates from a previous control stream, located in rcov.cov, to be
 used in
@@ -28,13 +28,13 @@ used in
   $TABLE ID TIME IPRED CL V1 Q V2 LTVCL VARCALC=3 FILE=rcov3.tab NOPRINT NOAPPEND
 #+end_src
 
-Alternatively the  record  $RCOVI  may  be  used to load the the
+Alternatively the  record  ~$RCOVI~  may  be  used to load the the
 variance-covariance information from the inverse-covariance file:
 #+begin_src perl
   $RCOVI FILE=sirsample.coi TBLN=1 DELIM=,
 #+end_src
-So $RCOV reading in variance-covariance from rcov.cov of a previous
-run can be used in place of executing the $COV step, and then used in
+So ~$RCOV~ reading in variance-covariance from rcov.cov of a previous
+run can be used in place of executing the ~$COV~ step, and then used in
 evaluating the total standard error for table items (VARCALC=3).
 Thus, you may bring in a variance-covariance evaluated by any possible
 method (IMP, SAEM, BAYES, SIR) from the previous run, and use it for
@@ -43,7 +43,7 @@ evaluating total standard errors of table items.
  The FILE=filename option is required.
 
  If FORMAT or DELIM is used, it should be the same as was specified  on
- the  $ESTIMATION record that created the file to be used.  The default
+ the  ~$ESTIMATION~ record that created the file to be used.  The default
  is s1PE12.5.
 
  TBLN is the table number in the file.  If TBLN is  not  specified,  it
@@ -56,7 +56,7 @@ evaluating total standard errors of table items.
  If NONMEM is unable to read the file, the message is
  COULD NOT FIND APPROPRIATE VARIANCE/COVARIANCE DATA IN FILE c5.cov
 
-$RCOV and $RCOVI can be used with the $CHAIN record.  For examples, final parameter results using the $CHAIN record, and final empirical Bayes estimates of ETAs (and their covariances) using the $ETAS record, may also be read in from the previous run:
+~$RCOV~ and ~$RCOVI~ can be used with the ~$CHAIN~ record.  For examples, final parameter results using the ~$CHAIN~ record, and final empirical Bayes estimates of ETAs (and their covariances) using the ~$ETAS~ record, may also be read in from the previous run:
 #+begin_src perl
 $CHAIN FILE=rcov.ext NSAMPLE=0 ISAMPLE=-1000000000 FORMAT=,1PE23.15
 $ETAS FILE=rcov.phi TBLN=1 DELIM=,
@@ -65,14 +65,14 @@ $RCOV FILE=rcov.cov TBLN=1 DELIM=,
 The final THETAs, SIGMAs, OMEGAs, ETAs, covariances of ETAs, and
 covariances of THETAs, OMEGAs and SIGMAs from the previous run can
 then be used without any re-estimation by setting FNLETA=2, and
-without any re-evaluation of the $COV step:
+without any re-evaluation of the ~$COV~ step:
 #+begin_src perl
 $EST METHOD=1 FNLETA=2 FORMAT=,1PE23.15
 $TABLE ID TIME IPRED CL V1 Q V2 LTVCL VARCALC=3 FILE=rcov3.tab NOPRINT
        NOAPPEND
 #+end_src
 
-$RCOV can also be used to import a prior in a $PRIOR TNPRI problem,
+~$RCOV~ can also be used to import a prior in a ~$PRIOR~ TNPRI problem,
 replacing the variance-covariance that was last written to an MSF file
 with alternative values.  This may have value if you wish to use
 variance-covariance estimated by an alternative method in a previous
@@ -81,7 +81,7 @@ problem.  A proper MSFI file was generated from a previous run (call
 it pre_tnpri), and it is desired to input variance-covariance  from
 another source, perhaps yet another previous run (call it sirsampling,
 because the SIR assessed covariance will be used), so that the
-contents of the MSFI file, along with the $RCOV record, are read in on
+contents of the MSFI file, along with the ~$RCOV~ record, are read in on
 the first problem:
 
 #+begin_src perl
@@ -112,7 +112,7 @@ the first problem:
   $PRIOR TNPRI (PROBLEM 2) IFND=0 MODE=0 PLEV=0 IVAR=0
   $EST OMIT
 #+end_src
-Then, the information is used in the next $PROB (same control stream)
+Then, the information is used in the next ~$PROB~ (same control stream)
 to be used as prior information:
 #+begin_src perl
 $PROB Evaluation
@@ -131,13 +131,13 @@ $COV MATRIX=R PRINT=E UNCONDITIONAL
 #+end_src
 
 Final parameter estimates from a previous run may also be entered in
-using the $CHAIN record, as shown above, to serve as the centrality
+using the ~$CHAIN~ record, as shown above, to serve as the centrality
 parameters of the prior.
 
-The lower and upper bound settings in the $THETA record on the second
+The lower and upper bound settings in the ~$THETA~ record on the second
 problem normally must match those of the problem that generated the
 prior.  To get around this, you can set the NOMSFTEST option on the
-$MSFI record in the first problem.  You will still get warnings if the
+~$MSFI~ record in the first problem.  You will still get warnings if the
 bounds do not match.
 
 Alternatively, you can omit an MSFI input altogether as follows:
@@ -175,7 +175,7 @@ Alternatively, you can omit an MSFI input altogether as follows:
   $PRIOR TNPRI (PROBLEM 2) IFND=0 MODE=0 PLEV=0 IVAR=0
   $EST OMIT
 #+end_src
-Then, the information is used in the next $PROB (same control stream)
+Then, the information is used in the next ~$PROB~ (same control stream)
 to be used as prior information:
 #+begin_src perl
 $PROB Evaluation
@@ -193,5 +193,5 @@ $EST METHOD=1 INTERACTION NSIG=3 PRINT=10 NOABORT MAXEVAL=9999
 $COV MATRIX=R PRINT=E UNCONDITIONAL
 #+end_src
 Final parameter estimates from a previous run may also be entered in
-using the $CHAIN record, as shown above, to serve as the centrality
+using the ~$CHAIN~ record, as shown above, to serve as the centrality
 parameters of the prior.

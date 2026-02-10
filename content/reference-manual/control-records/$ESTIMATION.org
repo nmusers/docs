@@ -151,13 +151,13 @@ Instructions for the NONMEM Estimation Step.
 
 ** Discussion
 Optional.  Requests  that  the  NONMEM Estimation Step be implemented.
-May also be coded $ESTM or $ESTIMATE.   The  Estimation  Step  obtains
+May also be coded ~$ESTM~ or ~$ESTIMATE~.   The  Estimation  Step  obtains
 parameter estimates.
 
 In NONMEM v7+, multiple Estimation Steps can be implemented in a
 single problem.  A sequence of two or more Estimation Steps  will
 result in the sequential execution of each.  Options specified in an
-$ESTIMATION record will carry over to the next $ESTIMATION  record
+~$ESTIMATION~ record will carry over to the next ~$ESTIMATION~  record
 unless  a new  option  is  specified.  If a particular option is not
 used by the method then the option will be ignored.  The final
 parameter estimates from an Estimation Step will be passed on as the
@@ -174,23 +174,23 @@ $EST METHOD=CONDTIONAL
      NSIG=4
 #+end_src
 will first result in estimation of the problem by the first order
-method, using as initial parameters those defined by the $THETA,
-$OMEGA, and $SIGMA statements.  Next, the first order conditional
+method, using as initial parameters those defined by the ~$THETA~,
+~$OMEGA~, and ~$SIGMA~ statements.  Next, the first order conditional
 estimation method will be implemented, using as initial parameters the
 final estimates of THETA, OMEGA, and SIGMA from the previous analysis.
 Up to 20 estimations may be performed within a problem.  For all
 intermediate estimation steps, their final parameter values and
 objective function will be printed to the raw output file. Settings to
-options specified in a $EST method will by default carry over to the
-next $EST method, until a new option setting specified.  Thus, in the
+options specified in a ~$EST~ method will by default carry over to the
+next ~$EST~ method, until a new option setting specified.  Thus, in the
 example above, PRINT will remain 5 and MAXEVAL will remain 9999 for
-the second $EST statement, whereas NSIG will be changed to 4 and
+the second ~$EST~ statement, whereas NSIG will be changed to 4 and
 METHOD becomes conditional. (NOTHETABOUND, NOOMEGABOUND, and
 NOSIGMABOUND are exceptions to this rule. They pertain to all of the
-estimations in the series within a $PROB.  In NM710, NM712, and NM720,
-these options must be given with the very first $EST record in the
-problem.  With NM73, these options may be placed with any of the $EST
-records, but will still apply to all $EST records in the problem.)
+estimations in the series within a ~$PROB~.  In NM710, NM712, and NM720,
+these options must be given with the very first ~$EST~ record in the
+problem.  With NM73, these options may be placed with any of the ~$EST~
+records, but will still apply to all ~$EST~ records in the problem.)
 
 We discuss the METHOD option first, since many other options are
 context-dependent on the estimation method used.
@@ -487,7 +487,7 @@ CLOCKSEED=1, to produce different stochastic results for automated replications,
 
 By default (CTYPE=0), random values of THETA are generated from a
 uniform distribution within the interval [lower bound, upper bound]
-from the $THETA record.  If bound not specified, then the default bounded
+from the ~$THETA~ record.  If bound not specified, then the default bounded
 interval is
 
 ~[(1-IACCEPT)*THETA, (1+IACCEPT)*THETA]~.
@@ -497,19 +497,19 @@ varied  within (but see option DFS)
 
 ~[(1-IACCEPT)*SIGMA, (1+IACCEPT)*SIGMA]~
 
-If CTYPE=1, then the lower and upper bounds from $THETA are ignored
+If CTYPE=1, then the lower and upper bounds from ~$THETA~ are ignored
 and all THETAs are uniformly varied using the IACCEPT factor.  If
 CTYPE=2, then THETAs are initiated based on a normal distribution with
-the initial $THETA as the mean, and the second set of $OMEGAs (or
-$THETAPV) as the variance, if there is a $PRIOR command with NTHP
+the initial ~$THETA~ as the mean, and the second set of ~$OMEGA~s (or
+~$THETAPV~) as the variance, if there is a ~$PRIOR~ command with NTHP
 non-zero.  This is the best way and most complete way to define the
 sampling density for the THETAs.   Otherwise, if  NTHP=0 (or no
-$THETAP are provided) , the variance for THETA is obtained from the
-first set of $OMEGA, and requires that the THETAs be MU modeled, and
+~$THETAP~ are provided) , the variance for THETA is obtained from the
+first set of ~$OMEGA~, and requires that the THETAs be MU modeled, and
 those THETAs not MU modeled will follow the uniform distribution as if CTYPE=0.
 
 The OMEGAs are sampled using a Wishart distribution with variance from
-$OMEGA, and DF is the degrees of freedom for randomly creating the
+~$OMEGA~, and DF is the degrees of freedom for randomly creating the
 OMEGAS.  If DF=0, then the dimensionality of the entire OMEGA matrix
 is used as the degrees of freedom.  As of NM73, setting DF>1E6 fixes OMEGA elements at their initial values.
 
@@ -519,7 +519,7 @@ example, after the 5 random samples are made, ISAMPLE=3 (the third
 randomly created sample) is selected, and brought in as the initial
 values.  If ISAMPLE=0, then the initial values are not set to any of
 the randomly generated samples, but will just be what was listed in
-$THETA and $OMEGA of the control stream file.
+~$THETA~ and ~$OMEGA~ of the control stream file.
 
 If NSAMPLE=0, but ISAMPLE=some number, then it is expected that FILE already exists, and its iteration number specified by ISAMPLE is to be read in for setting initial values:
 #+begin_src perl
@@ -621,15 +621,15 @@ $EST METHOD=CHAIN FILE=random.txt NSAMPLE=20 ISAMPLE=1 ISAMPEND=20
 #+end_src
 randomly creates 20 sets of initial parameters, and selects the one with the lowest objective function.
 
-If METHOD=CHAIN is used, it must be the first $EST command in the
-particular $PROB.  Furthermore, because the settings it uses for FILE,
+If METHOD=CHAIN is used, it must be the first ~$EST~ command in the
+particular ~$PROB~.  Furthermore, because the settings it uses for FILE,
 NSAMPLE, ISAMPLE, IACCEPT, CTYPE, and DF are functionally different
-from the way the other $EST methods use them, these settings from
-METHOD=CHAIN are not passed on to the next $EST command, which must be
+from the way the other ~$EST~ methods use them, these settings from
+METHOD=CHAIN are not passed on to the next ~$EST~ command, which must be
 an estimation method.  However, other parameters such as DELIM,
 FORMAT, SEED, AND RANMETHOD will be passed on as default
-delimiter/format to the next $EST command.  However, the RANMETHOD
-does not propagate to the $CHAIN record.
+delimiter/format to the next ~$EST~ command.  However, the RANMETHOD
+does not propagate to the ~$CHAIN~ record.
 
 ** Options
 Setting an option to "-100" will force NONMEM to select the default value for that parameter.
@@ -663,8 +663,8 @@ problem, so use with care.
       (usually  set  it equal to that of TOL), and improve speeds of up
       to 3 to 4 fold.
 
-      By default, the value set on $SUBROUTINES record (or $TOL or  TOL
-      subroutine)  is  used.  If ATOL is coded on $ESTIMATION, it overrides the default for that step.  If ATOL is  coded  on  $COVARIANCE,  it overrides $ESTIMATION and/or the default for that step.
+      By default, the value set on ~$SUBROUTINES~ record (or ~$TOL~ or  TOL
+      subroutine)  is  used.  If ATOL is coded on ~$ESTIMATION~, it overrides the default for that step.  If ATOL is  coded  on  ~$COVARIANCE~,  it overrides ~$ESTIMATION~ and/or the default for that step.
       With NONMEM 74, this feature is deprecated.  A user-supplied  TOL
       subroutine should test NM_STEP and set ANRD accordingly.
 
@@ -673,7 +673,7 @@ AUTO sets recommended options for METHOD used. This option is ignored by the cla
   - AUTO=0 (NM73): NONMEM  does  not provide best settings of certain options. This is the default.
   - AUTO=1 (NM73): Several options will be set by NONMEM that will allow
     best  settings  to  be determined.  User may still over-ride those
-    options set by auto, by specifying them on the  same  $EST
+    options set by auto, by specifying them on the  same  ~$EST~
     record:
     #+begin_src perl
       $EST METHOD=ITS AUTO=1 PRINT=10
@@ -746,8 +746,8 @@ AUTO sets recommended options for METHOD used. This option is ignored by the cla
       NUTS_EPARAM=1 NUTS_MASS=D
     #+end_src
 
-The AUTO setting itself transfers to the next $EST within the same
-$PROB, just like any other option settings explicitly set by the user
+The AUTO setting itself transfers to the next ~$EST~ within the same
+~$PROB~, just like any other option settings explicitly set by the user
 in the control stream file, so AUTO remains on or off until then next
 AUTO option specified.  For example, with
 #+begin_src perl
@@ -765,9 +765,9 @@ $EST METHOD=BAYES AUTO=1 FILE=auto.txt PRINT=100 NITER=1000
 #+end_src
 the AUTO setting is turned off for IMP, and turned back on for BAYES.
 Any option settings implicitly set by the AUTO feature does not
-transfer to the next $EST statement.  Also, when using AUTO=1, the
+transfer to the next ~$EST~ statement.  Also, when using AUTO=1, the
 transfer of any options settings explicitly set by the user from
-previous $EST statements may or may not occur for those options set by
+previous ~$EST~ statements may or may not occur for those options set by
 the AUTO option, depending on the situation.
 
 *** BAYES_PHI_STORE=[0|1] (NM75)
@@ -803,7 +803,7 @@ collection of individual samples in the .ets file (ETASAMPLES=0
 
 
 *** BOOTDATA=[0|1] (NM75)
-By default (BOOTDATA=0), when data are selected based on $SIML BOOSTRAP, the randomly selected subjects are analyzed during the subsequent estimation method.  If BOOTDATA=1, then the subjects not selected are analyzed.  Usually, you may wish to simply perform an evaluation, not an estimation, on these non-selected data (MAXEVAL=0, or NITER=0), at the population parameter values based on estimation of the selected subjects.  For example:
+By default (BOOTDATA=0), when data are selected based on ~$SIML BOOSTRAP~, the randomly selected subjects are analyzed during the subsequent estimation method.  If BOOTDATA=1, then the subjects not selected are analyzed.  Usually, you may wish to simply perform an evaluation, not an estimation, on these non-selected data (MAXEVAL=0, or NITER=0), at the population parameter values based on estimation of the selected subjects.  For example:
 
 #+begin_src perl
 $SIML BOOTSTRAP=-1 SUBP=100
@@ -956,7 +956,7 @@ Degrees of freedom for the SIGMA matrix for  simulation  purposes by CHAIN.
 *** EONLY=[0|1]
 Evaluate the IMP objective function by performing only the expectation step, without advancing the population parameters (default is 0, population parameters are updated).  When this method is used, NITER should equal 5 to 10, to allow proposal density to improve with each iteration, since mean and variance of parameters of normal or t distribution proposal density are obtained from the previous iteration.  Also it is good to get several objective function values to assess the Monte Carlo noise in it.
 
-As of NM74, if EONLY=2, then not only are the population parameters not updated with each iteration, neither are the individual conditional means/modes and conditional variances until the last iteration, if the variances of the population parameter estimates are estimated ($COV is requested).  If EONLY=3, then the conditional modes and approximate variances from MAP estimation will be saved on the first iteration, and used for the sampling density of all subsequent iterations.  This improves efficiency when selecting MAPITER=1, MAPINTER=0, so that the MAP estimation did not need to be repeatedly performed.
+As of NM74, if EONLY=2, then not only are the population parameters not updated with each iteration, neither are the individual conditional means/modes and conditional variances until the last iteration, if the variances of the population parameter estimates are estimated (~$COV~ is requested).  If EONLY=3, then the conditional modes and approximate variances from MAP estimation will be saved on the first iteration, and used for the sampling density of all subsequent iterations.  This improves efficiency when selecting MAPITER=1, MAPINTER=0, so that the MAP estimation did not need to be repeatedly performed.
 
 *** ETABARCHECK | NOETABARCHECK
 ETABARCHECK: there is an ETABAR statistic (see [[file:/docs/reference-manual/files/#output-etabar][ETABAR]]) from a  previous  problem,
@@ -998,7 +998,7 @@ Used with SAEM or BAYES. Default ETASAMPLES=0. ETASAMPLES=1 causes individual IS
 per subject, output to "root.ets". To do this, perform an SAEM
 analysis (or BAYES) after the primary estimation, keeping the
 population parameters fixed (ETYPE=1), only performing the burn stage
-so samples do not get accumulatively averaged, and set ISAMPLE to 10 or higher to collect suffient samples per subject.  For example, note the $EST line in bold, after the usual SAEM analysis:
+so samples do not get accumulatively averaged, and set ISAMPLE to 10 or higher to collect suffient samples per subject.  For example, note the ~$EST~ line in bold, after the usual SAEM analysis:
 #+begin_src perl
   $SIZES ISAMPLEMAX=250
   ;#...
@@ -1042,10 +1042,10 @@ to that ETA.  (See [[file:/docs/reference-manual/api/variables/#ETASXI][ETASXI]]
 
 *** EVALSHRINK=0 (NM760)
 By  default,  when  MAXEVAL=0,  and population parameters are not
-inputted from an MSF file (using the $MSFI  record),  Etabar  and
+inputted from an MSF file (using the ~$MSFI~  record),  Etabar  and
 shrinkage information is not calculated and displayed in the NONMEM
 report file.  If you wish to have this information  displayed when
-MAXEVAL=0, then set EVALSHRINK=1 on the $EST record.
+MAXEVAL=0, then set EVALSHRINK=1 on the ~$EST~ record.
 
 
 *** FILE=filename
@@ -1060,13 +1060,13 @@ mixture models) and FNLETA (which evaluates final ETAs) routines using
 the original algorithm after the estimation and covariance steps are
 completed.  You may want to turn this off if each objective function
 call takes a long time, with very complex problems or large data sets.
-Be aware, that certain $TABLE outputs, such as the traditional WRES,
+Be aware, that certain ~$TABLE~ outputs, such as the traditional WRES,
 RESI, and PRED, may or may not be properly evaluated if the FNLMOD and
 FNLETA steps are omitted.
 
 Normally, when you do not set FNLETA, or when you set FNLETA to 1,
 regardless of the method that was used (classical or EM/Monte Carlo)
-to obtain the THETAs, OMEGAs and SIGMAs in the last $EST step, $TABLE
+to obtain the THETAs, OMEGAs and SIGMAs in the last ~$EST~ step, ~$TABLE~
 parameters are estimated based on a “post-hoc” evaluation of the ETAs
 at the mode of the posterior density position (eta hat), and using the
 final theta/OMEGAs/sigma estimates (classical and EM), or at the
@@ -1076,19 +1076,19 @@ file).  These eta hat values are identical to those evaluated during
 the estimation for ITS/FOCE/Laplace methods, but differ from the mean
 values estimated during an IMP, SAEM, BAYES analysis.
 
-Setting FNLETA=0 prevents the post-hoc analysis, so that $TABLE
+Setting FNLETA=0 prevents the post-hoc analysis, so that ~$TABLE~
 parameters are evaluated based on the eta/phi values generated by the
-last iteration of the last $EST method implemented (those listed in
+last iteration of the last ~$EST~ method implemented (those listed in
 the .phi file), which are mode of posterior values for
 ITS/FOCE/Laplace, and conditional means for IMP/SAEM.
 
 Before nm75, the phis/ETAs after a BAYES analysis yields single sample
 position values of the very last iteration, and had limited use. With
-nm75, $TABLE parameters use final MCMC posterior means (those listed
+nm75, ~$TABLE~ parameters use final MCMC posterior means (those listed
 in the .phi file, collected during the stationary phase) for the phis,
 and posterior means of the THETAs, OMEGAs, SIGMAs (those listed on the
 -1000000000 line of the .ext file).  For example, suppose you have a
-user defined variable in $ERROR or $PK that is a function of THETA(1)
+user defined variable in ~$ERROR~ or ~$PK~ that is a function of THETA(1)
 and ETA(1):
 
 #+begin_src f90
@@ -1113,8 +1113,7 @@ you will need to collect individual samples of W with an additional
 WRITE statement, and then summarize the the results after NONMEM
 analysis, as shown in example 8.
 
-Regardless of the FNLETA setting, the .phi and .phm tables (see I.66
-$EST: Additional Output Files Produced) always output the phi/eta
+Regardless of the FNLETA setting, the .phi and .phm tables always output the PHI/ETA
 values used for the particular method (mode of posterior, and
 approximate Fisher information based variances for ITS/FOCE/Laplace
 methods, Monte Carlo assessed conditional means and conditional
@@ -1122,9 +1121,9 @@ variances for SAEM/IMP methods).
 
 If you set FNLETA=2 (NM73), then the estimation step is not done, and
 whatever ETAs are stored in memory at the time are used in any
-subsequent $TABLE’s.  This has value if you loaded the individual ETAs
-from an MSF file, or from a $PHIS/$ETAS record, and you want to
-calculate $TABLE items based on those ETAs, rather than from a new
+subsequent ~$TABLE~’s.  This has value if you loaded the individual ETAs
+from an MSF file, or from a ~$PHIS~ and ~$ETAS~ record, and you want to
+calculate ~$TABLE~ items based on those ETAs, rather than from a new
 estimation.  For example:
 
 #+begin_src perl
@@ -1144,7 +1143,9 @@ To summarize:
 
 - FNLETA=0: All table outputs (diagnostics and user selected items) will use EBE’s from final estimation method (conditional modes for FO/FOCE/Laplace/ITS, conditional means for IMP/SAEM, MCMC posterior means for BAYES).
 
-- FNLETA=2: All table outputs will use a common set of EBE’s from an imported source. When using an imported source, such as a *_ETAS.msf or *.phi file (from a $ETAS/PHIS record), ensure that their ID ordering matches that of the $DATA data file.
+- FNLETA=2: All table outputs will use a common set of EBE’s from an
+  imported source. When using an imported source, such as a *_ETAS.msf
+  or *.phi file (from a ~$ETAS~ or ~$PHIS~ record), ensure that their ID ordering matches that of the ~$DATA~ data file.
 
 - FNLETA=3 (as of nm74):  Like FNLETA=1, will call FNLETA, and all table outputs (diagnostics and user selected items) will use EBE’s from the FNLETA step (eta modes).
 
@@ -1171,7 +1172,7 @@ Final ETAs (empirical Bayes estimates; EBE's) are evaluated after
 
       FPARAFILE=OFF turns off parallelization for the EBE's.
 
-      The FPARAFILE option may be specified on any $ESTIMATION  record,
+      The FPARAFILE option may be specified on any ~$ESTIMATION~  record,
       but applies only after the last Estimation Step.
 
 *** GRD=[G|N|D|S]...
@@ -1393,7 +1394,7 @@ In importance sampling, the scale factor used to vary the size of
       varies widely, and the scale factor boundary may need to be
       reduced, e.g. ISCALE_MIN=0.3, ISAMPLE_MAX=3.  After the IMP
       estimation, remember to revert these parameters to default
-      operation on the next $EST step:
+      operation on the next ~$EST~ step:
       #+begin_src perl
 	ISCALE_MIN=-100 ISCALE_MAX=-100    ;# reset to default
       #+end_src
@@ -1405,7 +1406,7 @@ ISCALE_MAX=1.0E+06.  This should left alone for MCMC sampling, but on
 occasion there may be a reason to reduce the boundaries (e.g., to
 ISCALE_MIN=0.001, ISAMPLE_MAX=1000).  Similar to in IMP, after the
 saem estimation method, remember to revert these parameters back to
-default operation on the next $EST step.
+default operation on the next ~$EST~ step.
 
 *** KAPPA=x (NM74)
 The parameters are averaged using a weight N-KAPPA (also called PKAPPA) for the Nth iteration (so a simple average with each iteration’s value equally weighted would be KAPPA=1), in obtaining the mass matrix.  A value of 0.75 gives the best results when preparing a mass matrix during the BAYES step, in anticipation of the NUTS step.
@@ -1415,7 +1416,7 @@ The parameters are averaged using a weight N-KAPPA (also called PKAPPA) for the 
       variations  in  values  of the individual objective function.  To
       turn this off, and allow a standard  summation  (not  recommended
       except for comparison purposes from earlier versions), set KNUTHSUMOFF=1. With KNUTHSUM algorithm on by default, the SORT  option
-      is  not  necessary.  Default is 0.  May also be set with $COVARIANCE record.
+      is  not  necessary.  Default is 0.  May also be set with ~$COVARIANCE~ record.
 
 *** LAPLACIAN | NOLAPLACIAN
 LAPLACIAN: use the  Laplacian  method,  in  which  second  derivatives
@@ -1424,12 +1425,12 @@ METHOD=0.  It may be used with the  EM/Monte  Carlo  methods,  in
 which  case  the Laplacian option will be properly utilized, such as
 during MAP estimation used during IMP,  IMPMAP,  and  ITS,  or
 ignored, such as during SAEM or BAYES. Cannot  be  used  with
-$ABBREVIATED [[file:/docs/reference-manual/control-records/abbrev/#abbr-DERIV2][DERIV2=NO]]  unless NUMERICAL option is also specified.
+~$ABBREVIATED~ [[file:/docs/reference-manual/control-records/abbrev/#abbr-DERIV2][DERIV2=NO]]  unless NUMERICAL option is also specified.
 
 NOLAPLACIAN: do not use the Laplacian method.  This is the default.
 
 *** LEVCENTER=[0|1] (NM75)
-There is no default.  Required with $LEVEL and  $ESTIMATION.   If
+There is no default.  Required with ~$LEVEL~ and  ~$ESTIMATION~.   If
 LEVCENTER=1,  this ensures the ETAs of super ID random levels sum
 to 0. In earlier versions of NONMEM, this was  the  default  (and
 only)  action.  To  obtain similar results as earlier versions of
@@ -1454,10 +1455,10 @@ country ID, for  example).   The  LEVOBJTYPE=1 provides an OBJ more
 consistent with theory.
 
 By  default,  NONMEM  sets  the estimation process to SLOW when a
-$LEVEL option is used. As of nm751, you may set NOSLOW  or  FAST.
+~$LEVEL~ option is used. As of nm751, you may set NOSLOW  or  FAST.
 While there is an increase in speed, but there may not be as good
 optimization progress as with the SLOW option.  It may be best to use
-SLOW  for the $EST step, and use NOSLOW or FAST for the $COV step.
+SLOW  for the ~$EST~ step, and use NOSLOW or FAST for the ~$COV~ step.
 
 See [[file:/docs/cookbook/nested/][Cookbook: Nested random effects]] for examples.
 
@@ -1465,7 +1466,7 @@ See [[file:/docs/cookbook/nested/][Cookbook: Nested random effects]] for example
 :PROPERTIES:
 :CUSTOM_ID: levwt
 :END:
-      This option applies when $LEVEL record is present.   By  default,
+      This option applies when ~$LEVEL~ record is present.   By  default,
       LEVWT=0, and weights each level value equally, regardless of number of subjects per level value. To weight according to number of
       subjects for that value, set LEVWT=1.
 
@@ -1480,8 +1481,8 @@ See [[file:/docs/cookbook/nested/][Cookbook: Nested random effects]] for example
   will be ignored, and the DV data item will be set directly to the
   simulated value  in  abbreviated  or  user  code. Also ETAs, if any,
   are understood to be population ETAs.  Epsilon variables and the
-  $SIGMA record may not be  used.   The  L2  data item  may not be
-  used.  The CONTR and CCONTR options of the $SUBROUTINES record may
+  ~$SIGMA~ record may not be  used.   The  L2  data item  may not be
+  used.  The CONTR and CCONTR options of the ~$SUBROUTINES~ record may
   not be used.  NONMEM cannot obtain  the  initial  estimate  for
   omega.  If the data are population, and MAXEVALS=0 is not coded,
   then  NOINTERACTION  is  required.   Compare with PREDICTION option.
@@ -1503,7 +1504,7 @@ first twenty burn-in iterations is used, then for following 20 burn-in
 iterations, the mass matrix from the first 40 burn-in iterations are
 used, etc.  If KAPPA/=1, the samples of each are not evenly weighted,
 but are weighted according to the description of KAPPA below.  If
-MASSRESET=0 because the previous $EST was a METHOD=BAYES … MASSRESET=1
+MASSRESET=0 because the previous ~$EST METHOD=BAYES … MASSRESET=1~
 estimation from which an initial mass matrix was derived, then the
 first 20 burn-in iterations use this BAYES pre-prepared mass matrix,
 the next 20 burn-in iterations use a mass matrix derived from an
@@ -1614,8 +1615,8 @@ appropriate memory for its storage.  See the description of  MADAPT=-1
       Maximum allowable number of evaluations of the objective function
       during the Estimation Step.  Default: a generous  number.   (Each
       evaluation  of  the  objective function requires one pass through
-      the data set.  This is also referred to as  a  "function  evaluation.")   MAXEVALS=-1  may  be  specified  when a $MSFI record is
-      present.  It requests that NONMEM re-use the value from the  previous run, and is the default with $MSFI.
+      the data set.  This is also referred to as  a  "function  evaluation.")   MAXEVALS=-1  may  be  specified  when a ~$MSFI~ record is
+      present.  It requests that NONMEM re-use the value from the  previous run, and is the default with ~$MSFI~.
 
       MAXEVALS=0 requests that the Estimation Step be omitted.  This is
       useful, for example, with POSTHOC (see above).
@@ -1637,7 +1638,7 @@ constant,  where /N/ is the total number of normally distributed data
 values in the data set. See also OLNTWOPI (can be used at the same time).
 
 *** MSFO=filename
-A  [[file:/docs/reference-manual/files/#msf][Model Specification File]]  is output to a file with the given filename.  Filename may not contain embedded spaces.  If filename contains commas, semicolons, or parentheses, then it must be surrounded by quotes (' or ").   Filename  may  also  contain  equal signs  if it is enclosed in quotes.  Filename may contain at most 71 characters.  If filename is the same  as  any  option  of  the $ESTIMATION  record, it must be enclosed in quotes.  If the $NONPARAMETRIC record is present and also specifies the MSFO  option, the filename is required on the record which appears first in the control stream.  If filename is present on both, it must  be  the same.   If  the  filename  is  omitted  on  the second of the two records, the MSF option must be the final option on that  record. Default: If the MSFO option is not used, no MSF is output.
+A  [[file:/docs/reference-manual/files/#msf][Model Specification File]]  is output to a file with the given filename.  Filename may not contain embedded spaces.  If filename contains commas, semicolons, or parentheses, then it must be surrounded by quotes (' or ").   Filename  may  also  contain  equal signs  if it is enclosed in quotes.  Filename may contain at most 71 characters.  If filename is the same  as  any  option  of  the ~$ESTIMATION~  record, it must be enclosed in quotes.  If the ~$NONPARAMETRIC~ record is present and also specifies the MSFO  option, the filename is required on the record which appears first in the control stream.  If filename is present on both, it must  be  the same.   If  the  filename  is  omitted  on  the second of the two records, the MSF option must be the final option on that  record. Default: If the MSFO option is not used, no MSF is output.
 
 If  a  MSFO  is  output, then the iteration estimates may also be seen
 in the original parameterization for those iterations  whose summaries
@@ -1708,11 +1709,11 @@ distribution.  Default n=10000.  NITER  may  also  be coded NSAMPLE.
 *** NOCOV=[0|1] (NM73)
       If  covariance estimation is not desired for a particular estimation step, set NOCOV=1.  It may be turned on again for  the  next
       estimation  step  with  NOCOV=0.    If  NOCOV=1  is  set  for  an
-      FOCE/Laplace/FO step, this is equivalent to $COV NOFCOV setting.
+      FOCE/Laplace/FO step, this is equivalent to ~$COV NOFCOV~ setting.
 
       For ITS and IMP, covariance estimation can  take  some  time  for
       large  problems,  and  you  may wish to obtain only the objective
-      function, such as in the case of $EST METHOD=IMP EONLY=1 after an
+      function, such as in the case of ~$EST METHOD=IMP EONLY=1~ after an
       SAEM  estimation.  NOCOV  has  no effect on BAYES analysis, as no
       extra time is required in assessing covariance for BAYES.
 
@@ -1738,7 +1739,7 @@ influential eta, then the true EBE of the non-influential eta will in
 general not be 0.  When NONINFETA=0, the default, then this
 traditional algorithm is in effect, so that all non-influential ETAs,
 even those correlated with influential ETAs, will be reported as 0
-when outputted with $TABLE.  However, if NONINFETA=1, then all ETAs
+when outputted with ~$TABLE~.  However, if NONINFETA=1, then all ETAs
 are involved in the MAP estimation, regardless of their influence.
 This will result in non-influential ETAs reported as a non-zero value,
 if it is correlated with influential ETAs.  From a pure statistical
@@ -1753,7 +1754,7 @@ EM methods have always used (even with earlier versions of NONMEM 7)
 the pure statistical option (NONINFETA=1)
 
 *** NOPRIOR=[0|1]
-If  prior  information  was specified using the $PRIOR statement, then
+If  prior  information  was specified using the ~$PRIOR~ statement, then
 normally the analysis is set up for three stage hierarchical analysis.
 By default NOPRIOR=0, and this prior information will be used.  If
 NOPRIOR=1, then for the particular  estimation,  the prior information
@@ -1761,8 +1762,7 @@ is not included in the analysis. This is useful if you do not want to
 use prior information during a maximization (METHOD=IMP,  CONDITIONAL,
 IMPMAP, SAEM, or ITS), but then use it for the Bayesian analysis
 (METHOD=BAYES).  With  NOPRIOR=1,  FOCE is still allowed to evaluate
-an S MATRIX, since prior information is not used, i.e.,  $EST
-NOPRIOR=1 and $COV MATRIX=S are permitted.
+an S MATRIX, since prior information is not used, i.e.,  ~$EST NOPRIOR=1~ and ~$COV MATRIX=S~ are permitted.
 
 With NONMEM 7.3, when NOPRIOR=1 is set, the estimation will not use
 TNPRI prior information (TNPRI should only be  used  with
@@ -2052,7 +2052,7 @@ option may be needed.
     for  observation event records is abbreviated code (some may be in
     verbatim code), and/or some portions of  the  computation  of   F,
     G  and H are evaluated in a hidden subroutine specified by
-    "$SUBROUTINES OTHER=" and the user-written code does  not  compute
+    ~$SUBROUTINES OTHER=~ and the user-written code does  not  compute
     the  eta  derivatives.  When OPTMAP=1 is present, values of G and
     H are ignored during eta  optimization.   This  may  be  used  to
     test user-coded deriatives, because two runs, one with  OPTMAP=1
@@ -2073,7 +2073,7 @@ OMEGA  and SIGMA.  Affects the raw output file and all additional
 output files.  The default is TSOL: THETA, SIGMA, OMEGA in  Lower
 triangular form.  Does not affect the NONMEM report file.
 
-On  the $OMEGA record, elements of Omega are given in lower triangular order, e.g.,
+On  the ~$OMEGA~ record, elements of Omega are given in lower triangular order, e.g.,
 #+begin_src perl
  $OMEGA BLOCK(3) OM11 OM21 OM22 OM31 O32 OM33
 #+end_src
@@ -2169,13 +2169,13 @@ Note  that  the  ORDER  option does not affect the NONMEM report file,
       name if not specified: parallel.pnm or parafile name specified on
       nmfe command.
 
-      PARAFILE=ON turns on parallelization for this $ESTIMATION record.
-      PARAFILE=OFF  turns  off  parallelization  for  this  $ESTIMATION
+      PARAFILE=ON turns on parallelization for this ~$ESTIMATION~ record.
+      PARAFILE=OFF  turns  off  parallelization  for  this  ~$ESTIMATION~
       record.
 
 *** PARAFPRINT=n (NM74)
       The print iteration intervals to the parallelization log file can
-      be controlled by this option during parallelization of  the  $EST
+      be controlled by this option during parallelization of  the  ~$EST~
       step.   See also [[file:/docs/reference-manual/control-records/covar/][$COVARIANCE]] record and nmfe command.  Default is
       PARAFPRINT=1.
 
@@ -2246,7 +2246,7 @@ PSAMPLE_M3, PACCEPT are for the MCMC Metropolis-Hastings algorithm. They only ha
   + n=1: ran1 of reference [4], Bays and Durham.
   + n=2: ran2 of reference [4].
   + n=3: ran3 of reference [4], Knuth. (Default)
-  + n=4: NONMEM's traditional random number generator used in $SIMULATION
+  + n=4: NONMEM's traditional random number generator used in ~$SIMULATION~
 - S:  Sobol  method  without  scrambling, used during importance or
   direct sampling (methods IMP, IMPMAP, and DIRECT)  and  only  for
   the purpose of creating quasi-random samples of ETAs.
@@ -2287,8 +2287,8 @@ PSAMPLE_M3, PACCEPT are for the MCMC Metropolis-Hastings algorithm. They only ha
   data, and perhaps you are using the t distribution (DF>0) for the
   importance sampling density, then Sobol sequence generation may be
   helpful in reducing Monte Carlo noise.  The RANMETHOD specification
-  propagates to subsequent $EST records in a given problem, but does
-  not propagate to $CHAIN or $TABLE records.
+  propagates to subsequent ~$EST~ records in a given problem, but does
+  not propagate to ~$CHAIN~ or ~$TABLE~ records.
 
   In NM72, only DIRECT and IMP/IMPMAP methods could utilize the Sobol
   quasi-random method.  As of NM73, Sobol may be used for BAYES and
@@ -2317,8 +2317,8 @@ PSAMPLE_M3, PACCEPT are for the MCMC Metropolis-Hastings algorithm. They only ha
   important to you, then always set the P descriptor (so, RANMETHOD=P,
   at least).
 
-The RANMETHOD specification propagates to subsequent $EST records in a given problem, but does
-  not propagate to  $CHAIN  or  $TABLE records.
+The RANMETHOD specification propagates to subsequent ~$EST~ records in a given problem, but does
+  not propagate to  ~$CHAIN~  or  ~$TABLE~ records.
 
 When using the t-distribution sampling density (DF>0), by default the algorithm creates a random vector from n independent univariate t-distributed samples.  This is called the U algorithm, and the most efficient use of the U type t-distribution is when DF=1,2,4,5,8, or 10.  These algorithms were designed to work well with the Sobol method’s ability to reduce Monte Carlo noise.
 
@@ -2387,8 +2387,8 @@ is often sufficient to reposition the problem away from a saddle
 point.
 
 SADDLE_HESS=1 causes the full second
-derivative information matrix (identical to R matrix  in  the  $COV
-step) to be evaluated. Using SADDLE_HESS=1 to reposition the estimates may work better than the SADDLE_HESS=0 setting, but the computational expense is high, equivalent to that of a $COV step.
+derivative information matrix (identical to R matrix  in  the  ~$COV~
+step) to be evaluated. Using SADDLE_HESS=1 to reposition the estimates may work better than the SADDLE_HESS=0 setting, but the computational expense is high, equivalent to that of a ~$COV~ step.
 
 *** SADDLE_RESET=n (NM74)
 SADDLE_RESET  is the number of times that a reset should occur in
@@ -2406,28 +2406,28 @@ SEED (default 11456) sets the initial  seed  for  the random number generator us
       control stream file in each replication.
 
 *** SELECT=[0|1|2|3] (NM73)
-Used with METHOD=CHAIN and $CHAIN to specify how  the  sample  is selected.
+Used with METHOD=CHAIN and ~$CHAIN~ to specify how  the  sample  is selected.
   - SELECT=0: if  ISAMPEND>=ISAMPLE,  then  the  default  action  for
     selecting between  ISAMPLE  and  ISAMPEND  is   taken,   which
-    for $EST METHOD=CHAIN  is  to find the one giving the best OBJ at
-    the initial values, and for $CHAIN is to randomly select a sample,
+    for ~$EST METHOD=CHAIN~  is  to find the one giving the best OBJ at
+    the initial values, and for ~$CHAIN~ is to randomly select a sample,
     with replacement.  This is the default.
 
   - SELECT=1: the sample is selected sequentially from ISAMPLE to
-    ISAMPEND with each new use of $CHAIN/$SIML with multiple
-    sub-problems  for  the given  problem, and with each new $EST
-    METHOD=CHAIN with multiple sub-problems and across problems. When
+    ISAMPEND with each new use of ~$CHAIN~ and ~$SIML~ with multiple
+    sub-problems  for  the given  problem, and with each new ~$EST
+    METHOD=CHAIN~ with multiple sub-problems and across problems. When
     ISAMPEND is  reached,  the sample selection begins at ISAMPLE
     again.
 
   - SELECT=2: uniform  random selection of sample, without
     replacement.  Should the sample selection become exhausted, which
-    would occur if CHAIN or  $CHAIN  records are utilized for more
+    would occur if CHAIN or  ~$CHAIN~  records are utilized for more
     than ISAMPEND-ISAMPLE+1 times, subsequent sample selection then
     occurs with replacement.
 
   - SELECT=3: uniform random selection of sample,  with  replacement
-    (this  is equivalent to SELECT=0 for $CHAIN).
+    (this  is equivalent to SELECT=0 for ~$CHAIN~).
 
 *** SIGDIGITS=n
 :PROPERTIES:
@@ -2514,7 +2514,7 @@ A  set of tentative population estimates are first obtained using
       Stieltjes  is  a  two-stage method.  In the first stage, a set of
       tentative population estimates are "quickly" obtained using  some
       1st-  or 2nd-order population conditional method specified on the
-      $ESTIM record in the usual way to obtain  fairly  reliable  estimates.   Include the METHOD=CONDITIONAL option on the $ESTIMATION
+      ~$ESTIM~ record in the usual way to obtain  fairly  reliable  estimates.   Include the METHOD=CONDITIONAL option on the ~$ESTIMATION~
       record. However, the METHOD=HYBRID method  cannot  be  used.   At
       this  first stage, for each individual, a tentative value for the
       integral (i.e. an area) is obtained.  The  first-stage  estimates
@@ -2530,7 +2530,7 @@ A  set of tentative population estimates are first obtained using
       still  evaluated at many values of eta.  Generally though, sufficiently good estimates are obtained by using conditional  estimation  methods, or even the First-Order Estimation method, and one
       needs to use the Stieltjes Estimation method only  with  somewhat
       pathological  data  designs.   Simply  also include the STIELTJES
-      option (along with an optional GRID option)  on  the  $ESTIMATION
+      option (along with an optional GRID option)  on  the  ~$ESTIMATION~
       record.
 
       A  default  grid  on eta-space is used for numerical integration,
@@ -2573,7 +2573,7 @@ SVARF=-1 for the  halfCauchy distribution. Default is 1. See also
 [[file:/docs/reference-manual/control-records/svarf/][$SVARF control record]].
 
 *** TBLN=n (NM75)
-Used with $EST METHOD=CHAIN and $CHAIN to select a
+Used with ~$EST METHOD=CHAIN~ and ~$CHAIN~ to select a
 table within a raw output file.
 
 *** THIN=n (NM74)
@@ -2601,7 +2601,7 @@ for THETAs, and TTDF>0 indicates a t-distributed prior. With TTDF>0,
 METHOD=BAYES uses M-H sampler for THETAs, using the PSAMPLE_M1,
 PSAMPLE_M2, and PSAMPLE_M3 settings.
 
-See also [[file:/docs/reference-manual/control-records/ttdf/][$TTDF]] control record to specify degrees of  freedom for each THETA. The value of TTDF overrides $TTDF.
+See also [[file:/docs/reference-manual/control-records/ttdf/][$TTDF]] control record to specify degrees of  freedom for each THETA. The value of TTDF overrides ~$TTDF~.
 
 *** ZERO=list
       Required  with  METHOD=HYBRID.   A list of indices for ETAs which
@@ -2615,25 +2615,25 @@ Reserved Variables that are of Interest During the Estimation Step
 *** MUFIRSTREC (NM74)
       The  MUFIRSTREC  option  can  speed  up the NUTS method, and also
       ordinary  BAYES,  FAST  FOCE,  ITS,  and  the  EM  methods.   Set
-      MUFIRSTREC=1  in $PRED or $PK. MUFIRSTREC=1 selects the covariate
+      MUFIRSTREC=1  in ~$PRED~ or ~$PK~. MUFIRSTREC=1 selects the covariate
       of the first record of the subject, rather than  averaging  among
       its records when using that covariate in a MU reference.
-      The first statement of the $PRED or $PK block should be
+      The first statement of the ~$PRED~ or ~$PK~ block should be
       include nonmem_reserved_general.
 
 *** OBJQUICK (NM74)
-The  OBJQUICK option can speed up the NUTS method, and also ordinary BAYES, FAST FOCE, ITS, and the EM methods.  Set OBJQUICK  in $PRED or $PK.
+The  OBJQUICK option can speed up the NUTS method, and also ordinary BAYES, FAST FOCE, ITS, and the EM methods.  Set OBJQUICK  in ~$PRED~ or ~$PK~.
 
   - OBJQUICK=0: Default. Standard NONMEN processing of the model occurs.
 
   - OBJQUICK=1: Certain tests and initializations are skipped.
 
   - OBJQUICK=2: A  simplified  modeling  process occurs, but which
-    cannot be used when $LEVEL or $MIX is used in the model. In
+    cannot be used when ~$LEVEL~ or ~$MIX~ is used in the model. In
     addition, parallelization is not performed.
 
 The OBJQUICK and MUFIRSTREC can also speed up the other analysis
-methods, such as ordinary BAYES, FAST FOCE, ITS, and the EM methods. The first statement of the $PRED or $PK block should include nonmem_reserved_general:
+methods, such as ordinary BAYES, FAST FOCE, ITS, and the EM methods. The first statement of the ~$PRED~ or ~$PK~ block should include nonmem_reserved_general:
 #+begin_src perl
 $PRED
 include nonmem_reserved_general

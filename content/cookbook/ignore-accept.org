@@ -8,32 +8,28 @@ bookCollapseSection: false
 {{< katex >}}{{< /katex >}}
 
 * IGNORE/ACCEPT data records
-The  options IGNORE=(list) and ACCEPT=(list) of the $DATA record allow
-for simple selection criteria for records that are to be  excluded  or
-included,  respectively,  in the NONMEM data set.  A list has the
-format:
+The options ~$DATA IGNORE=(list)~ and ~$DATA ACCEPT=(list)~
+include and exclude selection criteria in the NONMEM data set, respectively.  The ~list~ has format:
 #+begin_src perl
  cond,cond,cond,...
 #+end_src
-where each cond is a test of a data item: "label operator value".  The
-commas  are  implied .OR. operators. The .AND. and .NOT. operators are
-not permitted.
-
-Suppose an ~.AND.~ is needed.  E.g.,
+where each cond is a test of a data item "label operator value".
+Comma ~,~ is equivalent to ~.OR.~ operator, and the ~.AND.~ or ~.NOT.~
+operators are not permitted. One may express ~.AND.~ such as in
 #+begin_src f90
    IGNORE=(GEN.EQ.1.AND.AGE.GT.60)
 #+end_src
-If the expressions are simple, this  may  be  done  by  negating  both sides:
+by negating both sides:
 #+begin_src f90
   .NOT.IGNORE =.NOT.(GEN.EQ.1.AND.AGE.GT.60)
    ACCEPT=.NOT.GEN.EQ.1.OR..NOT.AGE.GT.60
 #+end_src
-Thus,
+thus
 #+begin_src f90
    ACCEPT=(GEN.NE.1,AGE.LE.60)
 #+end_src
 
-But  logical  operators  inside parenthesis are not permitted, so that the following cannot be coded:
+But logical  operators  inside parenthesis are not permitted, so that the following cannot be coded:
 #+begin_src f90
  $DATA ACCEPT=((A==1.OR.A==2).AND.B<100)
 #+end_src
@@ -60,13 +56,13 @@ The following are equivalent:
  IGNORE=(B.GE.100)  IGNORE=(A.LT.1) IGNORE=(A.GT.2)
  IGNORE=(B.GE.100,A.LT.1,A.GT.2)
 #+end_src
-This  workaround cannot handle continuous values of A or  more complicated conditions.
+This  workaround cannot handle continuous ~A~ or more complicated conditions.
 
 With NONMEM through 7.3, two separate NONMEM problems can be used,  in
 two separate runs, for a complicated condition.  In the first problem,
 abbreviated code is used to append a new variable to the data  with  a
 value indicating ignore/accept; in the second run the variable is used
-in the $DATA statement to choose from the data set.
+in the ~$DATA~ statement to choose from the data set.
 
 Suppose  ACC  is  the  variable  that  is  to  have  values  0/1   for ignore/accept.  The desired code is:
 #+begin_src f90
@@ -92,7 +88,7 @@ any of the conditions is false.
  IF (A.NE.1.AND.A.NE.2) ACC=0
  IF (B.GE.100) ACC=0
 #+end_src
-In prob1.ctl, the first problem appends ACC to the (new) data set.  In prob2.ctl, the $DATA record uses ACC to select records.
+In prob1.ctl, the first problem appends ACC to the (new) data set.  In prob2.ctl, the ~$DATA~ record uses ACC to select records.
 
 All required data items for NONMEM  (and  PREDPP,  if  used)  must  be
 present  in the original data file testab.dat.  The control stream for
@@ -137,11 +133,11 @@ The control stream for the second run:
 #+end_src
 
 With NONMEM 7.4, it is possible to combine both problems into one
-NONMEM  run  using  the  $TABLE  record option "EXCLUDE_BY list".  If
-any variable in list is non-0, the record is excluded from the table
-file probe.tab.   The  $DATA  ACCEPT/IGNORE  option is not needed.
-Because probe.tab does not exist when NM-TRAN processes the second
-problem  in the  control stream, $DATA .. NOOPEN is needed and a
+NONMEM  run  using  the  ~$TABLE EXCLUDE_BY list~ option.  If
+any variable in list is non-zero, the record is excluded from the table
+file. In that case the ~$DATA  ACCEPT/IGNORE~ option is not needed.
+Because the table does not exist when NM-TRAN processes the second
+problem  in the  control stream, ~$DATA .. NOOPEN~ is needed and a
 format specification is needed.
 
 #+begin_src f90

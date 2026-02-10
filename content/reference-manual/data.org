@@ -7,11 +7,11 @@ weight: 13
 ---
 
 * Data
-Unless specified otherwise, all data items can be used in the $INPUT record as
+Unless specified otherwise, all data items can be used in the ~$INPUT~ record as
 #+begin_src perl
 $INPUT ... ITEM_NAME ...
 #+end_src
-and correspondingly in the input data file named in $DATA record.
+and correspondingly in the input data file named in ~$DATA~ record.
 
 ** ADDL
 ADDL labels PREDPP's additional dose (ADDL) data item.  The additional
@@ -89,14 +89,14 @@ RATE  labels  PREDPP's dose rate (RATE) data item.  The dose rate data
    whose rate  is  modeled  in the PK routine.  As an example, suppose
    the compartment being dosed is numbered 1 (e.g., the  CMT  data
    item contains  1,  or  it  contains 0 and compartment 1 is the
-   default compartment for doses).  The $PK abbreviated code must
+   default compartment for doses).  The ~$PK~ abbreviated code must
    define  a value  for  R1,  the  rate  parameter  for  compartment
    1, e.g., ~R1=THETA(4)+ETA(4)~.
 
  - 2:   The dose is a zero-order bolus dose,  i.e.,  an  infusion,
    whose duration  is  modeled  in the PK routine.  As an example,
    suppose the compartment being dosed is numbered  1  as  above.
-   The  $PK abbreviated code must define a value for D1, the duration
+   The  ~$PK~ abbreviated code must define a value for D1, the duration
    parameter for compartment 1, e.g., D1=THETA(4)+ETA(4).
 
  RATE must be 0 for observation, other-type, and reset event records.
@@ -143,7 +143,7 @@ RATE  labels  PREDPP's dose rate (RATE) data item.  The dose rate data
 |-----+-------+-----------------------------------------------|
 |  >0 |    >0 | Infusion dose ("regular infusion"). The infusion is started at  the  event  time. Its duration is computed as amount/RATE.      |
 |-----+-------+-----------------------------------------------|
-|  >0 | -1,-2 | Zero-order bolus dose. Similar  to  a  regular infusion, except that the duration of a regular infusion is  speci- fied  by information in the dose event record and computed by PREDPP  itself,  whereas  the duration   of   a   zero-order  bolus dose is regarded as a parameter which may be  modeled and  computed by the user's PK routine or $PK abbreviated code.  The infusion is started at the dose event time. |
+|  >0 | -1,-2 | Zero-order bolus dose. Similar  to  a  regular infusion, except that the duration of a regular infusion is  speci- fied  by information in the dose event record and computed by PREDPP  itself,  whereas  the duration   of   a   zero-order  bolus dose is regarded as a parameter which may be  modeled and  computed by the user's PK routine or ~$PK~ abbreviated code.  The infusion is started at the dose event time. |
 |     |       |
 |     |       | If  RATE=-2,  the duration is computed by PK. The parameter  is  coded  Dn  in  abbreviated code,  e.g.,  D1 models the duration of zero-order bolus  doses  to  compartment  1.   The duration  is given by the value of Dn as com- puted by PK at the dose event time (or lagged time,  if  the dose is lagged).  Rate is com- puted as amount/duration and  is  thus  fixed for  this  infusion, even if the value of Dn changes value with a later event record. |
 |     |       |
@@ -153,7 +153,7 @@ CAUTION:   If  PREDPP  is used without using NM-TRAN as a preprocessor
  then any user-supplied negative values for these data  items  will  be
  passed to PREDPP.  For a discussion of the circumstances such that the
  data file used by NONMEM and PREDPP is FDATA (in  which  case  NM-TRAN
- has  preprocessed  it)  or is the file named in the $DATA record.
+ has  preprocessed  it)  or is the file named in the ~$DATA~ record.
 
 (See multiple dose example, [[file:/docs/user-guide/predpp/exogenous/][exogenous supplementation example]]).
 
@@ -163,9 +163,9 @@ CAUTION:   If  PREDPP  is used without using NM-TRAN as a preprocessor
  CALL  labels  PREDPP's  call  (CALL) data item.  The call data item is
  optional.  It is used to force calls to PK  and/or  ERROR  subroutines
  with  event  records  for  which  such calls would not normally occur.
- (When $PK and/or $ERROR blocks are  present,  the  effect  of  calling
- these  routines  with  an  event  record is to evaluate the $PK and/or
- $ERROR abbreviated code for that particular event record.)
+ (When ~$PK~ and/or ~$ERROR~ blocks are  present,  the  effect  of  calling
+ these  routines  with  an  event  record is to evaluate the ~$PK~ and/or
+ ~$ERROR~ abbreviated code for that particular event record.)
 
  Values are:
 
@@ -271,7 +271,7 @@ separately or  together. Their meanings depend on the event record:
 
 The  prediction  computed  by  PREDPP is a scaled drug amount in some compartment called the observation compartment.  Every dose  is  input into some dose compartment.
 
-With  every  kinetic  model there are designated a default observation compartment and a default dose compartment. For some  kinetic  models, these  designations  are  built into the model definition; for others, these designations are given by the user in the user subroutine  MODEL (or in $MODEL abbreviated code).
+With  every  kinetic  model there are designated a default observation compartment and a default dose compartment. For some  kinetic  models, these  designations  are  built into the model definition; for others, these designations are given by the user in the user subroutine  MODEL (or in ~$MODEL~ abbreviated code).
 
 Unless  otherwise specified on an observation event record by means of the compartment data item (CMT), the observation compartment is  taken to  be the default observation compartment. Unless otherwise specified on a dose event record by means of the compartment data item, the dose compartment is taken to be the default dose compartment.
 
@@ -295,7 +295,7 @@ The  models  for  which  default  designations are built-in are listed here.  Th
  CONT  labels PREDPP's continuation (CONT) data item.  The continuation
  data item is optional.  The CONT  data  item  allows  a  PREDPP  event
  record to span several data records.  It is useful when more than NONMEM's maximum number of data items per record are needed to describe a
- single  event.   When  the CONT data item is not defined on the $INPUT
+ single  event.   When  the CONT data item is not defined on the ~$INPUT~
  record, every event record consists of a single data record.
 
  Values are:
@@ -350,7 +350,7 @@ The  models  for  which  default  designations are built-in are listed here.  Th
  With PREDPP, event records whose types are dose, other-type, reset, or
  reset-dose  (i.e.,  which  have  EVID values 1, 2, 3, 4) must all have
  MDV=1.  NM-TRAN will append the MDV data item if PREDPP  is  used  and
- MDV is not present on the $INPUT record.
+ MDV is not present on the ~$INPUT~ record.
 
 ** EVID
 :PROPERTIES:
@@ -389,7 +389,7 @@ EVID labels PREDPP's event identification (EVID) data item.  The event
  With  NONMEM  7, there is a change in the value of EVID under the following circumstances:
  1) NMTRAN is appending EVID
  2) The record is not a dose event (AMT, RATE, SS = 0)
- 3) MDV is present in the data set (i.e., was listed on $INPUT)
+ 3) MDV is present in the data set (i.e., was listed on ~$INPUT~)
  4) MDV is 1 or MDV is 101
 
  Previous versions of NMTRAN always set EVID=0 (observation)  when  the
@@ -404,7 +404,7 @@ EVID labels PREDPP's event identification (EVID) data item.  The event
  exists  to assist in specialized methodologies such as stochastic differential equations. A record in  a  data  file  may  be  set  up  for
  repeated  calls to PK and ERROR.  Each time, the same record is passed
  to PK and/or ERROR, but with a different  EVID.   The  user's  control
- stream  model  in  $PK  or $ERROR may then take advantage of executing
+ stream  model  in  ~$PK~  or ~$ERROR~ may then take advantage of executing
  certain code conditional on the EVID value.  For this  to  occur,  the
  user  must  introduce  one  or more of the following data items in the
  data file, with these names:
@@ -433,7 +433,7 @@ EVID labels PREDPP's event identification (EVID) data item.  The event
 
       Because there can be at most one scalar observation on  any  data
       record,  the  identification  (ID)  data  item  is  used to group
-      together the data records containing the scalar observations comprising  a level-one observation.  Using NM-TRAN, the identification data item is given the label ID in  the  $INPUT  record.   A
+      together the data records containing the scalar observations comprising  a level-one observation.  Using NM-TRAN, the identification data item is given the label ID in  the  ~$INPUT~  record.   A
       contiguous set of data records with the same value of ID are collectively called an individual record (also called an L1 record),
       and  this  record "contains" one level-one observation.  A change
       in ID value indicates the start of a new individual record.
@@ -448,13 +448,13 @@ EVID labels PREDPP's event identification (EVID) data item.  The event
       automatically  generates the ID data items and provides the label
       .ID. for the NONMEM control stream.  (Or if L2 data items appear,
       these  are  taken  to  be the ID data items.)  If the ID label is
-      given in the $INPUT record,  NM-TRAN  ignores  it,  and  it  also
+      given in the ~$INPUT~ record,  NM-TRAN  ignores  it,  and  it  also
       ignores the data items associated with this label.
 
   - L1
     Using  NM-TRAN,  the  identification  data  item may be given the
-      label L1 in the $INPUT record.  Use of L1 as a label  or  synonym
-      (e.g.  ID=L1)  in the $INPUT record specifies that the associated
+      label L1 in the ~$INPUT~ record.  Use of L1 as a label  or  synonym
+      (e.g.  ID=L1)  in the ~$INPUT~ record specifies that the associated
       data items are to be used as the identification data  items  and,
       if  the data are single-subject data, the automatic generation of
       the identification data items is suppressed.
@@ -546,11 +546,11 @@ Here  is  an  example of a fragment of a data set using L2 data items.
    1  112.5      .    1.4      7   31.0   2   2
 #+end_src
 When  the  data  are single-subject and the L2 data item is defined to
- NM-TRAN in a $INPUT record, the ID data item is taken  to  be  the  L2
+ NM-TRAN in a ~$INPUT~ record, the ID data item is taken  to  be  the  L2
  data  item.   The  ID  item may be defined, but then it is not in turn
  identified to NONMEM as such.  The labels L2 and ID (if  defined)  may
  be  used in abbreviated code, and then they refer to the corresponding
- items of the data record, as specified in the $INPUT record.  However,
+ items of the data record, as specified in the ~$INPUT~ record.  However,
  if  the  user  uses  the label L1 instead of the label ID, or uses the
  label L1 as a synonym with the ID label, then NM-TRAN does not  change
  the designations: For NONMEM, the items labeled L1 are taken to be the
@@ -635,7 +635,7 @@ four kinds of values.
   - RATE=-1:  the dose is a zero-order bolus dose,  i.e.,  an
     infusion,  whose rate  is  modeled  in the PK routine.  As an
     example, suppose the compartment being dosed is numbered 1 (e.g.,
-    CMT=1,  or CMT=0 and compartment 1 is the default dose compartment).  The $PK
+    CMT=1,  or CMT=0 and compartment 1 is the default dose compartment).  The ~$PK~
     abbreviated code must  assign for the reserved variable R1,  the  rate
     parameter  for  compartment  1, e.g.,
     #+begin_src f90
@@ -645,7 +645,7 @@ four kinds of values.
   - RATE=-2:   the dose is a zero-order bolus dose,  i.e.,  an
     infusion,  whose duration  is  modeled  in the PK routine.  For
     example, assume again the dose compartment is 1, with RATE=-2, the
-    $PK block must assign for reserved variable D1, the duration
+    ~$PK~ block must assign for reserved variable D1, the duration
     parameter for compartment 1, such as
     #+begin_src f90
       D1=THETA(4)+ETA(4)
@@ -709,14 +709,14 @@ RATE must be 0 for observation, other-type, and reset event records.
 :END:
 
 REPL_  labels NONMEM's replication (REPL_) data item.  The replication
-data item is optional.  When the REPL_ data item is listed in  $INPUT,
+data item is optional.  When the REPL_ data item is listed in  ~$INPUT~,
 the  NONMEM  data set is considered to be a template data set.  NONMEM
 itself replicates subjects from the template data set at the start  of
 the problem to create an expanded NONMEM data set. (Note  that  the
 NONMEM data set is typically the file FDATA generated by NM-TRAN,
 unless there is nothing for NM-TRAN to change and the format  is
-supplied on the $DATA record, in which case the file named on the
-$DATA record is the NONMEM data set.) The REPL_ data item and REPL option are meant to be used with $SIMULATION or $DESIGN.
+supplied on the ~$DATA~ record, in which case the file named on the
+~$DATA~ record is the NONMEM data set.) The REPL_ data item and REPL option are meant to be used with ~$SIMULATION~ or ~$DESIGN~.
 
 The  value of REPL_ is the replication number for that subject. If the
 value is fractional, it will be  truncated  to  the  nearest integer.
@@ -731,8 +731,8 @@ or Excel, as NONMEM could not expand the data file in this way.  As of
 NM75, NONMEM will replicate each subject REPL=n times, and then
 utilize this expanded data set.  (Note that the NONMEM data set is
 typically the file FDATA generated by NM-TRAN, unless there is nothing
-for NM-TRAN to change and the format is supplied on the $DATA record,
-in which case  the file named on the $DATA record is the NONMEM data
+for NM-TRAN to change and the format is supplied on the ~$DATA~ record,
+in which case  the file named on the ~$DATA~ record is the NONMEM data
 set.)  For example, suppose a data
 file, called template.csv, contains 3 subjects, each one representing
 a particular covariate type, dosing type, and/or sample time pattern.
@@ -789,14 +789,14 @@ shows that data of subject 1 will be replicated 2 times within NONMEM,
 and data of subject 2 will be replicated 3 times.  The ID values of
 the replicates will be 1.00, 1.01, 2.0, 2.01, 2.02.
 
-REPL_ may be used with the [[file:/docs/reference-manual/control-records/data/#repl][REPL option]] of $DATA to replicate the
+REPL_ may be used with the [[file:/docs/reference-manual/control-records/data/#repl][REPL option]] of ~$DATA~ to replicate the
 entire data set REPL=n times. For the same data set above,
 #+begin_src perl
 $INPUT ID TIME  AMT  RATE EVID MDV DV  REPL_
 $DATA warfarin.dat ignore=C REPL=100
 #+end_src
 will result in 200 replications for subject 1, and 300 replications
-for subject 2. If both REPL_ and $DATA REPL are used, the REPL_  data item
+for subject 2. If both REPL_ and ~$DATA REPL~ are used, the REPL_  data item
 applies first, and the REPL option applies second.
 
 ** RPT_
@@ -1039,11 +1039,11 @@ ID         TIME
 
 - FINISH record in NM-TRAN data sets:
 
-  + When the RECORDS option of the $DATA record is  omitted,  NM-TRAN reads  the  data set to a FINISH record or to end-of-file, which- ever comes first.
+  + When the RECORDS option of the ~$DATA~ record is  omitted,  NM-TRAN reads  the  data set to a FINISH record or to end-of-file, which- ever comes first.
 
-  + When a format is omitted on the $DATA  record,  a  FINISH  record consists  of  the characters FIN appearing anywhere in the record (the other characters are all blank).
+  + When a format is omitted on the ~$DATA~  record,  a  FINISH  record consists  of  the characters FIN appearing anywhere in the record (the other characters are all blank).
 
-  + When a format is provided on the $DATA record,  a  FINISH  record must have the same form as in NONMEM data sets.
+  + When a format is provided on the ~$DATA~ record,  a  FINISH  record must have the same form as in NONMEM data sets.
 
 - FINISH record in NONMEM data sets:
 

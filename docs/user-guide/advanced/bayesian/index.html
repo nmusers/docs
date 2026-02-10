@@ -25,7 +25,7 @@ https://github.com/alex-shpak/hugo-book
   <meta itemprop="name" content="Bayesian methods">
   <meta itemprop="description" content="Bayesian methods Recall that the classical NONMEM MLE methods seek parameters \((\theta, \Omega, \Sigma)\) that maximize the log-likelihood \(\mathcal{L}=\log(L)\). With Bayesian methods we instead seek the parameters using the prior information in addition to the likelihood, based on the Bayes&#39; theorem: $$ p(\theta, \Omega, \Sigma | y) \propto L(\theta, \Omega, \Sigma)p_0(\theta, \Omega, \Sigma). $$ Here the left-hand size \(p(\cdot|y)\) is called posterior distribution of the parameters, and \(p_0(\cdot)\) the prior distribution. Note that similar to the MLE approach presentation the \(\propto\) sign is used because the normalization factor is omitted 1.">
   <meta itemprop="dateModified" content="2026-01-24T15:00:40-08:00">
-  <meta itemprop="wordCount" content="1532">
+  <meta itemprop="wordCount" content="1536">
 
 <title>Bayesian methods | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -35,7 +35,7 @@ https://github.com/alex-shpak/hugo-book
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.c4ab5362d084fc428349e2f77e9f4ce2cc083889466d10a7c0c687bb83682091.js" integrity="sha256-xKtTYtCE/EKDSeL3fp9M4swIOIlGbRCnwMaHu4NoIJE=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.9927f7271e29990c78517d911ff44208ea0af9204541b35c9a557fb0daeaa7a8.js" integrity="sha256-mSf3Jx4pmQx4UX2RH/RCCOoK&#43;SBFQbNcmlV/sNrqp6g=" crossorigin="anonymous"></script>
 
 
 
@@ -1608,7 +1608,7 @@ function we must seek a balance between the prior term and the
 likelihood term. This is why the prior term is also referred to as
 penalty or regularization for MLE.</p>
 <p>
-NONMEM provides $PRIOR control record to specify the prior. For
+NONMEM provides <code>$PRIOR</code> control record to specify the prior. For
 example, one can use</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
@@ -1917,26 +1917,26 @@ two-compartment model example</p>
 </div>
 </div>
 <p>
-We use <a href="/docs/reference-manual/api/subroutines/#nwpri">NWPRI</a> in $PRIOR to indicate that
+We use <a href="/docs/reference-manual/api/subroutines/#nwpri">NWPRI</a> in <code>$PRIOR</code> to indicate that
 the priors will be given manually through prior-specification control
-records. Specifically, the $THETAP specifies that all elements of \(\theta\)
+records. Specifically, the <code>$THETAP</code> specifies that all elements of \(\theta\)
 has a normally-distributed prior with mean at 2.0. Note that this is
 not the prior mean for the individual PK parameters as they follow
-log-normal distribution. The $THETAPV record specifies an diagonal covariance matrix
+log-normal distribution. The <code>$THETAPV</code> record specifies an diagonal covariance matrix
 for the \(\theta\) prior, and each \(\theta\) has a very large prior
 variance <sup class="footnote-reference"><a id="footnote-reference-2" href="#footnote-2">2</a></sup>, showing the lack of prior information on \(\theta\).</p>
 <p>
-Similarly, $OMEGAP/$OMEGAPD, $SIGMAP/$SIGMAPD specify the elements and
+Similarly, <code>$OMEGAP</code> and <code>$OMEGAPD</code>, <code>$SIGMAP</code> and <code>$SIGMAPD</code>, specify the elements and
 degrees of freedom for OMEGA and SIGMA, respectively. The priors for
 the two matrices follow inverse Wishart distribution.</p>
 <p>
 Note that before using NUTS, we first do a short (NITER=0) Iterative
 Two Stage (ITS) MLE run. This is to prepare position the sampler so
 that the sampling is initiated in a reasonable proximity in the
-posterior distribution (recall that the concatenate $EST records means
+posterior distribution (recall that the concatenate <code>$EST</code> records means
 the estimation uses the previous run&#39;s results as starting point).</p>
 <p>
-For the $EST METHOD=NUTS record, we see that there are 1000 samples
+For the <code>$EST METHOD=NUTS</code> record, we see that there are 1000 samples
 (NITER). That is, each unknown parameter will be sampled 1000 times.
 These samples will be stored in the &#34;.ext&#34; file. BAYES_PHI_STORE=1
 means in addition to \(\theta, \Omega, \Sigma)\) we also requesting

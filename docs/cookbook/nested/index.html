@@ -25,7 +25,7 @@ https://github.com/alex-shpak/hugo-book
   <meta itemprop="name" content="Nested random effects">
   <meta itemprop="description" content="Adding nested random levels above subject ID The method in section is an improvement from NONMEM 7.4 and earlier (see the last section below). The method will give similar results, but additionally standard errors to THETAs that reflect the variability in the highest random level, rather than at the lowest, subject level. It does this by pointing the MU referencing to the ETA of the highest random level, rather than at the individual level, and preventing level ETAs summing to 0 (centering), by setting $EST LEVCENTER=0.">
   <meta itemprop="dateModified" content="2026-01-26T08:45:25-08:00">
-  <meta itemprop="wordCount" content="1017">
+  <meta itemprop="wordCount" content="1018">
 
 <title>Nested random effects | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -35,7 +35,7 @@ https://github.com/alex-shpak/hugo-book
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.c4ab5362d084fc428349e2f77e9f4ce2cc083889466d10a7c0c687bb83682091.js" integrity="sha256-xKtTYtCE/EKDSeL3fp9M4swIOIlGbRCnwMaHu4NoIJE=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.9927f7271e29990c78517d911ff44208ea0af9204541b35c9a557fb0daeaa7a8.js" integrity="sha256-mSf3Jx4pmQx4UX2RH/RCCOoK&#43;SBFQbNcmlV/sNrqp6g=" crossorigin="anonymous"></script>
 
 
 
@@ -1558,9 +1558,9 @@ Adding nested random levels above subject ID
 but additionally standard errors to THETAs that reflect the variability in the highest random
 level, rather than at the lowest, subject level. It does this by pointing the MU referencing to
 the ETA of the highest random level, rather than at the individual level, and preventing level
-ETAs summing to 0 (centering), by setting $EST LEVCENTER=0.</p>
+ETAs summing to 0 (centering), by setting <code>$EST LEVCENTER=0</code>.</p>
 <p>
-The $LEVEL control records is intended for modeling grouping effects
+The <code>$LEVEL</code> control records is intended for modeling grouping effects
 such that several subjects belong to a group/level, e.g. inter-site
 variability or inter-trial variability. The following control
 stream fragment contains an inter-site variability ETA(5) in addition
@@ -1616,9 +1616,9 @@ SID is for site IDs.</p>
 </div>
 <p><code>LEVCENTER=0</code> means level ETAs are not force to sum to 0,  and
 <code>FNLETA=0</code> means that the ETAs reflect what were used in the
-estimation.  Without <code>FNELTA=0</code>,  $TABLE output for super ID ETA
+estimation.  Without <code>FNELTA=0</code>,  <code>$TABLE</code> output for super ID ETA
 values will incorrectly differ with each subject, rather than averaged
-for each LEVEL item value. The $LEVEL record says that ETA(5) is for the
+for each LEVEL item value. The <code>$LEVEL</code> record says that ETA(5) is for the
 inter-site random effect, and within it nested the inter-subject
 random effect ETA(1). Both are for the multiplicative model of the
 clearance CL.</p>
@@ -1709,7 +1709,10 @@ few SIDs with a same CID. We model the hierarchy as the following.</p>
 </div>
 </div>
 <p>For clearance, ETA(9) varies by country, within it nested site-varying
-ETA(5), which in turn has nested in it the subject-varying (the standard ID data) ETA(1).  When performing FOCE with $LEVEL, you must use the SLOW option in $EST, and MATRIX=R for the covariance step $COV should be selected.  Notice in these examples the THETAs are MU referenced to the highest random level.</p>
+ETA(5), which in turn has nested in it the subject-varying (the
+standard ID data) ETA(1).  When performing FOCE with <code>$LEVEL</code>, you
+must use the <code>$EST SLOW</code> option and the <code>$COV MATRIX=R</code> option (if the
+covariance step is used) should be selected.  Notice in these examples the THETAs are MU referenced to the highest random level.</p>
 </div>
 </div>
 <div id="outline-container-headline-3" class="outline-3">
@@ -1794,7 +1797,7 @@ change only with each site, and setting the inter-subject variance to 0.</p>
 </div>
 </div>
 </div>
-<p>Alternatively (NM74), one can use &#34;0&#34; in $LEVEL to indicate no nested
+<p>Alternatively (NM74), one can use &#34;0&#34; in <code>$LEVEL</code> to indicate no nested
 variability:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
@@ -1847,8 +1850,8 @@ LEVWT=[0|1] (NM74)
 <div id="outline-text-headline-4" class="outline-text-3">
 <p>By default, <code>LEVWT=0</code>, and weights each level value equally,
 regardless of number of subjects per level value.  If you wish to
-weight according to number of subjects for that value, set <code>LEVWT=1</code> in
-$EST record.</p>
+weight according to number of subjects for that value, set
+<code>$EST LEVWT=1</code>.</p>
 </div>
 </div>
 <div id="outline-container-headline-5" class="outline-3">
@@ -1874,7 +1877,7 @@ then floats the ID (and below) level ETAs.  If <code>LEVOBJTYPE=1</code>, then
 the OBJ reported (and used for estimation) is only that of the second
 optimization cycle. <code>LEVOBJTYPE=0</code> provides more consistent results between FOCE/Laplace and the EM and Bayes methods, particularly with super-ID levels higher than 1 (so, site ID and country ID, for example).  The LEVOBJTYPE=1 provides an OBJ more consistent with theory.</p>
 <p>
-By default, NONMEM sets the estimation process to SLOW when a $LEVEL option is used. As of NM751, you may set NOSLOW or FAST.  While there is an increase in speed, but there may not be as good optimization progress as with the SLOW option.  It may be best to use SLOW for the $EST step, and use NOSLOW or FAST for the $COV step.</p>
+By default, NONMEM sets the estimation process to SLOW when a <code>$LEVEL</code> option is used. As of NM751, you may set NOSLOW or FAST.  While there is an increase in speed, but there may not be as good optimization progress as with the SLOW option.  It may be best to use SLOW for the <code>$EST</code> step, and use NOSLOW or FAST for the <code>$COV</code> step.</p>
 </div>
 </div>
 <div id="outline-container-headline-7" class="outline-3">
@@ -1882,7 +1885,7 @@ By default, NONMEM sets the estimation process to SLOW when a $LEVEL option is u
 NM74 and NM73
 </h3>
 <div id="outline-text-headline-7" class="outline-text-3">
-<p>The behavior of $LEVEL in these earlier versions are different in two
+<p>The behavior of <code>$LEVEL</code> in these earlier versions are different in two
 ways. First, the MU referencing pointed to the individual (ID) level
 rather than the top random level.  Secondly, the ETAs to random levels
 above ID were constrained to sum to 0, with the OMEGA estimation

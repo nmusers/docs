@@ -14,11 +14,11 @@
 #+end_src
 
 ** Discussion
-Optional. Specifies the use of the PRIOR feature of NONMEM. $PRIOR
-control record does not support abbreviated code block. $PRIOR relies
+Optional. Specifies the use of the PRIOR feature of NONMEM. ~$PRIOR~
+control record does not support abbreviated code block. ~$PRIOR~ relies
 on subroutine [[file:/docs/reference-manual/api/subroutines/#tnpri][TNPRI]] or [[file:/docs/reference-manual/api/subroutines/#nwpri][NWPRI]] to specify the source of prior
 information: TNPRI uses a previous run's MSF, and NWPRI uses
-user-specification. Use only NWPRI for the new $ESTIMATION methods of NONMEM 7.
+user-specification. Use only NWPRI for the new ~$ESTIMATION~ methods of NONMEM 7.
 
 One can specify which PROBLEM to apply the given prior, and/or whether
 to apply the prior to ESTIMATION or SIMULATION. By default PRIOR is
@@ -37,7 +37,7 @@ specification will be imposed with the prior. See examples below.
 
 ***  DISPLAY[=ALL|CNT]
 Optional.   The PRIOR subroutine will contain code to print items of
-   interest in the NONMEM report.  This is to assist the user in checking that the $PRIOR record is working correctly.
+   interest in the NONMEM report.  This is to assist the user in checking that the ~$PRIOR~ record is working correctly.
 
    DISPLAY=ALL  is the default when only DISPLAY is present. Lines such
    as the following are printed with every call to PRIOR:
@@ -89,18 +89,18 @@ Same  as  the preceding example, if the run consists of exactly five problems.  
 
    Within the same run, one may use TNPRI with some tasks or  problems,
    and  NWPRI  with  other  tasks or problems.  There may be at most 10
-   $PRIOR records per problem.
+   ~$PRIOR~ records per problem.
 
  (See [[file:/docs/reference-manual/api/subroutine/#tnpri][TNPRI]], [[file:/docs/reference-manual/api/subroutines/#prior][PRIOR]]).
 
 * Priors control records
 NONMEM v7.3+ provides more informative record names
-so that users do not have to directly specifying $PRIOR parameters
+so that users do not have to directly specifying ~$PRIOR~ parameters
 such as NTHETA, NETA, etc. These control records are intended to be
-used with $PRIOR [[file:/docs/reference-manual/api/subroutines/#nwpri][NWPRI]]. If given, options in $PRIOR NWPRI override
+used with ~$PRIOR~ [[file:/docs/reference-manual/api/subroutines/#nwpri][NWPRI]]. If given, options in ~$PRIOR NWPRI~ override
 the prior control record settings listed below.
 
-Similar to $OMEGA, the BLOCK and VALUES options are used to specify
+Similar to ~$OMEGA~, the BLOCK and VALUES options are used to specify
 the prior covariance matrices.
 
 See also [[file:/docs/reference-manual/api/subroutines/#nwpri][NWPRI]].
@@ -122,9 +122,9 @@ See also [[file:/docs/reference-manual/api/subroutines/#nwpri][NWPRI]].
  0.00  0.00 0.0 10000
 #+end_src
 
-$THETAP and $THETAPV are for THETA prior's mean and covariance matrix, respectively.
+~$THETAP~ and ~$THETAPV~ are for THETA prior's mean and covariance matrix, respectively.
 By default the prior uses the (multivariate) normal distribution. For
-the NUTS algorithm ($EST METHOD=NUTS) one can also specify the /t/-distribution using $TTDF.
+the NUTS algorithm (~$EST METHOD=NUTS~) one can also specify the /t/-distribution using ~$TTDF~.
 
 ** $TTDF (NM75)
 Specifies /t/-distribution degrees of freedom for \(\theta\).
@@ -147,9 +147,9 @@ and
 #+begin_src perl
 $SIMULATION
 #+end_src
-These values will be used in estimation and simulation unless $EST TTDF or $SIM TTDF is set, respectively, which set the degrees of freedom to a same value for all THETA's for that step.
+These values will be used in estimation and simulation unless ~$EST TTDF~ or ~$SIM TTDF~ is set, respectively, which set the degrees of freedom to a same value for all THETA's for that step.
 
-By default $TTDF value is 0 and the multivariate normal distribution is used.
+By default ~$TTDF~ value is 0 and the multivariate normal distribution is used.
 
 ** $OMEGAP, $OMEGAPD
 #+begin_src perl
@@ -169,16 +169,15 @@ By default $TTDF value is 0 and the multivariate normal distribution is used.
  $OMEGAPD (4 FIX)
 #+end_src
 By default, the prior for OMEGA follows the inverse Wishart
-distribution. $OMEGAP specifies the prior for elements, and $OMEGAPD
+distribution. ~$OMEGAP~ specifies the prior for elements, and ~$OMEGAPD~
 specifies degrees of freedom (also known as the dispersion factor).
-Note that $OMEGAPD specifies a vector, similar to $THETA.
+Note that ~$OMEGAPD~ specifies a vector, similar to ~$THETA~.
 
-For NUTS algorithm ($EST METHOD=NUTS), one can also use LKJ prior for OMEGA using $OLKJDF.
+For NUTS algorithm (~$EST METHOD=NUTS~), one can also use LKJ prior for OMEGA using ~$OLKJDF~.
 See below.
 
 In addition, one can use  the ~source/OMEGA_STD_PRIORU.f90~ file as a
-template to provide the prior density function. Set $SUBR
-OTHER=OMEGA_STD_PRIORU.f90 to use the user modified template.
+template to provide the prior density function. Set ~$SUBR OTHER=OMEGA_STD_PRIORU.f90~ to use the user modified template.
 
 ** $OLKJDF, $OVARDF
 Specifies LKJ decorrelation degrees of freedom for each OMEGA block.
@@ -196,7 +195,7 @@ The example shows that the first OMEGA block has degrees of freedom
 
 The default 0 specifies the inverse Wishart as OMEGA prior.
 
-$OVARF specifies the weighting (inverse variance) to the standard
+~$OVARF~ specifies the weighting (inverse variance) to the standard
 deviations of the LKJ decorrelation degrees of freedom for each OMEGA block.
 #+begin_src perl
    $OVARF 0 ;# default
@@ -210,15 +209,15 @@ The example specifies 2.0 for the first OMEGA block, 5.0 for the
 second.
 
 If the corresponding [[file:/docs/reference-manual/control-records/olkjdf/][$OLKJDF]] value is
-negative $OVARF  is  argument STDSSP in user-defined
+negative ~$OVARF~  is  argument STDSSP in user-defined
 OMEGA_STD_PRIORU.f90.
 
-$OVARF  separate records that allow the user to specify
+~$OVARF~  separate records that allow the user to specify
 the weighting  to the standard deviations LKJ
 decorrelation degrees of freedom for each OMEGA block and SIGMA block.
 Used with the NUTS algorithm.
 
-See also [[file:/docs/reference-manual/control-records/estimation/#estm-olkjdf][OLKJDF]] and [[file:/docs/reference-manual/control-records/estimation/#ovarf][OVARF]] option of $ESTIM. These options
+See also [[file:/docs/reference-manual/control-records/estimation/#estm-olkjdf][OLKJDF]] and [[file:/docs/reference-manual/control-records/estimation/#ovarf][OVARF]] option of ~$ESTIM~. These options
 override the control records.
 
 ** $SIGMAP, $SIGMAPD
@@ -233,22 +232,21 @@ override the control records.
  $SIGMAPD (1 FIX)
 #+end_src
 By default, the prior for SIGMA follows the inverse Wishart
-distribution, with $SIGMAP specifying the prior for elements, and $SIGMAPD
+distribution, with ~$SIGMAP~ specifying the prior for elements, and ~$SIGMAPD~
 the degrees of freedom (also known as the dispersion factor).
-Note that $SIGMAPD specifies a vector, similar to $THETA.
+Note that ~$SIGMAPD~ specifies a vector, similar to ~$THETA~.
 
-For NUTS algorithm ($EST METHOD=NUTS), one can also use LKJ prior for SIGMA using $SLKJDF.
+For NUTS algorithm (~$EST METHOD=NUTS~), one can also use LKJ prior for SIGMA using ~$SLKJDF~.
 See below.
 
 In addition, one can use  the ~source/SIGMA_STD_PRIORU.f90~ file as a
-template to provide the prior density function. Set $SUBR
-OTHER=SIGMA_STD_PRIORU.f90 to use the user modified template.
+template to provide the prior density function. Set ~$SUBR OTHER=SIGMA_STD_PRIORU.f90~ to use the user modified template.
 
 ** $SLKJDF, $SVARF
 Similarly to OMEGA, SIMGA has corresponding LKJ prior specification
 control records for the NUTS algorithm.
 
-$SLKJDF Specifies LKJ decorrelation degrees of freedom for each SIGMA block.
+~$SLKJDF~ Specifies LKJ decorrelation degrees of freedom for each SIGMA block.
 #+begin_src perl
  $SLKJDF 0 ;# default
  $SLKJDF [value ... ]
@@ -260,7 +258,7 @@ $SLKJDF Specifies LKJ decorrelation degrees of freedom for each SIGMA block.
 One can also use the ~source/SIGMA_STD_PRIORU.f90~ file as template to
 provide the desired probability density function.
 
-$SVARF specifies the weighting to the weighting (inverse variance) to the standard deviations LKJ decorrelation degrees of freedom for each SIGMA block.
+~$SVARF~ specifies the weighting to the weighting (inverse variance) to the standard deviations LKJ decorrelation degrees of freedom for each SIGMA block.
 #+begin_src perl
   $SVARF 0 ;# default
   $SVARF [value ... ]
@@ -270,4 +268,4 @@ $SVARF specifies the weighting to the weighting (inverse variance) to the standa
   $SVARF 2.0 5.0
 #+end_src
 
-The SLKJDF and SVARF option of $ESTIM override the control records.
+The SLKJDF and SVARF option of ~$ESTIM~ override the control records.

@@ -12,14 +12,14 @@ By default, priors to THETAS are multivariate normal, and
 to OMEGAS and SIGMAS are inverse Wishart distributed.
 Alternatively,  a residual variance in the form of its square root,
 may be modeled via THETA (a sigma-like Theta parameters is set up in
-example 2). See [[file:/docs/reference-manual/control-records/prior/][$PRIOR]] for prior specifications. Here we discuss the setup
+example 2). See [[file:/docs/reference-manual/control-records/prior/][~$PRIOR~]] for prior specifications. Here we discuss the setup
 for most Bayesian analysis purposes.
 
-To set up the $PRIOR NWPRI statement such as
+To set up the ~$PRIOR NWPRI~ statement such as
 #+begin_src perl
 $PRIOR NWPRI NTHETA=4, NETA=4, NEPS=1 NTHP=4, NETP=4, NEPP=1
 #+end_src
-keep in mind the following:
+one should note
   - NTHETA=number of THETAs to be estimated;
   - NETA=number of Etas (OMEGAs) to be estimated (and is to be described by an NETAxNETA OMEGA matrix);
   - NEPS=number of EPSILONs (SIGMAs) to be estimated (and is to be described by an NEPSxNEPS SIGMA matrix);
@@ -27,17 +27,16 @@ keep in mind the following:
   - NETP=number of OMEGAs with prior;
   - NEPP=number of SIGMAs with prior (NM73).  Before NM73, the NEPP
     option was ignored, as supplying priors for SIGMAs was not
-    activated,
-so that the $THETA records list the parameters, in order, the following:
+    activated, so that the ~$THETA~ records list the parameters, in order, the following:
   - NTHETA of initial THETAs;
   - NTHP of Priors to THETAS;
   - Degrees of freedom to each OMEGA block Prior;
   - Degrees of freedom to each SIGMA block Prior;
-the $OMEGA records list the variances, in order, the following:
+the ~$OMEGA~ records list the variances, in order, the following:
   - NETAxNETA of initial OMEGAS;
   - NTHPxNTHP of variances of Priors to THETAS;
   - NETPxNETP of priors to OMEGAS, matching the block pattern of the initial OMEGAS;
-the $SIGMA records list the variances, in order, the following:
+the ~$SIGMA~ records list the variances, in order, the following:
   - NEPSxNEPS of initial SIGMAS
   - NEPPxNEPP of priors to SIGMAS, matching the block pattern of the initial SIGMAS (NM73).
 
@@ -92,52 +91,58 @@ $THETA (1 FIX)
 By default, the number of prior experiments is 1.  However, perhaps
 you have more than one previous study, and you wish to average their
 contribution, forming a composite average set of prior parameters to
-influence the present analysis.  In this case, add NEXP=n to the
-$NWPRI record above, where n is the number of experiments.  Then, add
-the prior information of each additional study with additional $THETA,
-$OMEGA, and $SIGMA statements.  The order is as following.
+influence the present analysis.  In this case, add ~NEXP=n~ to the
+~$NWPRI~ record above, where ~n~ is the number of experiments.  Then add
+the prior information of each additional study with additional ~$THETA~,
+~$OMEGA~, and ~$SIGMA~ statements.  The order is as following.
 
-  - $THETA records list the parameters, in order, the following:
-    NTHETA of initial THETAs
-    Exp 1:
-    NTHP of Priors to THETAS
-    Degrees of freedom to each OMEGA block Prior
-    Degrees of freedom to each SIGMA block Prior
-    Exp 2:
-    NTHP of Priors to THETAS
-    Degrees of freedom to each OMEGA block Prior
-    Degrees of freedom to each SIGMA block Prior
-    ...
+  - ~$THETA~ records list the parameters, in order, the following:
+    #+begin_src perl
+          NTHETA of initial THETAs
+          Exp 1:
+          NTHP of Priors to THETAS
+          Degrees of freedom to each OMEGA block Prior
+          Degrees of freedom to each SIGMA block Prior
+          Exp 2:
+          NTHP of Priors to THETAS
+          Degrees of freedom to each OMEGA block Prior
+          Degrees of freedom to each SIGMA block Prior
+          ...
+    #+end_src
   - The $OMEGA records list the variances, in order, the following:
-    NETAxNETA of initial OMEGAS
-    Exp 1:
-    NTHPxNTHP of variances of Priors to THETAS
-    NETPxNETP of priors to OMEGAS, matching the block pattern of the initial OMEGAS
-    Exp 2:
-    NTHPxNTHP of variances of Priors to THETAS
-    NETPxNETP of priors to OMEGAS, matching the block pattern of the initial OMEGAS
-    ...
+    #+begin_src perl
+      NETAxNETA of initial OMEGAS
+      Exp 1:
+      NTHPxNTHP of variances of Priors to THETAS
+      NETPxNETP of priors to OMEGAS, matching the block pattern of the initial OMEGAS
+      Exp 2:
+      NTHPxNTHP of variances of Priors to THETAS
+      NETPxNETP of priors to OMEGAS, matching the block pattern of the initial OMEGAS
+      ...
+    #+end_src
   - The $SIGMA records list the variances, in order, the following:
-    NEPSxNEPS of initial SIGMAS
-    Exp 1:
-    NEPPxNEPP of priors to SIGMAS, matching the block pattern of the initial SIGMAS
-    Exp 2:
-    NEPPxNEPP of priors to SIGMAS, matching the block pattern of the initial SIGMAS
-    ...
+    #+begin_src perl
+      NEPSxNEPS of initial SIGMAS
+      Exp 1:
+      NEPPxNEPP of priors to SIGMAS, matching the block pattern of the initial SIGMAS
+      Exp 2:
+      NEPPxNEPP of priors to SIGMAS, matching the block pattern of the initial SIGMAS
+      ...
+    #+end_src
 
 As of NM73, you can use more informative names as follows:
-   - $THETAP for theta priors;
-   - $THETAPV for variance to theta priors;
-   - $OMEGAP for omega priors;
-   - $OMEGAPD for degrees of freedom (or dispersion factor) for omega priors;
-   - $SIGMAP for SIGMA priors;
-   - $SIGMAPD for degrees of freedom (or dispersion factor) for SIGMA priors.
+   - ~$THETAP~ for theta priors;
+   - ~$THETAPV~ for variance to theta priors;
+   - ~$OMEGAP~ for omega priors;
+   - ~$OMEGAPD~ for degrees of freedom (or dispersion factor) for omega priors;
+   - ~$SIGMAP~ for SIGMA priors;
+   - ~$SIGMAPD~ for degrees of freedom (or dispersion factor) for SIGMA priors.
 This allows you to intersperse these records at will in the control
 stream files, but it also gives NMTRAN an alternative source for
 values to NTHETA, NETA, NTHT, NETP, NEPS, and NEPP that is typically
 given in the $PRIOR NWPRIOR record.  However, if these values are also
-listed in $PRIOR NWPRI, then these values are chosen over what is
-surmised from the informatively labeled theta/omega/sigma records.
+listed in ~$PRIOR NWPRI~, then these values are chosen over what is
+surmised from the informatively labeled THETA/OMEGA/SIGMA records.
 Thus, the above control stream file could be structured as follows,
 with the various records in any order, and a shortened $PRIOR record
 (in the following example uninformative priors are used):
@@ -223,7 +228,7 @@ $THETAPV BLOCK(4)
         7.87E-04  1.27E-04  5.35E-03
         7.80E-05  2.36E-04  1.76E-03  2.98E-03
 #+end_src
-The omega priors of the present analysis are obtained from the
+The OMEGA priors of the present analysis are obtained from the
 estimates of OMEGAs from the previous study.  For example, from the
 report file of the previous study:
 #+begin_src
@@ -304,15 +309,15 @@ $$
 
 where are is the matrix that you would place as OMEGAP.  The justification of the above  is based on the mean and variance formulas for an inverse Wishart (see appendix G of the NONMEM7 Technical Guide).
 
-The SCALE option available for $OMEGA(P) and $SIGMA(P) records allows the user to conveniently input a re-scaling of the input matrix without having to hand calculate every element (see SCALE option for $OMEGA and $SIGMA (NM760) in section I.9 Expansions on Abbreviated and Verbatim Code and Other Items (NM72,NM73,NM74,NM75).
+The ~SCALE~ option for ~$OMEGA(P)~ and ~$SIGMA(P)~ allows the user to conveniently input a re-scaling of the input matrix without having to hand calculate every element.
 
 For convenient transfer of the entire information from a previous analysis to prior information for a subsequent analysis, see section I.101 priorget: Transfer Results of an Analysis to NMTRAN Prior Information (NM75).
 
 As yet another alternative, the mean of the inverse OMEGAS or SIGMAS
 from MCMC Bayesian samples and their variances are such that they are
 similar to those obtained from an nlme analysis. Therefore, the
-inverse of the mean inverse OMEGA can be used as the input $OMEGAP
-without re-scaling, and the effective DF for $OMEGAPD would be similar
+inverse of the mean inverse OMEGA can be used as the input ~$OMEGAP~
+without re-scaling, and the effective DF for ~$OMEGAPD~ would be similar
 to that of an NLME analysis:
 
 $$
@@ -325,4 +330,9 @@ Here \(\bar{\Omega}\) denotes average.
 The priorget utility will calculate the inverse of the average omega inverse from the non-negative iterations in the .ext file of an MCMC Bayesian analysis, and provide the appropriate prior information from these.
 
 
-As of nm74, the degrees of freedom to the inverse wishart algorithms used for OMEGAS and SIGMAS may be any real number greater than 0.  Thus, the inverse wishart matrix distribution can substitute for inverse gamma matrix distribution as follows.  The parameter beta is the rate parameter (with inverse units of the variable), and alpha is the shape parameter, to a gamma distribution.  This gamma distribution to the inverse residual variance can be expressed with an equivalent Wishart distribution to the inverse residual variance. Set 2alpha for the $SIGMAPD, and beta/alpha for $SIGMA.  The gamma distribution to the inverse residual variance is equivalent to the inverse gamma distribution of the residual variance.
+In NM74+, the degrees of freedom to the inverse Wishart algorithms
+for OMEGAs and SIGMAs may be any positive real number.
+Thus the inverse Wishart distribution can substitute for
+the inverse Gamma matrix distribution: the parameter ~beta~ is the
+rate parameter (with inverse units of the variable), and ~alpha~ is
+the shape parameter, for the Gamma distribution.  This distribution to the inverse residual variance can be expressed with an equivalent Wishart distribution to the inverse residual variance: set ~2alpha~ for the ~$SIGMAPD~, and ~beta/alpha~ for ~$SIGMA~.  The Gamma distribution to the inverse residual variance is equivalent to the inverse Gamma distribution of the residual variance.

@@ -26,15 +26,15 @@ that the initial parameter estimates were entered correctly
 
 Most lines above are easy to interpret. We make several comments as follows.
 - Line 21 gives the labels for all the data items. The first six
-  labels are specified in $INPUT. The next two (EVID, MDV) are those
+  labels are specified in ~$INPUT~. The next two (EVID, MDV) are those
   of two data items added to the data set by NONMEM (NONMEM deduces
   EVID and MDV from given data items. It also supplies data
   item PRED (prediction), RES (residual), and WRES (weighted residual)).
   In the formulation of \(y=f(x, \phi, t)+\epsilon\), ID,
   TIME, AMT, WT, and APGR are elements of \(x\), DV is \(y\), and PRED
-  is described by $SUBROUTINE and $PK records.
+  is described by ~$SUBROUTINE~ and ~$PK~ records.
 
-- Line 27-43 describe the contents of the $THETA, $OMEGA and $SIGMA.
+- Line 27-43 describe the contents of the ~$THETA~, ~$OMEGA~ and ~$SIGMA~.
   First the number of elements in line 27, 29 and 31, then their
   initial estimates are displayed. In line 35-38, value 0.1000e+07 and
   -0.1000e+07 are NONMEM’s way of expressing the values \(\infty\) and
@@ -45,11 +45,11 @@ Most lines above are easy to interpret. We make several comments as follows.
   diagonal, the off-diagonal element \(\text{cov}(\eta_1,\eta_2)\) is
   automatically set to zero.
 
-Output below describes the options of the $ESTIMATION.
+Output below describes the options of the ~$ESTIMATION~.
 #+INCLUDE: "../../examples/pheno_wt_cl_v/10.2b.ascii" src org
 
 NONMEM uses tag "#" to sectionize output files. The "#TBLN"  entry on line 1
-indicates estimation step is numbered "1". If additional $ESTIMATION record
+indicates estimation step is numbered "1". If additional ~$ESTIMATION~ record
 are used their output will be labeld in corresponding "#TBLN"s.
 Despite we only used the PRINT option, the output shows all the
 default options values. For example, line 10 shows the maximum
@@ -57,7 +57,7 @@ number of evaluations of the objective function during the Estimation
 Step is 360, and line 11 shows the desired number of significant
 digits in the final parameter estimate is 3.
 
-NONMEM's built-in ADVAN models, TRANS parameterizations, and $PK block specifications are in
+NONMEM's built-in ADVAN models, TRANS parameterizations, and ~$PK~ block specifications are in
 fact from a sub-library called PREDPP (PRED of Population
 Pharmacokinetics). The output below shows the ADVAN and TRANS routines used
 #+INCLUDE: "../../examples/pheno_wt_cl_v/10.3.ascii" src org
@@ -69,7 +69,7 @@ Several notes regarding the above output.
   unimportant here). This is corresponding to "S1" assignment in the
   model. Positions marked with "*", such as the bioavailability
   fraction, correspond to additional PK parameters that are allowed by
-  the model but that are not assigned a value by $PK statements.
+  the model but that are not assigned a value by ~$PK~ statements.
   Positions marked with "-" correspond to additional parameters that
   are not permitted. For instance, dose-related parameters are not
   allowed for compartment 2 (the output compartment), because this
@@ -77,19 +77,19 @@ Several notes regarding the above output.
 
 - Line 10-13 describe the locations  of PREDPP data items in the input
   data record. Note that data item 7, Event ID, was appended. Line 15
-  shows thats by default $PK statements are evaluated with every event
+  shows thats by default ~$PK~ statements are evaluated with every event
   record. Lagged and additional doses are discussed later in this
   document. They are not used in this example.
 
-- Line 18 shows that the $ERROR statements describe a simple error
+- Line 18 shows that the ~$ERROR~ statements describe a simple error
   model that needs be evaluated only once at the beginning of the
   problem. Line 17 indicates that, should the Simu- lation Step be
   implemented, PREDPP will disregard this limitation and evaluate the
-  $ERROR statements with every event record, so that
+  ~$ERROR~ statements with every event record, so that
   randomly-generated values of intra-individual error can be applied
   at every observation event. (This example does not involve
-  simulation, but the PK and ERROR routines which implement the $PK
-  and $ERROR statements are capable of supporting all NONMEM tasks,
+  simulation, but the PK and ERROR routines which implement the ~$PK~
+  and ~$ERROR~ statements are capable of supporting all NONMEM tasks,
   including simulations).
 
 ** Diagnostic output from the estimation step
@@ -144,7 +144,7 @@ default NM-TRAN requests only 3 significant digits.
 
 ** Covariance step output
 Output is from the Covariance Step, requested
-via the $COVARIANCE record. It shows the standard errors of the
+via the ~$COVARIANCE~ record. It shows the standard errors of the
 parameter estimates. Note that "........"  denotes a value (such as the standard error
 for \(\hat{\Omega}_{12}\)) that is 0 by definition, rather than due to computation.
 #+INCLUDE: "../../examples/pheno_wt_cl_v/10.6.ascii" src org
@@ -154,7 +154,7 @@ matrix, and the inverse of covariance matrix are similar and omitted
 here.
 
 ** Table output
-Below is the first 12 lines of the table file produced by the $TABLE
+Below is the first 12 lines of the table file produced by the ~$TABLE~
 record. The ID indicate it is from the first individual.
 #+INCLUDE: "../../examples/pheno_wt_cl_v/10.10.ascii" src org
 Each row in the table corresponds to a record of the input file, and the rows appear in the
@@ -164,5 +164,5 @@ RES and WRES are always shown as zero for non-observation records†, whereas a 
 If there are more than 900 data records, separate tables are produced for groups of 900
 records. The last table contains the remaining records. If the rows of the table are sorted,
 each group of records is sorted separately. When the input data file is large, the table will
-require many pages to print. Therefore, the $TABLE record should be omitted unless
+require many pages to print. Therefore, the ~$TABLE~ record should be omitted unless
 needed for diagnostic purposes (such as when initially checking a new data set or model).

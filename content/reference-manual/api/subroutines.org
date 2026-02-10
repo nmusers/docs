@@ -22,7 +22,7 @@ implementations (that do nothing) of these routines, to be replaced by user-writ
 
 - User-defined subroutines for user functions in abbreviated code: =FUNCA=, =FUNCB=, =FUNCC=, ... .
 
-User-defined subroutines/functions should be placed in a file and provided to $SUBROUTINES:
+User-defined subroutines/functions should be placed in a file and provided to ~$SUBROUTINES~:
 #+begin_src perl
 $SUBROUTINES ... OTHER=funcacode
 #+end_src
@@ -31,14 +31,14 @@ $SUBROUTINES ... OTHER=funcacode
 ICALL is  an  argument  passed by NONMEM to user-supplied
 subroutines CCONTR, CONTR, CRIT, PRED, PRIOR and MIX. It is also
 selectively passed to PK,  ERROR,  and  INFN. It can  be  used  in
-$PK, $ERROR, and $PRED abbreviated code.  The discussion below
+~$PK~, ~$ERROR~, and ~$PRED~ abbreviated code.  The discussion below
 describes the values of ICALL as seen by PRED.
 
   - ICALL=-1: the routine has been called for the [[file:/docs/reference-manual/abbr/#pred_ignore_data_block][ PRED_IGNORE_DATA]]
     feature (NM75).  One  call per data record, at the start of the run.
     These  calls  occur  only   if   abbreviated   code uses  variables
     PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if the
-    [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]] of $DATA is used.  Otherwise, there are no
+    [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]] of ~$DATA~ is used.  Otherwise, there are no
     calls to  PRED  with ICALL=-1.
 
   - ICALL=0:  the routine has been called for initialization at the
@@ -118,7 +118,7 @@ is  zero,  i.e.,  when  there are no ETAs in the problem, and in other
 situations, e.g., with categorical data.
 
 
-When NM-TRAN is used, the $CONTR record may be used  to  request  that
+When NM-TRAN is used, the ~$CONTR~ record may be used  to  request  that
 information from the data records be made available to CONTR.
 
 
@@ -576,7 +576,7 @@ Input argument:
       The PREDPP event record.
 
 -  INDXS
-      The  values specified in the $INDEX record of the NM-TRAN control
+      The  values specified in the ~$INDEX~ record of the NM-TRAN control
       stream.  (This is the NONMEM INDXS array starting at position 12,
       the first position beyond those positions used by PREDPP itself.)
 
@@ -604,7 +604,7 @@ Output argument:
 
       The  default  used  by PREDPP is IDEF(3)=-1.  However, when ERROR
       does not use A, then if IDEF(3) is set to  0,  PREDPP  can  avoid
-      some  time-consuming processing.  Indeed, when $ERROR abbreviated
+      some  time-consuming processing.  Indeed, when ~$ERROR~ abbreviated
       code is supplied, and there is  no  reference  to  a  compartment
       amount  A(n) (as a random variable in an arithmetic statement) in
       the abbreviated code (or to its derivatives  in  verbatim  code),
@@ -764,7 +764,7 @@ Input/Output argument:
     #+begin_src f90
         USE NMPRD_INT, ONLY: PRED_IGNORE_DATA,PRED_IGNORE_DATA_TEST
     #+end_src
-    The  option $DATA [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]]  is required to cause NONMEM to make a PRED_IGNORE_DATA  pass.
+    The  option ~$DATA~ [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]]  is required to cause NONMEM to make a PRED_IGNORE_DATA  pass.
 
   + ICALL=0: INFN may now make computations for  run  initialization.
     ICALL may be reset by INFN to a number in the range 1-8999.  This
@@ -800,7 +800,7 @@ INPUT ARGUMENTS:
        problem.
 
 -   INDXS
-       The  values specified in the $INDEX record of the NM-TRAN control
+       The  values specified in the ~$INDEX~ record of the NM-TRAN control
        stream.  (This is the NONMEM INDXS array starting at position 12,
        the first position beyond those positions used by PREDPP itself.)
 
@@ -880,7 +880,7 @@ Output argument:
 
 Other  inputs  are  available  to MIX in NONMEM read-only global
 variables.  In particular, data items that are requested using the
-$CONTR record, and the current value of THETA, as shown above. (See
+~$CONTR~ record, and the current value of THETA, as shown above. (See
 [[file:/docs/reference-manual/api/variables/#mix-data][MIX:DATA]], [[file:/docs/reference-manual/api/variables/#contr-mix-theta][CONTR_MIX:THETA]]).
 
 The [[file:/docs/reference-manual/api/variables/#var-templt][MIX CONTR: TEMPLT]]  data  record  in  a NONMEM read-only global variable also
@@ -889,7 +889,7 @@ serves to provide an additional way for  individual-specific  information to be 
 See also [[file:/docs/reference-manual/api/variables/#mixnum-mixest-mixp][MIXNUM, MIXEST and MIXP]].
 
 
-See [[file:/docs/user-guide/predpp/population_model/#mixture][mixture model]] example for using $MIX and MIX.
+See [[file:/docs/user-guide/predpp/population_model/#mixture][mixture model]] example for using ~$MIX~ and MIX.
 
 ** MODEL
 :PROPERTIES:
@@ -910,7 +910,7 @@ See [[file:/docs/user-guide/predpp/population_model/#mixture][mixture model]] ex
  USE SIZES,     ONLY: SD
  CHARACTER(LEN=SD) :: NAME(PC)
 #+end_src
-The  MODEL  subroutine is called by PREDPP only once at the start of a run when a general ADVAN (ADVAN 5, 6, 7, 8, 9, 13, 14, 15, 16, 17, 18) is  used.   It  allows  the  user to specify aspects of the particular model he wishes to use.  When NM-TRAN is used, the $MODEL record  supplies this information.
+The  MODEL  subroutine is called by PREDPP only once at the start of a run when a general ADVAN (ADVAN 5, 6, 7, 8, 9, 13, 14, 15, 16, 17, 18) is  used.   It  allows  the  user to specify aspects of the particular model he wishes to use.  When NM-TRAN is used, the ~$MODEL~ record  supplies this information.
 
 Input argument: None.
 
@@ -945,7 +945,7 @@ Output argument:
     SIZES.f90 which is given by PARAMETER (PG=50+PCT), where PCT is
     the maximum number of model event time parameters given by
     PARAMETER (PCT=30) Both these parameters can be changed with the
-    $SIZES record. With  the general non-linear models (ADVAN6,
+    ~$SIZES~ record. With  the general non-linear models (ADVAN6,
     ADVAN8,  ADVAN9,  ADVAN13,  ADVAN14,  ADVAN15, ADVAN16, ADVAN17,
     ADVAN18), NPAR may remain 0.
 
@@ -1034,10 +1034,10 @@ Output argument:
     i.e. numbers may be skipped. Moreover, two rate constants can be
     assigned the same number; this forces their values and
     η-derivatives to be the same. With NM-TRAN, there are two ways to
-    specify LINK. When the $PK abbreviated code is used, link
+    specify LINK. When the ~$PK~ abbreviated code is used, link
     relationships are implied by variable names such as Kij or KiTj
     (where "T" stands for "TO"). When a user-supplied PK is used, the
-    LINK relationships must be specified explicitly on the $MODEL
+    LINK relationships must be specified explicitly on the ~$MODEL~
     record using options such as Kij.
 
     With a general nonlinear model the user explicitly specifies by
@@ -1100,7 +1100,7 @@ linear model with first order absorption, just as with ADVAN2.
 #+end_src
 
 For another example, we implement the MODEL routine for the following
-$MODEL block
+~$MODEL~ block
 #+begin_src perl
 $MODEL COMP=(DEPOT,NOOFF,DEFDOSE) COMP=(CENTRAL NOOFF NODOSE)
 COMP=(EFFECT, NOOFF NODOSE DEFOBS)
@@ -1215,15 +1215,15 @@ Input argument:
   + ICALL=5: PK routine is being called for regular expectations
     computation. Multiple calls can occur. See [[file:/docs/reference-manual/abbr/#expectation-block][Expectation blocks]]. In this case no ETA derivatives are needed.
 
-If there is abbreviated code in the $PK block conditional on ICALL=0, ICALL=1, or ICALL=3, the
-code is transcribed to the INFN routine as part of an $INFN
+If there is abbreviated code in the ~$PK~ block conditional on ICALL=0, ICALL=1, or ICALL=3, the
+code is transcribed to the INFN routine as part of an ~$INFN~
 block.
 
   - THETA: the NONMEM THETA vector.
 
   - EVTREC: the PREDPP event record. See [[file:/docs/reference-manual/api/variables/#evtrec][EVTREC]].
 
-  - INDXS: the  values specified in the $INDEX record of the NM-TRAN
+  - INDXS: the  values specified in the ~$INDEX~ record of the NM-TRAN
     control stream.  (This is the NONMEM Index array starting at
     position 12, the first position beyond those positions used by
     PREDPP itself).
@@ -1234,7 +1234,7 @@ Output argument:
 
 - IDEF: stores values only when ICALL=1. Values may be stored in the following elements:
   + IDEF(1,1)=-9  (required)
-  + IDEF(1,2) is the call limiting element (compare $PK's CALLFL). Values are:
+  + IDEF(1,2) is the call limiting element (compare ~$PK~'s CALLFL). Values are:
     - -2:  call  with every event record and at additional and lagged dose times.
     - -1: call with every event record (default)
     -  0: call with first event record and new TIME values
@@ -1254,7 +1254,7 @@ Output argument:
     The default used by PREDPP is IDEF(1,3)=-1.  However,  when
     compartment  initialization is not implemented, then if IDEF(1,3)
     is set to  0,  PREDPP  can  avoid  some  time-consuming
-    processing. Indeed,  when  $PK  abbreviated or verbatim code is
+    processing. Indeed,  when  ~$PK~  abbreviated or verbatim code is
     supplied, and there is  no  reference  to  compartment
     initialization  amounts A_0(n)  in  either the abbreviated or
     verbatim code, then NM-TRAN sets IDEF(1,3)=0.
@@ -1270,7 +1270,7 @@ Output argument:
     The default used by PREDPP is IDEF(1,4)=-1.  However, when
     derivatives  of compartment amounts are not used, then if
     IDEF(1,4) is set to  0,  PREDPP  can  avoid  some  time-consuming
-    processing. Indeed,  when  $PK  abbreviated or verbatim code is
+    processing. Indeed,  when  ~$PK~  abbreviated or verbatim code is
     supplied, and there is no reference to A(n) (as a random variable
     in an  arithmetic  statement)  in  the abbreviated code (or to
     derivatives of A(n) in the verbatim code), then NM-TRAN sets
@@ -1413,7 +1413,7 @@ Input argument:
   + ICALL=-1: the routine has been called for the [[file:/docs/reference-manual/abbr/#pred_ignore_data_block][PRED_IGNORE_DATA]] feature (NM75).   One call per data record, at the start
     of the run.  These calls  occur  only  if  abbreviated  code  uses
     variables PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if the
-    [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]] of $DATA is used.  Otherwise, there are no
+    [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]] of ~$DATA~ is used.  Otherwise, there are no
     calls to  PRED  with ICALL=-1.
 
   + ICALL=0:  PRED  has  been  called  for  initialization purposes at
@@ -1488,7 +1488,7 @@ Input argument:
       The current data record.
 
 - INDXS
-      The  values specified in the $INDEX record of the NM-TRAN control
+      The  values specified in the ~$INDEX~ record of the NM-TRAN control
       stream.
 
 Output argument:
@@ -1555,7 +1555,7 @@ level-two record,  the  values obtained are the last values stored in
 these variables when the record was previously passed to PRED.
 
 If, the NEW option is used with the first random source on the
-$SIMULATION  record, then each time SIMEPS is called (with the same or
+~$SIMULATION~  record, then each time SIMEPS is called (with the same or
 different level-two record), new and different  values  are  obtained.
 With  any particular call to SIMEPS, the effect of the NEW option can,
 though, be overridden; (See Simulation:_IETAOL_IEPSOL)
@@ -1570,8 +1570,8 @@ is not implemented, the NONMEM  executable  resulting  from  using  an
 abbreviated  code  for  PRED  (or  for ERROR if PREDPP is used) can be
 reused with a run implementing the Simulation Step.
 
-Additional calls to SIMEPS may appear in simulation blocks of $PRED
-and $ERROR abbreviated code. There is an analogous routine SIMETA.
+Additional calls to SIMEPS may appear in simulation blocks of ~$PRED~
+and ~$ERROR~ abbreviated code. There is an analogous routine SIMETA.
 (See SIMETA).
 
 For example, implementation below illustrates
@@ -1640,7 +1640,7 @@ last values stored in these variables when the record was previously
 passed to PRED.)
 
 If, though, the NEW option is used with the first random source on the
-$SIMULATION record, then each time SIMETA is called (with the same  or
+~$SIMULATION~ record, then each time SIMETA is called (with the same  or
 different  individual  record), new and different values are obtained.
 Thus, for example, when PRED is called with the first data  record  of
 an  individual  record,  PRED  can  in turn call SIMETA multiple times
@@ -1667,7 +1667,7 @@ EXAMPLES OF USAGE:
 
 In  this example, the value of ETA(2) used by PRED will be less than 5
 in absolute value.  For this code to  have  the  desired  effect,  the
-option NEW must be used in the $SIMULATION record.
+option NEW must be used in the ~$SIMULATION~ record.
 
 #+begin_src f90
     IF (ICALL.EQ.4.AND.NEWIND.NE.2) THEN
@@ -1744,8 +1744,8 @@ exists), in the PRED Error file, and if recovery is not possible, in
 the NONMEM output. The error message is called a PRED error message .
 When the PRED error return code is 1, and a choice exists between
 implementation of the THETA- recovery and an abort, the THETA-recovery
-is implemented if the NOABORT option is used in the $ESTIMATION
-($THETA) record. Often, the most appropriate response to an abort
+is implemented if the NOABORT option is used in the ~$ESTIMATION~
+(~$THETA~) record. Often, the most appropriate response to an abort
 occuring during the Initial Estimate Step, or during the Estimation
 Step after the 0th iteration summary has been output, is to rerun the
 problem requesting that the THETA-recovery be implemented. Warning: If
@@ -1849,7 +1849,7 @@ prior data set. (See also [[file:/docs/reference-manual/control-records/msfi/][$
 especially  useful   for   an   empirical   specification   of  a
 penalty  function. (See TNPRI).
 
-The $PRIOR statement can be used instead of a PRIOR subroutine.
+The ~$PRIOR~ statement can be used instead of a PRIOR subroutine.
 (See $prior.ctl).
 
 *** NWPRI
@@ -1866,7 +1866,7 @@ The $PRIOR statement can be used instead of a PRIOR subroutine.
     CALL NWPRI (NTHETA,NETA,NEPS,NTHP,NETP,NEPP,NPEXP,ITYP,PLEV, &
          NSAM,ISS,CNT)
 #+end_src
-NONMEM v7+'s new $ESTIMATION methods (BAYES,
+NONMEM v7+'s new ~$ESTIMATION~ methods (BAYES,
 NUTS, SAEM, etc) can only use NWPRI to specify priors.
 
 The user-written PRIOR subroutine allows a penalty function based on a
@@ -1972,7 +1972,7 @@ Input arguments:
     R1 over  which  only  a fraction of mass of the normal occurs.
     This fraction is given by PLEV.  The distribution is further
     truncated to  R2,  the  subregion of R1 lying within the
-    rectangular boundaries defined on  the  $THETA  record.   Simple
+    rectangular boundaries defined on  the  ~$THETA~  record.   Simple
     random  sampling occurs  in  R2.   Latin  sampled partitions are
     partitions of R1. However, when ITYP=1, if a uniformly sampled
     point from a  partition  lies outside R2, it is replaced by a
@@ -2012,16 +2012,16 @@ Output argument:
 
   CNT Relevant only if NWPRI is called at ICALL=2.  CNT is the penalty.
 
-See PRIOR subroutine for using NWPRI. Below we discuss using it along with $THETA, $OMEGA, $SIGMA records.
+See PRIOR subroutine for using NWPRI. Below we discuss using it along with ~$THETA~, ~$OMEGA~, ~$SIGMA~ records.
 
 The first use is to specify the multivariate normal form for THETA
-(NTHP>0). After the usual set of $THETA records, add  a  second  set
-of  $THETA records  giving  the  mean  of the multivariate normal.
+(NTHP>0). After the usual set of ~$THETA~ records, add  a  second  set
+of  ~$THETA~ records  giving  the  mean  of the multivariate normal.
 The values on these records must be fixed.  They should number NTHP
-altogether. After the usual set of $OMEGA records, add  a  second  set
-of  $OMEGA records giving the variance-covariance matrix of the
+altogether. After the usual set of ~$OMEGA~ records, add  a  second  set
+of  ~$OMEGA~ records giving the variance-covariance matrix of the
 multivariate normal.  (If there are no ETAs in the model, there will
-not  be  a  usual set  of  $OMEGA  records.)  The values on these
+not  be  a  usual set  of  ~$OMEGA~  records.)  The values on these
 records must be fixed. They should number (NTHP+1)xNTHP/2 altogether,
 including implicit 0's, which  may  occur because the
 variance-covariance matrix of the normal may be block-diagonal.  If a
@@ -2029,9 +2029,9 @@ variance-covariance matrix of the normal may be block-diagonal.  If a
 variance-covariance matrix of the normal are ignored.
 
 Another use is to specify the inverse Wishart form  for  OMEGA
-(NETAP>0; population data only). After  the second set of $OMEGA
-records (or if NTHP=0, after the first set of $OMEGA records), add
-another set of $OMEGA records  giving  the mode  of  the  inverse
+(NETAP>0; population data only). After  the second set of ~$OMEGA~
+records (or if NTHP=0, after the first set of ~$OMEGA~ records), add
+another set of ~$OMEGA~ records  giving  the mode  of  the  inverse
 Wishart.   The values on these records must be fixed.   They  should
 number  (NETP+1)xNETP/2  altogether,  including implicit  0's, which
 may occur because the mode of the inverse Wishart may be
@@ -2042,9 +2042,9 @@ prior-affected part of) OMEGA,  there corresponds  a  number of
 "degrees of freedom" of the inverse Wishart. All blocks of a given
 block set are constrained to be equal (by  using the SAME attribute),
 and therefore, to each of these blocks there cor- responds the same
-number of degrees of freedom.  After the second  set of  $THETA
-records  (or  if  NTHP=0,  after  the  first set of $THETA records),
-add another set of $THETA records, giving for each block set in  turn
+number of degrees of freedom.  After the second  set of  ~$THETA~
+records  (or  if  NTHP=0,  after  the  first set of ~$THETA~ records),
+add another set of ~$THETA~ records, giving for each block set in  turn
 the  number of degrees of freedom for the blocks of the set. The
 values on these records must be fixed.  There should  be  as  many
 values as there are block sets with the prior-affected part of OMEGA.
@@ -2057,25 +2057,25 @@ values of the mode and number of degrees of freedom are ignored.
 
 With NONMEM 7.3 and higher, you can use more informative record  names
 instead of directly specifying NTHETA, NETA, et al:
-  - $THETAP for THETA priors
-  - $THETAPV for covariance matrix for THETA's
-  - $OMEGAP for OMEGA prior
-  - $OMEGAPD for degrees of freedom (or dispersion factor) for OMEGA prior
-  - $SIGMAP for SIGMA prior
-  - $SIGMAPD for degrees of freedom (or dispersion factor) for SIGMA prior
+  - ~$THETAP~ for THETA priors
+  - ~$THETAPV~ for covariance matrix for THETA's
+  - ~$OMEGAP~ for OMEGA prior
+  - ~$OMEGAPD~ for degrees of freedom (or dispersion factor) for OMEGA prior
+  - ~$SIGMAP~ for SIGMA prior
+  - ~$SIGMAPD~ for degrees of freedom (or dispersion factor) for SIGMA prior
 
 If  the  informative  record names are used, the records may be in any
- order, and the options of $PRIOR need not be specified.  Note that the
+ order, and the options of ~$PRIOR~ need not be specified.  Note that the
  name  of the record describes the kind of information it gives, rather
  than the structure of the information.  E.g., in  the  example  below,
- $THETAPV  is  used  instead  of  an $OMEGA record and $OMEGAPV is used
- instead of a $THETA record.
- (See $THETAP, $OMEGAP, $SIGMAP)
+ ~$THETAPV~  is  used  instead  of  an ~$OMEGA~ record and ~$OMEGAPV~ is used
+ instead of a ~$THETA~ record.
+ (See ~$THETAP~, ~$OMEGAP~, ~$SIGMAP~)
 
-Below are three examples of extra $THETA and $OMEGA records specifying
+Below are three examples of extra ~$THETA~ and ~$OMEGA~ records specifying
 prior  information  from an experiment.  This information concerns all
 the regular elements of THETA and OMEGA.  All examples are shown  with
-a $PRIOR record although a PRIOR subroutine could be used instead.
+a ~$PRIOR~ record although a PRIOR subroutine could be used instead.
 #+begin_src perl
  $PRIOR NWPRI NTHETA=3 NETA=3 NTHP=3 NETP=3 NPEXP=1
    ...
@@ -2113,7 +2113,7 @@ With NONMEM 7.3 and higher, informative record names can be used:
 #+end_src
 
 There may be prior information from a number of experiments, in  which
-case  the  $THETA  and  $OMEGA records specifying this information for
+case  the  ~$THETA~  and  ~$OMEGA~ records specifying this information for
 each experiment may be stacked, e.g.
 
 #+begin_src perl
@@ -2176,7 +2176,7 @@ of  its  input arguments are checked.  If it is not used at ICALL=0 or
 ICALL=1, then the first time it is used at ICALL=2 or ICALL=4,
 checking will occur.
 
-Not to be used with the new $ESTIMATION methods of NONMEM 7.
+Not to be used with the new ~$ESTIMATION~ methods of NONMEM 7.
 
  Input argument:
 
@@ -2203,7 +2203,7 @@ Not to be used with the new $ESTIMATION methods of NONMEM 7.
       current control stream that appears before the problem using
       TNPRI (problem  (A))  and  inputs  a  model specification file.
       The problem specification should not include any task  records,
-      but  it  may include  e.g.  a  $SUBROUTINES record and/or
+      but  it  may include  e.g.  a  ~$SUBROUTINES~ record and/or
       abbreviated code, if problem B is the first problem in the
       control stream,  and  these elements  will  be needed for a
       subsequent problem.  If problem A inputs a model specification
@@ -2221,11 +2221,11 @@ Not to be used with the new $ESTIMATION methods of NONMEM 7.
 
   - MODE.
     In any NONMEM problem specification, all of the last contiguously
-    listed parameters on the $THETA record, whose values on this
+    listed parameters on the ~$THETA~ record, whose values on this
     record are fixed, and assuming the value of the very last
     parameter  itself is fixed, are called the "terminal fixed THETA
     parameters".  There may be  no  such  parameters.   E.g.  if  the
-    $THETA record is
+    ~$THETA~ record is
     #+begin_src perl
       $THETA 3.1 FIX 6.3 .01 400 FIX 7 FIX 90 FIX
     #+end_src
@@ -2238,7 +2238,7 @@ Not to be used with the new $ESTIMATION methods of NONMEM 7.
     the last contiguous fixed parameters in OMEGA  (SIGMA),  assuming
     the  values  in the very last block set are fixed, are called the
     "terminal fixed OMEGA (SIGMA)  parameters".  (Recall  that  in  a
-    diagonal $OMEGA record, all the values form separate block sets.)
+    diagonal ~$OMEGA~ record, all the values form separate block sets.)
 
     There are some rules concerning the parameter records of a NONMEM
     control stream that relate the parameters of the prior problem to
@@ -2247,27 +2247,27 @@ Not to be used with the new $ESTIMATION methods of NONMEM 7.
     + With  the exception of the terminal fixed THETA parameters in
       the prior problem, which are altogether ignored  in  the
       current problem,  the  THETA  parameters of the prior problem
-      must be the first THETA parameters listed in the $THETA record
+      must be the first THETA parameters listed in the ~$THETA~ record
       of the current problem, whether or not their values are fixed in
       the prior problem.
-    + The order of these  first  THETA  parameters  on  the  $THETA
-      record must be the same as that in the $THETA record of the
+    + The order of these  first  THETA  parameters  on  the  ~$THETA~
+      record must be the same as that in the ~$THETA~ record of the
       prior problem.   The initial estimates of these parameters need
       not  be the same, but any upper or lower bounds must be the
       same.
     + Among the first THETA parameters, values that are fixed on the
-      $THETA record of the prior problem must also be fixed on  the
-      $THETA  record  of  the current problem, although the values
+      ~$THETA~ record of the prior problem must also be fixed on  the
+      ~$THETA~  record  of  the current problem, although the values
       need not be the same, but not vice-versa; see  discussion  below
       concerning parameter interpretation.
     + THETA  parameters  peculiar  to  the current problem may be
-      listed at the end of the $THETA record of  the  current
+      listed at the end of the ~$THETA~ record of  the  current
       problem, after  the  parameters that are shared between the
-      prior and current problems. E.g. if the $THETA record with the prior problem is
+      prior and current problems. E.g. if the ~$THETA~ record with the prior problem is
       #+begin_src perl
       $THETA 3.1 FIX 6.3 (0,.01) 400 FIX 7 FIX 90 FIX
       #+end_src
-      then the $THETA record with the current problem may be
+      then the ~$THETA~ record with the current problem may be
       #+begin_src perl
       $THETA 10  FIX 7.0 (0,.03) 80.2 100.8
       #+end_src
@@ -2278,7 +2278,7 @@ Not to be used with the new $ESTIMATION methods of NONMEM 7.
       first parameter may be used in the current problem, in which
       case  its value is fixed to 10.
 
-    The same rules apply to the $OMEGA and $SIGMA records of the current problem.
+    The same rules apply to the ~$OMEGA~ and ~$SIGMA~ records of the current problem.
 
     A model specification file from a previous instance of  the
     current  problem  may  be used, as usual, providing that if with
@@ -2471,13 +2471,13 @@ to obtain numbers from random number generators.
 Input argument:
 
   - KR:  an  integer  variable or integer constant.  The index of the
-    random source. Random sources are defined using the $SIMULATION
+    random source. Random sources are defined using the ~$SIMULATION~
     record. With standard normal as the default distribution.
     Typically, the first source is reserved by NONMEM to generate
     realizations of the ETA and EPSILON variables and/or to randomly
     mix individuals into different subpopulations according to the
     mixing parameter.  Thus, typically, RANDOM must be called with KR
-    > 1. A random source that is specified on the $SIMULATION record
+    > 1. A random source that is specified on the ~$SIMULATION~ record
     as  NONPARAMETRIC should not be used to obtain a value of R.
 
 Output argument:
@@ -2661,9 +2661,9 @@ Output argument:
   the relative tolerance for the Steady State computations.   If
   NRD(0) is not specified, NRD(1) is used.
 
-  The  value  of  NRD(1)  can  also be specified using $SUBROUTINES
+  The  value  of  NRD(1)  can  also be specified using ~$SUBROUTINES~
   option TOL. The value of NRD(0) can  also  be  specified  using
-  $SUBROUTINES option SSTOL.
+  ~$SUBROUTINES~ option SSTOL.
 
 - ANRD(I) (NM74): the  absolute  tolerance in the computation of the
   drug amount in compartment  I.   The  default  is  12  (that  is,
@@ -2674,9 +2674,9 @@ Output argument:
 
   ANRD(0) is the absolute tolerance for the Steady  State
   computations.  If ANRD(0) is not specified, ANRD(1) is used. The
-  value  of  ANRD(1)  can also be specified using $SUBROUTINES option
+  value  of  ANRD(1)  can also be specified using ~$SUBROUTINES~ option
   ATOL. The value of ANRD(0) can also  be  specified  using
-  $SUBROUTINES option SSATOL.
+  ~$SUBROUTINES~ option SSATOL.
 
 - NRDC(I) (NM74): same  as  NRD(I),  but used for the FOCE/LAPLACE
   covariance step. Used with ADVAN 9, 13, 14, and 15, 16, 17, and 18.
@@ -2684,9 +2684,9 @@ Output argument:
   for Steady State computations during the FOCE/LAPLACE covariance
   step.
 
-  The value of NRDC(1) can also  be  specified  using  $SUBROUTINES
+  The value of NRDC(1) can also  be  specified  using  ~$SUBROUTINES~
   option TOLC. The  value  of  NRDC(0)  can also be specified using
-  $SUBROUTINES option SSTOLC.
+  ~$SUBROUTINES~ option SSTOLC.
 
 - ANRDC(I) (NM74): Same as ANRD(I), but used for the FOCE/LAPLACE
   covariance  step. Used  with  ADVAN 9, 13, 14, and 15, 16, 17,
@@ -2694,12 +2694,12 @@ Output argument:
   is used for Steady State computations during the FOCE/LAPLACE
   covariance step.
 
-  The  value  of  ANRDC(1) can also be specified using $SUBROUTINES
+  The  value  of  ANRDC(1) can also be specified using ~$SUBROUTINES~
   option ATOLC. The value of ANRDC(0) can also be  specified  using
-  $SUBROUTINES option SSATOLC.
+  ~$SUBROUTINES~ option SSATOLC.
 
 When  NM-TRAN  is used, this information may be supplied by either the
-TOL option of the $SUBROUTINES record or the $TOL record.
+TOL option of the ~$SUBROUTINES~ record or the ~$TOL~ record.
 
 One may supply a TOL routine that assigns values of  NRD  and ANRD
 specifically for the initial (base) setting and each NONMEM step
@@ -2733,7 +2733,7 @@ toluser.f90 file,
     RETURN
   END SUBROUTINE TOL
 #+end_src
-and incorporate it using $SUBR
+and incorporate it using ~$SUBR~
 #+begin_src perl
  $SUBROUTINES ADVAN13 TRANS1 TOL=toluser.f90
 #+end_src
@@ -2778,7 +2778,7 @@ NM-TRAN makes some modifications to verbatim code:
      "      +D/E
   #+end_src
 
-- Replacement Rule: in $PK, $ERROR, $DES, $AES, $INFN, and $PRED, in a
+- Replacement Rule: in ~$PK~, ~$ERROR~, ~$DES~, ~$AES~, ~$INFN~, and ~$PRED~, in a
   line of abbreviated  code  labels  of items in the data record are
   replaced by direct references to the data record  itself  (either
   DATREC  or EVTREC,  as  appropriate).   Thus,  for  example, if such
@@ -2847,7 +2847,7 @@ subroutines and modules based on NM-TRAN input file.
 
 ** =FSIZESR=
 Since v7.2+, NONMEM employs dynamic memory allocation. Subroutine =FSIZESR= contains the constants
-for the allocation. The $SIZES record can be used to override some of
+for the allocation. The ~$SIZES~ record can be used to override some of
 the values in FSIZESR. Constants set to 0 cannot be determined or are
 not given by NM-TRAN and will default to the values in
 resource/SIZES.f90 in NONMEM source code.
@@ -2855,19 +2855,19 @@ resource/SIZES.f90 in NONMEM source code.
 ** =NMPRD4=, =PRINFN=, and =DECLAREVARIABLES=
 Module =NMPRD4= stores NONMEM runtime variables.
 It is also accessible in user-supplied routines and generated code,
-and also by NONMEM. User can use $TABLE to output the module variables.
+and also by NONMEM. User can use ~$TABLE~ to output the module variables.
 It is possible for the user to set aside a portion of =NMPRD4= for
 variables defined in user-supplied code, or for variables directly
 controlled by the user (see COMACT, COMRES, COMSAV in Chapters III.B.7
 and IV.E.2).
 
 Module =PRINFN= is only for user-supplied and generated code.
-NM-TRAN creates this module only when $INFN is used.
+NM-TRAN creates this module only when ~$INFN~ is used.
 
-Module =DECLAREVARIABLES= stores variables in $ABBREVIATED DECLARE control record. (NM73)
+Module =DECLAREVARIABLES= stores variables in ~$ABBREVIATED DECLARE~ control record. (NM73)
 
 ** =THETAISUB=, =THETARSUB=
-The two subroutines implement the $THETAI and $THETAR records, respectively.
+The two subroutines implement the ~$THETAI~ and ~$THETAR~ records, respectively.
 They are created only when the corresponding record is used.
 
 ** =MUMODEL2=
@@ -2881,6 +2881,6 @@ used by NONMEM.
 - =FSUBS_MU.F90=: the file for =MUMODEL2= in FSUBS.
 - =FSIZES=: same as the =FSIZESR= routine in FSUBS.
 - =FMSG=: messages (information, warning, error) NM-TRAN run, same as displayed in terminal.
-- =FORIG=: the original (pre-replacement) abbreviated code and $TABLE and $SCATTER records.
-- =FREPL=: the new (post-replacement) abbreviated code and $TABLE and $SCATTER records.
+- =FORIG=: the original (pre-replacement) abbreviated code and ~$TABLE~ and ~$SCATTER~ records.
+- =FREPL=: the new (post-replacement) abbreviated code and ~$TABLE~ and ~$SCATTER~ records.
 - =FSUBS2=, ==FSUBS.F90=: duplicates of =FSUBS=.

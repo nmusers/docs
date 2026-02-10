@@ -41,7 +41,7 @@ NMPRD_INT (NMPRD1) PRED return code and user message count (IERPRD,NETEXT) NMPRD
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.c4ab5362d084fc428349e2f77e9f4ce2cc083889466d10a7c0c687bb83682091.js" integrity="sha256-xKtTYtCE/EKDSeL3fp9M4swIOIlGbRCnwMaHu4NoIJE=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.9927f7271e29990c78517d911ff44208ea0af9204541b35c9a557fb0daeaa7a8.js" integrity="sha256-mSf3Jx4pmQx4UX2RH/RCCOoK&#43;SBFQbNcmlV/sNrqp6g=" crossorigin="anonymous"></script>
 
 
 
@@ -2740,7 +2740,7 @@ parameters defined in prsizes.f90.  Some constants in prsizes are
 assessed  for the current problem; others are copied from default
 values in SIZES.f90.</p>
 <p>
-The user may override many of the parameter values in FSIZES  and prsizes  with  the  <a href="/docs/reference-manual/control-records/sizes/">$SIZES record</a>.  Any value specified by $SIZES will override both the default in SIZES.f90 and  the  value  that NM-TRAN would have specified.</p>
+The user may override many of the parameter values in FSIZES  and prsizes  with  the  <a href="/docs/reference-manual/control-records/sizes/">$SIZES record</a>.  Any value specified by <code>$SIZES</code> will override both the default in SIZES.f90 and  the  value  that NM-TRAN would have specified.</p>
 <p>
 As  of NONMEM 7.3, NMTRAN determines the maximum number of observation
 records (MDV=0) that occur in any subject, among all  data files  used
@@ -2750,10 +2750,10 @@ Thus, users no longer have to be conscientious of sizing the NO
 parameter. However, there is no  guarantee  that NMTRAN  will
 correctly assess NO for the entire scope of the control stream file
 for all types of problems.  Should  this  occur, NONMEM  may  issue an
-error, and the user will need to set the NO value with a $SIZES
+error, and the user will need to set the NO value with a <code>$SIZES</code>
 record.</p>
 <p>
-Constants that may be changed with $SIZES record:</p>
+Constants that may be changed with <code>$SIZES</code> record:</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2815,7 +2815,7 @@ values are high enough that all of the data may reside in memory
 without resorting to the buffer files.  For large data sets, buffer
 files are likely to be used.  The user may, however, select a LIM
 value that is different from that specified in sizes.f90, via the
-$SIZES record in the control stream file, e.g.:</p>
+<code>$SIZES</code> record in the control stream file, e.g.:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2941,14 +2941,14 @@ It is most desirable to set the LIM value that is the proper size for the run, s
 <ul>
 <li>MAXDREC= Largest number of data records in any one individual record (in any one subject)</li>
 <li>TOTDREC=total number of data records (lines) in largest data set to be used.</li>
-<li>NPNIND=Larger of MAXIDS and NPSUPP/NPSUPPE given on $NONP record.</li>
+<li>NPNIND=Larger of MAXIDS and NPSUPP/NPSUPPE given on <code>$NONP</code> record.</li>
 <li>NPROB=Total number of problems in the control stream.</li>
-<li>LVR=Largest number of ETAs in any problem (including those listed in $PRIOR)</li>
+<li>LVR=Largest number of ETAs in any problem (including those listed in <code>$PRIOR</code>)</li>
 </ul>
-<p>As of NM73, the values for MAXDREC and TOTDREC are assessed by NMTRAN, and the user may take advantage of NMTRAN’s evaluation by using the –maxlim option to the nmfe75 script (see below).  But NMTRAN may not always correctly assess these values.  Thus, it is best if the user ascertains these values ahead of time by inspection of his largest data set among all of the problems to be used by the control stream file, and the largest number of parameters to be used.  Then set the LIM values accordingly via the $SIZES record.</p>
+<p>As of NM73, the values for MAXDREC and TOTDREC are assessed by NMTRAN, and the user may take advantage of NMTRAN’s evaluation by using the –maxlim option to the nmfe75 script (see below).  But NMTRAN may not always correctly assess these values.  Thus, it is best if the user ascertains these values ahead of time by inspection of his largest data set among all of the problems to be used by the control stream file, and the largest number of parameters to be used.  Then set the LIM values accordingly via the <code>$SIZES</code> record.</p>
 <p>
 One can alternatively assess empirically whether file buffers are used, by beginning the run, allowing perhaps one iteration to transpire, then from another command window do a directory search for FILE*, (or WK* for worker files in parallelization problems, section  I.76 Parallel Computing (NM72)
-If any of the FILExx do not have 0 size, then they are being used.  Interrupt the analysis, then increase the appropriate LIM value with the $SIZES record, delete the FILE* in case some remain due to a ctrl-C interrupt, rerun the problem, and look again for any non-zero sized FILE* again.  Repeat as needed.</p>
+If any of the FILExx do not have 0 size, then they are being used.  Interrupt the analysis, then increase the appropriate LIM value with the <code>$SIZES</code> record, delete the FILE* in case some remain due to a ctrl-C interrupt, rerun the problem, and look again for any non-zero sized FILE* again.  Repeat as needed.</p>
 <p>
 By default (-maxlim=0), NMTRAN will set the LIM values to those listed in sizes.f90, or to the minimum required, whichever is larger.  As of NM73, if you set –maxlim=1 on the command line, then LIM1, LIM3, LIM4, LIM13, and LIM15 (those used during estimation, and therefore by workers in a parallelization problem), will be set to the size needed to assure no buffer files are used, and everything is stored in memory, for the particular prolem.  If you set –maxlim=2, then LIM1, LIM2, LIM3, LIM4, LIM5, LIM6, LIM7, LIM8, LIM10, LIM11, LIM13, LIM15, and LIM16 are also sized to what is needed to assure that buffer files are not needed.</p>
 <p>

@@ -64,7 +64,7 @@ function we must seek a balance between the prior term and the
 likelihood term. This is why the prior term is also referred to as
 penalty or regularization for MLE.
 
-NONMEM provides $PRIOR control record to specify the prior. For
+NONMEM provides ~$PRIOR~ control record to specify the prior. For
 example, one can use
 #+begin_src perl
 $PRIOR TNPRI
@@ -176,26 +176,26 @@ two-compartment model example
 
 #+INCLUDE: "../../examples/bayes_twocpt/w15.ctl" src perl
 
-We use [[file:/docs/reference-manual/api/subroutines/#nwpri][NWPRI]] in $PRIOR to indicate that
+We use [[file:/docs/reference-manual/api/subroutines/#nwpri][NWPRI]] in ~$PRIOR~ to indicate that
 the priors will be given manually through prior-specification control
-records. Specifically, the $THETAP specifies that all elements of \(\theta\)
+records. Specifically, the ~$THETAP~ specifies that all elements of \(\theta\)
 has a normally-distributed prior with mean at 2.0. Note that this is
 not the prior mean for the individual PK parameters as they follow
-log-normal distribution. The $THETAPV record specifies an diagonal covariance matrix
+log-normal distribution. The ~$THETAPV~ record specifies an diagonal covariance matrix
 for the \(\theta\) prior, and each \(\theta\) has a very large prior
 variance [fn:2], showing the lack of prior information on \(\theta\).
 
-Similarly, $OMEGAP/$OMEGAPD, $SIGMAP/$SIGMAPD specify the elements and
+Similarly, ~$OMEGAP~ and ~$OMEGAPD~, ~$SIGMAP~ and ~$SIGMAPD~, specify the elements and
 degrees of freedom for OMEGA and SIGMA, respectively. The priors for
 the two matrices follow inverse Wishart distribution.
 
 Note that before using NUTS, we first do a short (NITER=0) Iterative
 Two Stage (ITS) MLE run. This is to prepare position the sampler so
 that the sampling is initiated in a reasonable proximity in the
-posterior distribution (recall that the concatenate $EST records means
+posterior distribution (recall that the concatenate ~$EST~ records means
 the estimation uses the previous run's results as starting point).
 
-For the $EST METHOD=NUTS record, we see that there are 1000 samples
+For the ~$EST METHOD=NUTS~ record, we see that there are 1000 samples
 (NITER). That is, each unknown parameter will be sampled 1000 times.
 These samples will be stored in the ".ext" file. BAYES_PHI_STORE=1
 means in addition to \(\theta, \Omega, \Sigma)\) we also requesting

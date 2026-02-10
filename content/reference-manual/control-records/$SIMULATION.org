@@ -22,32 +22,32 @@
 
 ** Discussion
 Optional.  Requests  that  the  NONMEM Simulation Step be implemented.
-May also be coded $SIMULATE or $SIML. The simulation (see NOPREDICTION
+May also be coded ~$SIMULATE~ or ~$SIML~. The simulation (see NOPREDICTION
 option for an exception) generates the ~Y~ variable (with NMTRAN
 abbreviated code) or the ~F~ variable (with a user-supplied  PRED  or
 ERROR routine) using the initial parameter estimates specified in
-$THETA, $OMEGA, $SIGMA. Thus initial estimates must be given for all
+~$THETA~, ~$OMEGA~, ~$SIGMA~. Thus initial estimates must be given for all
 parameters.
 
 The interpretation of ETAs depends on the control records and options provided:
-  - if the $ESTIM (or $SIMUL) and ~$SIMUL [LIKELIHOOD | -2LOGLIKELIHOOD]~ option are
+  - if the ~$ESTIM~ (or ~$SIMUL~) and ~$SIMUL [LIKELIHOOD | -2LOGLIKELIHOOD]~ option are
     used, ETAs are for population data;
-  - if the $ESTIM (or $SIMUL) is used, ~$SIMUL [LIKELIHOOD | -2LOGLIKELIHOOD]~ option is
+  - if the ~$ESTIM~ (or ~$SIMUL~) is used, ~$SIMUL [LIKELIHOOD | -2LOGLIKELIHOOD]~ option is
     not used but EPS is used, ETAs are for population data;
-  - if the $ESTIM (or $SIMUL) is used, neither ~[LIKELIHOOD | -2LOGLIKELIHOOD]~
+  - if the ~$ESTIM~ (or ~$SIMUL~) is used, neither ~[LIKELIHOOD | -2LOGLIKELIHOOD]~
     option or EPS is used, ETAs are for single-subject data;
   - With option ~NOPREDICTION~ (see below)
 
 In addition to this control record,
 a [[file:/docs/reference-manual/abbr/#simulation-block]["simulation block"]]
-(executed when ICALL=4) can be used in $PK, $ERROR, and $PRED for simulation.
+(executed when ICALL=4) can be used in ~$PK~, ~$ERROR~, and ~$PRED~ for simulation.
 
 Internally the simulation of ETA and EPS are performed by [[file:/docs/reference-manual/api/subroutines/#simeta][SIMETA]] and
 [[file:/docs/reference-manual/api/subroutines/#simeps][SIMEPS]] routines, respectively.
 
 ** Options
 Each parenthese defines an instance of pseudo random number generator
-(pRNG). The pRNGs are ordered as defined on the $SIMUL record.  User
+(pRNG). The pRNGs are ordered as defined on the ~$SIMUL~ record.  User
 can use NONMEM [[file:/docs/reference-manual/api/subroutines/#random][utility routine RANDOM]] to access the pRNG.  By default,
 the first pRNG is for the simulating ETA and EPS and not available to
 the user. This can be changed with the SOURCE_EPS option below.
@@ -68,7 +68,7 @@ Specifies distribution used by the pseudo-random number generator
 (pRNG) of the source. NORMAL (default) indicates normal distribution
 with mean 0 and variance 1 (unless the source is "1" that is used to
 generate ETA and EPSILON, in which  case  the  variance-covariance  of
-these  variables  is  that  specified in the $OMEGA and $SIGMA
+these  variables  is  that  specified in the ~$OMEGA~ and ~$SIGMA~
 records). UNIFORM indicates uniform distribution on [0,1].
 
 NONPARAMETRIC indicates that the first source defined with the NONPARAMETRIC attribute are used to generate realizations of  random vectors  from a (multivariate) nonparametric distribution on ETA, obtained from the Nonparametric Step of an earlier  problem.   An input  MSF  must also be present.  It is understood that the ETAs are to be simulated from the  nonparametric  distribution  rather than  from  the  pseudo-normal  distribution  associated with the first source.  The NONPARAMETRIC attribute can only  be  used  in the definition of the second or subsequent source.
@@ -112,7 +112,7 @@ function  on  these  data.   WRES values in tables and scatterplots
 will be 0.  PRED-defined data items  in  tables  and scatterplots
 will  be  computed using simulated ETAs and initial THETAs.
 
-$ESTIM, $COV and $NONP cannot be used with ONLYSIMULATION. See also the PREDICTION and NOPREDICTION options.
+~$ESTIM~, ~$COV~ and ~$NONP~ cannot be used with ONLYSIMULATION. See also the PREDICTION and NOPREDICTION options.
 
 *** SUBPROBLEMS=n
       Requests that the entire NONMEM problem is to be repeated n times
@@ -184,7 +184,7 @@ population ETAs, even if EPSILONs do not appear.
       and the final estimates with the previous run  are  used  as  the
       initial  estimates  in  all tasks other than the simulation.  The
       UCP used with these other tasks are the same as with the previous
-      run.   This  is  the default.  May not be used with $MSFI in conjunction with SUBPROBLEMS=n (n > 1).
+      run.   This  is  the default.  May not be used with ~$MSFI~ in conjunction with SUBPROBLEMS=n (n > 1).
 
 - TRUE=FINAL:
       An input model specification file must be used.  The final  estimates  with  the  previous  run  are used as the parameter values
@@ -360,7 +360,7 @@ data set.
       and REWIND options give the same results.
 
       Keep in mind that transgeneration performed on the data set using
-      $INFN  with  ICALL=1  affects  the  original  data  set and these
+      ~$INFN~  with  ICALL=1  affects  the  original  data  set and these
       changes are unaffected by   REWIND  and  NOREWIND  options.   For
       example:
       #+begin_src perl
@@ -373,14 +373,14 @@ data set.
       #+end_src
 
 *** SUPRESET|NOSUPRESET
-      This  option  affects seeds for random sources when a $SIMULATION
-      record is included in the scope of a $SUPER problem.  The  SUPRESET  option requests that, with subsequent iterations of a superproblem, the seed(s) for all random sources  are  reset  back  to
-      that listed in the $SIMULATION record of the control stream file.
+      This  option  affects seeds for random sources when a ~$SIMULATION~
+      record is included in the scope of a ~$SUPER~ problem.  The  SUPRESET  option requests that, with subsequent iterations of a superproblem, the seed(s) for all random sources  are  reset  back  to
+      that listed in the ~$SIMULATION~ record of the control stream file.
       This is the default.  With NONMEM 7.4, the NOSUPRESET option  may
       be used to prevent resetting the random seeds, so that each iteration serves as a new random instance.
 
 *** RANMETHOD=[n|S|m|P]
-As of NM73, the RANMETHOD option is available for the $SIM record, to
+As of NM73, the RANMETHOD option is available for the ~$SIM~ record, to
 use alternative random numbers generators (default is NONMEM’s
 traditional one, number 4):
 
@@ -396,10 +396,10 @@ $SIM PARAFILE=ON RANMETHOD=P
 
 Before NM74, a P descriptor could be given without an error message,
 but it was ignored because the parallel random number generation for
-each individual was not yet developed for $SIM.
+each individual was not yet developed for ~$SIM~.
 
-NONMEM’s default random number generator for the $SIM step is 4 (in
-contrast, default random number generator for $EST and $TABLE is 3).
+NONMEM’s default random number generator for the ~$SIM~ step is 4 (in
+contrast, default random number generator for ~$EST~ and ~$TABLE~ is 3).
 Number 4 is NONMEM’s classic random number generator.  Whatever random
 number source is selected, it affects all seed1 sources, and all
 source seed2 if not also selecting P.  The P descriptor sets initial
@@ -415,21 +415,22 @@ multi-dimensional spaces.
 (See also [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
 
 *** PARAFILE=filename
-      As  of  NONMEM 7.4, the Simulation Step computation may be parallelized.  by default. By default, parallelization is  not  turned
-      on,  because  simulation is very rapid anyway, and often does not
-      need to be accelerated.  When modeling with super-ID  nested  ETA
-      levels  ($LEVEL  record  is  present),  parallelization  will not
-      occur, since these ETAs are shared across individuals, and  there
-      is  no  guarantee that all subjects sharing the same ETAs will be
-      simulated by the same process.
-      PARAFILE=filename specifies a different parafile  than  was  used
-      for the previous step.
-      PARAFILE=ON turns on parallelization for the Simulation Step.
-      Set RANMETHOD=P to permit assure consistient seed patterns
-      regardless of whether or not parallelization is performed.  E.g.,
-      $SIML ... PARAFILE=ON RANMETHOD=P
-      PARAFILE=OFF turns off parallelization for the Simulation
-      Step.  This is the default.
+As  of  NONMEM 7.4, the Simulation Step computation may be
+parallelized.  by default. By default, parallelization is  not  turned
+on,  because  simulation is very rapid anyway, and often does not need
+to be accelerated.  When modeling with super-ID  nested  ETA levels
+(~$LEVEL~  record  is  present),  parallelization  will not occur,
+since these ETAs are shared across individuals, and  there is  no
+guarantee that all subjects sharing the same ETAs will be simulated by
+the same process. PARAFILE=filename specifies a different parafile
+than  was  used for the previous step. PARAFILE=ON turns on
+parallelization for the Simulation Step. Set RANMETHOD=P to permit
+assure consistient seed patterns regardless of whether or not
+parallelization is performed,  e.g.,
+#+begin_src perl
+$SIML ... PARAFILE=ON RANMETHOD=P
+#+end_src
+The default ~PARAFILE=OFF~ turns off parallelization for the Simulation Step.
 
 *** OMITTED
-      The Simulation Step is not implemented.
+The Simulation Step is not implemented.

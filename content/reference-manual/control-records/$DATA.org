@@ -24,7 +24,7 @@
 This  record  specifies  the data set to be used.  It is required with
 the first problem specification.  It must precede  any  other  NM-TRAN
 control  record  that refers to specific data item types.  May also be
-coded $INFILE.
+coded ~$INFILE~.
 
 It optional with the second or subsequent problems.
 If omitted, NONMEM re-uses the data set from the previous problem.
@@ -48,23 +48,21 @@ the file is opened by NM-TRAN, filename may contain embedded spaces if
 it is enclosed in quotes, and may  contain  at most  80  characters.
 If the file is opened by NONMEM, the filename may not contain
 embedded spaces, and may contain at most  71 characters.   If
-filename is the same as any option of the $DATA record, it must be
+filename is the same as any option of the ~$DATA~ record, it must be
 enclosed in quotes.
 
-"*" may be coded in a problem subsequent to the  first.   This  has
-the  same  effect as omitting the $DATA record (NONMEM is told to
-re-use the previous data set), but allows the CHECKOUT option  to be
-included.  With *, no other option may be included.
+One may use ~*~ in a problem subsequent to the first to omit the ~$DATA~ record (NONMEM is told to
+re-use the previous data set). It allows no other option except ~CHECKOUT~.
 
 *** (format)
 The format refers to a FORTRAN format specification to be used by NONMEM
 to read the NONMEM data records.  Note that this specification is to be
-enclosed in parentheses.  Format codes F, E, and X may be used, but not I.
+enclosed in parentheses.  Format codes ~F~, ~E~, and ~X~ may be used, but not ~I~.
 The format will also be used by NONMEM to read the NONMEM data records,
 after it had been modified to account for
 generated data items.
 If a format is provided, the label
-DROP cannot be used, and the WIDE and NULL options may not be used.
+~DROP~, the ~WIDE~ option, or the ~NULL~ option, may not be used.
 If a format is omitted, the NONMEM records can still be read, and a format
 specification which is appropriate for reading
 the NONMEM data records will be generated.
@@ -98,14 +96,14 @@ and puts this number in the NONMEM control file.
 In particular, the ID label may be used (or alternatively, the option
 may be coded =RECORDS=IR=, =RECORDS=INDREC=,
 or =RECORDS=INDIVIDUALRECORD=).
-If a label other than ID is used, the $INPUT record must precede the
-$DATA record.  If the data are single-subject data,
+If a label other than ID is used, the ~$INPUT~ record must precede the
+~$DATA~ record.  If the data are single-subject data,
 the ID data items used to determine the data records for the problem are
 those labeled ID (not .ID.).
 
-If there is more than one problem specification with a $DATA record that
+If there is more than one problem specification with a ~$DATA~ record that
 includes an option of the form =RECORDS==label, then either none of these
-$DATA records may also include a format specification, or all of them must
+~$DATA~ records may also include a format specification, or all of them must
 include the same format specification.
 
 *** LRECL=n2
@@ -163,7 +161,7 @@ records.
       IGNORE=(OCC==1.0000E+00).
       #+end_src
       With NONMEM 7 the default format for the table file is PE11.4, as
-      in the examples above.  The FORMAT option of $TABLE may  be  used
+      in the examples above.  The FORMAT option of ~$TABLE~ may  be  used
       to  change  this and the values used in a subsequent  IGNORE will
       have to be changed accordingly.
       The .NEN. and .EQN.  operators  that  are  described  above  will
@@ -184,7 +182,7 @@ records.
       No format specification is permitted with this form of IGNORE.
 
       A data item type may be dropped from the NONMEM data set by means
-      of the DROP or SKIP synonym on the $INPUT record,  after  records
+      of the DROP or SKIP synonym on the ~$INPUT~ record,  after  records
       are  dropped  due  to  a  condition  based on the data item type.
       E.g.,
       #+begin_src perl
@@ -224,9 +222,9 @@ IGNORE list but may be used with the IGNORE=c option.
 :PROPERTIES:
 :CUSTOM_ID: pred_ignore_data_option
 :END:
-The $DATA IGNORE=(list) and ACCEPT=(list) provide a limited means of filtering the input data set, which is performed by NMTRAN.  To provide more elaborate filtering for excluding data, PRED can instruct NONMEM to filter out additional data records at the beginning of the run or problem.
+The ~$DATA IGNORE=(list)~ and ~$DATA ACCEPT=(list)~ options provide a limited means of filtering the input data set, which is performed by NMTRAN.  To provide more elaborate filtering for excluding data, PRED can instruct NONMEM to filter out additional data records at the beginning of the run or problem.
 
-This is done by creating a PRED_IGNORE_DATA_TEST==1 IF block presented in $INFN, $PK, or $PRED. For eample:
+This is done by creating a ~PRED_IGNORE_DATA_TEST==1 IF~ block presented in ~$INFN~, ~$PK~, or ~$PRED~. For eample:
 #+begin_src perl
 $INFN
 IF(PRED_IGNORE_DATA_TEST==1) THEN
@@ -246,12 +244,12 @@ PRED_IGNORE_DATA=0
 RETURN ;# Assures no additional code in PRED is executed (saves time)
 ENDIF
 #+end_src
-If PRED_IGNORE_DATA is set to a non-zero value, then the data record
+If ~PRED_IGNORE_DATA~ is set to a non-zero value, then the data record
 is ignored, and excluded from the internal data set.  This allows the
 user to use more complex, multi-line and FORTRAN syntax based, logical
 operations on data record exclusions.
 
-When PRED_IGNORE_DATA_TEST=1, then ICALL is set to -1.  the following variables have properly defined values during this call:
+When ~PRED_IGNORE_DATA_TEST=1~, then ~ICALL~ is set to -1.  the following variables have properly defined values during this call:
 #+begin_src perl
 NEWIND, NEWL2,IPROB, NPROB, S1NUM, S2NUM, S1NIT, S2NIT, S1IT, S2IT
 #+end_src
@@ -265,9 +263,10 @@ IF(IPROB==2.AND.PRED_IGNORE_DATA_TEST==1) THEN
 ENDIF
 #+end_src
 
-No other variables are properly defined during PRED_IGNORE_DATA_TEST=1, such as THETAS, data record information such as NIREC, NDREC, etc., and no calls to complicated functions that  such as RANDOM() will be valid (simple functions, such as built-in FORTRAN functions, are fine).  Furthermore, changes to data items may not be made during this call.  Any other functions of $INFN, such as data modification, RANDOM() calls, etc., should be made with separate ICALL==0 or ICALL==1 blocks.
+No other variables are properly defined during ~PRED_IGNORE_DATA_TEST=1~, such as THETAS, data record information such as NIREC, NDREC, etc., and no calls to complicated functions that  such as ~RANDOM()~ will be valid (simple functions, such as built-in FORTRAN functions, are fine).  Furthermore, changes to data items may not be made during this call.  Any other functions of ~$INFN~, such as data modification, ~RANDOM()~ calls, etc., should be made with separate ~ICALL==0~ or ~ICALL==1~ blocks.
 
-If the user write his own INFN routine in which PRED_IGNORE_DATA code is constructed, then NONMEM needs to be informed with the PRED_IGNORE_DATA option in $DATA.  For example:
+If the user write his own INFN routine in which ~PRED_IGNORE_DATA~
+code is constructed, then NONMEM needs to be informed with the ~$DATA PRED_IGNORE_DATA~ option.  For example:
 #+begin_src perl
 $PROB  THEOPHYLLINE   POPULATION DATA
 $INPUT      ID DOSE=AMT TIME CP=DV WT
@@ -292,17 +291,17 @@ with =myinfn.f90=
   RETURN
   END
 #+end_src
-If  PRED_IGNORE_DATA_TEST and PRED_IGNORE_DATA are used only in verbatim code, it
-is also necessary to code the PRED_IGNORE_DATA option in $DATA.
+If  ~PRED_IGNORE_DATA_TEST~ and ~PRED_IGNORE_DATA~ are used only in verbatim code, it
+is also necessary to code the ~$DATA PRED_IGNORE_DATA~ option.
 
 *** NULL=c2
-Specifies  that null data items in the NM-TRAN data set are to be
-replaced in the NONMEM data  set  by  the  character  c2.   E.g.,
-NULL=0. Null data items consist of a single dot (.) or consecutive
-commas or consecutive tab characters.  c2 may be  any  character
-except space (" ") or semicolon (";"). Also  permitted: NULL='c' or
-NULL="c", where c may be any charac- ter. If omitted,
-NM-TRAN replaces  each  null  with  a space. Default: null/blank.
+Default to null/blank, the option specifies a character ~c2~ that will
+replace null data items in the NM-TRAN data,  e.g.
+~NULL=0~. Null data items consist of a single dot ~.~ or consecutive
+commas or consecutive tab characters.  ~c2~ may be  any  character
+except space (" ") or semicolon (";"). Also  permitted: ~NULL='c'~ and
+~NULL="c"~, where ~c~ may be any character. If omitted,
+NM-TRAN replaces  each  null  with  a space.
 
 *** NOWIDE | WIDE
 NOWIDE requests  that  NM-TRAN  attempt  to  limit FDATA to
@@ -317,19 +316,18 @@ be no FINISH (FIN) record in the NONMEM data set.
 =NOREWIND= specifies that the file is not to be
 rewound before it is read, and =REWIND= specifies that the file is to be
 rewound.
-These options are ignored if used on the $DATA record appearing in the first
-problem specification of the NONMEM control stream, or on a $DATA record
+These options are ignored if used on the ~$DATA~ record appearing in the first
+problem specification of the NONMEM control stream, or on a ~$DATA~ record
 appearing in a subsequent problem specification when this record contains a
-file name different from that contained on the $DATA record of the prior
+file name different from that contained on the ~$DATA~ record of the prior
 problem specification.  In these cases the file is automatically rewound.
 These options are relevant only when there are
 multiple problem specifications in the NONMEM control stream, and when the
-$DATA records appearing in two consecutive problem specifications, corresponding
+~$DATA~ records appearing in two consecutive problem specifications, corresponding
 to two problems A and B, contain the
 same file name.  In this situation:
 
-When the =REWIND= option is used on the
-the $DATA record for problem B, the
+When the ~$DATA REWIND~ option is used for problem B, the
 first NONMEM data set on the file is re-used for problem B.
 If NONMEM does not modify this data set,
 then an instruction to rewind the (same) file is also contained in the
@@ -340,14 +338,13 @@ after the last NONMEM data set already present on FDATA, and no instruction to
 rewind FDATA is contained in the NONMEM control stream problem specification
 for problem B.
 
-If the =NOREWIND= option is used on
-the $DATA record for problem B, or neither option is used, then the file is not
+If the ~$DATA NOREWIND~ options is used for problem B, or neither option is used, then the file is not
 rewound, and the NONMEM data set on this file that follows the one used for
-problem A is used for problem B.  In this case note that the $DATA
+problem A is used for problem B.  In this case note that the ~$DATA~
 record with problem A must have contained the =RECORDS= option or the
 NONMEM data set used for problem A must end with a FINISH record.
 Also in this case, no instruction to rewind the file containing the NONMEM
-data set for problem B (whether this file is the file named in the $DATA record or whether
+data set for problem B (whether this file is the file named in the ~$DATA~ record or whether
 it is FDATA) is contained in the NONMEM control stream problem specification
 for problem B.
 
@@ -356,11 +353,11 @@ for problem B.
 Requests  that  NONMEM implement the data checkout mode, in which the
 PRED  routine  is  not  called  and  predictions,  residuals, weighted
 residuals and the objective function are not computed. May also be
-coded CHECKDATA.  No tasks other than $TABLE or $SCAT can be
+coded CHECKDATA.  No tasks other than ~$TABLE~ or ~$SCAT~ can be
 specified. With NONMEM 7.5, an additional file, FDATA.csv is  produced
 that outputs  the contents of its input data file (typically FDATA) in
 a comma delimited file format, so you can check how NONMEM interprets
-the  input data.  If the REPL option of $DATA or the REPL_ data item
+the  input data.  If the ~$DATA REPL~ option or the ~REPL_~ data item
 is used, the replicated form of the data will appear in FDATA.csv.
 
 *** NOOPEN
@@ -437,7 +434,7 @@ coded in full.
 
 *** MISDAT=r (NM74)
 A numerical value indicating a missing data  value  in  the  data set,
-which  is  displayed on $TABLE table outputs, but is safely
+which  is  displayed on ~$TABLE~ table outputs, but is safely
 interpreted as 0 by other steps of NONMEM. May be used up  to  20
 times. Example:
 #+begin_src perl
@@ -507,7 +504,7 @@ CID TIME    AMT  RATE EVID MDV DV    REPL_
 #+end_src
 data of subject 1 will be replicated 2 times within NONMEM, and data of subject 2 will be replicated 3 times.  The ID values of the replicates will be 1.00, 1.01, 2.0, 2.01, 2.02.
 
-Using the $DATA REPL option along with the REPL_ data item such as:
+Using the ~$DATA REPL~ option along with the ~REPL_~ data item such as:
 #+begin_src perl
 $INPUT ID TIME  AMT  RATE EVID MDV DV  REPL_
 $DATA warfarin.dat ignore=C REPL=100
@@ -520,7 +517,7 @@ longer than another to compute during estimation,  this pattern allows
 the best load balancing for  parallelization.
 
 the DV patterns will be identically replicated as well, so replicated
-data templates make sense only if you will be using $SIML or $DESIGN
+data templates make sense only if you will be using ~$SIML~ or ~$DESIGN~
 to subsequently create the unique DV patterns for each replicated
 subject.
 
@@ -533,8 +530,7 @@ subject.
       of  FDATA.csv  can  cause  a long period of data file loading and
       processing at the beginning of a run, if the FDATA file  is  very
       large  (such  as  >1 MB).  As of nm760, the creation of this file
-      can be prevented by adding the option  NOFDATACSV  on  the  $DATA
-      record.
+      can be prevented by adding the ~$DATA NOFDATACSV~ option.
 
  Another  change  in  NONMEM  VI  2.0 is that tab characters (and other
  characters that are smaller than blank  in  the  computer's  collating
@@ -551,5 +547,5 @@ subject.
 
 [fn:2] Note that the NONMEM data set is typically the file FDATA
 generated  by  NM-TRAN.  If there is nothing for NM-TRAN to change and
-the format is supplied on the $DATA record, the file named on the
-$DATA  record  is  the  NONMEM data set.
+the format is supplied on the ~$DATA~ record, the file named on the
+~$DATA~  record  is  the  NONMEM data set.

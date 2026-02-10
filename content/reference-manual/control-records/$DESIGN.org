@@ -67,14 +67,14 @@ points  appropriate for a particular sub-design, etc. The design
 algorithms have been modeled after POPED by Hooker et  al.,  and  PFIM
 by Mentre et al. (see references [22-27]) in Introduction to NONMEM 7.
 
-Another name for the record is $OPTDESIGN, or $OPT.
+Another name for the record is ~$OPTDESIGN~, or ~$OPT~.
 
 The  following is a brief summary of the options.  See Introduction to
 NONMEM 7 "Clinical Trial Design Evaluation and Optimization" for  more
 details  and examples.  The options are grouped into the following
 sections:
-- $DESIGN Record Options
-- Additional Control Options for $DESIGN
+- ~$DESIGN~ Record Options
+- Additional Control Options for ~$DESIGN~
 - Options for Setting up Types of Optimal Design
 
 ** $DESIGN Record Options
@@ -271,10 +271,7 @@ OMEGA() fixed to 0 will be analytically evaluated.
   fim.calc.type=4 in POPED, and diagonal option in PFIM.
 
 *** EOPTD=1
-EOPTD=1 by default. For each iteration, this creates a random sample of  THETAs,
-           OMEGAs,  or  SIGMAs,  using  the  prior information.  $PRIOR
-           NWPRI prior information is required, and PLEV=0.999 must  be
-           specified.  Best used with STGR. See example optdesign16.
+EOPTD=1 by default. For each iteration, this creates a random sample of  THETAs, OMEGAs,  or  SIGMAs,  using  the  prior information.  ~$PRIOR NWPRI~ prior information is required, and PLEV=0.999 must  be specified.  Best used with STGR. See example optdesign16.
 
 *** SEED
 Default: 223345. Set  the starting seed for any random samples to be
@@ -312,8 +309,8 @@ assessed. If FIMDIAG>0, then a y-expectation covariance will be
 evaluated, but mode will be evaluated with the simulated data.
 
 ** Additional Control Options
-The  following  options may be set within the $DESIGN record, and they
-operate exactly as their counterparts  in  the  $EST  record. Thus,
+The  following  options may be set within the ~$DESIGN~ record, and they
+operate exactly as their counterparts  in  the  ~$EST~  record. Thus,
 the following are equivalent:
 #+begin_src perl
   $DESIGN FIMDIAG=1 OFVTYPE=6 APPROX=FO
@@ -379,20 +376,20 @@ for optimal design and design evaluation.
 
 Note the usual variance-covariance intended for an actual data set is
 not created, but rather the asymptotic, y-expectation evaluation
-version, since the $DESIGN record was specified.  Much of the control
+version, since the ~$DESIGN~ record was specified.  Much of the control
 stream setup is as is if one were performing an FO estimation analysis
-on a real data set, while the addition of the $DESIGN record then
+on a real data set, while the addition of the ~$DESIGN~ record then
 re-purposes the analysis for design evaluation (or optimization if
 MAXEVAL>0).
 
 View the standard error and variance-covariance outputs in the NONMEM
 report file, .ext file, .cov, .cor, and .coi files.  For optimal
 design, you can view the final optimal design in the final data set,
-which can be outputted with the $TABLE step (see Examples for Optimal
+which can be outputted with the ~$TABLE~ step (see Examples for Optimal
 Design).
 
 ** Options for Setting up Types
-The  additional options for $DESIGN listed below are for optimizing
+The  additional options for ~$DESIGN~ listed below are for optimizing
 parts of the design  components.   For  example,  the  DESEL,
 DESELSTRAT, DESELMIN, DESELMAX can be specified for all the various
 design elements that you want optimized.  It  might  be  TIME for
@@ -470,16 +467,15 @@ All  the above four   DESEL  items  must  be  specified. They  may be repeated f
   - STRATF=label: The  data  item (column) containing starting fraction representation for the stratification value in column STRAT. If STRAT and STRATF are specified, and there is at least one STRAT  value  >0,  then  the SRATF values are optimized, and represent the weight to the contribution of that subject  to the  Information  matrix.   For  STRAT<=0, then their STRATF values are not optimized, and remain fixed at their  initial values,  but  are  still  used as weights to the information matrix.  It is up to the user to  ensure  that  the  sum  of STRATF  values  among unique STRAT values sum to 1. If value of STRATF<0.0, then that subject  is  not  included  in  the assessment.
 
 ** Additional $COVARIANCE Control Options
-In  addition,  $DESIGN  sets  up  the covariance step as  [[file:/docs/reference-manual/control-records/covar/][$COVARIANCE]] MATRIX=R
- UNCONDITIONAL without the user requiring this record  entered  in  the
- control  stream.   If  you  wish to specify additional control for the
- covariance, you can add these in a $COV record, such as:
+~$DESIGN~  sets  up  the covariance step [[file:/docs/reference-manual/control-records/covar/][$COVARIANCE]] with option
+ ~MATRIX=R UNCONDITIONAL~.  To specify additional controls,
+ add in a ~$COV~ record, such as:
  #+begin_src perl
  $DESIGN FIMDIAG=1 OFVTYPE=6 APPROX=FO MAXEVAL=9999 NOHABORT PRINT=20 SIGL=10 POSTHOC
  $COV PRINT=E
  #+end_src
 ** Record order
- Same as $ESTIMATION or $SIMULATION
+ Same as ~$ESTIMATION~ or ~$SIMULATION~.
 
 ** References
 Guide Introduction_7

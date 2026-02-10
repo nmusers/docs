@@ -24,7 +24,7 @@ Supplies initial estimates for an entire problem.
 
 ** Discussion
 Any initial settings of THETA, OMEGA, and SIGMA set by
-[[file:/docs/reference-manual/control-records/estimation/#method-chain][$EST METHOD=CHAIN]] are only applied to the Estimation Step.  The $SIML command will not be affected, and will still use the initial settings given in $THETA, $OMEGA, and $SIGMA statements, or from an $MSFI file. To introduce initial THETAs OMEGAs and SIGMAs that will cover the entire scope of a given problem,  use the $CHAIN record:
+[[file:/docs/reference-manual/control-records/estimation/#method-chain][$EST METHOD=CHAIN]] are only applied to the Estimation Step.  The ~$SIML~ command will not be affected, and will still use the initial settings given in ~$THETA~, ~$OMEGA~, and ~$SIGMA~ statements, or from an ~$MSFI~ file. To introduce initial THETAs OMEGAs and SIGMAs that will cover the entire scope of a given problem,  use the ~$CHAIN~ record:
 
 #+begin_src perl
 $CHAIN FILE=example1_previous.txt NSAMPLE=0
@@ -32,10 +32,15 @@ $CHAIN FILE=example1_previous.txt NSAMPLE=0
 #+end_src
 
 ** Options
-The following options are available for $CHAIN, and have the same actions as for $EST METHOD=CHAIN:  FILE, NSAMPLE, ISAMPLE, SEED, CLOCKSEED, RANMETHOD, FORMAT, ORDER, CTYPE, DF, DFS, IACCEPT, NOLABEL, NOTITLE.  Setting SEED or RANMETHOD in a $CHAIN record does not propagate to $EST METHOD=CHAIN or any other $EST record.
+The following options are available for ~$CHAIN~, and have the same
+actions as for ~$EST METHOD=CHAIN~:
+#+begin_src f90
+FILE, NSAMPLE, ISAMPLE, SEED, CLOCKSEED, RANMETHOD, FORMAT, ORDER, CTYPE, DF, DFS, IACCEPT, NOLABEL, NOTITLE
+#+end_src
+Setting ~SEED~ or ~RANMETHOD~ in a ~$CHAIN~ record does not propagate to ~$EST METHOD=CHAIN~ or any other ~$EST~ record.
 
-ISAMPEND (NM73) has a different action with $CHAIN than with $EST METHOD=CHAIN.
-If the option ISAMPEND is set to a value greater than ISAMPLE, then NONMEM uniformly randomly selects one of these samples between ISAMPLE and ISAMPEND.  This is particularly useful in combination with the SIML record:
+~ISAMPEND~ (NM73) has a different action with ~$CHAIN~ than with ~$EST METHOD=CHAIN~.
+If the option ~ISAMPEND~ is set to a value greater than ~ISAMPLE~, then NONMEM uniformly randomly selects one of these samples between ~ISAMPLE~ and ~ISAMPEND~.  This is particularly useful in combination with the ~$SIML~ record:
 
 #+begin_src perl
 $CHAIN FILE=test2.chn ISAMPLE=3 ISAMPEND=10 NSAMPLE=10 SEED=6234
@@ -71,6 +76,6 @@ empirical distribution of uncertainty of the parameters.  In general
 sampling is performed between the larger of ISAMPLE and the lowest
 iteration (sample) number of a raw output file, and the smaller of
 ISAMPEND and the largest iteration number in the file.  So, it is safe
-to make ISAMPEND=1000000 for example, to cover most Bayesian sample
-set sizes.  If ISAMPEND is specified in the $CHAIN record, then
-$SIML’s TRUE=PRIOR will be ignored.
+to make ~ISAMPEND=1000000~ for example, to cover most Bayesian sample
+set sizes.  If ISAMPEND is specified in the ~$CHAIN~ record, then
+~$SIML TRUE=PRIOR~ will be ignored.

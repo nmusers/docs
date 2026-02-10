@@ -23,7 +23,7 @@ This record gives initial estimates and constraints for elements of
 one or several blocks of the OMEGA matrix, i.e., the matrix of
 variances and  covariances  of  the  ETA  variables  in the
 statistical model.  This record should appear only if the statistical
-model  contains  ETA  variables. Multiple  $OMEGA  records  may  be
+model  contains  ETA  variables. Multiple  ~$OMEGA~  records  may  be
 used  to define multiple blocks of OMEGA.  The order of the appearance
 of all  blocks  over  all  records corresponds to the order of the
 blocks in OMEGA.
@@ -54,7 +54,7 @@ Each initial estimate may optionally be coded  with  one  of  the forms:
   init options      (init options)        (options init)
 #+end_src
 NONMEM v7.3+ supports ~(value,value...)xn~ for repeated
-entries of $OMEGA may be entered easily.   Any  initial  value  or
+entries of ~$OMEGA~ may be entered easily.   Any  initial  value  or
 group  of  initial values may be enclosed in parentheses and followed
 by ~xn~ to indicate ~n~ replications of the values.
 
@@ -162,7 +162,7 @@ the diagonal and the subdiagonals are constrained to be zero.  To
 specify the initial estimates of such  a block,  the  initial
 estimates  of those elements that are to be constrained to 0 should be
 given as 0, while  all  other  initial estimates  should  be  given as
-nonzero.  E.g., with these structures for $OMEGA BLOCK(3), the 0's are
+nonzero.  E.g., with these structures for ~$OMEGA BLOCK(3)~, the 0's are
 preserved:
 
 #+begin_src perl
@@ -184,21 +184,22 @@ NONMEM  report  file  will  indicate that this was done. E.g.,
 
 *** BLOCK(n) SAME(m)
 #+begin_src perl
-$OMEGA BLOCK(n) SAME(m)
+  $OMEGA BLOCK(n) SAME(m)
 #+end_src
 This  describes a block whose initial estimates, as well as final
-      estimates, are constrained to be equal to those of the  preceding
-      block. Values may not be given. "(n)" may be omitted.
+estimates, are constrained to be equal to those of the  preceding
+block. Values may not be given. ~(n)~ may be omitted.
 
-With  NONMEM  7.3 (m) is permitted.  If (m) is present, then this
-      record is equivalent to m identical records without (m).  E.g.,
-      $OMEGA BLOCK(2) SAME(3)
-      is equivalent to
-      #+begin_src perl
-      $OMEGA BLOCK(2) SAME
-      $OMEGA BLOCK(2) SAME
-      $OMEGA BLOCK(2) SAME
-      #+end_src
+NONMEM v7.3+ allows ~(m)~ so that the record is equivalent to ~m~ identical records,  e.g.,
+#+begin_src perl
+  $OMEGA BLOCK(2) SAME(3)
+#+end_src
+is equivalent to
+#+begin_src perl
+  $OMEGA BLOCK(2) SAME
+  $OMEGA BLOCK(2) SAME
+  $OMEGA BLOCK(2) SAME
+#+end_src
 
 *** BLOCK(n) VALUES(diag,odiag)
 :PROPERTIES:
@@ -240,7 +241,7 @@ is a compact method of defining an ETA (an element of OMEGA)
 specifying its initial estimate, and specifying a label  for  the
 index  for this element of OMEGA.  The label may be used as a
 index for ETA in abbreviated code,  and  will  also  identify this
-element  of  OMEGA  in  the  NONMEM  output.  If new $OMEGA records
+element  of  OMEGA  in  the  NONMEM  output.  If new ~$OMEGA~ records
 change the ordering, the abbreviated code does  not  have to  be
 changed.  For example, suppose the first element of OMEGA that is
 defined happens to be
@@ -258,7 +259,7 @@ and ETA(CL) rather than ETA1 will appear in  the  NONMEM  report.
       MU_'s.
 
 For  example, suppose the following code is present for the first
-elements of THETA and ETA.  Note that $OMEGA and  $THETA  records must
+elements of THETA and ETA.  Note that ~$OMEGA~ and  ~$THETA~  records must
 be placed ahead of any records that use the symbolic label.
 #+begin_src perl
 $THETA CL=(0.0,7.0)

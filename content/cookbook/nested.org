@@ -6,9 +6,9 @@ The method in section is an improvement from NONMEM 7.4 and earlier
 but additionally standard errors to THETAs that reflect the variability in the highest random
 level, rather than at the lowest, subject level. It does this by pointing the MU referencing to
 the ETA of the highest random level, rather than at the individual level, and preventing level
-ETAs summing to 0 (centering), by setting $EST LEVCENTER=0.
+ETAs summing to 0 (centering), by setting ~$EST LEVCENTER=0~.
 
-The $LEVEL control records is intended for modeling grouping effects
+The ~$LEVEL~ control records is intended for modeling grouping effects
 such that several subjects belong to a group/level, e.g. inter-site
 variability or inter-trial variability. The following control
 stream fragment contains an inter-site variability ETA(5) in addition
@@ -38,9 +38,9 @@ $COV MATRIX=R UNCONDITIONAL SIGL=10
 #+end_src
 ~LEVCENTER=0~ means level ETAs are not force to sum to 0,  and
 ~FNLETA=0~ means that the ETAs reflect what were used in the
-estimation.  Without ~FNELTA=0~,  $TABLE output for super ID ETA
+estimation.  Without ~FNELTA=0~,  ~$TABLE~ output for super ID ETA
 values will incorrectly differ with each subject, rather than averaged
-for each LEVEL item value. The $LEVEL record says that ETA(5) is for the
+for each LEVEL item value. The ~$LEVEL~ record says that ETA(5) is for the
 inter-site random effect, and within it nested the inter-subject
 random effect ETA(1). Both are for the multiplicative model of the
 clearance CL.
@@ -87,7 +87,10 @@ few SIDs with a same CID. We model the hierarchy as the following.
   CID=(9[5],10[6],11[7],12[8])
 #+end_src
 For clearance, ETA(9) varies by country, within it nested site-varying
-ETA(5), which in turn has nested in it the subject-varying (the standard ID data) ETA(1).  When performing FOCE with $LEVEL, you must use the SLOW option in $EST, and MATRIX=R for the covariance step $COV should be selected.  Notice in these examples the THETAs are MU referenced to the highest random level.
+ETA(5), which in turn has nested in it the subject-varying (the
+standard ID data) ETA(1).  When performing FOCE with ~$LEVEL~, you
+must use the ~$EST SLOW~ option and the ~$COV MATRIX=R~ option (if the
+covariance step is used) should be selected.  Notice in these examples the THETAs are MU referenced to the highest random level.
 
 ** Select random effect level
 Assume we conclude there is inter-site variability but no
@@ -128,7 +131,7 @@ change only with each site, and setting the inter-subject variance to 0.
   $LEVEL
   SID=(4[3])
 #+end_src
-Alternatively (NM74), one can use "0" in $LEVEL to indicate no nested
+Alternatively (NM74), one can use "0" in ~$LEVEL~ to indicate no nested
 variability:
 #+begin_src perl
   ;#...
@@ -153,8 +156,8 @@ variability:
 ** LEVWT=[0|1] (NM74)
 By default, ~LEVWT=0~, and weights each level value equally,
 regardless of number of subjects per level value.  If you wish to
-weight according to number of subjects for that value, set ~LEVWT=1~ in
-$EST record.
+weight according to number of subjects for that value, set
+~$EST LEVWT=1~.
 
 ** LEVCENTER=[0|1] (NM75)
 No default. ~LEVCENTER=1~ means the ETAs of super ID random levels sum
@@ -170,10 +173,10 @@ then floats the ID (and below) level ETAs.  If ~LEVOBJTYPE=1~, then
 the OBJ reported (and used for estimation) is only that of the second
 optimization cycle. ~LEVOBJTYPE=0~ provides more consistent results between FOCE/Laplace and the EM and Bayes methods, particularly with super-ID levels higher than 1 (so, site ID and country ID, for example).  The LEVOBJTYPE=1 provides an OBJ more consistent with theory.
 
-By default, NONMEM sets the estimation process to SLOW when a $LEVEL option is used. As of NM751, you may set NOSLOW or FAST.  While there is an increase in speed, but there may not be as good optimization progress as with the SLOW option.  It may be best to use SLOW for the $EST step, and use NOSLOW or FAST for the $COV step.
+By default, NONMEM sets the estimation process to SLOW when a ~$LEVEL~ option is used. As of NM751, you may set NOSLOW or FAST.  While there is an increase in speed, but there may not be as good optimization progress as with the SLOW option.  It may be best to use SLOW for the ~$EST~ step, and use NOSLOW or FAST for the ~$COV~ step.
 
 ** NM74 and NM73
-The behavior of $LEVEL in these earlier versions are different in two
+The behavior of ~$LEVEL~ in these earlier versions are different in two
 ways. First, the MU referencing pointed to the individual (ID) level
 rather than the top random level.  Secondly, the ETAs to random levels
 above ID were constrained to sum to 0, with the OMEGA estimation

@@ -34,10 +34,10 @@ Instructions for NONMEM Covariance Step
 ** Discussion
  Optional.  Requests  that  the  NONMEM Covariance Step be implemented.
  This step outputs: standard errors, covariance matrix, inverse covariance  matrix,  and the correlation form of the covariance matrix.  May
- also be coded $COVR.
+ also be coded ~$COVR~.
 
- If $COV is specified, then for IMP, IMPMAP, and ITS methods,  standard
- error information will be supplied for every $EST statement.  Standard
+ If ~$COV~ is specified, then for IMP, IMPMAP, and ITS methods,  standard
+ error information will be supplied for every ~$EST~ statement.  Standard
  error information for the classical methods (METHOD=0, METHOD=1)  will
  be given only if they are the last estimation method, and only if NOFCOV is not specified.
 
@@ -72,23 +72,23 @@ The option  has  no  relevance  to  the Covariance step results for a BAYES meth
 
 *** [SLOW | NOSLOW | FAST (NM74)]
 SLOW requests  a slower method of computation.  Required when either a
-mixture model was used along with CENTERING  on  the  $ESTIMATION
-record,  or NUMERICAL was used on the $ESTIMATION record.  If not
+mixture model was used along with CENTERING  on  the  ~$ESTIMATION~
+record,  or NUMERICAL was used on the ~$ESTIMATION~ record.  If not
 present, the option will be automatically supplied in  these  two
 cases.
 
 NOSLOW requests  a  faster  method  of computation.  This is the default.
 
-FAST is equivalent to FAST for the $ESTM record.  If $EST FAST is set,
-then $COV will be set to FAST, unless SLOW or NOSLOW is specified.
+FAST is equivalent to FAST for the ~$ESTM~ record.  If ~$EST FAST~ is set,
+then ~$COV~ will be set to FAST, unless SLOW or NOSLOW is specified.
 
 *** TOL=n (NM72)
 :PROPERTIES:
 :CUSTOM_ID: covariance-tol
 :END:
       Tolerance.  Used only with General Nonlinear (differential  equation solver) ADVAN's. Sets NRD=TOL.  By default, the value set on
-      $SUBROUTINES record (or $TOL or TOL subroutine) is used.  If  TOL
-      is  coded  on  $COVARIANCE, it overides the default.  With NONMEM
+      ~$SUBROUTINES~ record (or ~$TOL~ or TOL subroutine) is used.  If  TOL
+      is  coded  on  ~$COVARIANCE~, it overides the default.  With NONMEM
       74, this feature is deprecated.  A user-supplied  TOL  subroutine
       should test NM_STEP and set NRD accordingly.
 
@@ -101,8 +101,8 @@ then $COV will be set to FAST, unless SLOW or NOSLOW is specified.
       is  10**(-12)).  Usually the problem runs quickly when using this
       setting.  On occasion, however, you may want to reduce ATOL (usually  set it equal to that of TOL), and improve speeds of up to 3 to 4 fold.
 
-      By default, the value set on $SUBROUTINES record (or $TOL or  TOL
-      subroutine)  is  used.  If ATOL is coded on $ESTIMATION, it overrides the default for that step.  If ATOL is  coded  on  $COVARIANCE,  it overrides $ESTIMATION and/or the default for that step.
+      By default, the value set on ~$SUBROUTINES~ record (or ~$TOL~ or  TOL
+      subroutine)  is  used.  If ATOL is coded on ~$ESTIMATION~, it overrides the default for that step.  If ATOL is  coded  on  ~$COVARIANCE~,  it overrides ~$ESTIMATION~ and/or the default for that step.
       With NONMEM 74, this feature is deprecated.  A user-supplied  TOL
       subroutine should test NM_STEP and set ANRD accordingly.
 
@@ -126,7 +126,7 @@ By default, values specified in the [[file:/docs/reference-manual/control-record
 The options have no effects on BAYES method.
 
 *** NOFCOV (NM72)
-      No  $COV  step for any classical estimation steps.  This would be
+      No  ~$COV~  step for any classical estimation steps.  This would be
       useful if you wanted EM  estimation  analyses  performed,  and  a
       final  FOCE  analysis  performed, but did not want the program to
       spend time on standard error assessments for FOCE, which can take
@@ -137,19 +137,19 @@ The options have no effects on BAYES method.
       controls parallelization (distributed computing).   Default  file
       name if not specified: parallel.pnm or parafile name specified on
       nmfe command.
-      PARAFILE=ON turns on parallelization for this $COVARIANCE record;
+      PARAFILE=ON turns on parallelization for this ~$COVARIANCE~ record;
       PARAFILE=OFF  turns  it off.
 
 *** PARAFPRINT=n (NM74)
 The print iteration intervals to the parallelization log file can be
-controlled by this option during parallelization of the $COV step.
+controlled by this option during parallelization of the ~$COV~ step.
 
 See also [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]] and nmfe7.
 
 Default is PARAFPRINT=1.
 
 *** THBND=n (NM74)
-If THBND=1, any theta boundaries specified in the  $THETA  record
+If THBND=1, any theta boundaries specified in the  ~$THETA~  record
 causes  NONMEM to impose a non-linear transformation of the theta
 parameters so that  the  transformed  parameters  may  vary  from
 -infinity  to  infinity.  It  does this with logistic transformations.
@@ -164,7 +164,7 @@ when a lower bound of 0 is given, but if you have very narrow
 boundaries set, then this can  impact the  assessment  of the
 variance-covariance of the estimates considerably, and you may wish to
 set THBND=0. If no lower or  upper bounds  are  given to THETAs in
-$THETA record, this option has no impact.
+~$THETA~ record, this option has no impact.
 
 *** SIRSAMPLE=[numberlist] (NM74)
 Option  SIRSAMPLE  requests  the   Sampling-Importance-Resampling
@@ -180,7 +180,7 @@ the   list):   SIRSAMPLE="1000,200,500"  If  there are fewer than
 SIRNITER values, the last value in the list will be used as the
 SIRSAMPLE  value  for the  remaining  iterations.   Utility  programs
 table_quant (frequency and quantile sorting) and table_resample
-(resampling)  may be used to analyze $COV
+(resampling)  may be used to analyze ~$COV~
 Sampling-Importance-Resampling data.
 
 *** SIRNITER=n (NM74)
@@ -235,14 +235,14 @@ The same as listed for IACCEPTL in "Monte Carlo  Importance  Sampling EM".  Defa
       the iterations listed in  the  raw  output  file.   Default SIRPRINT=0.
 
 *** FILE=filename (NM74)
-By  default,  the  raw  output file is whatever was listed in the $EST
+By  default,  the  raw  output file is whatever was listed in the ~$EST~
 step, or root.ext, where root is the root name of  the  control
 stream  file.  You  can re-direct SIR sample listings to an
 alternative file with this option.
 
 *** FORMAT=s (NM75)
       By default, the format for the raw output file and all additional
-      output  files is whatever FORMAT was specified for the $EST step.
+      output  files is whatever FORMAT was specified for the ~$EST~ step.
       You can change its format with the FORMAT option.  s defines  the
       delimiter [,|s(pace)|t(ab)] followed by a Fortran format
       specification.  The default is s1PE12.5.  For more details, see
@@ -251,8 +251,8 @@ alternative file with this option.
 *** SIRTHBND=n (NM74)
       As  with the deterministic covariance assessment step, by default
       the transformed parameters are sampled,  so  that  no  sample  is
-      below  the  $THETA  lower bound specification, and no higher than
-      the $THETA upper bound specification.  To  allow  a  boundariless
+      below  the  ~$THETA~  lower bound specification, and no higher than
+      the ~$THETA~ upper bound specification.  To  allow  a  boundariless
       search  in  the original theta domain, set SIRTHBND=1. You should
       also set THBND=1, so that the deterministc covariance matrix used
       as  the proposal density is also not hindered or contorted by the
@@ -263,15 +263,15 @@ alternative file with this option.
       Name  of  the  "parallel file" (the parallelization profile) that
       controls parallelization during SIR sampling (distributed computing).   Default  file  name  if  not  specified:  parallel.pnm or
       parafile name specified on nmfe command.
-      SIRPARAFILE=ON turns  on  parallelization  for  this  $COVARIANCE
+      SIRPARAFILE=ON turns  on  parallelization  for  this  ~$COVARIANCE~
       record during SIR sampling.
-      SIRPARAFILE=OFF  turns  off  parallelization for this $COVARIANCE
+      SIRPARAFILE=OFF  turns  off  parallelization for this ~$COVARIANCE~
       record during SIR sampling.
 
 *** SIRPARAFPRINT=n (NM74)
       The print iteration intervals to the parallelization log file can
       be  controlled  by  this option during parallelization of the SIR
-      sampling portion of the $COV step. Default is SIRPARAFPRINT=1.
+      sampling portion of the ~$COV~ step. Default is SIRPARAFPRINT=1.
 
       See also [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION  record]]
       and nmfe7 command.
@@ -280,7 +280,7 @@ alternative file with this option.
       Options PRECOND through PRETYPE affect the preconditioning of the
       R Matrix.
       (See Guide  Introduction_7,  "Preconditioning  the  R  Matrix  to
-      Improve Precision and Success Rate of $COV Step").
+      Improve Precision and Success Rate of ~$COV~ Step").
       By  default,  PRECOND (Preconditioning cycles") is 0, and no preconditioning of the R matrix is performed.  When PRECOND=n,  then
       up  to  n  preconditioning cycles are performed.  This is used in
       combination with the PFCOND setting.
@@ -331,8 +331,8 @@ alternative file with this option.
       In NONMEM 7.4, the Knuth summing method is used to allow the most
       accurate summation of individual objective function values,  even
       with large variations in values of the individual objective function.  To turn this off, and allow a standard summation (not recommended  except  for comparison purposes from earlier versions),
-      set KNUTHSUMOFF=1. If KNUTHSUMOFF was set in the $EST  step,  but
-      not  in  the  $COV  step,  the KNUTHSUMOFF value of the last $EST
+      set KNUTHSUMOFF=1. If KNUTHSUMOFF was set in the ~$EST~  step,  but
+      not  in  the  ~$COV~  step,  the KNUTHSUMOFF value of the last ~$EST~
       record will be used.
       Default is 0.
 
@@ -352,11 +352,11 @@ PRECOND below). Default is 0.
 *** CONDITIONAL | UNCONDITIONAL
 CONDITIONAL implements the Covariance Step but only when the
 Estimation Step  terminates  successfully (in this run or in a run
-continued via $MSFI).  This is the default.
+continued via ~$MSFI~).  This is the default.
 
 UNCONDITIONAL implements the Covariance Step regardless of how the
 Estimation  Step  terminates  (in  this  run  or in a run continued
-via $MSFI).
+via ~$MSFI~).
 
 *** RESUME (NM73)
 :PROPERTIES:
@@ -365,9 +365,9 @@ via $MSFI).
 If MSFO=msfile was specified  in  the  Estimation  Step  for  the
 FO/FOCE/Laplace  method  and  analysis was interrupted during the
 Covariance Step, then the Covariance Step may be resumed where it was
-interrupted in a subsequent problem.  Use the $MSFI record to specify
+interrupted in a subsequent problem.  Use the ~$MSFI~ record to specify
 the MSFO file of the interrupted analysis, and the RESUME option of
-the $COV record:
+the ~$COV~ record:
 #+begin_src perl
 $MSFI=msfile
 ;# ...

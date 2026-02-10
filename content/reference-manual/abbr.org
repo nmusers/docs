@@ -12,8 +12,8 @@ weight: 12
 :END:
 
 Abbreviated code follows a subset of Fortran language syntax within an NM-TRAN control
-stream. A /block/ of abbreviated code begins with control record $PRED, $PK, $ERROR, $DES,
-$AES, $AESINITIAL, $TOL, $MIX, or $INFN, and ends with either
+stream. A /block/ of abbreviated code begins with control record ~$PRED~, ~$PK~, ~$ERROR~, ~$DES~,
+~$AES~, ~$AESINITIAL~, ~$TOL~, ~$MIX~, or ~$INFN~, and ends with either
 another record (that begins with "$"), or the end of the
 control stream. The code blocks are case-insensitive (NM72).
 
@@ -63,7 +63,7 @@ The right-hand (RHS) quantity =B= can be an expression of:
   - constants [fn:4], e.g. 1, 1.1, 3E+1, 3E1, 3E01, 3E-1 3E-01, 3D+1, 3D1, 3D01, 3D-1, 3D-01;
   - THETA,  OMEGA,  and  SIGMA elements, e.g. ~THETA(1)~, ~OMEGA(1,3)~,
     ~OMEGA(2,2)~ (equivalently ~OMEGA(2)~, for diagonal elements);
-  - data items defined from the $INPUT record;
+  - data items defined from the ~$INPUT~ record;
   - ETA, EPS, and ERR, elements, assummed with mean 0 and
     covariance matrix specifed by OMEGA and SIGMA;
   - operators: =+= , =-= , =*= , =/= , and =**= (exponentiate);
@@ -104,7 +104,7 @@ also be:
   index, it referrs to a different scalar variable.
   An index  must  be  an integer constant, or a
   character string that is replaced by an integer constant using the
-  $ABBR REPLACE feature.  Whereas  once  it  is defined,  a vector
+  ~$ABBR REPLACE~ feature.  Whereas  once  it  is defined,  a vector
   element may be used as a right-hand quantity -- in the same way as
   any previously defined variable -- the vector itself may be used
   only as an argument to an abbreviated function. (See VECTORS and
@@ -118,7 +118,7 @@ also be:
    with respect to the base random variables).
 
 In simulation blocks, initialization blocks, finalization blocks, a label
-from $INPUT record can be on the left in an assignment statement.
+from ~$INPUT~ record can be on the left in an assignment statement.
 
 See also pseudo-assignment below.
 
@@ -149,7 +149,7 @@ the example.
 - DOWHILE  blocks  may  not  include IF/THEN/ENDIF blocks.  Only
   single-statement IF statements are permitted.
 
-- Index variables may be used within the block.  These  are  variables  that  have  been  declared arrays using the $ABBR statement, or indexed reserved variables such as THETA.  Indices may be integer  expressions  using declared integer variables and integer values, e.g.
+- Index variables may be used within the block.  These  are  variables  that  have  been  declared arrays using the ~$ABBR~ statement, or indexed reserved variables such as THETA.  Indices may be integer  expressions  using declared integer variables and integer values, e.g.
   #+begin_src perl
     $ABBR DECLARE X(10)
     $ABBR DECLARE DOWHILE ILOOP
@@ -209,8 +209,8 @@ Several examples are present in the examples directory:
   - Dose Superposition ([[https://github.com/nmusers/docs/tree/master/examples/sumdosetn]["examples/sumdosetn"]])
   - Summing elements of THETA ([[https://github.com/nmusers/docs/tree/master/examples/superid3_6]["examples/superid3_6"]])
 
-The non-FORTRAN syntax DO WHILE(DATA) is permitted  in  $PRED  initialization  and
-finalization blocks, and in the $INFN record. (See [[file:/docs/reference-manual/abbr/#initialization-finalization-block][Initialization-Finalization block]]).
+The non-FORTRAN syntax DO WHILE(DATA) is permitted  in  ~$PRED~  initialization  and
+finalization blocks, and in the ~$INFN~ record. (See [[file:/docs/reference-manual/abbr/#initialization-finalization-block][Initialization-Finalization block]]).
 
 ** Conditional
 The ~IF~ Conditional statements can be paired with ~ELSE/ELSEIF/ENDIF~
@@ -243,7 +243,7 @@ expressions.
   IF (Q.EQ.R.AND.(C.GT.D.OR.E.EQ.F)) ...
 #+end_src
 
-With $PRED, $PK, and $ERROR records, a condition may test the  ICALL
+With ~$PRED~, ~$PK~, and ~$ERROR~ records, a condition may test the  ICALL
 argument.   However,  if  the test is IF (ICALL.EQ.2), then ELSE may
 not be used.  Special rules apply.  For  more  detail,  see  SPECIAL
 STATEMENTS (below), and help entries for these records.
@@ -283,7 +283,7 @@ If  the  condition is false, the non-random variable TVK retains the value set w
 If the condition is false, the value of the random variable K is set
 to zero. NM-TRAN prints a warning message when it detects such code.
 
-In  $PK, $ERROR, and $PRED records, recursion code may be used in an explicit manner, as in this example:
+In  ~$PK~, ~$ERROR~, and ~$PRED~ records, recursion code may be used in an explicit manner, as in this example:
 
 #+begin_src f90
   IF (WT.GT.0) THEN
@@ -293,12 +293,12 @@ In  $PK, $ERROR, and $PRED records, recursion code may be used in an explicit ma
   ENDIF
 #+end_src
 If the condition is false, =K= retains its value set with the previous
-data record. Recursion  code  can  be  used in $PRED, $PK, and $ERROR
+data record. Recursion  code  can  be  used in ~$PRED~, ~$PK~, and ~$ERROR~
 records for other purposes as well.  The following two fragments of
 code  illustrate how one can use abbreviated code to implement
-recursive kinetics in $PRED.  The first example works with a single
+recursive kinetics in ~$PRED~.  The first example works with a single
 bolus dose  and the second example works with single or multiple bolus
-doses.  Similar code can be used in $PK and $ERROR.
+doses.  Similar code can be used in ~$PK~ and ~$ERROR~.
 #+begin_src f90
   K=THETA(1)*EXP(ETA(1))
   IF (TIME.EQ.0) THEN
@@ -371,7 +371,7 @@ The function should be defined with Fortran signature:
     the value of =X2(n,m)= is needed, then the value of =X2(m,n)=  is
     needed  as  well,  even though these two values will be identical.
 
-The  Fortran  code  for  the functions should be placed in one or more files.  Suppose there is one such file and its name  is funcfile.   It should be listed on the $SUBROUTINES record.  It may contain more than one FUNCTION,  e.g.,
+The  Fortran  code  for  the functions should be placed in one or more files.  Suppose there is one such file and its name  is funcfile.   It should be listed on the ~$SUBROUTINES~ record.  It may contain more than one FUNCTION,  e.g.,
 #+begin_src perl
  $SUBROUTINES ... OTHER=funcfile
 #+end_src
@@ -394,7 +394,7 @@ used as the vector argument ~X~, e.g.
   W=FUNCA(VECTRA)
 #+end_src
 Note that Vectors defined outside of
-$DES (or $AES) may not  be used in the $DES (or $AES) block.
+~$DES~ (or ~$AES~) may not  be used in the ~$DES~ (or ~$AES~) block.
 
 NONMEM v7.4+ provides a more flexible way to declare functions and
 vector arguments through ~$ABBR FUNCTION~ and ~$ABBR VECTOR~ (see [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]]).
@@ -458,7 +458,7 @@ Pseudo-assignment statements provide special instructions and must
 appear at the beginning of a control record.  They may be enclosed in
 parentheses. Multiple pseudo-assignment statements enclosed by
 parentheses must be semicolon-separated. A common example (may be used
-in all records except $MIX) is
+in all records except ~$MIX~) is
 #+begin_src f90
 COMRES=-1
 #+end_src
@@ -469,8 +469,8 @@ various user-routines, and can be displayed in tables and
 scatterplots.)
 
 ** Reserved variables
-Entries for $PRED, $PK,  $ERROR,  $DES,
-$AES, $AESINITIAL, and $TOL describe the reserved variable names for
+Entries for ~$PRED~, ~$PK~,  ~$ERROR~,  ~$DES~,
+~$AES~, ~$AESINITIAL~, and ~$TOL~ describe the reserved variable names for
 these abbreviated codes. A reserved variable name cannot be used for user-defined variables
 unless the pseudo-assignment statement ~COMRES=-1~ is used.
 
@@ -513,7 +513,7 @@ Where an index is permitted or necessary, it may  be  an  integer
    integer expressions may be used only if they are listed in in  WRITE
    or  PRINT statements.  Otherwise n must be an integer constant, or a
    character string that is replaced by an integer constant  using  the
-   $ABBR REPLACE feature.
+   ~$ABBR REPLACE~ feature.
 
 ** Probability density functions
 A  series of built in probability density functions are available with
@@ -583,11 +583,11 @@ Examples of their use are in the ..\examples\densities directory.
 #+begin_src perl
  CALLFL=n
 #+end_src
-- In $PK abbreviated code: control when PREDPP calls the PK routine.
+- In ~$PK~ abbreviated code: control when PREDPP calls the PK routine.
 
-- In $ERROR abbreviated code: control when PREDPP calls the ERROR routine.
+- In ~$ERROR~ abbreviated code: control when PREDPP calls the ERROR routine.
 
-- In $AESINITIAL abbreviated code: when the TIME data item is not
+- In ~$AESINITIAL~ abbreviated code: when the TIME data item is not
   used, it controls when PREDPP calls the ADVAN9, ADVAN15,  or
   ADVAN17  routine.
 
@@ -689,7 +689,7 @@ verbatim code or other pseudo-assignment  statements). The
 pseudo-assignment statement  may not be used conditionally.  CALLFL
 may not be used as a variable elsewhere in the abbreviated code.
 
-Note that if the $ERROR record consists  of  only one  of  these  four statements:
+Note that if the ~$ERROR~ record consists  of  only one  of  these  four statements:
 #+begin_src f90
    Y=F+ERR(1)
    Y=F*(1+ERR(1))
@@ -700,7 +700,7 @@ NM-TRAN will automatically limit calls to ERROR  to  once-per-problem
 (unless  the Simulation  Step  is being implemented, in which case.
 calls are made with every event record).  In effect, this amounts to
 yet another  way to  control  when it is that calls may occur to the
-ERROR routine, but one which may not be explicitly specified in $ERROR
+ERROR routine, but one which may not be explicitly specified in ~$ERROR~
 via  the  use  of CALLFL.
 
 With  the  last  three  models above (proportional and exponential), NM-TRAN will also request PREDPP to output the message:
@@ -718,7 +718,7 @@ For example
  $AESINITIAL (ONCE PER INDIVIDUAL RECORD)
 #+end_src
 A calling protocol phrase can be used instead of  the  CALLFL
-pseudo-statement  in  $PK,  $ERROR,  and  $AESINITIAL abbreviated
+pseudo-statement  in  ~$PK~,  ~$ERROR~,  and  ~$AESINITIAL~ abbreviated
 codes.  The phrase must be enclosed in parentheses.  Either upper  or
 lower  case may  be used.  In an abbreviated code, the line of code
 containing the phrase must precede all the other abbreviated code
@@ -728,7 +728,7 @@ in the above  usage examples.   Pseudo-statements  defining COMRES may
 be coded within the same parentheses, separated by a semicolon ";".
 No  abbreviated  code may follow ")" on the same line as the ")".
 
-- Phrases equivalent to CALLFL=-2 for the $PK record:
+- Phrases equivalent to CALLFL=-2 for the ~$PK~ record:
 
   #+begin_src perl
   (NON-EVENT)
@@ -745,7 +745,7 @@ No  abbreviated  code may follow ")" on the same line as the ")".
   TIMES AND AT MODEL TIMES
   #+end_src
 
-- Phrases  equivalent to CALLFL=-1 for $PK, $ERROR and $AESINITIAL records (the default):
+- Phrases  equivalent to CALLFL=-1 for ~$PK~, ~$ERROR~ and ~$AESINITIAL~ records (the default):
 
   #+begin_src perl
   (EVERY EVENT)
@@ -764,7 +764,7 @@ No  abbreviated  code may follow ")" on the same line as the ")".
   ADVAN15 CALLED WITH EVERY EVENT RECORD.
   #+end_src
 
-- Phrases equivalent to CALLFL=0 for the $PK record:
+- Phrases equivalent to CALLFL=0 for the ~$PK~ record:
 
   #+begin_src perl
   (NEW TIME)
@@ -778,7 +778,7 @@ No  abbreviated  code may follow ")" on the same line as the ")".
   PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
   #+end_src
 
-- Phrases equivalent to CALLFL=0 for the $ERROR record:
+- Phrases equivalent to CALLFL=0 for the ~$ERROR~ record:
 
   #+begin_src perl
   (OBSERVATION EVENT)
@@ -794,7 +794,7 @@ No  abbreviated  code may follow ")" on the same line as the ")".
   OTHERWISE, ERROR SUBROUTINE CALLED ONLY WITH OBSERVATION EVENTS
   #+end_src
 
-- Phrases  equivalent  to  CALLFL=1 for the $PK, $ERROR and $AESINITIAL:
+- Phrases  equivalent  to  CALLFL=1 for the ~$PK~, ~$ERROR~ and ~$AESINITIAL~:
 
   #+begin_src perl
   (ONCE PER INDIVIDUAL RECORD)
@@ -854,7 +854,7 @@ NM-TRAN makes some modifications to verbatim code:
      "      +D/E
   #+end_src
 
-- Replacement Rule: in $PK, $ERROR, $DES, $AES, $INFN, and $PRED, in a
+- Replacement Rule: in ~$PK~, ~$ERROR~, ~$DES~, ~$AES~, ~$INFN~, and ~$PRED~, in a
   line of abbreviated  code  labels  of items in the data record are
   replaced by direct references to the data record  itself  (either
   DATREC  or EVTREC,  as  appropriate).   Thus,  for  example, if such
@@ -935,7 +935,7 @@ where each of x, y, z  stands  for  an  alphabetic character  A-Z,
 e.g.,  FUNCAB  or FUNCABC.  Similar extended reserved names for
 vectors are also recognized: e.g, VECTRAB or VECTRABC. If the
 abbreviated code uses one of these extended  reserved  function names,
-but the user does not supply the code via $SUBR OTHER, the NONMEM
+but the user does not supply the code via ~$SUBR OTHER~, the NONMEM
 executable cannot be created, and there will be an  error  message
 from the Fortran compiler such as:
 #+begin_src
@@ -950,8 +950,8 @@ characters.
 ** Reserved and other functions
 With verbatim code advanced users can also access many internal NONMEM
 variables.  For example variable ~ITER_REPORT~ that contains the present
-iteration number as in the output may be used within the $PK, $ERROR,
-or $PRED code. To access these variables in certain block one needs to place the
+iteration number as in the output may be used within the ~$PK~, ~$ERROR~,
+or ~$PRED~ code. To access these variables in certain block one needs to place the
 corresponding MODULE definitions in an include file with name that
 begins with "NONMEM_RESERVED" (case insensitive) at the beginning of
 the control record block. NONMEM provides file ~util/nonmem_reserved_general~
@@ -966,7 +966,7 @@ verbatim code:
 " USE PNM_CONFIG, ONLY: PNM_NODE_NUMBER
 " USE NM_INTERFACE, ONLY: TFI,TFD
 #+end_src
-For example, to use ~nonmem_reserved_general~ in $PK, place the file
+For example, to use ~nonmem_reserved_general~ in ~$PK~, place the file
 in the present run directory, and do ([[https://github.com/nmusers/docs/tree/master/examples/example8]["examples/example8"]]):
 #+begin_src perl
 $PK
@@ -1108,7 +1108,7 @@ If NONMEM aborts, and k>0, a user message such as the  following  is
 
 ** File and output
 Fortran statements of ~WRITE~, ~PRINT~, ~OPEN~, ~CLOSE~, and ~REWIND~
-may be used in $PRED, $INFN, $PK, $ERROR,  $DES, $AES, $AESINITIAL
+may be used in ~$PRED~, ~$INFN~, ~$PK~, ~$ERROR~,  ~$DES~, ~$AES~, ~$AESINITIAL~
 blocks, such as
 #+begin_src f90
    WRITE (50,*) 99,ID,CL,THETA(1),ETA(1)
@@ -1233,7 +1233,7 @@ A isn't B
 #+begin_src f90
 CALL PASS(MODE)
 #+end_src
-may be used only in $PRED Initialization-Finalization blocks and in $INFN records. If present,
+may be used only in ~$PRED~ Initialization-Finalization blocks and in ~$INFN~ records. If present,
 MODE becomes a reserved variable with type INTEGER, and may not  be
 used outside the block(s).
 
@@ -1243,8 +1243,8 @@ CALL SUPP(ie,ic)
 #+end_src
 =ie= and =ic= are of integer values 0 or 1.  Value 1 of =ie= / =ic=  suppresses  output  from  the
 Estimation/Covariance step.  A value 0 does not suppress the output
-from the step.  May be used only in $PRED  initialization-finalization
-blocks, and in $INFN records.  The =ie= / =ic= value remains in effect
+from the step.  May be used only in ~$PRED~  initialization-finalization
+blocks, and in ~$INFN~ records.  The =ie= / =ic= value remains in effect
 until changed by a call to SUPP.
 
 ** =RANDOM=
@@ -1288,12 +1288,12 @@ the routine. See code blocks below for its use.
 Abbreviated code blocks are used to achieve special tasks.
 | Block                             | Usage                                           |
 |-----------------------------------+-------------------------------------------------|
-| Compartment initialization block  | $PK abbreviated code                            |
-| Compartment update block          | $PK abbreviated code                            |
+| Compartment initialization block  | ~$PK~ abbreviated code                            |
+| Compartment update block          | ~$PK~ abbreviated code                            |
 | DATA_AVERAGE block                | Abbreviated  code                               |
-| PRED_IGNORE_DATA block            | $PRED, $PK, $INFN abbreviated code              |
-| Initialization-finalization block | $PRED, $PK, $ERROR, $INFN abbreviated code      |
-| Copying block                     | $PRED, $PK, $ERROR, $AES, $DES abbreviated code |
+| PRED_IGNORE_DATA block            | ~$PRED~, ~$PK~, ~$INFN~ abbreviated code              |
+| Initialization-finalization block | ~$PRED~, ~$PK~, ~$ERROR~, ~$INFN~ abbreviated code      |
+| Copying block                     | ~$PRED~, ~$PK~, ~$ERROR~, ~$AES~, ~$DES~ abbreviated code |
 | Simulation block                  | Abbreviated code                                |
 | Expectation block                 | Abbreviated code                                |
 
@@ -1304,14 +1304,14 @@ distinguish NONMEM executation stages.
 ICALL is  an  argument  passed by NONMEM to user-supplied
 subroutines CCONTR, CONTR, CRIT, PRED, PRIOR and MIX. It is also
 selectively passed to PK,  ERROR,  and  INFN. It can  be  used  in
-$PK, $ERROR, and $PRED abbreviated code.  The discussion below
+~$PK~, ~$ERROR~, and ~$PRED~ abbreviated code.  The discussion below
 describes the values of ICALL as seen by PRED.
 
 - ICALL=-1: the routine has been called for the ~PRED_IGNORE_DATA~
   (NM 7.5).  One call per data record, at the start
   of the run. These calls occur only  if  abbreviated  code
   uses variables ~PRED_IGNORE_DATA~ or ~PRED_IGNORE_DATA _TEST~, or
-  the $DATA PRED_IGNORE_DATA option.
+  the ~$DATA PRED_IGNORE_DATA~ option.
 
 - ICALL=0:  the routine has been called for initialization at the
   beginning of the NONMEM run; one such call per run.
@@ -1348,7 +1348,7 @@ IF (A_0FLG.EQ.1) THEN
 ENDIF
 #+end_src
 
-A "compartment  initialization  block" is abbreviated code in $PK block
+A "compartment  initialization  block" is abbreviated code in ~$PK~ block
 that sets [[file:/docs/reference-manual/api/variables/#a_0][~A_0~]], the initial state of the kinetic system, when
 the read-only global variable [[file:/docs/reference-manual/api/variables/#a_0flg][~A_0FLG~]] has value 1. PREDPP sets ~A_0FLG=1~ at a call to PK with the first event
 record of an individual record (if the data are population data), with
@@ -1511,8 +1511,8 @@ executed when ICALL=6.  This value of ICALL  occurs  when  the [[file:/docs/refe
 data item is defined in the data set and has a non-zero value for some
 records.  Data average blocks are not required when the
 raw-data-average  data  item is present, but they allow the user
-additional functionality.  Such blocks may be present in $PRED and
-$ERROR. If  for  a given observation record matching a template
+additional functionality.  Such blocks may be present in ~$PRED~ and
+~$ERROR~. If  for  a given observation record matching a template
 record, a data average block sets the DV variable to a value different
 from  the  one in the record, this value is the one included in the
 average.
@@ -1733,12 +1733,12 @@ Usage (in user-defined function):
        SUBROUTINE INFN (ICALL,THETA,DATREC,INDXS,NEWIND)
        USE NMPRD_INT, ONLY: PRED_IGNORE_DATA,PRED_IGNORE_DATA_TEST
 #+end_src
-The IGNORE=(list) and ACCEPT=(list) options of $DATA provide a limited
+The ~$DATA IGNORE=(list)~ and ~$DATA ACCEPT=(list)~ options provide a limited
 means of filtering the input data set, which is performed  by  NMTRAN.
 To  provide  more  elaborate  filtering  for  excluding data, PRED can
 request that NONMEM filter out additional data records at  the
 beginning of the run. This  is  done  by setting the reserved variable
-PRED_IGNORE_DATA to a non-zero value within $INFN, [[file:/docs/reference-manual/control-records/pk][$PK]], or [[file:/docs/reference-manual/control-records/pred][$PRED]],  for
+PRED_IGNORE_DATA to a non-zero value within ~$INFN~, [[file:/docs/reference-manual/control-records/pk][$PK]], or [[file:/docs/reference-manual/control-records/pred][$PRED]],  for
 each  record  to  be ignored.
 
 - It may be useful to package PRED_IGNORE_DATA statements within
@@ -1751,11 +1751,17 @@ each  record  to  be ignored.
   structures to avoid unnecessary code execution.
 
 - If  the  PRED_IGNORE_DATA_TEST or PRED_IGNORE_DATA variables appear
-  in abbreviated code, or the option $DATA ... PRED_IGNORE_DATA is
-  used in the NM-TRAN control stream, then  a  PRED_IGNORE_DATA  pass
-  through the NONMEN data file with PRED_IGNORE_DATA_TEST=1 and
+  in abbreviated code, or the option ~$DATA ... PRED_IGNORE_DATA~ is
+  used in the NM-TRAN control stream, then a ~PRED_IGNORE_DATA~  pass
+  through the NONMEN data file with ~PRED_IGNORE_DATA_TEST=1~ and
   ICALL=-1 occurs.  Otherwise it does not.  Therefore, existing code
-  such as  "IF (ICALL<=1) THEN ...ENDIF" does not need to be changed.
+  such as
+  #+begin_src f90
+    IF (ICALL<=1) THEN
+       ;! ...
+    ENDIF
+  #+end_src
+  does not need to be changed.
 
 - The following variables have properly defined values:
   + ICALL
@@ -1777,10 +1783,10 @@ each  record  to  be ignored.
 - In a  pred_ignore_data block, the data record has been read by
   NONMEM and  all  data  record  items  have numeric values.  The
   (non-Fortran) operators .EQN. and .NEN. that can be used with the
-  $DATA  IGNORE  and ACCEPT options are not needed and cannot be used
+  ~$DATA  IGNORE~  and ~ACCEPT~ options are not needed and cannot be used
   in a pred_ignore_data block.
 
-- Any other functions of $INFN, such as DATA  item  modification
+- Any other functions of ~$INFN~, such as DATA  item  modification
   (i.e., transgeneration  of  the data), RANDOM calls, etc. should be
   made with ICALL==1 or ICALL==0 IF blocks, as before.
 
@@ -1872,8 +1878,8 @@ abbreviated code that is only executed at ICALL=3.  E.g.,
    ... initialization block ...
   ENDIF
 #+end_src
-Such  blocks may be present in $PRED, $PK, $ERROR, and $INFN blocks of
-abbreviated code.  If such blocks are present in  $PK  or  $ERROR,  an
+Such  blocks may be present in ~$PRED~, ~$PK~, ~$ERROR~, and ~$INFN~ blocks of
+abbreviated code.  If such blocks are present in  ~$PK~  or  ~$ERROR~,  an
 INFN routine is used to implement the logic in these blocks.
 Initialization and finalization blocks will be implemented by means of
 a generated FORTRAN subroutine.
@@ -2041,7 +2047,7 @@ In addition, these rules apply:
   may appear as left-hand quantities in initialization blocks.
   (See Repetition Variables).
 
-As a practical example, the abbreviated code below can be inserted in a $PRED or $INFN
+As a practical example, the abbreviated code below can be inserted in a ~$PRED~ or ~$INFN~
 block to output final parameter estimates, standard errors, minimum value of
 the objective function, and conditional estimates of ETAs to various user files. The return
 codes from Estimation and Covariance steps (zero for normal termination) are also output.
@@ -2101,7 +2107,7 @@ with the last copying pass.
 A  copying  block is a block of abbreviated code that is only executed
 during a copying pass, i.e. when COMACT has a positive value.  Special
 rules apply, which allow the user to be less concerned about using the
-COMSAV option of the $ABBREVIATED record (see example below):
+COMSAV option of the ~$ABBREVIATED~ record (see example below):
 
 COM(i) variables that are defined in a copying block are  referred  to
 as  explicit  SAVE variables.  PRED-defined variables that are defined
@@ -2111,12 +2117,12 @@ variables are referred to as SAVE variables.  NM-TRAN  stores  SAVE
 variables in the SAVE region of module NMPRD4.
 
 Implicit and explicit SAVE variables cannot both appear in abbreviated
-code.  The COMRES option of the $ABBREV record cannot be used when any
+code.  The COMRES option of the ~$ABBREV~ record cannot be used when any
 implicit  SAVE  variables  are used, but it must be used when explicit
 SAVE variables appear (as whenever COM(i) variables appear).
 
 The size of the SAVE region of NMPRD4 depends on the COMSAV option  of
-the $ABBREV record.  This option may be used in three ways:
+the ~$ABBREV~ record.  This option may be used in three ways:
 
 - No COMSAV option.  The SAVE region of module NMPRD4 will nonetheless include all the SAVE variables.
 
@@ -2182,7 +2188,7 @@ concerned about this option.
 #+end_src
 A  "simulation block" is
 executed when ICALL=4 (simulation).  Such blocks may be present
-in $PK,  $ERROR,  and $PRED, and may be implemented by means of
+in ~$PK~,  ~$ERROR~,  and ~$PRED~, and may be implemented by means of
 generated Fortran subroutines. Special rules:
 
  1. No ETA derivatives are computed in a simulation block.
@@ -2191,7 +2197,7 @@ generated Fortran subroutines. Special rules:
     to appear on the left of an assignment statement.  NM-TRAN
     generates assignment statements changing first the data  item  in
     the event  or  data  record,  and then the local variable having
-    that label.  E.g.,  suppose WT is listed in $INPUT:
+    that label.  E.g.,  suppose WT is listed in ~$INPUT~:
 
     #+begin_src perl
     IF (ICALL.EQ.4) WT=70+70*ETA(3)
@@ -2223,7 +2229,7 @@ generated Fortran subroutines. Special rules:
     generated routines.  Explicit calls are used in abbreviated code
     only to obtain different values of ETA and EPS.
 
- 4. A RETURN statement may be used.  If in $ERROR or $PRED,  and  the
+ 4. A RETURN statement may be used.  If in ~$ERROR~ or ~$PRED~,  and  the
     RETURN  occurs  in  a  simulation block, then Y may be assigned a
     value prior to the return.  If so, then F is set (F=Y); otherwise
     F is not set.
@@ -2253,7 +2259,7 @@ generated Fortran subroutines. Special rules:
     ENDIF
     IF (ICALL.EQ.4) WT=70+70*ETA(1)
     #+end_src
-    In the examples, the first random seed of the $SIMULATION record
+    In the examples, the first random seed of the ~$SIMULATION~ record
     must have the NEW option.  Note also that, because of the
     previous  automatic  call to SIMETA, ETA(1) requires no
     initialization, but that R in the next example does.
@@ -2394,8 +2400,8 @@ executed when ICALL=5.  This value of ICALL occurs when the
 [[file:/docs/reference-manual/data/#mrg][marginal (MRG_) data item]] is defined in the data set and has a
 non-zero value for some records.  Expectation blocks are not required
 when  the  marginal  data  item is present, but they allow the user
-additional functionality.  Such blocks may be present in $PRED, $PK,
-$ERROR.
+additional functionality.  Such blocks may be present in ~$PRED~, ~$PK~,
+~$ERROR~.
 
 If the MRG_ data item has the value 1 in a data record, PRED- (PK- and
 ERROR-)  defined  items displayed for the record (e.g. in the row of a
