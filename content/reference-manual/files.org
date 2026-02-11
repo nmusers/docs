@@ -22,7 +22,7 @@ files to NONMEM itself.
 |---------+-------------------------------------------+-------------------------------|
 | FDATA   | Data file, ~$DATA~, ~$INPUT~                  | NONMEM (data file)            |
 |---------+-------------------------------------------+-------------------------------|
-| FSTREAM | Filenames from ~$DATA~,~$MSFI~, ~$MSFO~, ~$TABLE~ | NONMEM (file control stream)  |
+| FSTREAM | Filenames from ~$DATA~, ~$MSFI~, ~$MSFO~, ~$TABLE~ | NONMEM (file control stream)  |
 |---------+-------------------------------------------+-------------------------------|
 | FSUBS   | Abbreviated code                          | Generated FORTRAN subroutines |
 |---------+-------------------------------------------+-------------------------------|
@@ -36,9 +36,9 @@ files to NONMEM itself.
 |---------+-------------------------------------------+-------------------------------|
 | FWARN   | All                                       | Warning   and   informational messages.                     |
 |---------+-------------------------------------------+-------------------------------|
-| FSIZES  | Abbreviated code, ~$THETA~, ~$OMEGA~,  ~$SIGMA~,~$SIZES~, SIZES.f90                        | Dynamic  array sizes for NONMEM. The file is for user consumption only.  =SUBROUTINE FSIZESR= in FSUBS is  what  is  actually  used during the NONMEM run. |
+| FSIZES  | Abbreviated code, ~$THETA~, ~$OMEGA~,  ~$SIGMA~, ~$SIZES~, ~SIZES.f90~                       | Dynamic  array sizes for NONMEM. The file is for user consumption only.  =SUBROUTINE FSIZESR= in FSUBS is  what  is  actually  used during the NONMEM run. |
 |---------+-------------------------------------------+-------------------------------|
-| prsizes | Abbreviated code, ~$THETA~,  ~$OMEGA~, ~$SIGMA~, ~$SIZES~, SIZES.f90                       | Static array sizes for PREDPP |
+| prsizes | Abbreviated code, ~$THETA~,  ~$OMEGA~, ~$SIGMA~, ~$SIZES~, ~SIZES.f90~                       | Static array sizes for PREDPP |
 
 In NONMEM v7+, files FSUBS2 and FSUBS_MU are used by NMTRAN as work files during the creation of FSUBS.
 
@@ -47,16 +47,12 @@ In NONMEM v7+, files FSUBS2 and FSUBS_MU are used by NMTRAN as work files during
 :CUSTOM_ID: nm_control_stream
 :END:
 
-The collection of instructions to NONMEM is called the /NONMEM/
-control stream. They are different from //NM-TRAN// control records.
-Though one can create the NONMEM control stream file directly, modern
-NONMEM applications almost exclusively
-use NM-TRAN to create file FCON that contains NONMEM control streams.
-Therefore in this documentation unless specified the term "NONMEM
-control stream" actually refers to NM-TRAN control stream.
-
-For details of NONMEM control stream in FCON, see NONMEM Guide V, Appendix 4.
-and Guide I, section B.2.
+NONMEM input consists of a set of instructions known as the /NONMEM/ control
+records. In modern practice, these instructions are almost exclusively
+generated as NM-TRAN output in the FCON file. Thus unless stated otherwise, in this
+documentation the terms "NM-TRAN control stream" and "NONMEM control stream" are used
+interchangeably to denote the control stream in NM-TRAN syntax. For details of NONMEM control records in FCON, see
+NONMEM Guide V, Appendix 4. and Guide I, section B.2.
 
 ** NONMEM file control records
  Names of optional files to be opened by NONMEM is stored in a file
@@ -110,19 +106,18 @@ and Guide I, section B.2.
 :PROPERTIES:
 :CUSTOM_ID: raw-output
 :END:
-With  NONMEM 7, a run outputs several additional
- files, as a more efficient alternative of extracting
- results  from the the NONMEM report file. These additional files
- share a same file name "stem"
- (file name sans extension) with the control stream given to ~nmfe~ (root="nmbayes" if the control stream
- file  name is  not passed as an argument). We refer this stem "root" onward.
+With  NONMEM 7, a run outputs several additional files, as a more
+efficient alternative of extracting results  from the the NONMEM
+report file. These additional files share a same file name "stem"
+(base name sans extension) with the control stream given to ~nmfe~ or
+NONMEM executable.
 
- A different stem name may be specified using  the
- FILE=filename option of the ~$ESTIMATION~ record.  This filename is
- used for all subsequent problems, until a new FILE=filename option is
- coded.   The raw output file is only generated if the ~$ESTIMATION~
- record is present and accumulates information from each Estimation
- Step. A raw output file has the following format.
+A different stem name may be specified using  the ~$EST FILE=filename~
+option.  This name is used for all subsequent problems, until a new
+~FILE=filename~ option is coded.  The raw output file is only
+generated if the ~$ESTIMATION~ record is present and accumulates
+information from each Estimation Step. A raw output file has the
+following format.
 
  The first two lines of each file is the same: a header line that begins with the word TABLE, such as:
  #+begin_src
@@ -221,9 +216,12 @@ IPROB IREP S1NUM S1IT  S2NUM S2IT
            + 16,20: All individual objective fuctions are  zero.  problem ended
            + 4,5,6,7,12,20: reduced stochastic/stationary portion was not completed prior to user interrupt
 
-      - Dummy iteration id -1000000008 lists the  partial  derivative  of  the likelihood  (-1/2OFV)  with  respect to each estimated parameter. This may be useful for using tests like the  Lagrange  multiplier test.
+      - Dummy iteration id -1000000008 lists the  partial  derivative
+        of  the likelihood  (-1/(2 OFV))  with  respect to each
+        estimated parameter. This may be useful for using tests like
+        the Lagrange  multiplier test.
 
-A file simliar to the raw output file is root.cnv.  This file contains convergence information for the Monte Carlo/EM methods, if CTYPE>0:
+A file simliar to the raw output file is ~.cnv~. It contains convergence information for the Monte Carlo/EM methods, if CTYPE>0:
 
       - Iteration  -2000000000  identifies the line that contains the
         mean of last CITER values (mean objective  function  is  that
@@ -239,34 +237,40 @@ A file simliar to the raw output file is root.cnv.  This file contains convergen
         iteration number.  (for objective function, p-value of second
         to last CITER values)
 
-
       - Iteration -2000000003 identifies the line  that  contains  the
-        Alpha used to assess statistical significance (p-value<alpha)
+        Alpha used to assess statistical significance (p-value<alpha).
 
-      Please note the following: The Sigma values are in their Cholesky
-      format, as this is the form in which convergence of these  values
-      are  tested.  The Alpha are those based on ones actually used for
+      Note that the SIGMAs are in their Cholesky
+      format, as this is the form in which convergence
+      is tested.  The Alpha are those based on ones actually used for
       convergence test of that parameter, or which would have been used
       on that parameter if CTYPE were of proper type.  The alpha may be
       bonferoni corrected because of multiple comparisons, depending on
       number  of parameters that were tested or would have been tested.
       Objective function alphas are not bonferoni corrected.
 
-      For importance sampling and  iterative  two  stage,  the  average
-      objective  function listed in root.cnv could be used as an alternative to the  final  objective  function  for  likelihood  ratio tests.
+      For importance sampling and  iterative  two  stage,  the
+      average objective  function listed in the ~.cnv~ file could be used as
+      an alternative to the  final  objective  function  for
+      likelihood  ratio tests.
 
 ** Additional output files
 :PROPERTIES:
 :CUSTOM_ID: addi-output
 :END:
-To simplify notation in the rest of this section we omit "root" but
-only document according to file extension.
 
-The the following files are always output: .ext (see above "raw output file"), .grd (NM72) (gradient values for classical methods), .cpu(cpu time in seconds, incorporating the nature of sequential and parallel runs. It is not elapsed/wall time),  and .phi,
+To simplify notation in the rest of this section we omit the stem file
+name and refer to the files only by their extensions.
 
-Note that in NONMEM v7.3+, the [[file:/docs/reference-manual/control-records/thetai/][~$THETAI~]] and  [[file:/docs/reference-manual/control-records/thetar/][~$THETAR~]]  records  may  be
+The the following files are always output: ~.ext~ (see above "raw
+output file"), ~.grd~ (NM72) (gradient values for classical methods),
+~.cpu~ (cpu time in seconds, incorporating the nature of sequential
+and parallel runs. It is not elapsed/wall time),  and ~.phi~
+(individual parameters).
+
+Note that in NONMEM v7.3+, the [[file:/docs/reference-manual/control-records/thetai/][~$THETAI~]] and  [[file:/docs/reference-manual/control-records/thetai/][~$THETAR~]]  records  may  be
 used  to transform initial and final estimates of THETA, respectively.
-This will affect values in the .ext, .cov, etc. files.
+This will affect values in the output files.
 
 *** .phi
 Individual \(\phi\) (PHI) parameters (recall \(\phi=\mu+\eta\)) and their variances PHC(,).
@@ -298,24 +302,24 @@ table. regardless  of  the  analysis method.
 :END:
 As of nm75, samples of PHI/ETA are collected at each BAYES iteration,
 and summarized to provide conditional mean PHI and PHC() in the
-root.phi table, as described above. By default, the individual PHI
+~.phi~ table, as described above. By default, the individual PHI
 values from each iteration are not stored.  However,  if you set
 #+begin_src perl
   $EST ... BAYES_PHI_STORE=1
 #+end_src
 then PHI and ETA values from each BAYES iteration will be stored in
-root.iph. For non-mixture problems, only records of SUBP=0 are
+~.iph~. For non-mixture problems, only records of SUBP=0 are
 recorded,  as  there are no sub-population divisions. For mixture
 problems, the SUBP=0 records contain the composite phis and  ETAs (the
 average  of these across all non-negative iterations are in the
-root.phi table), and the SUBP>0 records contain the phis  and ETAs
+~.phi~ table), and the SUBP>0 records contain the phis  and ETAs
 appropriate  to  each  sub-population  SUBP (the average of these
-across all non- negative iterations are in the root.phm table).  The
-root.iph file can become quite large, so it should be used only on the
+across all non- negative iterations are in the ~.phm~ table).  The
+~.iph~ file can become quite large, so it should be used only on the
 final analysis.
 
 *** .phm (NM72)
-These vaues have similar meaning as the results in root.phi, but
+These vaues have similar meaning as the results in ~.phi~, but
 individual phi/eta/obji parameters per sub-population are recorded.
 This file is only produced in ~$MIXTURE~ problems.
 
@@ -326,7 +330,7 @@ consist of the average values among all the iterations during the
 stationary distribution phase.  Before nm75, the values consisted of
 values from the last MCMC iteration.
 
-The conditional variances in the root.phi and root.phm files can
+The conditional variances in the ~.phi~ and ~.phm~ files can
 represent the information content provided by a subject for a given
 eta or phi.  For example, if data supplied by the subject is rich,
 then the variance tends to be smaller.  If little data is supplied by
@@ -344,49 +348,49 @@ $$
 \text{ETA shrinkage}=\text{PHC}_i(j, j)/\Omega(j, j).
 $$
 
-
 *** .shk, .shm
-File root.shk (NM72) presents composite eta shrinkage and epsilon shrinkage
+File ~.shk~ (NM72) presents composite eta shrinkage and epsilon shrinkage
 information, the same as given in the NONMEM report file  between the
 #TERM:  and #TERE: tags, but in rows/column format, and with
 adjustable formatting.
 
-File root.shm (NM73) is a shrinkage map describing which ETAS were
+File ~.shm~ (NM73) is a shrinkage map describing which ETAS were
 included or excluded in the eta shrinkage assessment.  (See shrinkage below).
 
 *** .xml (NM72)
-An  XML markup version of the contents of the NONMEM report file. The
-rules by which it is constructed are given in output.xsd  and
-output.dtd.
+An XML markup version of the contents of the NONMEM report file. The
+rules by which it is constructed can be found in ~output.xsd~  and
+~output.dtd~.
 
 *** .cov, .cor, .clt, .coi, .smt, .rmt
-Full  variance-covariance  error  matrix  of  THETAs, SIGMAs, and
+Full variance-covariance  error  matrix  of  THETAs, SIGMAs, and
 OMEGAs.  Same as "COVARIANCE MATRIX OF ESTIMATE"  in  the  NONMEM
 report  except  that  it  is full (NONMEM displays only the lower
 triangle), elements that are fixed or not estimated are displayed as
 0  (NONMEM  displays  them  as .....), and, when the data are
 individual, sigma is displayed as  0  (NONMEM  does  not  display
 sigma  at  all.)   Only  generated  if  the ~$COVARIANCE~ record is
-present. The same applies to "root.cor".
-
-"root.cor" contains full correlation matrix of THETAs, SIGMAs, and
-OMEGAs. Same  as "CORRELATION   MATRIX  OF  ESTIMATE".
+present. The same applies to the ~.cor~ file (full correlation matrix
+of THETAs, SIGMAs, and OMEGAs; same  as "CORRELATION   MATRIX  OF  ESTIMATE").
 
 (See correlation matrix of estimate, covariance matrix of estimate below.)
 
 (See [[file:/docs/reference-manual/control-records/estimation/#order-option][ORDER option]]).
 
-"root.clt" (NM74) contains the lower-triangular portion of the  variance-covariance  of  the
-      parameter  estimates  reported  in root.cov. This is provided for
-      easier pasting of the information as theta priors  for  a  subsequent  analysis.   Only  generated  if  the  [[file:/docs/reference-manual/control-records/covar/][~$COVARIANCE~]] record is
-      present.
+File ~.clt~ (NM74) contains the lower-triangular portion of the
+variance-covariance  of  the parameter  estimates  reported  in
+~.cov~. This is provided for easier pasting of the information as
+theta priors  for  a  subsequent  analysis.   Only  generated  if  the
+[[file:/docs/reference-manual/control-records/covar/][~$COVARIANCE~]] record is present.
 
-"root.coi" contains full inverse covariance matrix (Fischer information  matrix)  for
-      THETAs,  SIGMAs,  and OMEGAs.  Same as "INVERSE COVARIANCE MATRIX
-      OF ESTIMATE" except as described for "root.cov".
+File "~.coi~" contains full inverse covariance matrix (Fischer
+information  matrix)  for THETAs,  SIGMAs,  and OMEGAs.  Same as
+"INVERSE COVARIANCE MATRIX OF ESTIMATE" except as described for
+"~.cov~".
 
-"root.smt" (NM72) contains the S matrix, if  ~$COV~ step failed.
-"root.rmt" (NM72) Contains the R matrix, if  ~$COV~ step failed.
+File "~.smt~" (NM72) contains the /S/ matrix, if  ~$COV~ step failed.
+
+File "~.rmt~" (NM72) Contains the /R/ matrix, if  ~$COV~ step failed.
 
 *** .cnv (NM72)
 Convergence  information  for  the  Monte  Carlo/EM  methods,  if CTYPE>0.
@@ -396,7 +400,7 @@ Convergence  information  for  the  Monte  Carlo/EM  methods,  if CTYPE>0.
 Produced if the user selects importance sampling with option IACCEPT=0.0.  Contains the final IACCEPT and DF values  that  NONMEM selected for each subject.
 
 *** .npd, .npe, .npi, .npl
-For  NONPARAMETRIC method.  Each row of "root.npd" contains
+For  NONPARAMETRIC method.  Each row of "~.npd~" contains
 information about a support point: the support point number, the ID
 from which the support point was obtained as an EBE of that subject
 (ID is -1 if this support point was randomly generated because
@@ -408,14 +412,14 @@ selected.  If ETAS was selected, then instead of cumulative
 probabilities, the support point eta vector that best fits that
 subject (ETM) is listed.
 
-"root.npe" contains the expected value ETAs and expected value ETA
+"~.npe~" contains the expected value ETAs and expected value ETA
 covariances (ETC) for each problem or sub-problem.  Because
 only one line is written per problem or sub-problem, the column header
 is displayed (unless NOLABEL=1) only once for the entire NONMEM run.
 However, each line contains information of table number, problem
 number, sub-problem number, super problem and iteration number.
 
-"root.npi" (NM73) contains the individual probabilities.  The header
+"~.npi~" (NM73) contains the individual probabilities.  The header
 line (unless NOLABEL=1) is written only once, at the beginning of the
 file, per NONMEM run.  Each line contains information of table number,
 problem number, sub-problem number, super problem, iteration number,
@@ -424,7 +428,7 @@ probabilities at each support point (of which there are NSUPP/NSUPPE
 or NIND of them, whichever is greater).  The line with Subject
 number=0 contains the sum of the probabilities of all the subjects,
 and is similar or exactly equal to the joint probability of each
-support point listed in root.npd under the column PROBABILITY.  That
+support point listed in ~.npd~ under the column PROBABILITY.  That
 they are not equal is due to the convergence limit of the
 non-parametric analysis.  Row of subject number I, column of support
 K, contains the individual probability IPROB(I,K).   The sum of the
@@ -435,7 +439,7 @@ file is fixed at (,1PE22.15), and cannot be changed.  It is intended
 for use in further analysis by analytical software, and is designed to
 report the full double-precision information of each probability.
 
-"root.npl" contains the individual data likelihoods (not including the
+"~.npl~" contains the individual data likelihoods (not including the
 parameter density). The header line (unless NOLABEL=1) is written only
 once, at the beginning of the file, per NONMEM run.  Each line
 contains information of table number, problem number, sub-problem
@@ -485,23 +489,23 @@ they are computed with eta=0.
 This file is produced  if  the  user  selects  ~$EST  NUMDER=2~  or
 ~NUMDER=3~.   The file lists the analytically evaluated derivatives of Y
 with respect to eta.  The format and order is  the  same  as file
-root.fgh.  The values are those returned by subroutine PRED in
+~.fgh~.  The values are those returned by subroutine PRED in
 arguments F, G, and H.  These are 0 if not computed  by  PRED. (E.g.
 second  derivatves  are  not  computed analytically with a method
-other than  LAPLACIAN.)   Values  in  root.agh  correspond exactly  to
-those  in  root.fgh.  That is, values of F and G are from calls to
+other than  LAPLACIAN.)   Values  in  ~.agh~  correspond exactly  to
+those  in  ~.fgh~.  That is, values of F and G are from calls to
 PRED with ETA=0 or with non-zero ETAs, as described above.   Values
 of H are from calls to PRED with the same values of eta if INTERACTION
 is  specified;  otherwise,  they  are  from calls to PRED with ETA=0,
 regardless of the Estimation method.
 
 *** .vpd, .vpt (NM74)
-"root.vpd" is produced if the ~$TABLE VARCALC=1~ or ~VARCALC=2~ option
+"~.vpd~" is produced if the ~$TABLE VARCALC=1~ or ~VARCALC=2~ option
 is used.  It is the full variances-covariances among  all user-defined
 and  PREDPP  parameters.   The FORMAT used for this file is that
 defined in the ~$EST~ record.
 
-"root.vpt" contains variance-covariance among user-defined parameters
+"~.vpt~" contains variance-covariance among user-defined parameters
 and PREDPP parameters, associated with conditional individual
 variances of the .phi file, as well as the variance-covariance of the
 fixed effects parameters (THETAS, SIGMAS, OMEGAS) of the .cov file.
@@ -526,19 +530,19 @@ used.
 As of NM74, one can obtain random samples of individual ETAs, and uses
 these  for  covariate  and  model diagnostics.  ~$EST ETASAMPLES=1~
 option causes individual ~ISAMPLE~  random  ETA  samples  per subject,
-to  be written to  root.ets, where root is the root name of the control stream file. See also [[file:/docs/reference-manual/control-records/estimation/#method-saem][SAEM method]].
+to  be written to  ~.ets~. See also [[file:/docs/reference-manual/control-records/estimation/#method-saem][SAEM method]].
 
 *** .bfm (NM75)
 With ~$DESIGN OFVTYPE=8~ the
 progress of average  individual  conditional  variances  (average
-empirical  Bayes  conditional variance) are shown in the root.bfm file
-(where root is name of control stream file), and  the  final one on
+empirical  Bayes  conditional variance) are shown in the ~.bfm~ file
+, and  the  final one on
 the -1000000000 line, during an optimization. The RAW file (by default
-named root.ext) which shows only  the  starting,  and final  values of
+named ~.ext~) which shows only  the  starting,  and final  values of
 the standard errors of population parameters, as extra information.
 
 *** msfroot_ETAS
-When MSF or MSFO option is used to specify an MSFO file in the ~$EST~ record:
+Let "root" be the input file stem. When MSF or MSFO option is used to specify an MSFO file in the ~$EST~ record:
 #+begin_src perl
 $EST … MSFO=msfroot.msf
 #+end_src
@@ -1525,9 +1529,9 @@ In summary,
     with a non-influential ETAs that have zero derivative.
 
   - One may  request include/exclude ETA output using
-    [[file:/docs/reference-manual/api/variables/#ETASXI][ETASXI]]. Shrinkage map for included/exlucded ETAs is documented in root.shm.
+    [[file:/docs/reference-manual/api/variables/#ETASXI][ETASXI]]. Shrinkage map for included/exlucded ETAs is documented in ~.shm~.
 
-  - Shrinkage  data  are  reported in file root.shk.
+  - Shrinkage  data  are  reported in file ~.shk~.
 
 As of nm73, if the eta shrinkage is less than 0, it will reported as a
 value of 1.0E-10.  Less than 0 shrinkage can occur due to limited

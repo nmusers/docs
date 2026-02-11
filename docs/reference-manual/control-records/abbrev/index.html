@@ -19,13 +19,13 @@ https://github.com/alex-shpak/hugo-book
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="reference-manual">
-    <meta property="article:modified_time" content="2026-01-25T08:38:32-08:00">
+    <meta property="article:modified_time" content="2026-02-10T13:43:04-08:00">
 
 
   <meta itemprop="name" content="$ABBREVIATED">
   <meta itemprop="description" content="$ABBREVIATED 1 2 3 4 5 6 7 8 9 10 11 12 13 $ABBREVIATED [COMRES=n1] [COMSAV=n2] [DERIV2=NO] [DERIV2=NOCOMMON] [DERIV1=NO] [FASTDER | NOFASTDER] [CHECKMU | NOCHECKMU] [DES=COMPACT|DES=FULL] [REPLACE left_string = right_string ] ... [DECLARE [type] [DOWHILE] name [(dimension [,dimension])] ... [PROTECT] [FUNCTION function_name(input_vector_name,dimension[,usage])] [VECTOR input_vector_name(dimension)] ;# Example $ABBREVIATED COMRES=2 Discussion Optional. May be used when $PK, $ERROR, or $PRED abbreviated code is present. Must precede all blocks of abbreviated code. With NONMEM 7.4, may also be used when there is no abbreviated code. For example, $ABBR REPLACE may be used for label substitution in NONMEM report files.">
-  <meta itemprop="dateModified" content="2026-01-25T08:38:32-08:00">
-  <meta itemprop="wordCount" content="3690">
+  <meta itemprop="dateModified" content="2026-02-10T13:43:04-08:00">
+  <meta itemprop="wordCount" content="2745">
 
 <title>$ABBREVIATED | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -35,7 +35,7 @@ https://github.com/alex-shpak/hugo-book
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.9927f7271e29990c78517d911ff44208ea0af9204541b35c9a557fb0daeaa7a8.js" integrity="sha256-mSf3Jx4pmQx4UX2RH/RCCOoK&#43;SBFQbNcmlV/sNrqp6g=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.26a41ca86d4729334fc6054f9d1ca6c746848e44a6087fabc62c386f102d50aa.js" integrity="sha256-JqQcqG1HKTNPxgVPnRymx0aEjkSmCH&#43;rxiw4bxAtUKo=" crossorigin="anonymous"></script>
 
 
 
@@ -1527,7 +1527,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="#headline-4">COMRES=n1</a>
 </li>
-<li><a href="#headline-5">COMSAV= n2</a>
+<li><a href="#headline-5">COMSAV=n2</a>
 </li>
 <li><a href="#headline-6">DERIV1=NO (NM74)</a>
 </li>
@@ -1558,8 +1558,6 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="#headline-18">FUNCTION</a>
 </li>
 </ul>
-</li>
-<li><a href="#headline-19">References</a>
 </li>
 </ul>
 </li>
@@ -1638,87 +1636,61 @@ Options
 COMRES=n1
 </h4>
 <div id="outline-text-headline-4" class="outline-text-4">
-<p>Stands for &#34;common reserve&#34;, one use of the option COMRES involves the presence of both abbreviated
-and user-supplied subroutines. Values for variables defined in
-abbreviated codes may be displayed in tables and scatterplots. These
-variables are listed (i.e. their values are stored) in a NONMEM MODULE
-NMPRD4 in the generated subroutine. (With versions of NONMEM prior to
-nm7, NMPRD4 was a named FORTRAN common, hence the use of options
-&#34;COM…&#34;). User-supplied FORTRAN routines may also list variables
-whose values are to be displayed in NMPRD4.  The first \(n_1\)
-positions in NMPRD4 are reserved for the use of these routines;
-generated subroutines will not list variables defined in abbreviated
-codes in these positions.  If there are no abbreviated codes, not only
-is <code class="verbatim">COMRES</code> not needed for this purpose, it may not be used. All
-variables listed in NMPRD4 must be double precision. .\&#34;variables if
-double precision NONMEM is used; otherwise, they must be .\&#34;single
-precision variables. The number \(\text{n}_{1}\) can be nonnegative,
-and if the option is not used, it is understood to be 0.  It can also
-be -1, in which case no variables defined in abbreviated codes are
-listed in NMPRD4.</p>
-<p>
-All variables defined in an abbreviated code are listed in NMPRD4,
-whether or not their values are displayed.  Thus with PREDPP, where
-there may be more than one abbreviated code, each such variable is
-recognized as the same variable in all abbreviated codes in which it is
-used.  If it desireable to avoid this type of global definition, then the option
-value -1 can be used.</p>
-<p>
-The option COMSAV (&#34;common save&#34;) may be used when the variable COMACT is used in
-abbreviated code. It defines the SAVE region of NMPRD4.
-In this case the option COMRES should also be used, and
-\(n_2\) must satisfy \( 0 \le n_2 \le n_1\).</p>
+<p>Stands for &#34;common reserve&#34;. Variables defined in abbreviated codes
+are stored in MODULE NMPRD4. User-supplied
+Fortran routines may also store variables in NMPRD4. To differentiate
+these two sets of variables, the first <code>n1</code> positions in NMPRD4 are
+reserved for the use of user-supplied routines. In other words, when both abbreviated code and
+user-supplied subroutines (or verbatim code) are used in a control
+stream, the user-supplied subroutine has the first <code>n1</code> positions in
+NMPRD4 reserved for its use. The first position used by NM-TRAN for
+variables defined in abbreviated code is <code>n1+1</code>. Default <code>n1=0</code> (no
+reserved storage).</p>
 <ul>
-<li>\(n_1=-1\): do not store any variables in the global variable array, VRBL, in the NMPRD4 module.</li>
-<li>\(n_1=0\): store  variables  in  NMPRD4  with  no  reserved  positions  (the default).</li>
-<li>\(n_1&gt;0\): store variables in NMPRD4, but reserve the first \(n_1\) positions.</li>
+<li>A special case <code>n1=-1</code> requests no variables defined in abbreviated
+codes are stored in NMPRD4. This is used when one would like to
+avoid the default global scope of variables defined in abbreviated
+code. With <code>COMRES=-1</code> the variables in the current abbreviated code
+block, e.g. <code>$PK</code>, is no longer accessible in other code blocks,
+e.g. <code>$ERROR</code>.</li>
+<li>Do not use this option when there are no abbreviated codes.</li>
+<li>
+<p>Abbreviated code, verbatim code, <code>$TABLE</code>,  and  <code>$SCATTER</code>  may explicitly reference variables in
+reserved positions using <code>COM(I)</code>, <code>I</code> between 1 and <code>n1</code>. For
+example, in addition to output variables defined in abbreviated code
+by name, one can do</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$TABLE</span> COM(<span style="color:#ff9f43">1</span>) COM(<span style="color:#ff9f43">2</span>)</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+</li>
 </ul>
-<p>With  abbreviated  code, the Ith position in NMPRD4 is referenced
-by COM(I).</p>
-<p>
-      This option is intended for advanced users of NONMEM, e.g.,  when
-      abbreviated  code  is  combined with user-supplied subroutines or
-      verbatim code.  A user-supplied subroutine may reserve the  first
-      n1 positions in NMPRD4 for its use, in which case the option COMRES should be set to n1 to instruct NM-TRAN to skip  these  positions;  the  first position used by NM-TRAN for storing variables defined in abbreviated code will be position {n1}+1.</p>
-<p>
-      <code>$TABLE</code>  and  <code>$SCATTER</code>  may  explicitly  reference  variables   in
-      reserved  positions  1  through  n1  by  COM(1)  through COM(n1),
-      respectively, in addition to listing variables defined in  abbreviated code by name.</p>
-<p>
-      An  individual  block  of abbreviated code (e.g. <code>$PK</code>) may include
-      the  pseudo-statement  COMRES=-1,  which  prevents  any  variable
-      defined in that particular block from being stored in NMPRD4.</p>
 </div>
 </div>
 <div id="outline-container-headline-5" class="outline-4">
 <h4 id="headline-5">
-COMSAV= n2
+COMSAV=n2
 </h4>
 <div id="outline-text-headline-5" class="outline-text-4">
-<p>Values  of  variables  displayed  in  tables and scatterplots are
-      obtained from NMPRD4.   There  are  particular  times  when  data
-      records  are  passed  to  PRED for the purpose of obtaining these
-      values; these are called copying  passes.   The  SAVE  region  of
-      NMPRD4  is  the  initial  part  of  this array.  If a variable is
-      stored in the SAVE region, then the value of  the  variable  computed  with  a  given  data  record during a copying pass will be
-      found in NMPRD4 when the same record is passed  during  the  next
-      copying  pass,  i.e.  it  will  have been saved from the previous
-      copying pass.  This is in contrast to the usual behaviour,  where
-      with  a  given data record, the value in NMPRD4 is the value computed with the previous data record.
-      n2 is the initial size of the SAVE region,  i.e.  the  number  of
-      positions  in  this  region.  n2 =0 is the default value.  n2 may
-      not exceed n1.
-      The SAVE region has size n2 initially, but NM-TRAN may extend  it
-      if  SAVE variables are used.  However, if n2 =-1, the SAVE region
-      is not to be extended, and there is to be no  SAVE  region  altogether.
-      (See <a href="/docs/reference-manual/abbr/#copying-block">copying block</a>).</p>
-<p>
-      When  PREDPP is used, and a <code>$PK</code> block is present, NM-TRAN inserts
-      code into the PK routine that  stores  the  value  of  COMSAV  at
-      ICALL=1.   If  no  <code>$PK</code>  block  is  present, and a <code>$ERROR</code> block is
-      present, the code is  inserted  into  the  ERROR  routine.   When
-      PREDPP  is  not used, and a <code>$PRED</code> block is present, the generated
-      or library PRED routine stores the value of COMSAV at ICALL&lt;=1.</p>
+<p>When tables and scatterplots output certain variables, the values are
+copied from NMPRD4 in a <em>copying pass</em>. Normally with a given data
+record, values in NMPRD4 are computed with the previous data record.
+In order to access the values from the previous copying pass, one can
+use <code>COMSAV=n2</code> to designate a SAVE array in NMPRD4  with initial size
+<code>n2</code>. A variable stored in the SAVE region has a persistent value from
+one copying pass to the next. Default <code>n2=0</code>.  <code>n2</code> may not exceed
+<code>n1</code>.</p>
+<ul>
+<li>The SAVE region has size <code>n2</code> initially, but NM-TRAN may extend  it if  SAVE variables are used.</li>
+<li><code>n2=-1</code> requests no SAVE region used.</li>
+<li>See <a href="/docs/reference-manual/abbr/#copying-block">copying block</a> and <a href="/docs/reference-manual/api/variables/#comact"><code>COMACT</code></a> variable.</li>
+</ul>
 </div>
 </div>
 <div id="outline-container-headline-6" class="outline-4">
@@ -1726,10 +1698,10 @@ COMSAV= n2
 DERIV1=NO (NM74)
 </h4>
 <div id="outline-text-headline-6" class="outline-text-4">
-<p>Prevents the computation of first derivatives.  For example,  may be
-used when only SAEM or BAYES is performed, or IMPMAP/ITS/FOCE are
-performed using OPTMAP&gt;0 and ETADER&gt;0.  The  global  variable
-NOFIRSTDERCODE is set to 1.</p>
+<p>The option prevents the computation of first derivatives (setting the global variable
+<code>NOFIRSTDERCODE</code> to 1). For example,  one may
+use the option when only SAEM or BAYES is performed, or IMPMAP/ITS/FOCE are
+performed using OPTMAP&gt;0 and ETADER&gt;0.</p>
 </div>
 </div>
 <div id="outline-container-abbr-DERIV2" class="outline-4">
@@ -1737,23 +1709,19 @@ NOFIRSTDERCODE is set to 1.</p>
 DERIV2=NO | NOCOMMON
 </h4>
 <div id="outline-text-abbr-DERIV2" class="outline-text-4">
-<p><code>DERIV2=NO</code> prevents  the computation of second-order derivatives, which are needed
-      only for the Laplacian method. If it does appear, if PREDPP is not used, and if the Laplacian estimation
-method is requested in a subsequent run using the same load module,
-then, in effect, the first-order conditional estimation method is used
-in that run, although using somewhat more computer time than is necessary.
-However, care should be taken to avoid this situation.
-If the option appears, and PREDPP is used, then the Laplacian estimation method
-must not be requested in a subsequent run using the same load module,
-even when all second-partial derivatives that might be computed
-are uniformly zero (in which case code computing these zeros
-is actually not generated whether or not the option appears).</p>
-<p>
-<code>DERIV2=NOCOMMON</code> permits the computation of these derivatives, but
+<p><code>DERIV2=NO</code> prevents  the computation of second-order derivatives (needed only for the Laplacian method).</p>
+<ul>
+<li>When PREDPP is not used. <code>DERIV2=NO</code> makes the Laplacian estimation
+method requested in a subsequent run effectively a FOCE run. This is
+less efficient than a normal FOCE run and should be avoided.</li>
+<li>When PREDPP is used with  <code>DERIV2=NO</code>, one cannot request the
+Laplacian estimation method in a subsequent run.</li>
+</ul>
+<p><code>DERIV2=NOCOMMON</code> permits the computation of these derivatives, but
 prevents  them from being stored in the global variable NMPRD4.
 <code>$ESTIMATION METHOD=COND LAPLACIAN</code> may be specified, but variables
 representing second derivatives are not stored in NMPRD4.  Therefore,
-they  cannot  be displayed in tables and scatterplots.  In addition,
+they  cannot be output in tables and scatterplots.  In addition,
 no variables computed in the <code>$PK</code> block  may  be  referenced  in  the
 <code>$ERROR</code>  block.  This is true whether or not these variables happen to
 have second derivatives, and whether  or  not the Laplacian method is
@@ -1768,16 +1736,11 @@ FASTDER | NOFASTDER  (NM72)
 <p>Code to compute first-partial derivatives with respect to ETA
 variables is always generated from abbreviated codes. These
 derivatives are almost always needed by classical NONMEM methods with
-population data. However, NONMEM does not always use these derivatives
-for the newer Bayesian methods. Since NONMEM 7.2, NONMEM collects
-(re-arranges) all code for first derivative computation so that only a
-few tests (for FIRSTEM==1; see Chapter IV.E.4) are needed to compute
-them when NONMEM indicates that it needs first-partial derivatives,
-and skip them  otherwise. This is explicitly requested by option
-<code class="verbatim">FASTDER</code>, which is the default. The collection (re-arrangement) of
+population data. However, these derivatives are not necessary
+for the newer Bayesian methods. By default (<code>FASTDER</code>) NONMEM v7.2+
+collects (re-arranges) all code for first derivative computation and use them
+only when needed (when <code>IFIRSTEM=1</code>, see <a href="/docs/reference-manual/api/variables/#partial-derivative-indicators">partial derivative indicators</a>). The collection (re-arrangement) of
 first derivative code can be prevented with option <code class="verbatim">NOFASTDER</code>.</p>
-<p>
-(See <a href="/docs/reference-manual/api/variables/#partial-derivative-indicators">Partial Derivative Indicators</a>).</p>
 </div>
 </div>
 <div id="outline-container-headline-9" class="outline-4">
@@ -1785,15 +1748,11 @@ first derivative code can be prevented with option <code class="verbatim">NOFAST
 CHECKMU | NOCHECKMU
 </h4>
 <div id="outline-text-headline-9" class="outline-text-4">
-<p>With NONMEM 7.2 and higher, NM-TRAN checks the  MU  model  statements  in  abbreviated  code  and issues warning messages if they
-      appear to contain mistakes.  This can take a long time for  large
-      control streams.  Also, in the examples directory, there are control streams for which the check  is  too  difficult  for  NMTRAN
-      (tdist6_sim.ctl  and tdist7.ctl), and some for which the warnings
-      are  inappropriate  (the  &#34;superid&#34;  control  streams  that   use
-      <code>$LEVEL</code>).   NOCHECKMU can be used to prevent NM-TRAN from attempting to check the MU model statements.</p>
-<p>
-      CHECKMU requests that MU model statements be checked, and is  the
-      default.  Neither option affects the generated code.</p>
+<p>By default (<code>CHECKMU</code>) NONMEM v7.2+ checks the  MU model statements in
+abbreviated code for potential errors.  This check can be either time
+consuming for large control streams or too difficult/error-prone to
+perform (see <a href="https://github.com/nmusers/docs/tree/master/examples/tdist6_sim">examples/tdist6_sim</a> and <a href="https://github.com/nmusers/docs/tree/master/examples/tdist7">examples/tdist7</a>). In such cases
+<code>NOCHECKMU</code> can be used to disable the check.</p>
 </div>
 </div>
 <div id="outline-container-headline-10" class="outline-4">
@@ -1827,25 +1786,22 @@ REPLACE
 </div>
 </div>
 </div>
-<p>There are several different forms of the REPLACE option.  They do not affect verbatim code.  Case is ignored.</p>
+<p>There are several different forms of the REPLACE option.  They do not
+affect verbatim code.</p>
+<p>
+When <code>$ABBR REPLACE</code> is coded, NM-TRAN produces two files: <code>FORIG</code>
+contains the original (pre-replacement) abbreviated code, and task
+specification records <code>$TABLE</code> and <code>$SCATTER</code>. <code>FREPL</code> contains the new
+(post-replacement) abbreviated code and task specification records.</p>
 <div id="outline-container-headline-12" class="outline-5">
 <h5 id="headline-12">
 Simple replacement
 </h5>
 <div id="outline-text-headline-12" class="outline-text-5">
 <p>May  be  used  in  all  blocks of abbreviated code and <code>$TABLE</code> and
-      <code>$SCATTER</code> records.  Left_string is replaced by right_string.   The
-      search   is   &#34;anchored&#34;  by  a  Fortran  identifier.   That  is,
-      left_string is parsed for the first Fortran  identifier  and  the
-      abbreviated  code is searched for the same identifier.  Following
-      the identifier, the entire left_string must match the abbreviated
-      code.   Single  or  double  quotes  around a string are optional.
-      They are necessary if the string contains punctuation such  as  a
-      comma.   A  given  line  of  abbreviated  code  may have multiple
-      replacements; they are applied in the order that they  appear  in
-      the NM-TRAN control stream.</p>
-<p>
-      Examples:</p>
+<code>$SCATTER</code> records, to replace <code>left_string</code> with <code>right_string</code>.
+Single  or  double  quotes  around a string are optional unless
+the string contains punctuations such as comma. For example,</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1858,18 +1814,17 @@ Simple replacement
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE PI<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">3.14159265</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(CL)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>)
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE ETA(CL)<span style="color:#ff6ac1">=</span>ETA(<span style="color:#ff9f43">5</span>)
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE K34<span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#34;3,4&#34;</span>
-</span></span><span style="display:flex;"><span> <span style="color:#ff6ac1">...</span>
-</span></span><span style="display:flex;"><span>CL<span style="color:#ff6ac1">=</span>PI<span style="color:#ff6ac1">*</span>THETA(CL)<span style="color:#ff6ac1">*</span>EXP(ETA(CL))
-</span></span><span style="display:flex;"><span>PRINT <span style="color:#ff6ac1">*</span>,OMEGA(K34)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE PI<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">3.14159265</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(CL)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE ETA(CL)<span style="color:#ff6ac1">=</span>ETA(<span style="color:#ff9f43">5</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE K34<span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#34;3,4&#34;</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>  CL<span style="color:#ff6ac1">=</span>PI<span style="color:#ff6ac1">*</span>THETA(CL)<span style="color:#ff6ac1">*</span>EXP(ETA(CL))
+</span></span><span style="display:flex;"><span>  PRINT <span style="color:#ff6ac1">*</span>,OMEGA(K34)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>
-      The post-replacement code is</p>
+<p>becomes</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1877,40 +1832,17 @@ Simple replacement
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>CL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">3.14159265</span><span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">4</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">5</span>))
-</span></span><span style="display:flex;"><span>PRINT <span style="color:#ff6ac1">*</span>,OMEGA(<span style="color:#ff9f43">3</span>,<span style="color:#ff9f43">4</span>)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  CL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">3.14159265</span><span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">4</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">5</span>))
+</span></span><span style="display:flex;"><span>  PRINT <span style="color:#ff6ac1">*</span>,OMEGA(<span style="color:#ff9f43">3</span>,<span style="color:#ff9f43">4</span>)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
+<p>In NONMEM v7.4+, the replacement also results in label substitution in  report files and table files.  For example,
+the above replacement
+results in <code>ETA(CL)</code> replaced by <code>ETA(5)</code> in the generated subroutine,
+and <code>ETA(5)</code> replaced by <code>ETA(CL)</code> in the report  and  table  files.</p>
 <p>
-      With  this feature, indices of THETA, ETA, and EPS and ERR may
-      be given symbolic names in abbreviated code, and <code>$ABBR REPLACE</code> is
-      used  to  replace them with integer indices.  With NONMEM 7.4,
-      this feature also requests label substitution  in  NONMEM  report
-      files and table files.  For example, the following will cause all
-      appearances of &#34;ETA(CL)&#34; to be replaced by &#34;ETA(3)&#34; in the generated  subroutine,  and  will  cause  &#34;ETA(3)&#34;  to  be replaced by
-      &#34;ETA(CL)&#34; in the NONMEM  report  and  any  table  file  in  which
-      &#34;ETA(3)&#34; is  listed.</p>
-<div class="src src-perl">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE ETA(CL)<span style="color:#ff6ac1">=</span>ETA(<span style="color:#ff9f43">3</span>)</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
-<p>
-      Label  substitution  can be turned off for an entire problem with
-        the <code>$DEFAULT NOSUB=1</code> option.  Label substitution can be
-      turned  off for a specific NONMEM task (and all subsequent tasks)
-      with the <code>NOSUB=1</code> option of <code>$TABLE</code>, <code>$SCAT</code>, and <code>$ESTIMATION</code>.</p>
-<p>
-      Substitutions will never be made in the additional  output  files
-      *.ext,  ,phi,  etc., to maintain their third party software readability.</p>
-<p>
-      With this feature, compartment names may be used instead of  compartment numbers.  For example,</p>
+For another example, one can use compartment names instead of numbering:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1921,20 +1853,24 @@ Simple replacement
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE A(DEPOT)<span style="color:#ff6ac1">=</span>A(<span style="color:#ff9f43">1</span>)
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE DADT(DEPOT)<span style="color:#ff6ac1">=</span>DADT(<span style="color:#ff9f43">1</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">...</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$DES</span>
-</span></span><span style="display:flex;"><span> DADT(DEPOT)<span style="color:#ff6ac1">=-</span>KA<span style="color:#ff6ac1">*</span>A(DEPOT)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE A(DEPOT)<span style="color:#ff6ac1">=</span>A(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE DADT(DEPOT)<span style="color:#ff6ac1">=</span>DADT(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$DES</span>
+</span></span><span style="display:flex;"><span>   DADT(DEPOT)<span style="color:#ff6ac1">=-</span>KA<span style="color:#ff6ac1">*</span>A(DEPOT)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
+<p>This  &#34;explicit&#34; compartment name substitution is similar to the
+&#34;implicit&#34; compartment name substitution feature of the <a href="/docs/reference-manual/control-records/model/">$MODEL</a> record
+(NM75).</p>
 <p>
-      This  is  called  &#34;explicit&#34; compartment name substitution.  With
-      NONMEM 7.5, compare the &#34;implicit&#34; compartment name  substitution
-      feature of the <code>$MODEL</code> record.</p>
-<p>
-      See also <a href="/docs/reference-manual/control-records/model/">$MODEL</a>.</p>
+Label substitution can be turned off for an entire problem with the
+<code>$DEFAULT NOSUB=1</code> option.  Label substitution can be turned  off for
+a specific NONMEM task (and all subsequent tasks) with the <code>NOSUB=1</code>
+option of <code>$TABLE</code>, <code>$SCAT</code>, and <code>$ESTIMATION</code>. Substitutions will
+never be made in the additional output files such as <code>.ext</code>,  <code>,phi</code>,
+etc., for the reason of third party software compatibility.</p>
 </div>
 </div>
 <div id="outline-container-headline-13" class="outline-5">
@@ -1952,11 +1888,10 @@ By data item
 </div>
 </div>
 </div>
-<p>May be used in <code>$PK</code>, <code>$ERROR</code>, <code>$PRED</code> blocks only.  VAR must  one  of
-      ETA,  EPS, THETA. (ERR is not permitted.)  d must be a data item.
-      The integer value of d (i.e., INT(d)) is used to  select  one  of
-      n1,n2,..,nk.   If  any  of the ni is 0, that position is skipped.
-      The effective code is:</p>
+<p>May be used in <code>$PK</code>, <code>$ERROR</code>, <code>$PRED</code> blocks only. <code>VAR</code> can be
+ETA,  EPS, or THETA. (ERR is not permitted.)  The replacement uses the
+integer value of data item <code>d</code>, i.e. <code>INT(d)</code>, as mask to select among
+<code>n1</code>, <code>n2</code>, …, <code>nk</code>:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1965,16 +1900,16 @@ By data item
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>IF (d<span style="color:#ff6ac1">.</span><span style="color:#ff6ac1">eq</span><span style="color:#ff9f43">.1</span>) VAR(d)<span style="color:#ff6ac1">=</span>VAR(n1)
-</span></span><span style="display:flex;"><span>IF (d<span style="color:#ff6ac1">.</span><span style="color:#ff6ac1">eq</span><span style="color:#ff9f43">.2</span>) VAR(d)<span style="color:#ff6ac1">=</span>VAR(n2)
-</span></span><span style="display:flex;"><span> <span style="color:#ff6ac1">...</span></span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  IF (d<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">1</span>) VAR(d)<span style="color:#ff6ac1">=</span>VAR(n1)
+</span></span><span style="display:flex;"><span>  IF (d<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">2</span>) VAR(d)<span style="color:#ff6ac1">=</span>VAR(n2)
+</span></span><span style="display:flex;"><span>   <span style="color:#ff6ac1">...</span></span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>The actual generated code uses Q-type  indicator  variables,  and
-      variables such as THETA_OCC_ in place of THETA(OCC).</p>
+<p>The actual generated code uses indicator  variables, so that
+variables such as <code>THETA_d_</code> is used in place of <code>THETA(d)</code>.</p>
 <p>
-      Example: Suppose OCC is a data item that takes values 1 and 2.</p>
+For example, suppose OCC is a data item that takes values 1 and 2.</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1991,7 +1926,7 @@ By data item
 </div>
 </div>
 </div>
-<p>The effective code after replacement is</p>
+<p>results in</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2004,10 +1939,9 @@ By data item
 </div>
 </div>
 </div>
-<p>
-      A  user-defined variable can be given a default value in case the
-      implied selection is not satisfied.  E.g., suppose  there  are  3
-      doses per subject (DOSN=1,2,3) and the model is:</p>
+<p>During the replacement if <code>ni=0</code> the position <code>i</code> is skipped. One use
+of this is to specify a default value.  For example, assume there  are
+3 doses per subject (DOSN=1,2,3) and the model is:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2017,15 +1951,14 @@ By data item
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span> <span style="color:#ff6ac1">...</span>
-</span></span><span style="display:flex;"><span>   IF(DOSN<span style="color:#ff6ac1">.</span>EQ<span style="color:#ff9f43">.1</span>) F1<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span>   IF(DOSN<span style="color:#ff6ac1">.</span>EQ<span style="color:#ff9f43">.2</span>) F1<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span><span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">2</span>))
-</span></span><span style="display:flex;"><span>   IF(DOSN<span style="color:#ff6ac1">.</span>EQ<span style="color:#ff9f43">.3</span>) F1<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span><span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">3</span>))</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$PK</span> <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>     IF(DOSN<span style="color:#ff6ac1">.</span>EQ<span style="color:#ff9f43">.1</span>) F1<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>     IF(DOSN<span style="color:#ff6ac1">.</span>EQ<span style="color:#ff9f43">.2</span>) F1<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span><span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">2</span>))
+</span></span><span style="display:flex;"><span>     IF(DOSN<span style="color:#ff6ac1">.</span>EQ<span style="color:#ff9f43">.3</span>) F1<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span><span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">3</span>))</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>
-      The model can be implemented using implied selection as follows:</p>
+<p>It can be implemented as</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2055,16 +1988,16 @@ By data item and parameter
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>      <span style="color:#ff5c57">$ABBR</span> REPLACE VAR(p_d)<span style="color:#ff6ac1">=</span>VAR(n1,n2,<span style="color:#ff6ac1">..</span>,nk)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE VAR(p_d)<span style="color:#ff6ac1">=</span>VAR(n1,n2,<span style="color:#ff6ac1">..</span>,nk)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>p  is a user-defined variable in the abbreviated code.  The order
-      may be p_d or d_p This allows a given data item d to be used as a
-      selection  variable for more than one parameter, with a different
-      choice of elements of VAR.</p>
+<p><code>p</code> is a user-defined variable in the abbreviated code.  The notation
+can be either <code>p_d</code> or <code>d_p</code>. This allows a given data item <code>d</code> to be
+used as a selection  variable for more than one parameter, with a
+different choice of elements of <code>VAR</code>.</p>
 <p>
-      Example 1:</p>
+Example 1:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2076,16 +2009,16 @@ By data item and parameter
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>,<span style="color:#ff9f43">6</span>)
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_CL)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">5</span>,<span style="color:#ff9f43">7</span>)
-</span></span><span style="display:flex;"><span>   <span style="color:#ff6ac1">...</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
-</span></span><span style="display:flex;"><span>KA<span style="color:#ff6ac1">=</span>THETA(SID_KA)
-</span></span><span style="display:flex;"><span>CL<span style="color:#ff6ac1">=</span>THETA(SID_CL)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>,<span style="color:#ff9f43">6</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_CL)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">5</span>,<span style="color:#ff9f43">7</span>)
+</span></span><span style="display:flex;"><span>     <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$PK</span>
+</span></span><span style="display:flex;"><span>  KA<span style="color:#ff6ac1">=</span>THETA(SID_KA)
+</span></span><span style="display:flex;"><span>  CL<span style="color:#ff6ac1">=</span>THETA(SID_CL)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>which is equivalent to</p>
+<p>is equivalent to</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2096,16 +2029,16 @@ By data item and parameter
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
-</span></span><span style="display:flex;"><span>IF (SID<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">1</span>) KA<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>)
-</span></span><span style="display:flex;"><span>IF (SID<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">2</span>) KA<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">6</span>)
-</span></span><span style="display:flex;"><span>IF (SID<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">1</span>) CL<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">5</span>)
-</span></span><span style="display:flex;"><span>IF (SID<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">2</span>) CL<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">7</span>)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$PK</span>
+</span></span><span style="display:flex;"><span>  IF (SID<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">1</span>) KA<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span>  IF (SID<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">2</span>) KA<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">6</span>)
+</span></span><span style="display:flex;"><span>  IF (SID<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">1</span>) CL<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">5</span>)
+</span></span><span style="display:flex;"><span>  IF (SID<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">2</span>) CL<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">7</span>)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
 <p>
-      Example 2:</p>
+Example 2:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2117,16 +2050,16 @@ By data item and parameter
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE ETA(OCC_CL)<span style="color:#ff6ac1">=</span>ETA(<span style="color:#ff9f43">5</span>,<span style="color:#ff9f43">3</span>)
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE ETA(OCC_V) <span style="color:#ff6ac1">=</span>ETA(<span style="color:#ff9f43">6</span>,<span style="color:#ff9f43">4</span>)
-</span></span><span style="display:flex;"><span>   <span style="color:#ff6ac1">...</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
-</span></span><span style="display:flex;"><span>CL<span style="color:#ff6ac1">=</span>TVCL<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span>ETA(OCC_CL))
-</span></span><span style="display:flex;"><span>V <span style="color:#ff6ac1">=</span>TVV <span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">+</span>ETA(OCC_V))</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE ETA(OCC_CL)<span style="color:#ff6ac1">=</span>ETA(<span style="color:#ff9f43">5</span>,<span style="color:#ff9f43">3</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE ETA(OCC_V) <span style="color:#ff6ac1">=</span>ETA(<span style="color:#ff9f43">6</span>,<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span>     <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$PK</span>
+</span></span><span style="display:flex;"><span>  CL<span style="color:#ff6ac1">=</span>TVCL<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span>ETA(OCC_CL))
+</span></span><span style="display:flex;"><span>  V <span style="color:#ff6ac1">=</span>TVV <span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">+</span>ETA(OCC_V))</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>which is equivalent to</p>
+<p>is equivalent to</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2137,17 +2070,15 @@ By data item and parameter
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
-</span></span><span style="display:flex;"><span>IF (OCC<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">1</span>) CL<span style="color:#ff6ac1">=</span>TVCL(EXP(ETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">5</span>))
-</span></span><span style="display:flex;"><span>IF (OCC<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">2</span>) CL<span style="color:#ff6ac1">=</span>TVCL(EXP(ETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">3</span>))
-</span></span><span style="display:flex;"><span>IF (OCC<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">1</span>) V<span style="color:#ff6ac1">=</span>TVV(EXP(ETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">6</span>))
-</span></span><span style="display:flex;"><span>IF (OCC<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">2</span>) V<span style="color:#ff6ac1">=</span>TVV(EXP(ETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">4</span>))</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$PK</span>
+</span></span><span style="display:flex;"><span>  IF (OCC<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">1</span>) CL<span style="color:#ff6ac1">=</span>TVCL(EXP(ETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">5</span>))
+</span></span><span style="display:flex;"><span>  IF (OCC<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">2</span>) CL<span style="color:#ff6ac1">=</span>TVCL(EXP(ETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">3</span>))
+</span></span><span style="display:flex;"><span>  IF (OCC<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">1</span>) V<span style="color:#ff6ac1">=</span>TVV(EXP(ETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">6</span>))
+</span></span><span style="display:flex;"><span>  IF (OCC<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">2</span>) V<span style="color:#ff6ac1">=</span>TVV(EXP(ETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">4</span>))</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>
-      The number of values specified for the selection data  item  must
-      be consistent for all parameters in which it is used.</p>
+<p>The number of values specified for the selection data  item  must be consistent for all parameters in which it is used.</p>
 </div>
 </div>
 <div id="outline-container-headline-15" class="outline-5">
@@ -2165,10 +2096,9 @@ Replacement for multiple variables
 </div>
 </div>
 </div>
-<p>This  form  is  new  to NONMEM 7.4.  The pi are character strings
-      separated by commas.  A  character  string  may  not  contain  an
-      embedded  space.   The lists on both left and right sides must be
-      of the same length.  VAR(pi) is replaced by VAR(ni).   For  example,</p>
+<p>In NONMEM v7.4+,  one may replace numbering <code>n1</code>, <code>n2</code>, …, <code>nk</code> with
+strings (may not contain space) <code>p1</code>, <code>p2</code>, …, <code>pk</code>, respectively.
+For example,</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2179,8 +2109,7 @@ Replacement for multiple variables
 </div>
 </div>
 </div>
-<p>
-      This is equivalent to:</p>
+<p>is equivalent to</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2190,28 +2119,32 @@ Replacement for multiple variables
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(CL)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(V1)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">2</span>)
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(Q)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">3</span>)
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(V2)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(CL)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(V1)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(Q)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">3</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(V2)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
+<p>Label substition occurs with this form, the same as with the Simple replacement.</p>
 <p>
-      Label  substition  occurs with this form, as with Simple replacement (1).</p>
+Additionally one can use short-hand notation to describe a series of
+values of <code>n</code>:  an ascending sequence of <code>n</code>&#39;s can be described as</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>, start TO end [BY interval]</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p><code>BY</code>  is  optional (default is 1).  <code>TO</code> (or
+equivalently <code>:</code>) is required.
+At least one comma must appear, so NMTRAN knows it is a number list, not a variable name.</p>
 <p>
-    Short-hand notation
-      A short-hand notation may be used to describe a series of  values
-      of ni.  An ascending sequence of ni can be described as
-       ,start TO end [BY interval]</p>
-<p>
-      BY  is  optional  and must be &gt; 0. Default is 1.  TO is required.
-      If end &lt; start, the sequence is ignored.  At least one comma must
-      appear, so NMTRAN knows it is a number list, not a variable name.
-      With NONMEM 7.4, the character : may be used instead of  TO,  and
-      the value of BY may be negative.</p>
-<p>
-      Examples:</p>
+Examples:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2220,9 +2153,9 @@ Replacement for multiple variables
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">10</span>:<span style="color:#ff9f43">4</span> by <span style="color:#ff9f43">3</span>) ; order: <span style="color:#ff9f43">10</span>,<span style="color:#ff9f43">7</span>,<span style="color:#ff9f43">4</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span> to <span style="color:#ff9f43">10</span> by <span style="color:#ff6ac1">-</span><span style="color:#ff9f43">3</span>) ; order: <span style="color:#ff9f43">10</span>,<span style="color:#ff9f43">7</span>,<span style="color:#ff9f43">4</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">10</span> to <span style="color:#ff9f43">4</span>) ; order: <span style="color:#ff9f43">10</span>,<span style="color:#ff9f43">9</span>,<span style="color:#ff9f43">8</span>,<span style="color:#ff9f43">7</span>,<span style="color:#ff9f43">6</span>,<span style="color:#ff9f43">5</span>,<span style="color:#ff9f43">4</span></span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">10</span>:<span style="color:#ff9f43">4</span> by <span style="color:#ff9f43">3</span>) ; order: <span style="color:#ff9f43">10</span>,<span style="color:#ff9f43">7</span>,<span style="color:#ff9f43">4</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span> to <span style="color:#ff9f43">10</span> by <span style="color:#ff6ac1">-</span><span style="color:#ff9f43">3</span>) ; order: <span style="color:#ff9f43">10</span>,<span style="color:#ff9f43">7</span>,<span style="color:#ff9f43">4</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">10</span> to <span style="color:#ff9f43">4</span>) ; order: <span style="color:#ff9f43">10</span>,<span style="color:#ff9f43">9</span>,<span style="color:#ff9f43">8</span>,<span style="color:#ff9f43">7</span>,<span style="color:#ff9f43">6</span>,<span style="color:#ff9f43">5</span>,<span style="color:#ff9f43">4</span></span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
@@ -2233,7 +2166,7 @@ Replacement for multiple variables
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(,<span style="color:#ff9f43">4</span> to <span style="color:#ff9f43">13</span> by <span style="color:#ff9f43">3</span>,<span style="color:#ff9f43">25</span> to <span style="color:#ff9f43">37</span> by <span style="color:#ff9f43">4</span>)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(,<span style="color:#ff9f43">4</span> to <span style="color:#ff9f43">13</span> by <span style="color:#ff9f43">3</span>,<span style="color:#ff9f43">25</span> to <span style="color:#ff9f43">37</span> by <span style="color:#ff9f43">4</span>)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
@@ -2244,18 +2177,10 @@ Replacement for multiple variables
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>,<span style="color:#ff9f43">7</span>,<span style="color:#ff9f43">10</span>,<span style="color:#ff9f43">13</span>,<span style="color:#ff9f43">25</span>,<span style="color:#ff9f43">29</span>,<span style="color:#ff9f43">33</span>,<span style="color:#ff9f43">37</span>)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> REPLACE THETA(SID_KA)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>,<span style="color:#ff9f43">7</span>,<span style="color:#ff9f43">10</span>,<span style="color:#ff9f43">13</span>,<span style="color:#ff9f43">25</span>,<span style="color:#ff9f43">29</span>,<span style="color:#ff9f43">33</span>,<span style="color:#ff9f43">37</span>)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>
-    Files FORIG and FREPL
-      When <code>$ABBR REPLACE</code> is coded, NM-TRAN produces two files:
-      FORIG Contains the original (pre-replacement) abbreviated code,
-      and task specification records <code>$TABLE</code> and <code>$SCATTER</code>.
-      FREPL Contains the new (post-replacement) abbreviated code
-      and task specification records.
-      These may be helpful for debugging.</p>
 </div>
 </div>
 </div>
@@ -2490,102 +2415,77 @@ FUNCTION
 </div>
 </div>
 </div>
-<p>With all versions of NONMEM since NONMEM VI, user-supplied  functions  are permitted in abbreviated code with reserved names such
-      as FUNCA, FUNCB, …,  and argument vectors with  reserved  names
-      such as VECTRA, VECTRB, …..  With NONMEM 7.4, extended reserved
-      names are recognized.  These are FUNCxy and FUNCxyz,  where  each
-      of  x,  y, z stands for an alphabetic character A-Z, e.g., FUNCAB
-      or FUNCABC.  Similar extended reserved names for vectors are also
-      recognized:  e.g, VECTRAB or VECTRABC.  Reserved argument vectors
-      and arrays have dimension 9 and each reserved function may appear
-      in abbreviated code at most 9 times.</p>
+<p>User-supplied  functions  are permitted in abbreviated code with
+reserved names such as <code>FUNCA</code>, <code>FUNCB</code>, etc., and argument vectors
+with reserved names <code>VECTRA</code>, <code>VECTRB</code>, etc. NONMEM v7.4+ supports
+extended reserved names <code>FUNCxy</code> and <code>FUNCxyz</code>,  with each of <code>x</code>,
+<code>y</code>, <code>z</code>  as an alphabetic character <code>A-Z</code>, so that <code>FUNCAB</code> or
+<code>FUNCABC</code> are supported.  Similarly for vector names <code>VECTRAB</code>,
+<code>VECTRABC</code>, etc.  are supported. Reserved argument vectors and arrays
+have dimension 9 and each reserved function may appear in abbreviated
+code at most 9 times. (See <a href="/docs/reference-manual/abbr/#abbreviated-function">abbreviated functions</a>).</p>
 <p>
-      (See <a href="/docs/reference-manual/abbr/#abbreviated-function">abbreviated functions</a>).</p>
-<p>
-      In NONMEM 7.4 the <code>$ABBR FUNCTION</code> option allows user-defined function names and user-defined argument vector  names.   The  dimensions  of  the  argument vector and the maximum number of times a
-      given function name may appear in abbreviated code is user-specified.</p>
-<p>
-      A user-defined function may be declared as follows:</p>
+NONMEM v7.4+ supports <code>$ABBR FUNCTION</code> for user-defined function and argument vector declaration:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> FUNCTION function_name(input_vector_name,dimension,usage)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> FUNCTION function_name(input_vector_name,dimension,usage)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
 <ul>
-<li>function_name
-    is the name of the function.</li>
-<li>input_vector_name
-    is the name of an input vector that may be used to pass arguments
-    to the function.</li>
-<li>dimension
-    specifies how many input arguments function_name  will  use,  and
-    defines  input_vector_name as a vector with this length.  &#34;Dimension&#34; is a property of both the function and of the input vector.</li>
-<li>
-<p>usage
-    is the maximum number of times the function  may  appear  in  the
-    abbreviated  code,  that  is, the maximum number of occurances of
-    function_name. It is not an error if there are fewer  occurances.
-    If  usage  is  omitted,  NMTRAN  will supply the exact number. If
-    usage is coded, NMTRAN will generate an error  message  if  function_name appears in abbreviated code more than &#34;usage&#34; number of
-    times.</p>
-<p>
-    A vector and its length may be declared independently of a  function,</p>
+<li><code>function_name</code>: the name of the function.</li>
+<li><code>input_vector_name</code>: the name of an input vector that may be used to pass arguments to the function.</li>
+<li><code>dimension</code>: the length of <code>input_vector_name</code>. It is a property of both the function and of the input vector.</li>
+<li><code>usage</code>: the maximum number of times the function may appear in the
+abbreviated  code,  that  is, the maximum number of occurances of
+function_name. It is not an error if there are fewer  occurances. If
+usage  is  omitted,  NMTRAN  will supply the exact number. If usage
+is coded, NMTRAN will generate an error  message  if  function_name
+appears in abbreviated code more than &#34;usage&#34; number of times.</li>
+</ul>
+<p>In addition a vector and its length may be declared separately:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> VECTOR input_vector_name (dimension)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> VECTOR input_vector_name (dimension)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-</li>
-<li>input_vector_name
-    is the name of an input vector.</li>
-<li>
-<p>dimension
-    The length of the vector.  The dimension of a vector should be no
-    less than the dimension of all the functions which  which  it  is
-    used.</p>
 <p>
-    Example:</p>
+For example,</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> FUNCTION BIVARIATE(VBI,<span style="color:#ff9f43">5</span>,<span style="color:#ff9f43">3</span>)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> FUNCTION BIVARIATE(VBI,<span style="color:#ff9f43">5</span>,<span style="color:#ff9f43">3</span>)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>
-    A  vector VBI is defined of length 5.  There is a function called
-    BIVARIATE.  When BIVARIATE is used, the value 5 is passed  to  it
-    as  argument NDIM.  BIVARIATE uses 5 elements from the input vector.  Function BIVARIATE may appear in abbreviated code at most 3
-    times.   BIVARIATE should be present in a source code file listed
-    in the <code>$SUBROUTINES</code> record:</p>
+<p>defines <code>VBI</code>  as a vector of length 5, to be used as the argument of
+function <code>BIVARIATE</code>.  When <code>BIVARIATE</code> is defined, the value 5 is
+passed  to  its argument <code>NDIM</code>.  Function <code>BIVARIATE</code> may appear in
+abbreviated code at most 3 times. <code>BIVARIATE</code> should be specified in a
+source code file listed in the <code>$SUBROUTINES</code> record:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$SUBROUTINES</span> OTHER<span style="color:#ff6ac1">=</span>filename</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$SUBROUTINES</span> OTHER<span style="color:#ff6ac1">=</span>filename</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>
-    Instructions for coding both reserved functions and  user_defined
-    functions are in Abbreviated Function.</p>
-<p>
-    Here is an example of abbreviated code that uses BVI and BIVARIATE:</p>
+<p>so that one can use it in abbreviated code:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2600,33 +2500,32 @@ FUNCTION
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span> <span style="color:#ff6ac1">...</span>
-</span></span><span style="display:flex;"><span>VBI(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>RHO
-</span></span><span style="display:flex;"><span>VBI(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">5</span>
-</span></span><span style="display:flex;"><span>VBI(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">6</span>
-</span></span><span style="display:flex;"><span>VBI(<span style="color:#ff9f43">4</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> ;<span style="color:#78787e">#  0 = Upper tail as in Drezner &amp; Wesolowsky</span>
-</span></span><span style="display:flex;"><span>         ;<span style="color:#78787e">#  1 = Bottom tail;</span>
-</span></span><span style="display:flex;"><span>VBI(<span style="color:#ff9f43">5</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> ;<span style="color:#78787e">#  0 = 3 pt approximation</span>
-</span></span><span style="display:flex;"><span>         ;<span style="color:#78787e">#  1 = 5 point approximation;</span>
-</span></span><span style="display:flex;"><span>BV<span style="color:#ff6ac1">=</span>BIVARIATE(VBI)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$PK</span> <span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>  VBI(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>RHO
+</span></span><span style="display:flex;"><span>  VBI(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">5</span>
+</span></span><span style="display:flex;"><span>  VBI(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">6</span>
+</span></span><span style="display:flex;"><span>  VBI(<span style="color:#ff9f43">4</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> ;<span style="color:#78787e">#  0 = Upper tail as in Drezner &amp; Wesolowsky</span>
+</span></span><span style="display:flex;"><span>           ;<span style="color:#78787e">#  1 = Bottom tail;</span>
+</span></span><span style="display:flex;"><span>  VBI(<span style="color:#ff9f43">5</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> ;<span style="color:#78787e">#  0 = 3 pt approximation</span>
+</span></span><span style="display:flex;"><span>           ;<span style="color:#78787e">#  1 = 5 point approximation;</span>
+</span></span><span style="display:flex;"><span>  BV<span style="color:#ff6ac1">=</span>BIVARIATE(VBI)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
+<p>See <a href="https://github.com/nmusers/docs/tree/master/examples/bivariate">examples/bivariate</a> for the full example.</p>
 <p>
-    There is a fully worked out example.
-    (See bivariate function).
-    Files are  in  the  examples  directory:  bivariate.ctl,  bivariate.csv, bivariate.f90.</p>
+By  default,  there may be up to 100 different user-defined functions,
+which includes functions with  reserved  names  and  userdefined
+names.  There may also be up to 100 different vectors of input
+arguments, which includes vectors with reserved  names  and
+user-defined  names.   Constants NFUNCX and NVECX in SIZES may be used
+to change these numbers.</p>
 <p>
-    By  default,  there may be up to 100 different user-defined functions, which includes functions with  reserved  names  and  userdefined  names.  There may also be up to 100 different vectors of
-    input arguments, which includes vectors with reserved  names  and
-    user-defined  names.   Constants NFUNCX and NVECX in SIZES may be
-    used to change these numbers.</p>
-<p>
-    It is preferable that a unique vector should be  associated  each
-    function to assure that each vector-function pair are set up with
-    comparable dimensions.  This is not necessary.  Any  user-defined
-    vector  or  function  may  be  used  with  any reserved vector or
-    reserved function, subject to the same restriction. For example:</p>
+It is preferable that a unique vector should be  associated  each
+function to assure that each vector-function pair are set up with
+comparable dimensions.  This is not necessary.  Any  user-defined
+vector  or  function  may  be  used  with  any reserved vector or
+reserved function, subject to the same restriction. For example:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2634,13 +2533,12 @@ FUNCTION
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> FUNCTION BIVARIATE(VBI,<span style="color:#ff9f43">5</span>)
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ABBR</span> FUNCTION BIVARIATEQ(VQI,<span style="color:#ff9f43">10</span>)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> FUNCTION BIVARIATE(VBI,<span style="color:#ff9f43">5</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> FUNCTION BIVARIATEQ(VQI,<span style="color:#ff9f43">10</span>)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>
-    In abbreviated code, any of the following are permitted:</p>
+<p>In abbreviated code, any of the following are permitted:</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2650,15 +2548,15 @@ FUNCTION
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>BVI<span style="color:#ff6ac1">=</span>BIVARIATE(VBI)
-</span></span><span style="display:flex;"><span>BVQ<span style="color:#ff6ac1">=</span>BIVARIATE(VQI)
-</span></span><span style="display:flex;"><span>BVQI<span style="color:#ff6ac1">=</span>BIVARIATEQ(VBI)
-</span></span><span style="display:flex;"><span>BVQQ<span style="color:#ff6ac1">=</span>BIVARIATEQ(VQI)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>  BVI<span style="color:#ff6ac1">=</span>BIVARIATE(VBI)
+</span></span><span style="display:flex;"><span>  BVQ<span style="color:#ff6ac1">=</span>BIVARIATE(VQI)
+</span></span><span style="display:flex;"><span>  BVQI<span style="color:#ff6ac1">=</span>BIVARIATEQ(VBI)
+</span></span><span style="display:flex;"><span>  BVQQ<span style="color:#ff6ac1">=</span>BIVARIATEQ(VQI)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
 <p>
-    NM-TRAN gives a warning:</p>
+NM-TRAN would give a warning:</p>
 <div class="src src-text">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2673,13 +2571,9 @@ FUNCTION
 </div>
 </div>
 </div>
+<p>This is because vector <code>VBI</code> has dimension 5 and function  <code>BIVARIATEQ</code>  was declared with dimension <code>10</code>.</p>
 <p>
-    This is because vector VBI has dimension 5 and  function  BIVARIATEQ  was declared with dimension 10.  Note that the results will
-    be correct if BIVARIATEQ does not use more than  5  positions  in
-    the argument vector.</p>
-</li>
-</ul>
-<p>A vector and its length may be declared independently of a function, and vice versa.  The asterisk is used as a placeholder, e.g.,</p>
+A vector and its length may be declared independently of a function, and vice versa.  The asterisk is used as a placeholder, e.g.,</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2690,52 +2584,40 @@ FUNCTION
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>     <span style="color:#ff5c57">$ABBR</span> FUNCTION BIVARIATE(<span style="color:#ff6ac1">*</span>,<span style="color:#ff9f43">5</span>)
-</span></span><span style="display:flex;"><span>     ;<span style="color:#78787e"># when BIVARIATE is called, NDIM will be 5</span>
-</span></span><span style="display:flex;"><span>     <span style="color:#ff5c57">$ABBR</span> FUNCTION BIVARIATEQ(<span style="color:#ff6ac1">*</span>,<span style="color:#ff9f43">10</span>)
-</span></span><span style="display:flex;"><span>     ;<span style="color:#78787e"># when BIVARIATEQ is called, NDIM will be 10</span>
-</span></span><span style="display:flex;"><span>     <span style="color:#ff5c57">$ABBR</span> VECTOR VQI(<span style="color:#ff9f43">15</span>)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> FUNCTION BIVARIATE(<span style="color:#ff6ac1">*</span>,<span style="color:#ff9f43">5</span>)
+</span></span><span style="display:flex;"><span>  ;<span style="color:#78787e"># when BIVARIATE is called, NDIM will be 5</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> FUNCTION BIVARIATEQ(<span style="color:#ff6ac1">*</span>,<span style="color:#ff9f43">10</span>)
+</span></span><span style="display:flex;"><span>  ;<span style="color:#78787e"># when BIVARIATEQ is called, NDIM will be 10</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> VECTOR VQI(<span style="color:#ff9f43">15</span>)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
 <p>
- The <code>$ABBREV FUNCTION</code> record may be used to override the  default  settings for any of the reserved function or vectors.  For example,</p>
+The <code>$ABBREV FUNCTION</code> record may be used to override the  default  settings for any of the reserved function or vectors.  For example,</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>     <span style="color:#ff5c57">$ABBR</span> FUNCTION FUNCA(VECTRA,<span style="color:#ff9f43">25</span>,<span style="color:#ff9f43">5</span>)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$ABBR</span> FUNCTION FUNCA(VECTRA,<span style="color:#ff9f43">25</span>,<span style="color:#ff9f43">5</span>)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>
-      VECTRA  will  be  defined with length 25, not 9 as for a reserved
-      function.  The code for the function should have NDIM as an argument:</p>
+<p>VECTRA  will  be  defined with length 25, not 9 as for a reserved function.  The code for the function should have NDIM as an argument:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>FUNCTION VECTRA(X,X1,X2,NDIM)</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  FUNCTION VECTRA(X,X1,X2,NDIM)</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>
-      NDIM should be used instead of 9 for vector and array dimensions,
-      as shown in  the Abbreviated Function help item.</p>
+<p><code>NDIM</code> should be used instead of 9 for vector and array dimensions.</p>
 </div>
 </div>
-</div>
-</div>
-<div id="outline-container-headline-19" class="outline-3">
-<h3 id="headline-19">
-References
-</h3>
-<div id="outline-text-headline-19" class="outline-text-3">
-<p>Guide Introduction_7</p>
 </div>
 </div>
 </div>
@@ -2749,9 +2631,9 @@ References
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/75f746f1d521f67bde10c1e21cc202c6e736674a" title='Last modified by Yi Zhang | 2026 Jan 25' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/2ae4983e4fde9a10a5dcc4c04887e5b83a839b55" title='Last modified by Yi Zhang | 2026 Feb 10' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Jan 25</span>
+    <span>2026 Feb 10</span>
   </a>
 
 </div>
@@ -2831,7 +2713,7 @@ References
 <ul>
 <li><a href="#headline-4">COMRES=n1</a>
 </li>
-<li><a href="#headline-5">COMSAV= n2</a>
+<li><a href="#headline-5">COMSAV=n2</a>
 </li>
 <li><a href="#headline-6">DERIV1=NO (NM74)</a>
 </li>
@@ -2862,8 +2744,6 @@ References
 <li><a href="#headline-18">FUNCTION</a>
 </li>
 </ul>
-</li>
-<li><a href="#headline-19">References</a>
 </li>
 </ul>
 </li>

@@ -202,14 +202,10 @@ injection.
 
 ** Dose rate: RATE
 In a dose record the RATE data item can have values
-- =RATE>0=: an infusion rate.
+- RATE>0: an infusion rate.
 - RATE=0: instantaneous bolus dose.
-- RATE=-1: the dose is either a zero-order bolus dose (see section
-  III.F.3) with rate modeled in PK (see section III.F.4) or a
-  rate-modeled steady-state infusion (see section III.F.5).
-- RATE=-2: a zero-order bolus dose and that its duration is modeled
-  in PK (see section III.F.3).  In this case a positive AMT  must be
-  specified.
+- RATE=-1: the dose is either a zero-order bolus dose with rate modeled in PK or a rate-modeled steady-state infusion.
+- RATE=-2: a zero-order bolus dose and that its duration is modeled in PK.  In this case a positive AMT must be specified.
 
 RATE must be 0 in observation, other-type, and reset
 event records.
@@ -434,17 +430,14 @@ TIME     RATE     AMT     SS
 
 ** Compartment: CMT and PCMT
 The /observation compartment/ of a record contains the prediction for
-an observation. It can be either a scaled drug amount
-(see section III.F.1) or a modification of this quantity (see section IV.B.2).
-Every dose event is associated with a /dose compartment/
-(see section III.F.2).  A kinetic model has default designation for
-these compartments, called
-/default observation compartment/ and
-/default dose compartment/, respectively.
-Some kinetic models have the defaults built into the model definition,
-some can be user-specified (see $MODEL record, and section VI.B).
-Hereon unless otherwise specified by observation/dose compartment we
-we their defaults.
+an observation. It can be either a scaled drug amount or a
+modification of this quantity. Every dose event is associated with a
+/dose compartment/ .  A kinetic model has default designation for
+these compartments, called /default observation compartment/ and
+/default dose compartment/, respectively. Some kinetic models have the
+defaults built into the model definition, some can be user-specified
+(see ~$MODEL~ record). Hereon unless otherwise specified by
+observation/dose compartment we we their defaults.
 
 *** On/Off of compartments
 Some compartments can be switched on or off at event record times.
@@ -457,10 +450,10 @@ computation.
 Each compartment has an initial on/off status at the start of an
 individual record and retains that status until explicitly changed. In
 single-subject datasets, “individual record” refers to the entire
-dataset (see Section IV.A). Only specific compartments in a kinetic
+dataset. Only specific compartments in a kinetic
 model can be switched, and both switchable compartments and their
 initial statuses are defined—either built into the model or set by the
-user in subroutine MODEL (see Section VI.B).
+user in subroutine MODEL.
 
 A dose event turns on the dose compartment at dosing time if not
 already active. During an observation event, the observation
@@ -512,11 +505,11 @@ at times of interest, and output the predition in tables.
 - Data records with CONT=1 are ignored thus the prediction is 0.
 - For the last data record of an observation event record, the
   prediction is always either the scaled drug amount in the
-  observation compartment (see section III.F.1), or a modification of
-  this quantity (see section IV.B.2).
+  observation compartment, or a modification of
+  this quantity.
 - For the last data record of a non-observation record, the prediction is
 the prediction that would result for an observation of the default observation
-compartment (see section H), unless otherwise specified using PCMT.
+compartment, unless otherwise specified using PCMT.
 
 The optional PCMT data item specifies the compartment number for the prediction for the last
 data record of the event record.  Thus predictions for
@@ -540,10 +533,9 @@ can use ADDL on a single dose event record. The dose specified on the dose event
   initiating dose, are given. In that case one must use
   II to specify the constant interdose interval.
 
-If the initiating dose is lagged, the additional doses are also lagged
-(see section III.F.6). The /additional dose time/ are the time when
+If the initiating dose is lagged, the additional doses are also lagged. The /additional dose time/ are the time when
 such a dose actually enters the system, accounting for lag, if any. It
-is a nonevent dose time (see section III.B.2). At each additional dose
+is a nonevent dose time. At each additional dose
 time a dose like the initiating dose automatically enters the system.
 Until such a time as all the additional doses have entered, or until
 the last event time in an individual record is attained, whichever
@@ -552,7 +544,7 @@ active. Afterwards, the record is said to be inactive (The additional
 dose data item can also be used when all the data are from a single
 subject, and then the term 'last event time in an individual record'
 should be understood to mean the last event time in the data set. This
-is a consequence of the single-subject assumption; see section IV.A.)
+is a consequence of the single-subject assumption).
 There can be at most 10 active dose event records at a time.
 
 Note that
@@ -569,7 +561,7 @@ Note that
   previous dose event record which happens to be active. Also, a reset
   and a reset-dose event record will deactivate any previous dose
   event record which happens to be active. Also, if a compartment is
-  turned off with an other-type event record (see section H), this
+  turned off with an other-type event record, this
   deactivates any previous dose event record with a dose to this
   compartment which happens to be active.
 
