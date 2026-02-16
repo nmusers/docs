@@ -1170,23 +1170,23 @@ USAGE:
 before NONMEM 7.2:
 #+begin_src f90
   SUBROUTINE PK(ICALL,IDEF,THETA,IREV,EVTREC,NVNT,INDXS,IRGG,GG,NETAS)
-   USE SIZES,     ONLY: DPSIZE,ISIZE,LVR
-   REAL(KIND=DPSIZE) :: EVTREC
-   INTEGER(KIND=ISIZE) :: ICALL,IDEF,IREV,NVNT,INDXS,IRGG,NETAS
-   DIMENSION :: IDEF(7,*),THETA(*),EVTREC(IREV,*),INDXS(*)
-   DIMENSION :: GG(IRGG,LVR+1,*)
+    USE SIZES,     ONLY: DPSIZE,ISIZE,LVR
+    REAL(KIND=DPSIZE) :: EVTREC
+    INTEGER(KIND=ISIZE) :: ICALL,IDEF,IREV,NVNT,INDXS,IRGG,NETAS
+    DIMENSION :: IDEF(7,*),THETA(*),EVTREC(IREV,*),INDXS(*)
+    DIMENSION :: GG(IRGG,LVR+1,*)
 #+end_src
 
 With NONMEM 7.2 and higer:
 #+begin_src f90
-   SUBROUTINE PK(ICALL,IDEF,THETA,IREV,EVTREC,NVNT,INDXS,IRGG,GG,NETAS)
-   USE SIZES,     ONLY: DPSIZE,ISIZE
-   USE PRDIMS,    ONLY: GPKD
-   IMPLICIT REAL(KIND=DPSIZE) (A-Z)
-   REAL(KIND=DPSIZE) :: EVTREC
-   INTEGER(KIND=ISIZE) :: ICALL,IDEF,IREV,NVNT,INDXS,IRGG,NETAS
-   DIMENSION :: IDEF(7,*),THETA(*),EVTREC(IREV,*),INDXS(*)
-   DIMENSION :: GG(IRGG,GPKD+1,*)
+  SUBROUTINE PK(ICALL,IDEF,THETA,IREV,EVTREC,NVNT,INDXS,IRGG,GG,NETAS)
+    USE SIZES,     ONLY: DPSIZE,ISIZE
+    USE PRDIMS,    ONLY: GPKD
+    IMPLICIT REAL(KIND=DPSIZE) (A-Z)
+    REAL(KIND=DPSIZE) :: EVTREC
+    INTEGER(KIND=ISIZE) :: ICALL,IDEF,IREV,NVNT,INDXS,IRGG,NETAS
+    DIMENSION :: IDEF(7,*),THETA(*),EVTREC(IREV,*),INDXS(*)
+    DIMENSION :: GG(IRGG,GPKD+1,*)
 #+end_src
 
 The  PK  subroutine is called by PREDPP to obtain values for basic and
@@ -1233,79 +1233,79 @@ block.
 Output argument:
 
 - IDEF: stores values only when ICALL=1. Values may be stored in the following elements:
-  + IDEF(1,1)=-9  (required)
-  + IDEF(1,2) is the call limiting element (compare ~$PK~'s CALLFL). Values are:
-    - -2:  call  with every event record and at additional and lagged dose times.
-    - -1: call with every event record (default)
-    -  0: call with first event record and new TIME values
-    -  1: call once per individual record
+  + ~IDEF(1,1)=-9~  (required)
+  + ~IDEF(1,2)~ is the call limiting element (compare ~$PK~'s CALLFL).
+    - ~IDEF(1,2)=-2~:  call  with every event record and at additional and lagged dose times.
+    - ~IDEF(1,2)=-1~: call with every event record (default)
+    - ~IDEF(1,2)= 0~: call with first event record and new TIME values
+    - ~IDEF(1,2)= 1~: call once per individual record
     Compartment initialization may be performed by routine PK.
 
     An initial steady state may be requested by routine PK;
 
     (See [[file:/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod][Initial Steady State: I_SS,ISSMOD]]).
 
-  + IDEF(1,3) describes whether PK performs  compartment
+  + ~IDEF(1,3)~ describes whether PK performs  compartment
       initialization,  i.e.,  whether or not PK initializes elements of
-      the initial state vector A_0(n).  Values are:
-    - -1: PK may initialize A_0.
-    -  0: PK does not initialize A_0.
-    -  1: PK does initialize A_0.
-    The default used by PREDPP is IDEF(1,3)=-1.  However,  when
-    compartment  initialization is not implemented, then if IDEF(1,3)
+      the initial state vector ~A_0(n)~.
+    - ~IDEF(1,3)=-1~: PK may initialize ~A_0~.
+    - ~IDEF(1,3)= 0~: PK does not initialize ~A_0~.
+    - ~IDEF(1,3)= 1~: PK does initialize ~A_0~.
+    The default used by PREDPP is ~IDEF(1,3)=-1~.  However,  when
+    compartment  initialization is not implemented, then if ~IDEF(1,3)~
     is set to  0,  PREDPP  can  avoid  some  time-consuming
     processing. Indeed,  when  ~$PK~  abbreviated or verbatim code is
     supplied, and there is  no  reference  to  compartment
     initialization  amounts A_0(n)  in  either the abbreviated or
-    verbatim code, then NM-TRAN sets IDEF(1,3)=0.
+    verbatim code, then NM-TRAN sets ~IDEF(1,3)=0~.
 
     Compartment amounts may be used by routine PK (See [[file:/docs/reference-manual/api/variables/#state-vec-a][State Vector A]]).
 
-  + IDEF(1,4) describes whether PK uses  derivatives  of
+  + ~IDEF(1,4)~ describes whether PK uses  derivatives  of
       compartment amounts (e.g. compartment amounts themselves are used
       as random variables in arithmetic statements in PK).  Values are:
-    - -1: PK may use derivatives of compartment amounts.
-    -  0: PK does not use derivatives of compartment amounts.
-    -  1: PK uses derivatives of compartment amounts.
-    The default used by PREDPP is IDEF(1,4)=-1.  However, when
+    - ~IDEF(1,4)=-1~: PK may use derivatives of compartment amounts.
+    - ~IDEF(1,4)= 0~: PK does not use derivatives of compartment amounts.
+    - ~IDEF(1,4)= 1~: PK uses derivatives of compartment amounts.
+    The default used by PREDPP is ~IDEF(1,4)=-1~.  However, when
     derivatives  of compartment amounts are not used, then if
-    IDEF(1,4) is set to  0,  PREDPP  can  avoid  some  time-consuming
+    ~IDEF(1,4)~ is set to  0,  PREDPP  can  avoid  some  time-consuming
     processing. Indeed,  when  ~$PK~  abbreviated or verbatim code is
-    supplied, and there is no reference to A(n) (as a random variable
+    supplied, and there is no reference to ~A(n)~ (as a random variable
     in an  arithmetic  statement)  in  the abbreviated code (or to
-    derivatives of A(n) in the verbatim code), then NM-TRAN sets
-    IDEF(1,4)=0.
+    derivatives of ~A(n)~ in the verbatim code), then NM-TRAN sets
+    ~IDEF(1,4)=0~.
 
-  + Remaining elements contain row numbers in GG:
-    - IDEF(2,1): row number of F0 (output fraction)
-    - IDEF(2,2): row number of XSCALE (Time Scale)
-    - IDEF(2,3): row number of lowest-numbered MTIME
-    - IDEF(2,4): row number of highest-numbered MTIME
-    - IDEF(3,n): row number of Sn (Scale for comp. n) (thru n+1 output)
-    - IDEF(4,n): row number of Fn (bioavailability fraction for comp. n)
-    - IDEF(5,n): row number of Rn (modeled rate for comp. n)
-    - IDEF(6,n): row number of Dn (modeled duration for comp. n)
-    - IDEF(7,n): row number of ALAGn (absorption lag for comp. n)
+  + Remaining elements contain row numbers in ~GG~:
+    - ~IDEF(2,1)~: row number of ~F0~ (output fraction)
+    - ~IDEF(2,2)~: row number of ~XSCALE~ (Time Scale)
+    - ~IDEF(2,3)~: row number of lowest-numbered MTIME
+    - ~IDEF(2,4)~: row number of highest-numbered MTIME
+    - ~IDEF(3,n)~: row number of ~Sn~ (Scale for compartment ~n~) (thru ~n+1~ output)
+    - ~IDEF(4,n)~: row number of ~Fn~ (bioavailability fraction for compartment ~n~)
+    - ~IDEF(5,n)~: row number of ~Rn~ (modeled rate for compartment ~n~)
+    - ~IDEF(6,n)~: row number of ~Dn~ (modeled duration for compartment ~n~)
+    - ~IDEF(7,n)~: row number of ~ALAGn~ (absorption lag for compartment ~n~)
 
-- GG:  the array of PK parameters and their eta derivatives,
+- ~GG~:  the array of PK parameters and their eta derivatives,
   initialized to zero immediately before PK calls. The  maximum
-  number  of rows in GG is given by IRGG, which is the same as
+  number  of rows in ~GG~ is given by ~IRGG~, which is the same as
   constant PG found in file SIZES (See [[file:/docs/reference-manual/api/memory/][SIZES]]).
   + At ICALL = 2:
-     - GG(k,1,1) contains the value of the k'th parameter;
-     - GG(k,i+1,1) contains its derivative with respect to the ETA(i);
-     - GG(k,i+1,j+1) contains its second derivative with respect to
+     - ~GG(k,1,1)~ contains the value of the k'th parameter;
+     - ~GG(k,i+1,1)~ contains its derivative with respect to the ETA(i);
+     - ~GG(k,i+1,j+1)~~ contains its second derivative with respect to
        ETA(i) and ETA(j) (lower-triangular; j=1, ..., i).  Recall that
-       second derivatives are only needed with METHOD=LAPLACE,
-       therefore GG may be declared as a two-dimensional array
+       second derivatives are only needed with ~METHOD=LAPLACE~,
+       therefore ~GG~ may be declared as a two-dimensional array
        ~GG(IRGG,*)~ when the Laplacian method is not used.
-  + At ICALL = 4: GG(k,1,1)  contains  the  individual-specific  value  of  the
+  + At ICALL = 4: ~GG(k,1,1)~  contains  the  individual-specific  value  of  the
     k'th parameter.  Since ICALL=4 indicates simulation, other columns
     of GG for partial derivatives need not be computed.
-  + At ICALL = 1: GG(k,1,1)=[0|1] specifies transformation of the
-    values that will be stored at GG(k,1,1) during
-    calls with ICALL=2 or 4. GG(k,1,1)=0 means no transformation,
-    while GG(k,1,1)=1 indicates GG(k,1,1) will store a log-transformed
+  + At ICALL = 1: ~GG(k,1,1)=[0|1]~ specifies transformation of the
+    values that will be stored at ~GG(k,1,1)~ during
+    calls with ICALL=2 or 4. ~GG(k,1,1)=0~ means no transformation,
+    while GG(k,1,1)=1 indicates ~GG(k,1,1)~ will store a log-transformed
     parameter value.
 
 Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/#nm-pred-mod][NONMEM-PRED modules, and  PREDPP modules]].
@@ -1535,8 +1535,8 @@ ICALL=4.
 
 Output argument:
 
-EPS: a 1-D array that stores  simulated  epsilon values
-EPS(1), EPS(2).
+~EPS~: a 1-D array that stores  simulated  epsilon values
+~EPS(1)~, ~EPS(2)~.
 
 The simulated epsilon values follow a multivariate normal
 distribution with mean 0 and covariance matrix SIGMA.  With  different  calls  to  SIMEPS  with
@@ -1610,18 +1610,18 @@ simulated.
 :CUSTOM_ID: simeta
 :END:
 #+begin_src f90
-! USAGE:
-      USE SIZES, ONLY: DPSIZE,LVR
-      REAL(KIND=DPSIZE):: ETA(LVR)
-      CALL SIMETA (ETA)
+  ! USAGE:
+    USE SIZES, ONLY: DPSIZE,LVR
+    REAL(KIND=DPSIZE):: ETA(LVR)
+    CALL SIMETA (ETA)
 #+end_src
 Routine SIMETA can be called by PRED during the simulation step, to
 obtain simulated eta values.   It  may  be  called only when ICALL=4.
 
 Output argument:
 
-ETA: an  array  into  which SIMETA stores simulated ETA values ETA(1),
-      ETA(2), ...  The dimension of the array may be smaller  than  the
+~ETA~: an  array  into  which SIMETA stores simulated ETA values ~ETA(1)~,
+      ~ETA(2)~, ...  The dimension of the array may be smaller  than  the
       maximum, e.g., it may equal the number of ETAs in the problem.
 
 Simulated  ETA  values  arise from a multivariate normal pseudo-random
@@ -1706,6 +1706,54 @@ Another way this can be implemented is as follows:
 #+end_src
 
 See also the analogous routine SIMEPS.
+
+*** GETETA
+#+begin_src f90
+  ! Usage
+    DIMENSION ETA(LVR)
+    DOUBLE PRECISION ETA
+    CALL GETETA (ETA)
+
+  ! Example
+    IF (ICALL.EQ.1) THEN
+       ...
+       CALL GETETA (ETA)
+       ...
+       RETURN
+    ENDIF
+    ...
+    IF (ICALL.EQ.2) CALL GETETA (ETA)
+    ! subject-specific Mth parameter is stored in GG(M,1)
+    GG(1,1) = TVCLMT*EXP(ETA(4))+TVCLRN*EXP(ETA(5))
+    ...
+#+end_src
+The  NONMEM  utility routine ~GETETA~ is used to obtain
+subject-specific values of ETA in population models.
+
+Output argument:
+
+~ETA~: an  array  into  which  ~GETETA~ stores subject-specific ETA
+values ~ETA(1)~, ~ETA(2)~, etc.  If a conditional estimation method is
+/not/ used, ~GETETA~ stores zeros in the ~ETA~ array.
+
+~GETETA~  must  always  be  initialized at ~ICALL=1~. This simply
+involves calling ~GETETA~ at ~ICALL=1~.  No values are stored in ETA
+at this call.
+
+When the data are population and abbreviated code is used,  values  of
+etas are always obtained by a call to ~GETETA~ occurring in generated
+or Library PK or PRED subroutines.  (In the case of PK, the array of
+etas is  stored  in  a  common  and is available to the ERROR
+subroutine as well.)  This call occurs even if a conditional
+estimation  method  is not  implemented,  in  which  case  GETETA
+stores zeros in ETA.  As a result, when the first-order method is
+used, apparent subject-specific values  computed  in NM-TRAN
+abbreviated code are the required typical values.  Thus, an executable
+resulting from using an abbreviated  code for  PRED  (for  PK  and
+ERROR if PREDPP is used) can be used with any estimation method.
+
+
+ REFERENCES: Guide VI, section III.E.2 , IV.B.2
 
 *** Error recovery
 :PROPERTIES:
