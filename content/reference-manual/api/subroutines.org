@@ -34,32 +34,32 @@ selectively passed to PK,  ERROR,  and  INFN. It can  be  used  in
 ~$PK~, ~$ERROR~, and ~$PRED~ abbreviated code.  The discussion below
 describes the values of ICALL as seen by PRED.
 
-  - ICALL=-1: the routine has been called for the [[file:/docs/reference-manual/abbr/#pred_ignore_data_block][ PRED_IGNORE_DATA]]
+  - ~ICALL=-1~: the routine has been called for the [[file:/docs/reference-manual/abbr/#pred_ignore_data_block][ PRED_IGNORE_DATA]]
     feature (NM75).  One  call per data record, at the start of the run.
     These  calls  occur  only   if   abbreviated   code uses  variables
     PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if the
     [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]] of ~$DATA~ is used.  Otherwise, there are no
-    calls to  PRED  with ICALL=-1.
+    calls to  PRED  with ~ICALL=-1~.
 
-  - ICALL=0:  the routine has been called for initialization at the
+  - ~ICALL=0~:  the routine has been called for initialization at the
     beginning of the NONMEM run; one such call per run.
 
-  - ICALL=1: the routine has been called for initialization at the
+  - ~ICALL=1~: the routine has been called for initialization at the
     beginning of a NONMEM problem; one such call per problem.
 
-  - ICALL=2:  the routine has been called for a prediction. Multiple
+  - ~ICALL=2~:  the routine has been called for a prediction. Multiple
     calls occur.
 
-  - ICALL=3: the routine has been called for finalization at the end of
+  - ~ICALL=3~: the routine has been called for finalization at the end of
     a NONMEM problem; one such call per problem.
 
-  - ICALL=4:  the routine has been called during the Simulation Step;
-    multiple calls occur, as with ICALL=2.
+  - ~ICALL=4~:  the routine has been called during the Simulation Step;
+    multiple calls occur, as with ~ICALL=2~.
 
-  - ICALL=5: the routine has been called when expectations are being
+  - ~ICALL=5~: the routine has been called when expectations are being
     computed; multiple calls occur.
 
-  - ICALL=6:  the routine has been called when raw data averages are
+  - ~ICALL=6~:  the routine has been called when raw data averages are
     being computed; multiple calls occur.
 
 Note that not every subroutine listed is called all possible ICALL values.
@@ -207,7 +207,7 @@ Output argument:
 - P1  P1(i) is the partial derivative of CNT with respect to eta(i).
 
 - P2  P2(i,j) is the second partial derivative of CNT with  respect
-  to eta(i) and eta(j) (for i <= j). At  ICALL=1,  CCONTR  sets
+  to eta(i) and eta(j) (for i <= j). At  ~ICALL=1~,  CCONTR  sets
   P2(1,1)=-1 if second derivative values are to be used.  Otherwise,
   if cross-gradient values  are  to  be used.
 
@@ -533,7 +533,7 @@ function of concentration, in a pharmacodynamic study).
 Input argument:
 
 -  ICALL: see ICALL above for general discussions.
-   + ICALL=1:  ERROR  is being called for initialization at the
+   + ~ICALL=1~:  ERROR  is being called for initialization at the
      beginning of a NONMEM problem; one such call per problem.  EVTREC
      contains  the  first event record.  THETA contains the initial
      estimates.  ERROR must return values in IDEF which inform PREDPP
@@ -541,16 +541,16 @@ Input argument:
      elments of HH to the appropriate derivatives, when  it  has
      requested  that ERROR be called only once per problem.
 
-   + ICALL=2:  ERROR has been called to obtain the modeled value;
+   + ~ICALL=2~:  ERROR has been called to obtain the modeled value;
      multiple calls occur.  ERROR should compute derivatives of prediction F to
      be stored in ~HH~. If  ERROR  changes F, it should also change the derivates of
      F in G.
 
-   + ICALL=4: ERROR has been called during the Simulation Step;
+   + ~ICALL=4~: ERROR has been called during the Simulation Step;
      multiple calls occur.  ERROR should compute simulated
      observations and store them in F.
 
-   + ICALL=5: ERROR has been called during the computation of
+   + ~ICALL=5~: ERROR has been called during the computation of
      expectations;  multiple calls occur.  Such calls occur when the
      marginal (MRG_) data item is defined in the data set and has
      non-zero values  for  some records.  If the MRG_ data item has
@@ -560,7 +560,7 @@ Input argument:
      value  of  an  ERRORdefined  item  contributes  to  the
      expectation computed for the item.
 
-   + ICALL=6: ERROR has been called during the computation of raw data
+   + ~ICALL=6~: ERROR has been called during the computation of raw data
      averages;  multiple  calls occur.  Such calls occur when the
      rawdata (RAW_) data item is defined in the  data  set  and  has
      the value 1 for some records (See template).  ERROR may
@@ -583,7 +583,7 @@ Input argument:
 Output argument:
 
 -  IDEF
-      ERROR  should store values in IDEF only when ICALL=1.  A value of
+      ERROR  should store values in IDEF only when ~ICALL=1~.  A value of
       1 in IDEF(1) indicates that ERROR will store the  derivatives  of
       log  y  in HH (which causes PREDPP to multiply each element of HH
       by F).  That is, PREDPP understands that the "error in log y"  is
@@ -615,30 +615,30 @@ Input/Output argument:
 - F:  On  input,  the  prediction  based  on the pharmacokinetic model,
       i.e., the value of the scaled drug amount in the observation compartment.   On output, F may be unchanged, or it may be modified,
       e.g., when a PD prediction is needed.  If ERROR  modifies  F  and
-      uses  population  eta  variables  to do so, then at ICALL=2 ERROR
+      uses  population  eta  variables  to do so, then at ~ICALL=2~ ERROR
       must call GETETA to obtain eta values prior to modifying F.  When
-      ICALL=4,  ERROR should calculate the simulated observation (after
+      ~ICALL=4~,  ERROR should calculate the simulated observation (after
       calling  SIMETA  and/or  SIMEPS  to  obtain  simulated  ETA  and
       EPS, as necessary) and place its value in F.  With the Simulation Step, ERROR may return the simulated observation as the DV
       data item, rather than in the argument F.  With discrete data the
       simulated observation must be  returned  as  the  DV  data  item.
       (See [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
 
-- G:  On  input,  at  ICALL=2 when the data are population, an array of
+- G:  On  input,  at  ~ICALL=2~ when the data are population, an array of
       partial derivatives of F with respect to ETAs
       G (i,1) is the partial derivative of F with respect to eta(i).
       G (i,j+1) is the second derivative of F with respect  to  eta(i),
       eta(j) (lower-triangular; j=1, ..., i).
       (Second derivatives are only needed with estimation by the Laplacian method.)
       On input, G contains zeros when the data are single-subject data.
-      At ICALL=2, ERROR must modify G when it has  changed  F  and  has
+      At ~ICALL=2~, ERROR must modify G when it has  changed  F  and  has
       thus  changed the derivatives of F with respect to the population
       ETAs.
 
 - HH:  An array of partial derivatives of F with respect to  ETAs  (when
       the  data are single-subject data) or EPSILONs (when the data are
-      population).  Values should be stored when ICALL=2 and also  when
-      ICALL=1 if ERROR sets IDEF(2)=2.
+      population).  Values should be stored when ~ICALL=2~ and also  when
+      ~ICALL=1~ if ERROR sets IDEF(2)=2.
       HH(i,1) is the derivative of F with respect to eta(i) or eps(i).
       HH(i,j+1) is the derivative of H(i,1) with respect to eta(j) (but
       are only needed with conditional estimation when  the  dependence
@@ -661,7 +661,7 @@ correctly if routine ERROR is called with one event record after
 another (within an individual record), no event records being skipped,
 and no event record being repeated. This is the default. However,
 PREDPP can implement a few different protocols for calling ERROR. A
-protocol is specified by setting IDEF(2) to various values at ICALL=1
+protocol is specified by setting IDEF(2) to various values at ~ICALL=1~
 (for more about IDEF, see section B.1). The default is IDEF(2)=-1
 (call with every event record), described above. The ERROR routine can
 be called only with each observation event record of the individual
@@ -671,11 +671,11 @@ IDEF(2) must be explicitly set to 0.
 
 There are two general considerations to be remembered about
 calling-protocols with ERROR. First, no matter what calling-protocol
-is used, it applies only to calls to ERROR at ICALL=2; at ICALL=4
+is used, it applies only to calls to ERROR at ~ICALL=2~; at ~ICALL=4~
 (i.e. during simulation) ERROR is always called with every event
 record. [This differs from calling-protocols with PK, where whatever
-calling-protocol is used for PK at ICALL=2 is the same as that used at
-ICALL=4.] Second, a calling-protocol that limits the sequence of calls
+calling-protocol is used for PK at ~ICALL=2~ is the same as that used at
+~ICALL=4~.] Second, a calling-protocol that limits the sequence of calls
 to ERROR should not be requested when the value of F returned by ERROR
 may differ from the value input to ERROR.
 
@@ -702,17 +702,17 @@ not depend on any concomitant variables, nor do they depend on ETA or
 THETA. In such a case the values stored in the HH array must be the
 same for each observation event record of the entire data set; indeed,
 these values could be computed only once during the entire NONMEM
-problem. If at ICALL=1, IDEF(2) is set to 2, then at ICALL=2 values
+problem. If at ~ICALL=1~, IDEF(2) is set to 2, then at ~ICALL=2~ values
 for HH will always be taken to be (constant) values stored in HH at
-ICALL=1. Note that the HH array is initialized to zero immediately
-before the call to ERROR with ICALL=1.
+~ICALL=1~. Note that the HH array is initialized to zero immediately
+before the call to ERROR with ~ICALL=1~.
 
 If log y is given by (5), the derivatives of log y with respect to the
 EPS are particularly simple; they satisfy the requirement for using
 IDEF(2)=2. By setting IDEF(1)=1, the user is specifying that when
-ICALL=2, the derivatives of log y are to be found in HH (see section
+~ICALL=2~, the derivatives of log y are to be found in HH (see section
 B.1). By also setting IDEF(2)=2, these derivatives are actually taken
-to be the values stored in HH at ICALL=1.
+to be the values stored in HH at ~ICALL=1~.
 
 Even when IDEF(2)=0, 1, or 2, a call to ERROR with any given event record can be forced with
 the use of the CALL data item.
@@ -759,22 +759,22 @@ Input/Output argument:
 
 - ICALL
 
-  + ICALL=-1: INFN may  set  PRED_IGNORE_DATA=1  for  records  to  be
+  + ~ICALL=-1~: INFN may  set  ~PRED_IGNORE_DATA=1~  for  records  to  be
     dropped.  The following is required:
     #+begin_src f90
         USE NMPRD_INT, ONLY: PRED_IGNORE_DATA,PRED_IGNORE_DATA_TEST
     #+end_src
     The  option ~$DATA~ [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]]  is required to cause NONMEM to make a PRED_IGNORE_DATA  pass.
 
-  + ICALL=0: INFN may now make computations for  run  initialization.
+  + ~ICALL=0~: INFN may now make computations for  run  initialization.
     ICALL may be reset by INFN to a number in the range 1-8999.  This
     number will appear on NONMEM output, allowing the user  to
     identify the INFN routine being used.
 
-  + ICALL=1:  INFN  may now make computations for problem
+  + ~ICALL=1~:  INFN  may now make computations for problem
     initialization.
 
-  + ICALL=3: INFN may now make computations for problem finalization.
+  + ~ICALL=3~: INFN may now make computations for problem finalization.
     If there are subproblems, first do  subproblem  finalization,  if
     required.   Then  test  for  IREP=NREP (the number of the current
     subproblem equals the total number of subproblems), and if  true,
@@ -792,11 +792,11 @@ INPUT ARGUMENTS:
 
 - THETA
        The NONMEM THETA vector.
-       At ICALL=0, THETA contains the initial estimates  for  the  first
+       At ~ICALL=0~, THETA contains the initial estimates  for  the  first
        problem.
-       At  ICALL=1, THETA contains the initial estimates for the current
+       At  ~ICALL=1~, THETA contains the initial estimates for the current
        problem.
-       At ICALL=3, THETA contains the final estimates  for  the  current
+       At ~ICALL=3~, THETA contains the final estimates  for  the  current
        problem.
 
 -   INDXS
@@ -869,7 +869,7 @@ Output argument:
 
 - NSPOP: an integer variable or integer constant.  The maximum  number
   of sub-populations  that  are  possible.  Must be given a value when
-  ICALL=1.
+  ~ICALL=1~.
 
 - P: an array. For each i (i=1, ... , NSPOP), P(i) gives  the
   modeled fraction  of the population in the ith subpopulation.  The
@@ -941,7 +941,7 @@ Output argument:
     when only THETA and data record items are used in differential
     equations. The maximum number of basic PK parameters plus the
     number of additional parameters whose row indices are given
-    explicitly in PK (at ICALL=1) cannot exceed PG, a constant in
+    explicitly in PK (at ~ICALL=1~) cannot exceed PG, a constant in
     SIZES.f90 which is given by PARAMETER (PG=50+PCT), where PCT is
     the maximum number of model event time parameters given by
     PARAMETER (PCT=30) Both these parameters can be changed with the
@@ -1201,21 +1201,21 @@ such  as  modeled  infusion rates.
 
 Input argument:
 - ICALL: see ICALL above for general discussions.
-  + ICALL=1: PK routine is being called for the first time in the NONMEM problem. At such a time PK must store certain information in array IDEF, and optionally certain information in GG.
-  + ICALL=2: PK routine is being called for regular data analysis and
+  + ~ICALL=1~: PK routine is being called for the first time in the NONMEM problem. At such a time PK must store certain information in array IDEF, and optionally certain information in GG.
+  + ~ICALL=2~: PK routine is being called for regular data analysis and
     that values of PK parameters are to be stored in the first column
     of GG. These can be typical (population mean) values , or they can
     be subject-specific values. In addition, partial derivatives are also stored. see sections D and E.
-  + ICALL=4: PK routine is being called for regular data simulation.
+  + ~ICALL=4~: PK routine is being called for regular data simulation.
     If the data are population data, simulated subject-specific PK
     parameters values are to be stored in the first column of GG; see
     section E.2. However, if the data are all from a single subject,
     so that the subject’s specific values are synonomous with the
     typical values, then typical values are stored in this column.
-  + ICALL=5: PK routine is being called for regular expectations
+  + ~ICALL=5~: PK routine is being called for regular expectations
     computation. Multiple calls can occur. See [[file:/docs/reference-manual/abbr/#expectation-block][Expectation blocks]]. In this case no ETA derivatives are needed.
 
-If there is abbreviated code in the ~$PK~ block conditional on ICALL=0, ICALL=1, or ICALL=3, the
+If there is abbreviated code in the ~$PK~ block conditional on ~ICALL=0~, ~ICALL=1~, or ~ICALL=3~, the
 code is transcribed to the INFN routine as part of an ~$INFN~
 block.
 
@@ -1232,7 +1232,7 @@ block.
 
 Output argument:
 
-- IDEF: stores values only when ICALL=1. Values may be stored in the following elements:
+- IDEF: stores values only when ~ICALL=1~. Values may be stored in the following elements:
   + ~IDEF(1,1)=-9~  (required)
   + ~IDEF(1,2)~ is the call limiting element (compare ~$PK~'s CALLFL).
     - ~IDEF(1,2)=-2~:  call  with every event record and at additional and lagged dose times.
@@ -1300,11 +1300,11 @@ Output argument:
        therefore ~GG~ may be declared as a two-dimensional array
        ~GG(IRGG,*)~ when the Laplacian method is not used.
   + At ICALL = 4: ~GG(k,1,1)~  contains  the  individual-specific  value  of  the
-    k'th parameter.  Since ICALL=4 indicates simulation, other columns
+    k'th parameter.  Since ~ICALL=4~ indicates simulation, other columns
     of GG for partial derivatives need not be computed.
   + At ICALL = 1: ~GG(k,1,1)=[0|1]~ specifies transformation of the
     values that will be stored at ~GG(k,1,1)~ during
-    calls with ICALL=2 or 4. ~GG(k,1,1)=0~ means no transformation,
+    calls with ~ICALL=2~ or ~ICALL=4~. ~GG(k,1,1)=0~ means no transformation,
     while GG(k,1,1)=1 indicates ~GG(k,1,1)~ will store a log-transformed
     parameter value.
 
@@ -1322,7 +1322,7 @@ correctly if routine PK is called with one event record after another
 (within an individual record), no event records being skipped, and no
 event record being repeated. This is the default. However, PREDPP can
 implement a few different protocols for calling PK. A protocol is
-specified by setting IDEF(1,2) to one of various values at ICALL=1
+specified by setting IDEF(1,2) to one of various values at ~ICALL=1~
 (for more about IDEF, see section G). For example, the PK routine can
 be called only with the first event record of the individual record
 and with every event record thereafter where the time data item
@@ -1410,22 +1410,22 @@ for common Population PK models.
 Input argument:
 
 - ICALL
-  + ICALL=-1: the routine has been called for the [[file:/docs/reference-manual/abbr/#pred_ignore_data_block][PRED_IGNORE_DATA]] feature (NM75).   One call per data record, at the start
+  + ~ICALL=-1~: the routine has been called for the [[file:/docs/reference-manual/abbr/#pred_ignore_data_block][PRED_IGNORE_DATA]] feature (NM75).   One call per data record, at the start
     of the run.  These calls  occur  only  if  abbreviated  code  uses
     variables PRED_IGNORE_DATA or PRED_IGNORE_DATA _TEST, or if the
     [[file:/docs/reference-manual/control-records/data/#pred_ignore_data_option][PRED_IGNORE_DATA option]] of ~$DATA~ is used.  Otherwise, there are no
-    calls to  PRED  with ICALL=-1.
+    calls to  PRED  with ~ICALL=-1~.
 
-  + ICALL=0:  PRED  has  been  called  for  initialization purposes at
+  + ~ICALL=0~:  PRED  has  been  called  for  initialization purposes at
     the beginning of the NONMEM run; one such call per run.   DATREC
     contains the  first  data  record.  THETA contains the initial
     estimates.  PRED need not compute F, G, or H.
 
-  + ICALL=1: PRED has been  called  for  initialization  purposes  at
+  + ~ICALL=1~: PRED has been  called  for  initialization  purposes  at
     the beginning  of a NONMEM problem; one such call per problem.
-    Otherwise, identical to ICALL=0.
+    Otherwise, identical to ~ICALL=0~.
 
-  + ICALL=2: For the data record contained in DATREC, PRED has been
+  + ~ICALL=2~: For the data record contained in DATREC, PRED has been
     called for  the  purpose  of computing F, the value of the
     prediction, and/or the values of other PRED-defined items,
     appropriate  for  the  record. PRED  should  compute  F, and also
@@ -1433,12 +1433,12 @@ Input argument:
     compute F.   With  conditional  estimation, to obtain ETA values,
     PRED should call GETETA.
 
-  + ICALL=3:  PRED has been called for finalization purposes at the
+  + ~ICALL=3~:  PRED has been called for finalization purposes at the
      end of a NONMEM problem; one such call per (sub)problem.  DATEC
      contains  the first  data  record.   THETA contains the final
-     estimates.  Otherwise, identical to ICALL=0.
+     estimates.  Otherwise, identical to ~ICALL=0~.
 
-  + ICALL=4: For the data record contained in DATREC, PRED has been
+  + ~ICALL=4~: For the data record contained in DATREC, PRED has been
      called during the Simulation Step for the purpose of computing a
      value of the dependent variable and, possibly,  values  of
      independent  variables, appropriate  for  the record.  PRED
@@ -1447,7 +1447,7 @@ Input argument:
      used  to compute F.  PRED should call SIMETA (and SIMEPS) to
      obtain simulated values of ETA (and EPS).
 
-  + ICALL=5: For the data record contained in DATREC, PRED has been
+  + ~ICALL=5~: For the data record contained in DATREC, PRED has been
       called for the purpose of computing the expectation of the PRED
       item and possibly, the expectations of other PRED-defined items,
       appropriate  for the  record.  Such a call occurs when the
@@ -1461,7 +1461,7 @@ Input argument:
       are over possible values of ETA, and to obtain ETA values, PRED
       should call GETETA.
 
-  + ICALL=6:  PRED has been called for the purpose of  computing
+  + ~ICALL=6~:  PRED has been called for the purpose of  computing
       the  raw data average of the DV data items and, possibly, the
       raw data averages of PRED-defined items.  Such a call occurs
       when the raw-data data item (RAW_)  is defined in the data set
@@ -1493,18 +1493,18 @@ Input argument:
 
 Output argument:
 
-- F   When ICALL=2, the prediction associated  with  the  data  record.
+- F   When ~ICALL=2~, the prediction associated  with  the  data  record.
       With  discrete  data,  the  likelihood  of the observation in the
       record, but if there is no observation, F is ignored.
 
-      When ICALL=4, the value of the simulated  observation  associated
+      When ~ICALL=4~, the value of the simulated  observation  associated
       with  the  data record.  Alternatively, F can be ignored, and the
       DV item in the data record can be directly set to  the  value  of
       the  simulated  observation.   With  discrete data, ~F~ is ignored;
       PRED should directly set the DV item to the value  of  the  simulated observation.
 
 - G   An array of derivatives of F with respect to ETAs.  Values should
-      be set when ICALL=2.
+      be set when ~ICALL=2~.
       G(i,1) is the partial derivative of F with respect to eta(i).
       When the data are population, G(i,j+1) is the second partial  derivative  of  F with respect to eta(i), eta(j) (lower-triangular;
       j=1,..., i).
@@ -1512,7 +1512,7 @@ Output argument:
       used to estimate parameters.
 
 - H   An  array  of  partial derivatives of F with respect to EPSILONs.
-      When the data are population, values should be set when ICALL=2.
+      When the data are population, values should be set when ~ICALL=2~.
       H(i,1) is the derivative of F with respect to eps(i).
       H(i,j+1) is the partial derivative  of  H(i,1)  with  respect  to
       eta(j)
@@ -1531,7 +1531,7 @@ Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modul
 #+end_src
 SIMEPS can be called by PRED during the simulation
 step to obtain simulated epsilon values.  It can only be called with
-ICALL=4.
+~ICALL=4~.
 
 Output argument:
 
@@ -1580,7 +1580,7 @@ applicable when drug levels are being simulated under the same model
 used for the data analysis. Here
 EPS is obtained using SIMEPS, and the value for the observation /y/ is
 computed and returned in ~F~. Note that the
-computation at ICALL=2 implements a slightly different model for residual variability than is
+computation at ~ICALL=2~ implements a slightly different model for residual variability than is
 simulated.
 #+begin_src f90
   ! ERROR ROUTINE FOR THE PHENOBARB POPULATION DATA
@@ -1616,7 +1616,7 @@ simulated.
     CALL SIMETA (ETA)
 #+end_src
 Routine SIMETA can be called by PRED during the simulation step, to
-obtain simulated eta values.   It  may  be  called only when ICALL=4.
+obtain simulated eta values.   It  may  be  called only when ~ICALL=4~.
 
 Output argument:
 
@@ -1837,7 +1837,7 @@ When  the  Simulation  Step is implemented, THETA and OMEGA, and SIGMA
 may also be simulated (along with ETAs and EPSILONs, should  any  such
 appear  in  the model and have nonzero-variances) in the [[file:/docs/reference-manual/api/subroutines/#prior][PRIOR]]
 subroutine.  However, this  need
-not  be done  (simply execute a return in PRIOR at ICALL=4), in which
+not  be done  (simply execute a return in PRIOR at ~ICALL=4~), in which
 case the values for THETA, OMEGA, and SIGMA used in the simulation are
 the values  given  in  the NONMEM control stream or input Model
 Specification File.
@@ -1845,7 +1845,7 @@ Specification File.
 Input argument:
 
 - ICALL Similar to ICALL for PRED subroutine. Possible values: 0, 1,
-  2, and 4. In a multiple problem run, PRIOR is called with ICALL=1
+  2, and 4. In a multiple problem run, PRIOR is called with ~ICALL=1~
   only with the first problem.
 
 
@@ -1936,10 +1936,10 @@ NWPRI computes.
 
 When NWPRI is used during a Simulation Step,  it  produces  a  random
 value of THETA and a random value of OMEGA from the prior.  (See
-Simulation example). (See nwpri example). If NWPRI is used at ICALL=2,
-it need not be used at ICALL=4, and vice-versa.
+Simulation example). (See nwpri example). If NWPRI is used at ~ICALL=2~,
+it need not be used at ~ICALL=4~, and vice-versa.
 
-NWPRI should always be called at ICALL=0 or ICALL=1.
+NWPRI should always be called at ~ICALL=0~ or ~ICALL=1~.
 
 Input arguments:
 
@@ -1989,7 +1989,7 @@ Input arguments:
       "uniformly" from each partition.  This scheme may be used, for
       example, when the problem has NSAM  subproblems, in  which
       case, NWPRI would be called NSAM times, once each time during
-      the problem when ICALL=4, and at each of  these  calls,  a
+      the problem when ~ICALL=4~, and at each of  these  calls,  a
       different random value of THETA will be produced.
 
     + ITYP=2: Just as with value 1, but the NSAM values are obtained
@@ -2006,11 +2006,11 @@ Input arguments:
     communicated  directly  to  NONMEM.   (See
     PRIOR_Simulation:_Parameters).
 
-  - PLEV. When NWPRI is being used at ICALL=0 or 1, but NWPRI will
-    not  be used  at  ICALL=4  (i.e. during the Simulation Step), PLEV
-    can be set to 0.  When it is being used at ICALL=2, PLEV can also
-    be set to  0.   When  NWPRI is being used at ICALL=0 or 1 and it
-    will be used at ICALL=4, or when it is being used at ICALL=4,
+  - PLEV. When NWPRI is being used at ~ICALL=0~ or 1, but NWPRI will
+    not  be used  at  ~ICALL=4~  (i.e. during the Simulation Step), PLEV
+    can be set to 0.  When it is being used at ~ICALL=2~, PLEV can also
+    be set to  0.   When  NWPRI is being used at ~ICALL=0~ or 1 and it
+    will be used at ~ICALL=4~, or when it is being used at ~ICALL=4~,
     then  PLEV must be set to a fraction strictly less than 1, e.g.
     0.999.  PLEV is double precision with NONMEM 7, and is single
     precision  with NONMEM VI.
@@ -2058,7 +2058,7 @@ Input arguments:
 
 Output argument:
 
-  CNT Relevant only if NWPRI is called at ICALL=2.  CNT is the penalty.
+  CNT Relevant only if NWPRI is called at ~ICALL=2~.  CNT is the penalty.
 
 See PRIOR subroutine for using NWPRI. Below we discuss using it along with ~$THETA~, ~$OMEGA~, ~$SIGMA~ records.
 
@@ -2216,12 +2216,12 @@ When  TNPRI  is  used  during  a Simulation Step, it produces a random
 value of the vector of all model  parameters  (whose  values  are  not
 fixed  in the parameter records) from the frequency prior.  (See
 Simulation example).  (See tnpri example).  If TNPRI  is  used during
-a given  problem at ICALL=2, it should not be used during the same
-problem at ICALL=4, and vice-versa.
+a given  problem at ~ICALL=2~, it should not be used during the same
+problem at ~ICALL=4~, and vice-versa.
 
-TNPRI may be used at ICALL=0 or ICALL=1, in which case only the values
-of  its  input arguments are checked.  If it is not used at ICALL=0 or
-ICALL=1, then the first time it is used at ICALL=2 or ICALL=4,
+TNPRI may be used at ~ICALL=0~ or ~ICALL=1~, in which case only the values
+of  its  input arguments are checked.  If it is not used at ~ICALL=0~ or
+~ICALL=1~, then the first time it is used at ~ICALL=2~ or ~ICALL=4~,
 checking will occur.
 
 Not to be used with the new ~$ESTIMATION~ methods of NONMEM 7.
@@ -2410,7 +2410,7 @@ Not to be used with the new ~$ESTIMATION~ methods of NONMEM 7.
       "uniformly" from each  partition.   This  scheme may  be used,
       for example, when the problem has NSAM subproblems, in which
       case, TNPRI would be called NSAM times, once  each  time during
-      the  problem  when ICALL=4, and at each of these calls, a
+      the  problem  when ~ICALL=4~, and at each of these calls, a
       different random value of the UCP vector will be produced.
 
     + ITYP=2: same as ITYP=1, but the NSAM values are obtained by
@@ -2427,12 +2427,12 @@ Not to be used with the new ~$ESTIMATION~ methods of NONMEM 7.
     PRIOR_Simulation:_Parameters).
 
 
-  - PLEV. when  TNPRI  is being used at ICALL=0 or 1, but TNPRI will
-    not be used at ICALL=4 (i.e. during the Simulation Step), PLEV
-    should be set  to 0.  When it is being used at ICALL=2, PLEV
-    should also be set to 0.  When TNPRI is being used at ICALL=0 or 1
-    and will also be  used  at  ICALL=4,  or when it is being used at
-    ICALL=4, then PLEV must be set to a fraction strictly less than 1,
+  - PLEV. when  TNPRI  is being used at ~ICALL=0~ or 1, but TNPRI will
+    not be used at ~ICALL=4~ (i.e. during the Simulation Step), PLEV
+    should be set  to 0.  When it is being used at ~ICALL=2~, PLEV
+    should also be set to 0.  When TNPRI is being used at ~ICALL=0~ or 1
+    and will also be  used  at  ~ICALL=4~,  or when it is being used at
+    ~ICALL=4~, then PLEV must be set to a fraction strictly less than 1,
     e.g.  0.999. PLEV  is  double precision with NONMEM 7, and is
     single precision with NONMEM VI.
 
@@ -2498,7 +2498,7 @@ Not to be used with the new ~$ESTIMATION~ methods of NONMEM 7.
 
  Output argument:
 
-  CNT Relevant only if TNPRI is called at ICALL=2.  CNT is the penalty.
+  CNT Relevant only if TNPRI is called at ~ICALL=2~.  CNT is the penalty.
 
 ** RANDOM
 :PROPERTIES:
@@ -2513,7 +2513,7 @@ Not to be used with the new ~$ESTIMATION~ methods of NONMEM 7.
 #+end_src
 
 The NONMEM utility routine RANDOM may be called by PRED, PK or ERROR
-during the Simulation Step (ICALL=4) and data average block (ICALL=5)
+during the Simulation Step (~ICALL=4~) and data average block (~ICALL=5~)
 to obtain numbers from random number generators.
 
 Input argument:

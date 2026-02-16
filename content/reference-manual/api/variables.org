@@ -76,7 +76,7 @@ See COMSAV for more about save regions.
 
 When  PREDPP is used, and a ~$PK~ block is present, NM-TRAN inserts
 code into the PK routine that  stores  the  value  of  COMSAV  at
-ICALL=1.   If  no  ~$PK~  block  is  present, and a ~$ERROR~ block is
+~ICALL=1~.   If  no  ~$PK~  block  is  present, and a ~$ERROR~ block is
 present, the code is  inserted  into  the  ERROR  routine.   When
 PREDPP  is  not used, and a ~$PRED~ block is present, the generated or
 library PRED routine stores the value of COMSAV at ICALL<=1.
@@ -121,7 +121,7 @@ COMSAV=n2 (option of [[file:/docs/reference-manual/control-records/abbrev/][$ABB
       The  SAVE region has size n2 initially, but NM-TRAN may extend it
       if SAVE variables are used.  However, if n2 =-1, the SAVE  region
       is  not  to  be extended, and there is to be no SAVE region altogether.
-      (See [[file:/docs/reference-manual/abbr/#copying-block][copying block]]). NM-TRAN causes the generated routines to store the value of [[file:/docs/reference-manual/api/variables/#comres-comsav][COMSAV]] at ICALL=1.
+      (See [[file:/docs/reference-manual/abbr/#copying-block][copying block]]). NM-TRAN causes the generated routines to store the value of [[file:/docs/reference-manual/api/variables/#comres-comsav][COMSAV]] at ~ICALL=1~.
 
 COMSAV=n2 (in user written code):
       In  the absence of abbreviated code, COMSAV may be set by a userwritten PRED routine at ICALL<=1, or at COMACT=1  with  the  very first data record.  n2 is as described above.
@@ -170,7 +170,7 @@ These variables define data items from the
 #+end_src
 When  with  a given data record, either of the limits CTLO or CTUP are
  set, thus defining an interval of values  comprising  one  of  several
- categories  equated  with  the possible values of a potential observation, then during a copying pass (and during ICALL=5 and 6), PR_CT  is
+ categories  equated  with  the possible values of a potential observation, then during a copying pass (and during ~ICALL=5~ and 6), PR_CT  is
  the  estimated probability that an observation will be of the category
  in question.
 
@@ -268,7 +268,7 @@ PRINFN  is  a module for INFN-defined variables.  It contains an array
       USE SIZES, ONLY: MMX,DPSIZE
       REAL(KIND=DPSIZE) :: MIXP_RAW(MMX)
 #+end_src
-At  ICALL=6,  (the  final  estimate of) the mixture probabilities
+At  ~ICALL=6~,  (the  final  estimate of) the mixture probabilities
 associated with the individual  record  containing  the  template data
 record are stored in MIXPT.
 
@@ -354,7 +354,7 @@ Values are computed by NONMEM when the Nonparametric step is performed
 and marginal cumulatives are requested (with  NM-TRAN:  ~$NONPARAMETRIC MARGINALS~).
 
 Values  are  available  during  the pass with COMACT=2 and (if PASS is
-called) at ICALL=3.
+called) at ~ICALL=3~.
 
 These variables may be used as right-hand  quantities  in  abbreviated
 code blocks ~$PK~, ~$ERROR~, ~$INFN~ and ~$PRED~.
@@ -567,7 +567,7 @@ and in an ~$INFN~ block in conjunction with PASS.
  IPRED_,IRES_,IWRES and PRED_,RES_,WRES_ are equivalent.
 
 These items are available with passes  through  the  data  set  during
-problem finalization (i.e. ICALL=3), in a data record specific way.
+problem finalization (i.e. ~ICALL=3~), in a data record specific way.
 
 These  items  may  be used as right-hand quantities in ~$PRED~ and ~$INFN~
 during problem finalization.  They can also be output in  table  files
@@ -775,7 +775,7 @@ Status with 2nd level superproblem takes precedence.
 #+end_src
 When with a given data record, either of the limits YLO or YUP are set
  so that during the analysis an interval is defined in which  (or  outside  of  which) an observation is conditioned to exist, then during a
- copying pass (and during ICALL=5 and 6), PR_Y is the estimated  probability that an observation will fall within (or outside) the interval.
+ copying pass (and during ~ICALL=5~ and 6), PR_Y is the estimated  probability that an observation will fall within (or outside) the interval.
 
 (See [[file:/docs/reference-manual/api/variables/#ylo-yup][YLO, YUP]])
 
@@ -803,12 +803,12 @@ When with a given data record, either of the limits YLO or YUP are set
       USE SIZES, ONLY: VSIZE,DPSIZE
       REAL(KIND=DPSIZE) :: VRAW(VSIZE)
 #+end_src
-TEMPLT serves two different purposes. At ICALL=6, the template data
+TEMPLT serves two different purposes. At ~ICALL=6~, the template data
 record is stored in TEMPLT. When  MIX  is  called, the  first  data
 record of the individual record is stored in TEMPLT.
 
 TEMPLT(n) may be used as a right-hand quantity in blocks  of
-abbreviated  code  that  test for ICALL=6 and in ~$MIX~ blocks.  The "n"
+abbreviated  code  that  test for ~ICALL=6~ and in ~$MIX~ blocks.  The "n"
 may be either a position in the data record or the label of  the  data
 item, e.g. TEMPLT(1) or TEMPLT(ID).
 
@@ -842,7 +842,7 @@ At  run and problem initialization and at problem finalization use the variables
 Should not be used if an initial estimate is being computed.
 
 When an initial estimate is being computed, the  value  is  just  that
-found at problem initialization (when ICALL=1).
+found at problem initialization (when ~ICALL=1~).
 
 EXAMPLE: Compute individual weighted residuals using a slope-intercept residual error model:
 
@@ -974,18 +974,18 @@ or consequence from the estimation set by NONMEM.
 - MIXNUM: the index of the subpopulation for which variables are  to
   be computed.
 
-  During  ICALL=4, MIXNUM is the index of the sub-population that
+  During  ~ICALL=4~, MIXNUM is the index of the sub-population that
   was randomly selected to simulate the subject's data.   When
-  ICALL=3  and the PASS subroutine used, or when ICALL=5 or 6, MIXNUM
+  ~ICALL=3~  and the PASS subroutine used, or when ~ICALL=5~ or 6, MIXNUM
   is the index of the subpopulation estimated to be that  from  which
   the  individual's data most probably arises, and is equal to MIXEST
   (see below).
 
 - MIXEST
-  When  ICALL=3,5,6,  and at ICALL=2 when COMACT is not 0, MIXEST is the
-  index of the subpopulation estimated to be that from which  the  individual's data most probably arises.  Before nm7.3, at all other conditions, the value of MIXEST is not meaningful, such as when ICALL=4  or
-  ICALL=2  and  COMACT=0.   As  of NONMEM 7.3, when ICALL=4, MIXEST will
-  equal MIXNUM, and when ICALL=2 and COMACT=0, MIXEST will be 0 to indicate it has not been assigned a meaningful value.
+  When  ~ICALL=3~,5,6,  and at ~ICALL=2~ when COMACT is not 0, MIXEST is the
+  index of the subpopulation estimated to be that from which  the  individual's data most probably arises.  Before nm7.3, at all other conditions, the value of MIXEST is not meaningful, such as when ~ICALL=4~  or
+  ~ICALL=2~  and  COMACT=0.   As  of NONMEM 7.3, when ~ICALL=4~, MIXEST will
+  equal MIXNUM, and when ~ICALL=2~ and COMACT=0, MIXEST will be 0 to indicate it has not been assigned a meaningful value.
 
 - MIXP
   These are the mixture probabilities P(i) computed by subroutine MIX or
@@ -1044,10 +1044,10 @@ or consequence from the estimation set by NONMEM.
 - At ICALL = 0, these are zero values.
 
 - At ICALL = 1, these are initial values. If NONMEM will be computing
-  the initial value of theta(i), at  ICALL=1 the initial value
+  the initial value of theta(i), at  ~ICALL=1~ the initial value
   THETAF(i) is set to some point between the lower and upper bounds.
   If NONMEM will be computing the initial value of a diagonal  block
-  of OMEGA (SIGMA), at ICALL=1 the initial value of the block is set
+  of OMEGA (SIGMA), at ~ICALL=1~ the initial value of the block is set
   to the identity matrix.
 
 - At ICALL = 3, these are final values.
@@ -1832,7 +1832,7 @@ TNPRI, not just the the  inital sub-vectors (prior-affected parts).
 
 These  variables  may be used as right-hand quantities in ~$PK~, ~$ERROR~,
 ~$INFN~ and ~$PRED~ blocks.  After being set during the  Simulation  Step,
-they remain available during problem finalization (i.e., ICALL=3).
+they remain available during problem finalization (i.e., ~ICALL=3~).
 
 ** YLO, YUP
 :PROPERTIES:
@@ -1935,7 +1935,7 @@ PASSRC  contains  the  data  record  at  ICALL values 0, 1 and 3. PASSRC changes
     In  addition, for the repetition feature to work, it must be
     enabled at the outset.  This will be done if the repeat data item
     appears in the data set, or if RPTO is set to a nonzero value at
-    ICALL=0 or ICALL=1.
+    ~ICALL=0~ or ~ICALL=1~.
 
 - RPTON: when the repetition output value is non-negative, RPTON is
   ignored.  Otherwise, RPTON may be  set  to  an integer that gives
@@ -1998,8 +1998,8 @@ is passed for the second time.
   single-subject data, with the previous data record of the data set).
 
   In addition, for the PRED output control flag to work, it must be
-  enabled at the outset, i.e., PRDFL must be set to 1 at ICALL=0 or
-  ICALL=1.   It may be enabled only when the repetition feature has
+  enabled at the outset, i.e., PRDFL must be set to 1 at ~ICALL=0~ or
+  ~ICALL=1~.   It may be enabled only when the repetition feature has
   also been enabled.
 
   (See repeti1, repeti2)
@@ -2027,7 +2027,7 @@ given data record, the PRED computation depends on the values of
 variables  that PRED computes with any of the previous records.
 This is the case for PREDPP.
 
-- PRED is nonrecursive by default.  At ICALL=0 or  1,  one can declare
+- PRED is nonrecursive by default.  At ~ICALL~ is 0 or 1,  one can declare
   PRED recursive by setting I_REC=1. This can be  changed  from
   problem to  problem. For a problem with population data I_REC is
   always reset to 0.
@@ -2036,7 +2036,7 @@ This is the case for PREDPP.
   not  appear on the ~$COVARIANCE~ record, as the special computation is
   automatically applied.
 
-- PREDPP sets I_REC to 1 at ICALL=1.
+- PREDPP sets I_REC to 1 at ~ICALL=1~.
 
 - I_REC can be set explicitly in abbreviated code.  With recursive
   ~$PRED~ abbreviated  code and with single-subject data, if I_REC is
@@ -2134,7 +2134,7 @@ See also: Guide IV, ~$ABBREVIATED~, ~$TABLE~, ~$SCATTERPLOT~, and [[file:/docs/r
 #+end_src
 When  the ONLYSIMULATION option on the ~$SIMULATION~ record is used, the
 displayed eta values are those that PRED stores in ETA during the
-Simulation Step (i.e., at ICALL=4).
+Simulation Step (i.e., at ~ICALL=4~).
 
 In generated subroutines, ETA values are automatically stored in variale ETA.
 
@@ -2898,7 +2898,7 @@ ADVAN17, ADVAN18, SS6, and SS9.
   + ADVAN9 ADVAN15, ADVAN17.
             ISTFLG controls how ADVAN9 calls LSODI1 and what it does  if
             LSODI1  returns  and  indicates  that an integration failed.
-            ISTFLG is set to 0 (default) at ICALL=0.  If changed by  the
+            ISTFLG is set to 0 (default) at ~ICALL=0~.  If changed by  the
             user, it retains the changed value until the user changes it
             again.  ISTATE is a variable that is passed from  the  ADVAN
             to  LSODI1.   ISTATE=1  indicates  that  the  integration is
@@ -3101,7 +3101,7 @@ For user-supplied PK, DES, AES routines.
       INTEGER(KIND=ISIZE) :: PNEWIF
 #+end_src
 For user-supplied PK and ERROR routines.
-NEWIND  is  of interest only when ICALL=2, 4, 5, or 6.  It is the same
+NEWIND  is  of interest only when ~ICALL~ equals to 2, 4, 5, or 6.  It is the same
 as the NEWIND argument passed by NONMEM to PREDPP.
 
 ** Write formats
@@ -3301,7 +3301,7 @@ feature of MODEL and/or PK.
    + With I_SS=3  ("initial ests"), values of A_0 are used as initial estimates when computing the SS values.
   Similar for ISSMOD.
 
-- If ISSMOD is set, or I_SS is set at ICALL=1,  PREDPP  will  acknowlege the fact in the NONMEM output.
+- If ISSMOD is set, or I_SS is set at ~ICALL=1~,  PREDPP  will  acknowlege the fact in the NONMEM output.
 
 - When I_SS or ISSMOD is set, even if only to 0, then SSS and the
   appropriate SS routine are included in the NONMEM executable.
