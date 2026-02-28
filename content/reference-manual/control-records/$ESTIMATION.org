@@ -383,7 +383,7 @@ $EST METHOD=SAEM NBURN=1000 ISAMPLE=2 NITER=1000
 $EST METHOD=IMP EONLY=2 ISAMPLE=1000 NITER=5 MAPITER=0
 #+end_src
 
-To have conditional mean values (values in "root.phi") evaluated by MCMC sampling used in the SAEM method, but at a constant set of the final fixed parameters, then you could invoke EONLY=1 with the SAEM method as well:
+To have conditional mean values (values in ~.phi~) evaluated by MCMC sampling used in the SAEM method, but at a constant set of the final fixed parameters, then you could invoke EONLY=1 with the SAEM method as well:
 #+begin_src perl
 $EST METHOD=ITS INTERACTION NITER=5
 $EST METHOD=SAEM NBURN=1000 ISAMPLE=2 NITER=1000
@@ -772,13 +772,13 @@ the AUTO option, depending on the situation.
 
 *** BAYES_PHI_STORE=[0|1] (NM75)
 As of NM75, samples of phi/eta are collected at each BAYES iteration,
-and summarized to provide mean phi and phc() in the root.phi table, as
+and summarized to provide mean phi and phc() in the ~.phi~ table, as
 described above.  By default, the individual phi values from each
 iteration are not stored.  However, if you set
 #+begin_src perl
 $EST ... BAYES_PHI_STORE=1
 #+end_src
-then PHI and ETA values from each BAYES iteration will be stored in root.iph.  For non-mixture problems, only records of SUBP=0 are recorded, as there are no sub-population divisions.  For mixture problems, the SUBP=0 records contain the composite phis and ETAs (the average of these across all non-negative iterations are in the root.phi table), and the SUBP>0 records contain the phis and ETAs appropriate to each sub-population SUBP (the average of these across all non-negative iterations are in the root.phm table).  The root.iph file can become quite large, so it should be used only on the final analysis.  This root.iph file can be read by the utility program NEFFI (see I.103 NEFF and NEFFI Utility Programs (NM74)).
+then PHI and ETA values from each BAYES iteration will be stored in ~.iph~.  For non-mixture problems, only records of SUBP=0 are recorded, as there are no sub-population divisions.  For mixture problems, the SUBP=0 records contain the composite phis and ETAs (the average of these across all non-negative iterations are in the ~.phi~ table), and the SUBP>0 records contain the phis and ETAs appropriate to each sub-population SUBP (the average of these across all non-negative iterations are in the ~.phm~ table).  The ~.iph~ file can become quite large, so it should be used only on the final analysis.  This ~.iph~ file can be read by the utility program NEFFI (see I.103 NEFF and NEFFI Utility Programs (NM74)).
 
 *** BIONLY=[0|1] (NM75)
 BIONLY stands for Bayesian individual parameters only,  and  when set
@@ -995,7 +995,7 @@ needed.
 :CUSTOM_ID: ETAsamples
 :END:
 Used with SAEM or BAYES. Default ETASAMPLES=0. ETASAMPLES=1 causes individual ISAMPLE  random  ETA samples
-per subject, output to "root.ets". To do this, perform an SAEM
+per subject, output to the ~.ets~ file. To do this, perform an SAEM
 analysis (or BAYES) after the primary estimation, keeping the
 population parameters fixed (ETYPE=1), only performing the burn stage
 so samples do not get accumulatively averaged, and set ISAMPLE to 10 or higher to collect suffient samples per subject.  For example, note the ~$EST~ line in bold, after the usual SAEM analysis:
@@ -1010,8 +1010,7 @@ so samples do not get accumulatively averaged, and set ISAMPLE to 10 or higher t
 #+end_src
 
 ETASAMPLES=1 causes individual ISAMPLE random eta samples per subject,
-to be written to root.ets, where root is the root name of the control
-stream file.  MASSRESET is set to 1 to initialize the internal burn-in
+to be written to ~.ets~.  MASSRESET is set to 1 to initialize the internal burn-in
 coefficients, and collect that information during the population
 parameter estimation.  Then, have the next SAEM step accumulate eta
 samples (ETASAMPLES=1), and set MASSRESET=0 so the internal burn-in
@@ -1050,7 +1049,8 @@ MAXEVAL=0, then set EVALSHRINK=1 on the ~$EST~ record.
 
 *** FILE=filename
       Name for the [[file:/docs/reference-manual/files/#raw-output][raw output file]].  Parameter estimates and  objective
-      function  value will be printed to this file every printed iteration as indicated by the PRINT option.  Default: root.ext,  where root  is  the  name of the control file (not including any extension; "nmbayes" if the name is not specified on the nmfe  command line).   Note  that  the names of [[file:/docs/reference-manual/files/#addi-output][additional output files]] are not
+      function  value will be printed to this file every printed
+      iteration as indicated by the PRINT option.  Default: ~.ext~ ("nmbayes" if the name is not specified on the nmfe  command line).   Note  that  the names of [[file:/docs/reference-manual/files/#addi-output][additional output files]] are not
       affected by this option.
 
 *** FNLETA=n (NM72)
@@ -1242,7 +1242,8 @@ The function of IACCEPT depends on the method.
   most appropriate IACCEPT level for each subject, and if necessary,
   will use a t-distribution  (by  altering the  degrees of freedom of
   the distribution for each subject) as well.  In this case, the
-  individual IACCEPT values and degrees of freedom (DF) values will be listed in "root.imp".
+  individual IACCEPT values and degrees of freedom (DF) values will be
+  listed in the ~.imp~ output file.
 
 *** IACCEPTL=x (NM74)
 If IACCEPTL is set to greater than 0 then NONMEM uses this value as a
@@ -1262,7 +1263,7 @@ Leary, recommending IACCEPT=1.0 and IACCEPTL=0.01.
 If IACCEPT is set to 0, and IACCEPTL is set to a value greater than 0,
 then a search for the best IACCEPTL for each subject is made, starting
 the testing at the IACCEPTL value given by the user, while IACCEPT is
-fixed to 1.  The root.imp file will contain the final values selected
+fixed to 1.  The ~.imp~ file will contain the final values selected
 for each subject, listing the two IACCEPT scale values, the first one
 being 1 for near the mode, and the second for the long tails.
 
@@ -1779,14 +1780,14 @@ With NOSUB=0, label substitution  will  be  performed  for  final estimates  in 
 *** NUMDER=[0|1|2|3] (NM73)
       NUMDER=1: NONMEM computes and displays numerically evaluated
       derivatives of Y or F with respect to eta  and  eps  (G  and  H).
-      These  numeric values are displayed in root.fgh, but are not used
+      These  numeric values are displayed in ~.fgh~, but are not used
       in estimation.
 
-      NUMDER=0: file  root.fgh  is  not  produced.   This  is  the default.
+      NUMDER=0: file  ~.fgh~  is  not  produced.   This  is  the default.
 
-      NUMDER=2:,  analytical  derivatives  values  are  stored  in root.agh.
+      NUMDER=2:,  analytical  derivatives  values  are  stored  in ~.agh~.
 
-      NUMDER=3: both root.agh and root.fgh are produced.
+      NUMDER=3: both ~.agh~ and ~.fgh~ are produced.
 
 *** NUMERICAL | NONUMERICAL
 NUMERICAL: requests that second eta-derivatives for the Laplacian
@@ -2150,13 +2151,14 @@ Note  that  the  ORDER  option does not affect the NONMEM report file,
 :PROPERTIES:
 :CUSTOM_ID: ovarf
 :END:
-      Used  with  NUTS  method  and OLKJDF option.  OVARF is the weight
-      factor to STD prior to the log sqrt OMEGA diagonal elements,  the
-      normal density of the log square root of OMEGA centered about log
-      square root of Omega prior, and scaled with  OVARF  (see  below).
-      That            is,            log(sqrt(Omega(i)))           Normal(log(sqrt(OmegaPrior(i))),1/OVARF).  If OVARF<0, then a  halft-distribution  of  degrees of ABS(OVARF) is used as the prior to
-      the sqrt of OMEGA diagonal elements.  Use OVARF=-1 for the  halfCauchy distribution.
-      Default is 1.  See also [[file:/docs/reference-manual/control-records/ovarf/>$OVARF]] control record.
+Used  with  NUTS  method  and OLKJDF option.  OVARF is the weight
+factor to the STD prior to the log square-root of the OMEGA diagonal elements:
+$$
+\log\sqrt{\Omega(i)} \sim \text{Normal}(\log(\sqrt{\Omega_{\text{Prior}}(i)}),1/\text{OVARF}).
+$$
+By default OVARF=1. If OVARF<0, then a  half t-distribution  of  degrees of ABS(OVARF) is used as the prior to
+      the \(\sqrt{\Omega(i)}\). In particular, OVARF=-1 specifies the half-Cauchy distribution.
+      See also [[file:/docs/reference-manual/control-records/prior][$PRIOR]] control record.
 
 *** PACCEPT=n
       Used  only  with the BAYES method. n has meaning only for population parameters sampled  by  the  Metropolis-Hastings  algorithm.
@@ -2182,7 +2184,7 @@ Note  that  the  ORDER  option does not affect the NONMEM report file,
 *** PHYTYPE=n (NM74)
 Default is 0.  By default, after an estimation is performed,  the
 phi(),  conditional means of the individual parameters, and their
-variances, are reported in the "root.phi" file. If you wish to have
+variances, are reported in the ~.phi~ file. If you wish to have
 conditional mean ETAs reported, set PHITYPE=1.
 
 *** POSTHOC | NOPOSTHOC
@@ -2481,11 +2483,10 @@ NOSLOW requests a faster method of computation.   This  is  the  default.
 
 FAST(NM74): the option  is  available  for  FOCE/ITS methods. The FAST
 method allows use of analytical theta derivatives  to  facilitate FOCE
-analysis.  All THETAs should be [[file:/docs/user-guide/mu_model/][MU-referenced]]. For  THETAs
-that  should  not have inter-subject variability, or should not be MU
-referenced, do  it  anyway  by  adding addional ETAs and
-assigning them to these THETAs through MU referencing, but with the
-associated OMEGA FIXED to 0.0.
+analysis. All THETAs should be [[file:/docs/user-guide/advanced/mu_model/][MU-referenced]]. For THETAs
+without corresponding inter-subject variability, make them
+MU-referenced  anyway by assigning addional ETAs with the
+associated OMEGA ~FIXED~ to 0.0.
 
 *** SORT | NOSORT
 SORT: individual contribution to the objective function value and
