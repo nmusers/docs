@@ -40,12 +40,11 @@ Then we can read this file in R:
 Alternatively, one can read the original .ext file and skip the title
 and summary lines:
 #+begin_src r
-  data <- read.csv(text = head(readLines("w15.ext"), -6), skip=1)
+  data <- read.csv("w15.ext", skip=1)
+  data <- data[data$ITERATION>-1000000000, ]
 #+end_src
-Note that the "-6" argument here is ad hoc, in that the [[file:/docs/reference-manual/files/#raw-output][raw output
-files]] may contain a different number of summary and diagnostic lines.
-Alternatively one can simply remove the
-lines with ~ITERATION<=-1000000000~.
+Note that we filtered summary and diagnostic lines in that the [[file:/docs/reference-manual/files/#raw-output][raw output
+files]], indicated by ~ITERATION=-100000000x~.
 
 Now we can do postprocessing through the R package [[https://mc-stan.org/posterior/index.html][posterior]]. We first
 read in the ~data~ object as draws. We also skip the warmup (burn-in)
