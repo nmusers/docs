@@ -28,7 +28,7 @@ https://github.com/alex-shpak/hugo-book
   <meta itemprop="description" content="$DATA Describes the NM-TRAN data set
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 $DATA [filename|*] [(format)] [IGNORE=c1] [NULL=c2] [IGNORE=(list)...|ACCEPT=(list)...] [PRED_IGNORE_DATA] [NOWIDE|WIDE] [CHECKOUT] [RECORDS=n1|RECORDS=label] [LRECL=n2] [NOREWIND|REWIND] [NOOPEN] [LAST20=n3] [TRANSLATE=(list)] [BLANKOK] [MISDAT=r...] [FDATACSV...] [REPL=n...] ;# EXAMPLE $DATA DATAFILE Discussion This record specifies the data set to be used. It is required with the first problem specification. It must precede any other NM-TRAN control record that refers to specific data item types. May also be coded $INFILE.">
   <meta itemprop="dateModified" content="2026-02-10T13:43:04-08:00">
-  <meta itemprop="wordCount" content="4135">
+  <meta itemprop="wordCount" content="4075">
 
 <title>$DATA | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -38,7 +38,7 @@ https://github.com/alex-shpak/hugo-book
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.d448b59727570fe7d86928db8381348e8abbaaf5efe32dd7e827d82e68aef2f3.js" integrity="sha256-1Ei1lydXD&#43;fYaSjbg4E0joq7qvXv4y3X6CfYLmiu8vM=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.af192e635102b8c322ce7babc78ac286bac70beb6853dc45c8fdc4123383e576.js" integrity="sha256-rxkuY1ECuMMiznurx4rChrrHC&#43;toU9xFyP3EEjOD5XY=" crossorigin="anonymous"></script>
 
 
 
@@ -1656,19 +1656,15 @@ Options
 filename | *
 </h4>
 <div id="outline-text-headline-4" class="outline-text-4">
-<p>Name  of  the  file  containing  the data set.  Must be the first
-option.  If it contains commas, semicolons, or parentheses,  then it
-must  be  surrounded  by  single quotes &#39; or double quotes &#34;. Filename
-may also contain  equal  signs  if  it  is  enclosed  in quotes.   If
-the file is opened by NM-TRAN, filename may contain embedded spaces if
-it is enclosed in quotes, and may  contain  at most  80  characters.
-If the file is opened by NONMEM, the filename may not contain
-embedded spaces, and may contain at most  71 characters.   If
-filename is the same as any option of the <code>$DATA</code> record, it must be
+<p>File name for the data set. Must be the first
+option.  The name may not contain space and must be less than 72
+characters. Commas, semicolons, and parentheses must be in
+single or double quotes, though their use in file names is not recommended.
+If the name is same as another <code>$DATA</code> record option, it must be
 enclosed in quotes.</p>
 <p>
-One may use <code>*</code> in a problem subsequent to the first to omit the <code>$DATA</code> record (NONMEM is told to
-re-use the previous data set). It allows no other option except <code>CHECKOUT</code>.</p>
+One may use <code>*</code> in a subsequent problem to
+re-use the previous data file. It allows no other option except <code>CHECKOUT</code>.</p>
 </div>
 </div>
 <div id="outline-container-headline-5" class="outline-4">
@@ -1676,7 +1672,7 @@ re-use the previous data set). It allows no other option except <code>CHECKOUT</
 (format)
 </h4>
 <div id="outline-text-headline-5" class="outline-text-4">
-<p>The format refers to a FORTRAN format specification to be used by NONMEM
+<p>The format refers to a Fortran format specification to be used by NONMEM
 to read the NONMEM data records.  Note that this specification is to be
 enclosed in parentheses.  Format codes <code>F</code>, <code>E</code>, and <code>X</code> may be used, but not <code>I</code>.
 The format will also be used by NONMEM to read the NONMEM data records,
@@ -1740,7 +1736,7 @@ LRECL=n2
 <div id="outline-text-headline-7" class="outline-text-4">
 <p>Only needed when the format is omitted, and when either (i)
 the operating system (e.g. IBM/CMS) raises
-a fatal error when a FORTRAN program tries to read more characters from
+a fatal error when a Fortran program tries to read more characters from
 a logical record than the number
 of characters in the record, or (ii) the operating system
 imposes a maximum record length which is smaller than 999 characters (e.g.
@@ -1952,7 +1948,7 @@ This is done by creating a <code>PRED_IGNORE_DATA_TEST==1 IF</code> block presen
 </div>
 <p>If <code>PRED_IGNORE_DATA</code> is set to a non-zero value, then the data record
 is ignored, and excluded from the internal data set.  This allows the
-user to use more complex, multi-line and FORTRAN syntax based, logical
+user to use more complex, multi-line and Fortran syntax based, logical
 operations on data record exclusions.</p>
 <p>
 When <code>PRED_IGNORE_DATA_TEST=1</code>, then <code>ICALL</code> is set to -1.  the following variables have properly defined values during this call:</p>
@@ -1988,7 +1984,7 @@ When <code>PRED_IGNORE_DATA_TEST=1</code>, then <code>ICALL</code> is set to -1.
 </div>
 </div>
 <p>
-No other variables are properly defined during <code>PRED_IGNORE_DATA_TEST=1</code>, such as THETAS, data record information such as NIREC, NDREC, etc., and no calls to complicated functions that  such as <code>RANDOM()</code> will be valid (simple functions, such as built-in FORTRAN functions, are fine).  Furthermore, changes to data items may not be made during this call.  Any other functions of <code>$INFN</code>, such as data modification, <code>RANDOM()</code> calls, etc., should be made with separate <code>ICALL==0</code> or <code>ICALL==1</code> blocks.</p>
+No other variables are properly defined during <code>PRED_IGNORE_DATA_TEST=1</code>, such as THETAS, data record information such as NIREC, NDREC, etc., and no calls to complicated functions that  such as <code>RANDOM()</code> will be valid (simple functions, such as built-in Fortran functions, are fine).  Furthermore, changes to data items may not be made during this call.  Any other functions of <code>$INFN</code>, such as data modification, <code>RANDOM()</code> calls, etc., should be made with separate <code>ICALL==0</code> or <code>ICALL==1</code> blocks.</p>
 <p>
 If the user write his own INFN routine in which <code>PRED_IGNORE_DATA</code>
 code is constructed, then NONMEM needs to be informed with the <code>$DATA PRED_IGNORE_DATA</code> option.  For example:</p>

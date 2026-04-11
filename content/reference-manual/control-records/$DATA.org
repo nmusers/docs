@@ -40,22 +40,18 @@ data items.
 ** Options
 
 *** filename | *
-Name  of  the  file  containing  the data set.  Must be the first
-option.  If it contains commas, semicolons, or parentheses,  then it
-must  be  surrounded  by  single quotes ' or double quotes ". Filename
-may also contain  equal  signs  if  it  is  enclosed  in quotes.   If
-the file is opened by NM-TRAN, filename may contain embedded spaces if
-it is enclosed in quotes, and may  contain  at most  80  characters.
-If the file is opened by NONMEM, the filename may not contain
-embedded spaces, and may contain at most  71 characters.   If
-filename is the same as any option of the ~$DATA~ record, it must be
+File name for the data set. Must be the first
+option.  The name may not contain space and must be less than 72
+characters. Commas, semicolons, and parentheses must be in
+single or double quotes, though their use in file names is not recommended.
+If the name is same as another ~$DATA~ record option, it must be
 enclosed in quotes.
 
-One may use ~*~ in a problem subsequent to the first to omit the ~$DATA~ record (NONMEM is told to
-re-use the previous data set). It allows no other option except ~CHECKOUT~.
+One may use ~*~ in a subsequent problem to
+re-use the previous data file. It allows no other option except ~CHECKOUT~.
 
 *** (format)
-The format refers to a FORTRAN format specification to be used by NONMEM
+The format refers to a Fortran format specification to be used by NONMEM
 to read the NONMEM data records.  Note that this specification is to be
 enclosed in parentheses.  Format codes ~F~, ~E~, and ~X~ may be used, but not ~I~.
 The format will also be used by NONMEM to read the NONMEM data records,
@@ -109,7 +105,7 @@ include the same format specification.
 *** LRECL=n2
 Only needed when the format is omitted, and when either (i)
 the operating system (e.g. IBM/CMS) raises
-a fatal error when a FORTRAN program tries to read more characters from
+a fatal error when a Fortran program tries to read more characters from
 a logical record than the number
 of characters in the record, or (ii) the operating system
 imposes a maximum record length which is smaller than 999 characters (e.g.
@@ -246,7 +242,7 @@ ENDIF
 #+end_src
 If ~PRED_IGNORE_DATA~ is set to a non-zero value, then the data record
 is ignored, and excluded from the internal data set.  This allows the
-user to use more complex, multi-line and FORTRAN syntax based, logical
+user to use more complex, multi-line and Fortran syntax based, logical
 operations on data record exclusions.
 
 When ~PRED_IGNORE_DATA_TEST=1~, then ~ICALL~ is set to -1.  the following variables have properly defined values during this call:
@@ -263,7 +259,7 @@ IF(IPROB==2.AND.PRED_IGNORE_DATA_TEST==1) THEN
 ENDIF
 #+end_src
 
-No other variables are properly defined during ~PRED_IGNORE_DATA_TEST=1~, such as THETAS, data record information such as NIREC, NDREC, etc., and no calls to complicated functions that  such as ~RANDOM()~ will be valid (simple functions, such as built-in FORTRAN functions, are fine).  Furthermore, changes to data items may not be made during this call.  Any other functions of ~$INFN~, such as data modification, ~RANDOM()~ calls, etc., should be made with separate ~ICALL==0~ or ~ICALL==1~ blocks.
+No other variables are properly defined during ~PRED_IGNORE_DATA_TEST=1~, such as THETAS, data record information such as NIREC, NDREC, etc., and no calls to complicated functions that  such as ~RANDOM()~ will be valid (simple functions, such as built-in Fortran functions, are fine).  Furthermore, changes to data items may not be made during this call.  Any other functions of ~$INFN~, such as data modification, ~RANDOM()~ calls, etc., should be made with separate ~ICALL==0~ or ~ICALL==1~ blocks.
 
 If the user write his own INFN routine in which ~PRED_IGNORE_DATA~
 code is constructed, then NONMEM needs to be informed with the ~$DATA PRED_IGNORE_DATA~ option.  For example:
