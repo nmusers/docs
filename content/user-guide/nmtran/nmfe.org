@@ -94,3 +94,97 @@ Some common additional options are listed below.
   earlier versions, and rely on the presently existing PATH for
   finding the compiler and MPI system.  The nmfe7x script will display
   a statement as to what path it will use.
+The following applies to the experimental library release.
+See NONMEM Installation Guide for traditional installation instructions.
+
+* Use precompiled library
+As an experimental alternative, NONMEM is available as a precompiled library.
+One can download the library according to the OS and use the [[https://cmake.org/][cmake]] and
+[[https://ninja-build.org/][ninja]] build tools to build models. Currently this approach is
+available for GNU compilers.
+
+** Toolchain
+*** Windows
+The easiest way to set up toolchain on Windows is through MSYS2
+and MinGW.
+1. Follow https://www.mingw-w64.org/getting-started/msys2/ to install
+   MSYS2 and C/C++ compiler.
+2. Open MSYS2 MinGW64 command line and install the Fortran compiler
+   #+begin_src sh
+     pacman -S mingw-w64-x86_64-gcc-fortran
+   #+end_src
+3. Install cmake and ninja-build
+   #+begin_src sh
+     pacman -S mingw-w64-x86_64-cmake
+     pacman -S mingw-w64-x86_64-ninja
+   #+end_src
+# **** Intel compilers
+# 1. Install [[https://www.intel.com/content/www/us/en/developer/tools/oneapi/oneapi-toolkit-download.html][Intel oneAPI toolkit]] with Intel C/C++ and Fortran compilers.
+# 2. Download and install [[https://cmake.org/download/][cmake Windows binary]].
+# 3. Download and install [[https://github.com/ninja-build/ninja/releases][Ninja build Windows binary]].
+# 4. Add cmake and ninja binary path to Windows PATH, e.g., in Windows
+#    command line
+#    #+begin_src sh
+#      set PATH=%PATH%;C:\cmake\bin\path;C:\ninja-build\bin\path
+#    #+end_src
+
+*** Linux
+NONMEM has been tested on Ubuntu distribution. To install GNU compiler
+toolchain, do the following in shell.
+#+begin_src sh
+  sudo apt update
+  sudo apt install gcc
+  sudo apt install gfortran
+  sudo apt install cmake
+  sudo apt install ninja-build
+#+end_src
+
+*** MacOS
+NONMEM has been tested on MacOS with Apple silicon. To install GNU
+compilers, one can either use Xcode (assume Xcode installed)
+#+begin_src sh
+  xcode-select --install
+#+end_src
+or homebrew
+#+begin_src sh
+  brew install gcc
+#+end_src
+To install build toolchain, in terminal do
+#+begin_src sh
+  brew install cmake
+  brew install ninja
+#+end_src
+
+** Build and run
+1. Create a build directory at, say "/path/to/build",
+   #+begin_src sh
+     mkdir /path/to/build && cd /path/to/build
+   #+end_src
+2. To build a NONMEM model at ~/path/to/model/model-name.ctl~, in the build
+   directory, do
+   #+begin_src sh
+     cmake ../nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl
+     cmake --build . -j4
+     cmake --install .
+   #+end_src
+   The three commands above perform configuration, build, and
+   installation, respectively. One can use additional cmake options to
+   customize build. For example, assume multiple versions of compilers
+   are present in the system, and one would like to use a certain
+   version, say gfortran-15, as the Fortran compiler. One can do
+   # For example, to use Intel compilers ~icx~ and
+   # ~ifx~, one can do (assume Intel compilers installed and oneAPI
+   # launched properly)
+   #+begin_src sh
+     cmake ../nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl -DCMAKE_Fortran_COMPILER=gfortran-15
+   #+end_src
+   In the build command ~-j4~ requests four parallel processes during building. One may adjust
+   the number according to available hardware. After the last command,
+   an executible with the same name ("model-name.exe" in the above example) of the model is created at the
+   path ~/path/to/model/~.
+3. To run the model, do
+   #+begin_src sh
+     cd /path/to/model/
+     model-name.exe model-name.ctl output -licfile=/path/to/license/nonmem.lic
+   #+end_src
+   Additional NONMEM executible options apply.
