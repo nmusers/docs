@@ -1753,18 +1753,18 @@ In other words, the following three are equivalent:
  ! GLOBAL DECLARATION:
       INTEGER(KIND=ISIZE) :: IPRDFLG1
 #+end_src
-- F_FLAG=1: when LIKELIHOOD or -2LOGLIKIHOOD options are used in
-  ~$ESTIMATION~, F_FLAG=1, indicating  that  for  all  observations,
-  the variable Y (in NM-TRAN abbreviated code) or F (in user-supplied
-  PRED or ERROR routine) is being set to a LIKELIHOOD/-2LOGLIKIHOOD
-  value for the observation.
-- F_FLAG=0: when neither LIKELIHOOD or -2LOGLIKIHOOD used, for a given
-  observation, F_FLAG=0, and Y  or  F  is being set to a "prediction"
-  of the observation. One can manually set F_FLAG=1 or F_FLAG=2 in the
-  PRED or ERROR routine, so that Y or F  will be  set  to
-  LIKELIHOOD/-2LOGLIKIHOOD value for this particular observation.
+- F_FLAG=1: for  all  observations,
+  variable ~Y~ (in NM-TRAN abbreviated code) or ~F~ (in user-supplied
+  PRED or ERROR routine) assumes values of likelihood or -2 *
+  log-likelihood, based on the [[file:/docs/reference-manual/control-records/estimation/#likelihood][$ESTIMATION option]].
+- F_FLAG=0: In the absence of the ~LIKELIHOOD~ or ~-2LOGLIKIHOOD~ option
+  in [[file:/docs/reference-manual/control-records/estimation/#likelihood][$ESTIMATION]],  ~Y~ and ~F~ assume the "prediction"
+  of the observation. Manually setting ~F_FLAG=1~ in the
+  PRED or ERROR block will make ~Y~ or ~F~ assume
+  ~LIKELIHOOD~ values; ~F_FLAG=2~
+  will make ~Y~ or ~F~ assume ~-2LOGLIKELIHOOD~ values.
 
-- F_FLAG may be set in NM-TRAN abbreviated code:
+  For example, in NM-TRAN abbreviated code one can do:
   #+begin_src perl
    IF (TYPE.EQ.1) THEN
       Y=THETA(1)+ETA(1)+ERR(1) ; a prediction
@@ -1776,20 +1776,7 @@ In other words, the following three are equivalent:
    ENDIF
   #+end_src
 
-A nonzero value of F_FLAG has no effect during a Simulation Step.  But
- note:  When single-subject data are simulated for which, when the data
- are later analyzed, Y (F) would always be set  to  a  likelihood,  and
- when the ONLYSIMULATION option is used in the ~$SIMULATION~ record, then
- usually the NOPREDICTION option can also be used.  When the  NOPREDICTION  option is used, if any eta's are used in the model, the data are
- regarded as population data, but the model for the  data  in  question
- usually does not involve eta variables.  When, however, single-subject
- data are simulated for which, when the data are analyzed, Y (F)  would
- sometimes  be set to a likelihood and sometimes to a "prediction", and
- when the ONLYSIMULATION option is used in the ~$SIMULATION~ record, then
- the  PREDICTION  option  will  need  to  be  used (this is the default
- option!).  The reason is that the expression of  residual  variability
- associated with the predictions will involve eta variables.
-
+  A nonzero value F_FLAG has no effect during a Simulation Step. But note:  When single-subject data are simulated for which, when the data are later analyzed, Y (F) would always be set  to  a likelihood,  and when the ONLYSIMULATION option is used in the ~$SIMULATION~ record, then usually the NOPREDICTION option can also be used.  When the  NOPREDICTION  option is used, if any eta's are used in the model, the data are regarded as population data, but the model for the  data  in  question usually does not involve eta variables.  When, however, single-subject data are simulated for which, when the data are analyzed, Y (F)  would sometimes  be set to a likelihood and sometimes to a "prediction", and when the ONLYSIMULATION option is used in the ~$SIMULATION~ record, then the PREDICTION  option  will  need  to  be  used (this is the default option!).  The reason is that the expression of  residual variability associated with the predictions will involve eta variables.
 
 - When F_FLAG/=0 for some observation, neither the LIKELIHOOD or
   -2LOGLIKIHOOD option may be used, and the  Laplacian estimation
