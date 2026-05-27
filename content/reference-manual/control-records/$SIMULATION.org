@@ -36,7 +36,7 @@ The interpretation of ETAs depends on the control records and options provided:
     not used but EPS is used, ETAs are for population data;
   - if the ~$ESTIM~ (or ~$SIMUL~) is used, neither ~[LIKELIHOOD | -2LOGLIKELIHOOD]~
     option or EPS is used, ETAs are for single-subject data;
-  - With option ~NOPREDICTION~ (see below)
+  - With option ~NOPREDICTION~, ETAs are for population data, even if EPSILONs are missing.
 
 In addition to this control record,
 a [[file:/docs/reference-manual/abbr/#simulation-block]["simulation block"]]
@@ -46,88 +46,81 @@ Internally the simulation of ETA and EPS are performed by [[file:/docs/reference
 [[file:/docs/reference-manual/api/subroutines/#simeps][SIMEPS]] routines, respectively.
 
 ** Options
-Each parenthese defines an instance of pseudo random number generator
-(pRNG). The pRNGs are ordered as defined on the ~$SIMUL~ record.  User
-can use NONMEM [[file:/docs/reference-manual/api/subroutines/#random][utility routine RANDOM]] to access the pRNG.  By default,
+*** pRNG instance
+An instance of pseudo random number generator
+(pRNG), has the format of
+#+begin_src perl
+ (seed1 [seed2] [NORMAL|UNIFORM|NONPARAMETRIC] [NEW])
+#+end_src
+They are numbered sequentially 1, 2,..., in the order of being defined
+on the ~$SIMUL~ record.  By default,
 the first pRNG is for the simulating ETA and EPS and not available to
-the user. This can be changed with the SOURCE_EPS option below.
+the user. This can be changed with the ~SOURCE_EPS~ option.
 
-*** seed1, seed2
-Seed1 is the first seed for the random source, an integer between 0
-and 2147483647.  If this is not the first problem specification in
-the control stream, then seed1 can be -1, indicating that the random
-source is to be continued from the previous problem.
+**** seed1, seed2
+- seed1: an integer in the interval [0, 2147483647], or -1.  seed1=-1
+  indicates that the random source is to be continued from the
+  previous problem.
 
-Seed2 is the second  seed  for  the  random  source,  an integer
-between  0  and 2147483647.  It is used when it is desired that the
-current problem make use of a continuation of a random source defined
-in a preceding NONMEM run. It is seldom used.
+- seed2: an integer in the interval [0, 2147483647]. It is used when
+  it is desired that the current problem make use of a continuation of
+  a random source defined in a preceding NONMEM run. It is seldom
+  used.
 
-*** NORMAL | UNIFORM | NONPARAMETRIC
-Specifies distribution used by the pseudo-random number generator
-(pRNG) of the source. NORMAL (default) indicates normal distribution
-with mean 0 and variance 1 (unless the source is "1" that is used to
-generate ETA and EPSILON, in which  case  the  variance-covariance  of
-these  variables  is  that  specified in the ~$OMEGA~ and ~$SIGMA~
-records). UNIFORM indicates uniform distribution on [0,1].
+**** NORMAL | UNIFORM | NONPARAMETRIC
+Specifies distribution for the simulated variables.
+- NORMAL (default): normal distribution with mean 0 and variance 1.
+  When the source is "1", it is intended for ETA and EPSILON, with the
+  variance-covariance matrix specified by the ~$OMEGA~ and ~$SIGMA~
+  records.
+- UNIFORM: uniform distribution on [0,1].
+- NONPARAMETRIC: indicates that the first source defined with the
+  NONPARAMETRIC attribute are used to generate realizations of  random
+  vectors  from a (multivariate) nonparametric distribution on ETA,
+  obtained from the Nonparametric Step of an earlier  problem.   An
+  input  MSF  must also be present.  It is understood that the ETAs
+  are to be simulated from the  nonparametric  distribution  rather
+  than  from  the  pseudo-normal  distribution  associated with the
+  first source.  The NONPARAMETRIC attribute can only  be  used  in
+  the definition of the second or subsequent source.
 
-NONPARAMETRIC indicates that the first source defined with the NONPARAMETRIC attribute are used to generate realizations of  random vectors  from a (multivariate) nonparametric distribution on ETA, obtained from the Nonparametric Step of an earlier  problem.   An input  MSF  must also be present.  It is understood that the ETAs are to be simulated from the  nonparametric  distribution  rather than  from  the  pseudo-normal  distribution  associated with the first source.  The NONPARAMETRIC attribute can only  be  used  in the definition of the second or subsequent source.
-
-*** NEW
+**** NEW
 The  NEW  option requests a new call to pRNG (through routine SIMETA
 and SIMEPS) to genereate ETA/EPS, rather than only at the
 start of each individual record/level-two record. That is,
 with NEW, a call to SIMETA/SIMEPS will obtain new  ETA/EPS,  even if ID/L2 has
-not changed  The output NONMEM  report  describes this  as
-#+begin_src perl
-DIFFERENT ETA AND EPS WITH EACH CALL TO SIMETA AND SIMEPS
-#+end_src
+not changed.
 
 *** CLOCKSEED=[0|1]  (NM75)
-      If  CLOCKSEED=1  (default  is  0),  actual  starting seed will be
-      10000*(seconds after midnight)+SEED (applies to  both  seed1  and
-      seed2,  if  specified.)   This allows a control stream to produce
-      different stochastic results for automated replications,  without
-      the  need  to modify the seed value in the control stream file in
-      each replication.
+If  CLOCKSEED=1  (default  is  0),  actual  starting seed will be
+10000*(seconds after midnight)+SEED (applies to  both  seed1 and
+seed2,  if  specified.)
 
 *** SOURCE_EPS=n (NM75)
-      May be used to specify that the simulation of EPSILONs should use
-      a different source than the default, which is the first. n is the
-      number of the source for EPSILONs.  This  source  must  have  the
-      NORMAL attribute.
-
+May be used to specify that the simulation of EPSILONs should use a
+different source than the default. n is the number of the source for
+EPSILONs.  This  source  must  have  the NORMAL attribute.
 
 *** ONLYSIMULATION
-By default, when the Simulation Step is implemented, various
-statistics used for data analysis are always computed from the
-simulated data. These are the value of the objective function at the
-initial parameter estimates and if a table is requested, the weighted
-residuals based on these estimates. The data may be simulated in a way
-that gives rise to a problem with computing these statistics. For
-example, perhaps the simulation model is not appropriate for data
-analysis using the NONMEM default objective function. Option
-~ONLYSIMULATION~ requests simulation but to evaluate an objective
-function  on  these  data.   WRES values in tables and scatterplots
-will be 0.  PRED-defined data items  in  tables  and scatterplots
+By default the Simulation Step computes
+OFV and residuals using the simulated data.
+With option ~ONLYSIMULATION~ the Simulation Step simulates but does not
+compute OFV or residuals. PRED-defined data items in tables  and scatterplots
 will  be  computed using simulated ETAs and initial THETAs.
 
-~$ESTIM~, ~$COV~ and ~$NONP~ cannot be used with ONLYSIMULATION. See also the PREDICTION and NOPREDICTION options.
+~$ESTIM~, ~$COV~ and ~$NONP~ cannot be used with ~ONLYSIMULATION~. See
+also the ~PREDICTION | NOPREDICTION~ option.
 
 *** SUBPROBLEMS=n
-      Requests that the entire NONMEM problem is to be repeated n times
-      in succession (including all NONMEM  steps:  simulation,  estimation,  covariance, table, scatterplot).  Each subproblem includes
-      the Simulation Step, but the random sources are simply  continued
-      from  subproblem to subproblem.  If n=0 or n=1, there is only one
-      subproblem; this is the default.  May  also  be  coded  SUBPROBS,
-      NSUBPROBLEMS,  NSUBPROBS.   With all versions of NONMEM, the data
-      set for each subproblem after the first is the same data set used
-      by the previous subproblem, and includes any changes (transgeneration) made by the previous subproblem.
+Requests that the entire NONMEM problem is to be repeated ~n~ times in
+succession (including all NONMEM  steps:  simulation,  estimation,
+covariance, table, scatterplot).  Each subproblem continues with the
+random sources. Default: ~n=1~. The data set
+for each subproblem after the first is the same data set used by the
+previous subproblem, and includes any changes (transgeneration) made
+by the previous subproblem.
 
-      With NONMEM 7.4 and higher, see REWIND, below.
-
-      With NONMEM 7.3 and higher, the maximum number of subproblems  is
-      increased from 9999 to 2147483647.
+May also be coded ~SUBPROBS~, ~NSUBPROBLEMS~, ~NSUBPROBS~.
 
 *** REQUESTFIRST
       NONMEM sets a variable IFIRSTEM in Module ROCM_INT (referenced as
@@ -157,23 +150,27 @@ will  be  computed using simulated ETAs and initial THETAs.
       simulation block.  REQUESTSECOND implies REQUESTFIRST.
 
 *** PREDICTION | NOPREDICTION
-PREDICTION: default, used only with ONLYSIM. The simulated
-observation is taken to be the quantity to which the Y variable (with
-NM-TRAN abbreviated code) or F  variable  (with  a user-supplied  PRED
-or  ERROR  routine) is set. In a simulation block, the DV variable
-may  be  directly  set  to  the  simulated observation, but the Y (or
-F) variable should also be set to this observation. That is
-#+begin_src perl
-  $SIMULATION
-  DV=...
-  Y=DV
-#+end_src
+One of the following two options should be used with ~ONLYSIM~.
+- PREDICTION: default. The simulated observations assume the same
+  quantity as ~Y~ (with NM-TRAN abbreviated code) or ~F~ (with  a
+  user-supplied PRED or  ERROR  routine). Note that when ~DV~ is set
+  to the simulated observation, then ~Y~ (or ~F~) variable should also
+  be set to this observation, namely
+  #+begin_src perl
+    $SIMULATION
+    DV=...
+    Y=DV
+  #+end_src
 
-NOPREDICTION: permitted only with ONLYSIM. Indicates that the
-simulated observation will be taken to be the value to which the DV
-variable is set. When ~Y=...~ is used in a simulation block, one
-should use it to assign DV: ~DV=Y~. ETAs are understood to be
-population ETAs, even if EPSILONs do not appear.
+- NOPREDICTION: the simulated observations assume the quantity of ~DV~
+  variable. In this case, when ~Y~ is simulated, its value should be
+  used for ~DV~:
+  #+begin_src perl
+    $SIMULATION
+    Y=...
+    DV=Y
+  #+end_src
+  ETAs are understood to be population ETAs, even if EPSILONs are missing.
 
 *** TRUE
 - TRUE=INITIAL: the initial estimates given in the control stream are used as the
@@ -306,16 +303,10 @@ is given a large residual deviation W=1.0E+10, equivalent to very
 little weight in the model estimate.
 
 *** REPLACE | NOREPLACE
-REPLACE: subjects are selected with replacement.   This  results  in  some
-      subjects  not  being  selected at all, and some subjects selected
-      more than once. This is the default.
+- ~REPLACE~: default. Subjects are selected with replacement.
 
-NOREPLACE:
-      Subjects are  selected  without  replacement,  that  is,  without
-      repeating  a  subject.   The  NOREPLACE  feature is reasonable if
-      there are many more than n subjects to choose from  in  the  template  dataset  (for  example, 1000 subjects in the template, and
-      for each sub-problem, 50 of  them  are  randomly  chosen  without
-      replacement, that is, without repeating a subject).
+- ~NOREPLACE~: Subjects are  selected  without  replacement. It is for
+  when the  template  dataset contains many more than n.
 
 *** STRAT
 A single stratification data item may be entered. In the above
@@ -352,27 +343,25 @@ of  subjects from group 1 will be randomly selected out of 50 total
 to alter the proportions in each category from what is in the original
 data set.
 
-*** NOREWIND|REWIND
-      The NOREWIND option requests that if any input data  item(s)  are
-      changed  (transgenerated)  during a the simulation step of a subproblem, they remain changed at the start of the  next  sub-problem.  This  is  the  default.  With NONMEM 7.4, the REWIND option
-      requests that the original data set be used for all sub-problems.
-      If  the  data  set is not changed during simulation, the NOREWIND
-      and REWIND options give the same results.
+*** NOREWIND | REWIND
+- ~NOREWIND~: default. If any input data  item(s)  are changed
+  (transgenerated)  during a the Simulation Step of a subproblem, they
+  remain changed at the start of the  next sub-problem.
+- ~REWIND~ (NM74): the original data set be used for all sub-problems.
 
-      Keep in mind that transgeneration performed on the data set using
-      ~$INFN~  with  ~ICALL=1~  affects  the  original  data  set and these
-      changes are unaffected by   REWIND  and  NOREWIND  options.   For
-      example:
-      #+begin_src perl
-      $INFN
-      IF (ICALL==1) THEN
-      DOWHILE(DATA)
-       ... data transgeneration statements here
-      ENDDO
-      ENDIF
-      #+end_src
+Note that transgeneration performed on the data set using ~$INFN~
+with  ~ICALL=1~  affects  the  original  data  set and these changes
+are unaffected by the ~REWIND | NOREWIND~  option. For example:
+#+begin_src perl
+$INFN
+IF (ICALL==1) THEN
+DOWHILE(DATA)
+ ... data transgeneration statements here
+ENDDO
+ENDIF
+#+end_src
 
-*** SUPRESET|NOSUPRESET
+*** SUPRESET | NOSUPRESET
       This  option  affects seeds for random sources when a ~$SIMULATION~
       record is included in the scope of a ~$SUPER~ problem.  The  SUPRESET  option requests that, with subsequent iterations of a superproblem, the seed(s) for all random sources  are  reset  back  to
       that listed in the ~$SIMULATION~ record of the control stream file.
@@ -380,15 +369,11 @@ data set.
       be used to prevent resetting the random seeds, so that each iteration serves as a new random instance.
 
 *** RANMETHOD=[n|S|m|P]
-As of NM73, the RANMETHOD option is available for the ~$SIM~ record, to
-use alternative random numbers generators (default is NONMEM’s
-traditional one, number 4):
+The ~RANMETHOD~ option (NM73)
+specifies the pRNG algorithm. Default ~n=4~. See the [[file:/docs/reference-manual/control-records/estimation/#estm-ranmethod][$ESTIMATION RANMETHOD]]
+option for details.
 
-Option n is the random number generator type, S is Sobol sequence, and
-m is the Sobol scrambler.  See the description of RANMETHOD under I.39
-Monte Carlo Importance Sampling EM.
-
-As of NM74, RANMETHOD will also act on the P modifier, which will retain separate random number sequences for each subject, so that the random variable patterns are retained regardless of whether the simulation is done in single computing or parallel computing mode.  So, when parallel computing, you may select
+Note the P modifier (NM73) retains separate random number sequences for each subject, so that the random variable patterns are retained regardless of whether the simulation is done in single computing or parallel computing mode.  So, when parallel computing, you may select
 
 #+begin_src perl
 $SIM PARAFILE=ON RANMETHOD=P
@@ -412,13 +397,10 @@ methods, the S2 method appears to provide the least biased random
 samples, that is nearly uniform distribution, with good mixing in
 multi-dimensional spaces.
 
-(See also [[file:/docs/reference-manual/control-records/estimation/][$ESTIMATION]]).
-
 *** PARAFILE=filename
 As  of  NONMEM 7.4, the Simulation Step computation may be
-parallelized.  by default. By default, parallelization is  not  turned
-on,  because  simulation is very rapid anyway, and often does not need
-to be accelerated.  When modeling with super-ID  nested  ETA levels
+parallelized.  By default, parallelization is  not  turned
+on.  When modeling with super-ID  nested  ETA levels
 (~$LEVEL~  record  is  present),  parallelization  will not occur,
 since these ETAs are shared across individuals, and  there is  no
 guarantee that all subjects sharing the same ETAs will be simulated by
