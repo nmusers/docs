@@ -8,11 +8,10 @@ weight: 12
 {{< katex >}}{{< /katex >}}
 
 * Introduction
-NONMEM (NONlinear Mixed Effects Model) is software for fitting
-nonlinear regression models using the mixed-effects framework. It is
-commonly used in pharmacokinetic and pharmacodynamic studies, in which
-after drug administration its plasma concentrations is measured over
-time among the subjects. NONMEM takes account of the variability
+NONMEM (NONlinear Mixed Effects Model) is a software for fitting
+nonlinear regression models using the mixed-effects framework.
+Designed for pharmacokinetic and pharmacodynamic applications,
+NONMEM takes account of the variability
 between subjects (random effects) and within the subjects, as well as
 the influence of measured covariates (fixed effects), while
 incorporating the nonlinear nature of the biochemical and
@@ -22,34 +21,24 @@ subjects. The underlying method of NONMEM is general and can be
 applied to many problems beyond pharmacometrics.
 
 ** Data records
-In NONMEM, each observation is stored on its own data record. This is
-called an observation record. The observed value is stored in the DV
-(dependent variable) field on that record. NONMEM also supports
-records that are not observations. These are called nonobservation
-records. They use the MDV (Missing Dependent Variable) field. If MDV =
-1, the record is not an observation. In other words, the dependent
-variable is considered missing for that record.
-
-NONMEM is mainly concerned with time ordered events:  dose events,
-observation events, and other events such as the beginning of a urine
-collection and a measured change in kidney function. It expects that
-there will be different data records, ordered in time, associated with each of the
+NONMEM mainly uses longitudinal tabular data for analysis: each row of the data set identifies an event. There are two types of events:
+observation and nonobservation. Observation records identifiy
+events when dependent values are observed and stored in the reserved ~DV~
+(dependent variable) field; Nonobservation
+records can represent a variety of events, such as dosing and change
+of covariates. NONMEM data set can also incorporate missing data,
+identified by ~MDV~ (Missing Dependent Variable) field: the record is
+not an observation if MDV = 1. NONMEM expects that
+different data records, ordered in time, are associated with
 different events.
 
-In the case of population data,
-records are also organized into /individual records/, a group of /contiguous/
-data records associated with the same individual and having the same
-identification (ID) data item.  In this case the time ordering refers to data records
-/within/ an individual record.  In the case of data from a single
-subject, individual records do not correspond on a one-to-one basis to either
-animal or human subjects,
-but simply groups of contiguous data records
-containing only one observation record and having the same ID data item.
-(Although, the presence of a multivariate observation means the
-individual record containing it has several observation records, each
-containing one element of the observation.)
+Population data are organized into /individual records/, a group of /contiguous/
+data records having the same identification (ID) data item, associated
+with the same individual.
+In this case the time ordering refers to data records
+/within/ an individual record.
 
-A typical NONMEM data set looks like this:
+A typical NONMEM analysis data set looks like this:
 #+begin_src r
  ID      TIME    C1      C2  ...  CN      DV     MDV
   1       1.     .5      10        5              1
@@ -97,8 +86,8 @@ Below is a simple NONMEM model's /control stream/.
   $COVARIANCE
 #+end_src
 - NONMEM models consist of /control records/. Each control record
-  starts with a "$" symbol followed by a reserved name. Control
-  record ~$PROB~ on line 1 specifies string "PHENOBARB" as problem's
+  starts with a "$" symbol followed by a reserved name.
+  Control record $PROB on line 1 specifies string "PHENOBARB" as problem's
   name. The rest of the line is ignored as ";" indicates comments.
 - Line 2 says that the data file column 1-4 contain subject ID,
   observation time (TIME), dosing amount (AMT), and dependent value (DV), respectively.

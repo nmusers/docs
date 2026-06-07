@@ -9,37 +9,35 @@ weight: 1
 {{<katex />}}
 
 * Population models
-In this chapter we discuss models for populations data:
-observations from a set of individuals sampled from a population. The
-data is characterized by one or more observations for each individual.
-We are mainly interested in /parametric models/ and estimations of the
-random parameters.
+In this chapter we discuss /parametric/ population models:
+repeated observations are from a set of individuals sampled from a
+population.
 
 ** Problem formulation
 :PROPERTIES:
 :CUSTOM_ID: mixed_form
 :END:
 Individuals in a sample of size \(N\) are different due to
-/fixed/ and/or /random/ effects, manifested
-as individual parameters \(\phi_i\) (clearance, volume of
-distribution, etc), \(i=1,\dots,N\). For a general formulation for /mixed-effects/ model we consider a function \(f()\) of known quantities
+the fact that individual parameters \(\phi_i\) (clearance, volume of
+distribution, etc), \(i=1,\dots,N\), are based on /fixed/ and /random/
+effects. For a general formulation for /mixed-effects/ model we consider a function \(f()\) of known quantities
 \(x_{ij}\) (doses, covariates, time, etc) and unknown parameters \(\phi_i\) to describe
 observations \(y_{ij}\) (plasma concentration, drug effect, etc).
 \(f()\) is sometimes referred to as
 /structure model/. Since in reality \(f(x_{ij}, \phi_i)\) cannot
 account for all the variability of \(y_{ij}\), we additively
-complement it with a /residual error/ term.
-
-#+CAPTION: Longitudinal concentration (\(y_{ij}=C\)) data points and error term in an exponential model.
-@@html:<img src="/docs/img/guide_v_fig3.1.ubuntu.epsi.png">@@
-@@latex:\includegraphics[width=0.5\textwidth]{guide_v_fig3.1.ubuntu.epsi.png}@@
-
-In summary
+complement it with a /residual error/ term. In summary
 #+index: Residual error
 #+index: Residual error!EPS
 \begin{equation}
 y_{ij} = f(x_{ij}, \phi_i) + h(x_{ij}, \phi_i)\epsilon_{ij}.
 \end{equation}
+
+
+#+CAPTION: Longitudinal concentration (\(y_{ij}=C\)) data points and error term in an exponential model.
+@@html:<img src="/docs/img/guide_v_fig3.1.ubuntu.epsi.png">@@
+@@latex:\includegraphics[width=0.5\textwidth]{guide_v_fig3.1.ubuntu.epsi.png}@@
+
 
 - Subscript \(ij\), \(j=1\dots,N_i\) denotes observation \(j\) for
   individual \(i\). Then total number of observations in a data set is
@@ -96,7 +94,7 @@ y_{ij} = f(x_{ij}, \phi_i) + h(x_{ij}, \phi_i)\epsilon_{ij}.
     represents a multivariate model. This could be the case when
     observations are the plasma concentrations in both central and
     peripheral compartments, or from two tissues/organs in a physiologically based PK (PBPK) model.
-  NONMEM provides control record [[/docs/user-guide/nmtran/control/#error][$ERROR]] to specify the residual error \(h(x_{ij}, \phi_i)\epsilon_{ij}\).
+  NONMEM uses control record [[/docs/user-guide/nmtran/control/#error][$ERROR]] to specify the residual error \(h(x_{ij}, \phi_i)\epsilon_{ij}\).
 - Sometimes we use the vectorized representation for
   subject /i/
   \begin{equation}
@@ -131,7 +129,8 @@ that the value is the same for individuals with same covariates
   $$
   NONMEM uses reserved variable =OMEGA= for the covariance matrix \(\Omega\).
 #+index: OMEGA
-- In some of NONMEM's solution algorithms the above \(\mu() + \eta\) pattern can improve
+- When \(\mu(\cdot, \theta) + \eta\) formulation can be transformed into
+  \(\mu(\cdot, \theta + \eta)\) (with proper reparameterization), NONMEM's algorithms can improve
   efficiency. See [[file:/docs/user-guide/advanced/mu_model][MU referencing]].
 
 NONMEM refers the random effect with \(\phi\) (or equivalently \(\eta\)) as the
@@ -147,27 +146,26 @@ always use INTERACTION.
 #+index: INTERACTION
 
 ** Covariate models
-In NONMEM guides the models for \(\mu()\) are called structure
-parameter models. Here to avoid confusion with the model for \(f()\),
-we use the term "covariate models", and discuss a few common
-ones in PK applications. Assume \(\phi\)
+We call the structure for \(\mu()\) "covariate models". Below we
+discuss a few common
+ones in PK applications. For the notation, assume \(\phi\)
 has clearance CL as one of its elements,
-then we use \(\tilde{\text{CL}_i}=\mu(z_i, \theta)\) for =TVCL= [fn:4], the "typical
-value" of CL. In NONMEM the above equation for \(\phi\), i.e. the association of \(\theta\), \(\eta\), and
-\(z\), are encoded in control record [[file:/docs/user-guide/nmtran/control/#guide_$pk][$PK]].
+then we use \(\tilde{\text{CL}_i}\) for \(\mu(z_i, \text{CL})\), the "typical
+value" of CL, often encoded as =TVCL= [fn:4]. NONMEM uses control
+record ~$PK~ to program \(\mu()\), i.e. the association of \(\theta\), \(\eta\), and
+\(z\).
 
 *** Linear (additive) models
 :PROPERTIES:
 :CUSTOM_ID: additive-model
 :END:
-The simplest form of \(\mu()\) is its being linearly related to
-\(\theta\). For example, if CL is
+\(\mu()\) can be a linear function of
+\(\theta\). This is the simplest form. For example, if CL is
 the sum of renal and non-renal components (CL_{ren} and CL_{met}, respectively),
-and CL_{ren} is
-believed to be proportional to renal function (RF) as described according
-to a standard formula involving covariates in \(z\): age (AGE),
-serum creatinine (SECR), and weight (WT), then one might consider the
-following model (we omit subscript \(i\) to avoid clutter).
+and CL_{ren} is proportional to renal function (RF), with covariates
+\(z\) consisting of age (AGE),
+serum creatinine (SECR), and weight (WT), we consider the
+following model (to simplify notation subscript \(i\) is omitted).
 #+index: Additive model
 $$
 \tilde{\text{CL}}_{\text{met}} = \theta_1 \text{WT},
@@ -181,8 +179,8 @@ $$
 $$
 \tilde{\text{CL}} = \tilde{\text{CL}}_{\text{ren}} + \tilde{\text{CL}}_{\text{met}}.
 $$
-Despite RF being a nonlinear function of covariates, the above model
-shows a linear \(\mu\) with respect to \(\theta\), as (we use \(\cdot\) for inner product)
+Despite RF being a nonlinear function of covariates, here
+ \(\mu\) is linear with respect to \(\theta\), as (\(\cdot\) for inner product)
 $$
 \tilde{\text{CL}} = (\text{WT}, \text{RF}) \cdot (\theta_1, \theta_4).
 $$
@@ -204,10 +202,10 @@ they are unknown parameters we can transform them and fit either set
 in a model. This /reparameterization/ is common in statistical modeling.
 *** Saturation Models
 #+index: Saturation model
-A useful model for processes reaching a maximum is a hyperbolic model.
-For example, if a second drug, (whose steady-state plasma
-concentration, Cpss_2 is known and given in the data set), is present
-in some individuals and it is believed to be an inhibitor of the
+One can use hyperbolic model for staturable processes.
+For example, considered in addition a second drug is administored, with its steady-state plasma
+concentration, \(\text{Cpss}_2\), known and given in the data set.
+If it is believed to be an inhibitor of the
 metabolism of the study drug, one might consider
 
 $$
@@ -216,16 +214,16 @@ $$
 
 The relationshiup is shown in figure below.  The inhibition is expressed by the
 ratio occurring within the brackets and is a concave hyperbola,
-asymptoting
-to a maximum value equal to \(\theta_2\).  It is identical in form to
-the Michaelis-Menten model.
+asymptoting to a maximum value equal to \(\theta_1-\theta_2\) when
+\(\text{Cpss}_2 >> \theta_3\).  This is the same form of the Michaelis-Menten model.
 
 @@html:<img src="/docs/img/fig4.1.ubuntu.epsi.png">@@
 @@latex:\includegraphics[width=0.5\textwidth]{fig4.1.ubuntu.epsi.png}@@
 
 *** Indicator variables
-Assume a binary variable HF documents the clinical condition of heart
-failure as "present" (HF=0) or "absent" (HF=1). To model heart failure
+For an example of indicator variable, consider a binary variable HF that flags
+the presence of heart failure: as HF=0 for "present" and HF=1 for
+"absent". To model heart failure
 affected CL_{met}, we do [fn:5]
 $$
 \tilde{\text{CL}}_\text{met} = (\theta_1 - \theta_2\text{HF})\text{WT}.
