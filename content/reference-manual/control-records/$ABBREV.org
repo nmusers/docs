@@ -20,46 +20,39 @@ $ABBREVIATED COMRES=2
 #+end_src
 
 ** Discussion
-Optional.   May be used
-when ~$PK~, ~$ERROR~, or ~$PRED~ abbreviated code is present. Must precede
-all blocks of  abbreviated  code.   With  NONMEM 7.4, may also be used
-when there is no abbreviated code.  For example, ~$ABBR REPLACE~ may be
-used for  label  substitution  in  NONMEM  report files.
+Optional. It is placed
+before ~$PK~, ~$ERROR~, or ~$PRED~ abbreviated code blocks to signal
+code storage, processing, aliasing, and declaration.
 
 ** Options
 
 *** COMRES=n1
-Stands for "common reserve". Variables defined in abbreviated codes
-are stored in MODULE NMPRD4. User-supplied
-Fortran routines may also store variables in NMPRD4. To differentiate
-these two sets of variables, the first ~n1~ positions in NMPRD4 are
-reserved for the use of user-supplied routines. In other words, when both abbreviated code and
-user-supplied subroutines (or verbatim code) are used in a control
+~COMRES~ stands for "common reserve". ~n1~ is the number of variables
+reserved for user-supplied subroutines and verbatim code, in
+NONMEM's variable storage module ([[file:/docs/reference-manual/api/modules/#headline-1][NMPRD4]]). In other words, when both abbreviated code and
+user-supplied subroutines are used in a control
 stream, the user-supplied subroutine has the first ~n1~ positions in
-NMPRD4 reserved for its use. The first position used by NM-TRAN for
-variables defined in abbreviated code is ~n1+1~. Default ~n1=0~ (no
-reserved storage).
+the storage module, and the first position for abbreviated code is
+~n1+1~. Default ~n1=0~ (no reserved storage).
 
-- A special case ~n1=-1~ requests no variables defined in abbreviated
+- ~n1=-1~: no space reserved for variables in abbreviated
   codes are stored in NMPRD4. This is used when one would like to
   avoid the default global scope of variables defined in abbreviated
-  code. With ~COMRES=-1~ the variables in the current abbreviated code
-  block, e.g. ~$PK~, is no longer accessible in other code blocks,
-  e.g. ~$ERROR~.
+  code. With ~COMRES=-1~, the variables in the current abbreviated code
+  block, say ~$PK~, becomes inaccessible in other code blocks such as ~$ERROR~.
 
 - Do not use this option when there are no abbreviated codes.
 
-- Abbreviated code, verbatim code, ~$TABLE~,  and  ~$SCATTER~  may explicitly reference variables in
-  reserved positions using ~COM(I)~, ~I~ between 1 and ~n1~. For
-  example, in addition to output variables defined in abbreviated code
-  by name, one can do
+- Abbreviated code, verbatim code, ~$TABLE~,  and  ~$SCATTER~  may
+  explicitly reference reserved variables
+  using ~COM(I)~, ~I~ between 1 and ~n1~. For example,
   #+begin_src perl
     $TABLE COM(1) COM(2)
   #+end_src
 
 *** COMSAV=n2
 When tables and scatterplots output certain variables, the values are
-copied from NMPRD4 in a /copying pass/. Normally with a given data
+copied from NMPRD4 in a [[file:/docs/reference-manual/abbr/#copying-block][/copying pass/]]. Normally with a given data
 record, values in NMPRD4 are computed with the previous data record.
 In order to access the values from the previous copying pass, one can
 use ~COMSAV=n2~ to designate a SAVE array in NMPRD4  with initial size
@@ -127,7 +120,7 @@ perform (see [[https://github.com/nmusers/docs/tree/master/examples/tdist6_sim][
   Required  with Laplacian method; optional otherwise.  This is the
   default, except with ADVAN9 and ADVAN15 and ADVAN17.
 
-***  REPLACE
+*** REPLACE (NM74)
 #+begin_src f90
 REPLACE left_string = right_string
 #+end_src
