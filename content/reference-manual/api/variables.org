@@ -25,35 +25,30 @@ of the letters "COM".)
 :PROPERTIES:
 :CUSTOM_ID: comact
 :END:
-In any user code.
-
-Reserved variable COMACT is set by NONMEM. It may  be  tested  in PRED
-(e.g., in abbreviated code, verbatim code, or in user-written
-routines) to determine when NONMEM is making a copying  pass, i.e.,
-when the data records are being passed to PRED for the purpose of
-computing values of  variables  which  will  be  obtained (i.e.
-copied)  from  NMPRD4 for tables and scatterplots.  NONMEM only makes
-a copying pass when PRED-defined items are  listed  in ~$TABLE~  or
-~$SCATTER~ records.  There may be a few copying passes. With the first
-copying pass, the value of COMACT is 1.  As  copying  passes  proceed,
-the value of COMACT may remain the same or increase.  The values used
-in tables and scatterplots  are  those copied from NMPRD4 with the
-last copying pass.
+Available in any user code, read-only variable ~COMACT~ is a
+flag for /copying passes/.
+One can use the variable to change NONMEM output accordingly.
+Specifically, NONMEM only makes a copying pass when PRED-defined items are  listed  in ~$TABLE~  or
+~$SCATTER~ records, to make certain parameter values available in the
+current block.  There may be a few copying passes, with
+~COMACT=1~ in the first one.  As  copying  passes  proceed,
+the ~COMACT~ may remain the same or increase.
+Tables and scatterplots output variables copied from NONMEM variable
+storage module ([[file:/docs/reference-manual/api/modules/#headline-1][NMPRD4]]) in the last copying pass.
 
   - COMACT=0: not a copying pass.
   - COMACT=1: a copying pass with final THETAs and zero-valued ETAs.
   - COMACT=2: a copying pass with  final  THETAs  and  conditional estimates of ETAs.
-  - COMACT=3: a copying pass with conditional (nonparametric) estimates of ETAs.
-Such a pass takes place when the  control  stream  includes  this record:
-#+begin_src perl
-  $NONPARAMETRIC ETAS
-#+end_src
+  - COMACT=3: a copying pass with conditional (nonparametric) estimates of ETAs, i.e. with
+    #+begin_src perl
+      $NONPARAMETRIC ETAS
+    #+end_src
 
-If a mixture model is used, with each value of [[file:/docs/reference-manual/api/variables/#mixnum-mixest-mixp][MIXNUM]] there are more
-than two sets of calls. With ETA=0, there is a set of calls for each
-distinct value of MIXNUM with COMACT=1. If conditional estimates are
-used, then with ETA’s set to these estimates, there is a set of calls
-for each distinct value of MIXNUM with COMACT=2. Note that
+In a mixture model, for each value of [[file:/docs/reference-manual/api/variables/#mixnum-mixest-mixp][MIXNUM]] there are
+several sets of calls: calls for each
+distinct value of MIXNUM with COMACT=1 when ETA=0; and calls
+for each distinct value of MIXNUM with COMACT=2 if conditional estimates are
+used, with ETA’s set to these estimates. Note that
 nonparametric estimates cannot be obtained with a mixture model.
 
 [[file:/docs/reference-manual/api/variables/#pred-defined-variables][PRED-defined items]] are stored in variables defined in PRED (PK or
@@ -61,12 +56,12 @@ ERROR if PREDPP is used). Normally, these items may change from call
 to call. Therefore if an item is computed at a call with a particular
 data record (of the individual record) when COMACT=1, it may no longer
 be available at another call with the same data record when COMACT=2,
-due to there being (in general) multiple calls to PRED (PK and ERROR)
-with different data records of the individual record. In order to
+due to multiple calls to PRED (PK and ERROR)
+with different data records. In order to
 access an item  across the PRED calls, we can put the item in the
 /save region/ of NONMEM MODULE NMPRD4. All items stored in this region
-at a call to PRED (PK or ERROR) with a particular data record when
-COMACT=1 are available at a call with the same data record when
+at a call to PRED (PK or ERROR) when
+COMACT=1, are available at a call with the same data record when
 COMACT=2. In fact, with mixture models in mind, if at any call to PRED
 (PK or ERROR) with a particular data record (when COMACT=1 or 2 and
 MIXNUM has any value), an item is stored in a variable listed in the
