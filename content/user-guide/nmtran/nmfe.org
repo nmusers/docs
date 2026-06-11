@@ -156,14 +156,13 @@ To install build toolchain, in terminal do
 #+end_src
 
 ** Build and run
-1. Create a build directory at, say "/path/to/build",
+1. Create a build directory at, say ~/path/to/build~,
    #+begin_src sh
      mkdir /path/to/build && cd /path/to/build
    #+end_src
-2. To build a NONMEM model at ~/path/to/model/model-name.ctl~, in the build
-   directory, do
+2. Assume NONMEM is located at ~/path/to/nonmem~, to build a model at ~/path/to/model/model-name.ctl~, in the build directory, do
    #+begin_src sh
-     cmake ../nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl
+     cmake /path/to/nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl
      cmake --build . -j4
      cmake --install .
    #+end_src
@@ -171,20 +170,23 @@ To install build toolchain, in terminal do
    installation, respectively. One can use additional cmake options to
    customize build. For example, assume multiple versions of compilers
    are present in the system, and one would like to use a certain
-   version, say gfortran-15, as the Fortran compiler. One can do
+   version, say gcc-15, of the compilers. One can do
    # For example, to use Intel compilers ~icx~ and
    # ~ifx~, one can do (assume Intel compilers installed and oneAPI
    # launched properly)
    #+begin_src sh
-     cmake ../nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl -DCMAKE_Fortran_COMPILER=gfortran-15
+     cmake ../nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl -DCMAKE_Fortran_COMPILER=gfortran-15 -DCMAKE_C_COMPILER=gcc-15
    #+end_src
-   In the build command ~-j4~ requests four parallel processes during building. One may adjust
-   the number according to available hardware. After the last command,
-   an executible with the same name ("model-name.exe" in the above example) of the model is created at the
+   In the build command ~-j4~ requests four parallel processes. One may adjust
+   the number according to the hardware. After the last command,
+   an executible with the same name as the model (in the above example it will be "model-name.exe" for Windows, and "model-name" for other OS) is created at the
    path ~/path/to/model/~.
 3. To run the model, do
    #+begin_src sh
      cd /path/to/model/
+     # Windows
      model-name.exe model-name.ctl output -licfile=/path/to/license/nonmem.lic
+     # Linux & MacOS
+     ./model-name model-name.ctl output -licfile=/path/to/license/nonmem.lic
    #+end_src
    Additional NONMEM executible options apply.

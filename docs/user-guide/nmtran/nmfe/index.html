@@ -28,7 +28,7 @@ https://github.com/alex-shpak/hugo-book
 	<meta itemprop="description" content="Running NONMEM NONMEM runs can be invoked using the command line/shell script nmfe (NONMEM Front End). The script is appended with release version, e.g. nmfe75 for NONMEM v7.5. The basic use requires two arguments, model file and report file:
 1 2 nmfe75.bat model.ctl model.res # Windows nmfe75 model.ctl model.res # Linux/Unix The run will output status, information, and messages on screen, to re-direct/save them, one may use">
 	<meta itemprop="dateModified" content="2026-04-29T14:31:26-07:00">
-	<meta itemprop="wordCount" content="907">
+	<meta itemprop="wordCount" content="933">
 
 <title>Running NONMEM | NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -38,7 +38,7 @@ https://github.com/alex-shpak/hugo-book
 
 
   <script defer src="/docs/fuse.min.js"></script>
-  <script defer src="/docs/en.search.min.51f0273b615221c20a9c3da576ff67dd38394f71d0c6aad1d15ad2c7e43b65ee.js" integrity="sha256-UfAnO2FSIcIKnD2ldv9n3Tg5T3HQxqrR0VrSx&#43;Q7Ze4=" crossorigin="anonymous"></script>
+  <script defer src="/docs/en.search.min.fb743fa0ded23b90edf181cf524a08cfb0f8933347791ebc07baffd99a48f01c.js" integrity="sha256-&#43;3Q/oN7SO5Dt8YHPUkoIz7D4kzNHeR68B7r/2ZpI8Bw=" crossorigin="anonymous"></script>
 
 
 
@@ -1843,7 +1843,7 @@ Build and run
 <div id="outline-text-headline-7" class="outline-text-3">
 <ol>
 <li>
-<p>Create a build directory at, say &#34;/path/to/build&#34;,</p>
+<p>Create a build directory at, say <code>/path/to/build</code>,</p>
 <div class="src src-sh">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1856,8 +1856,7 @@ Build and run
 </div>
 </li>
 <li>
-<p>To build a NONMEM model at <code>/path/to/model/model-name.ctl</code>, in the build
-directory, do</p>
+<p>Assume NONMEM is located at <code>/path/to/nonmem</code>, to build a model at <code>/path/to/model/model-name.ctl</code>, in the build directory, do</p>
 <div class="src src-sh">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1866,7 +1865,7 @@ directory, do</p>
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  cmake ../nonmem -B. -GNinja -Dmodel<span style="color:#ff6ac1">=</span>/path/to/model/model-name.ctl
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  cmake /path/to/nonmem -B. -GNinja -Dmodel<span style="color:#ff6ac1">=</span>/path/to/model/model-name.ctl
 </span></span><span style="display:flex;"><span>  cmake --build . -j4
 </span></span><span style="display:flex;"><span>  cmake --install .</span></span></code></pre></td></tr></table>
 </div>
@@ -1876,20 +1875,20 @@ directory, do</p>
 installation, respectively. One can use additional cmake options to
 customize build. For example, assume multiple versions of compilers
 are present in the system, and one would like to use a certain
-version, say gfortran-15, as the Fortran compiler. One can do</p>
+version, say gcc-15, of the compilers. One can do</p>
 <div class="src src-sh">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  cmake ../nonmem -B. -GNinja -Dmodel<span style="color:#ff6ac1">=</span>/path/to/model/model-name.ctl -DCMAKE_Fortran_COMPILER<span style="color:#ff6ac1">=</span>gfortran-15</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  cmake ../nonmem -B. -GNinja -Dmodel<span style="color:#ff6ac1">=</span>/path/to/model/model-name.ctl -DCMAKE_Fortran_COMPILER<span style="color:#ff6ac1">=</span>gfortran-15 -DCMAKE_C_COMPILER<span style="color:#ff6ac1">=</span>gcc-15</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>In the build command <code>-j4</code> requests four parallel processes during building. One may adjust
-the number according to available hardware. After the last command,
-an executible with the same name (&#34;model-name.exe&#34; in the above example) of the model is created at the
+<p>In the build command <code>-j4</code> requests four parallel processes. One may adjust
+the number according to the hardware. After the last command,
+an executible with the same name as the model (in the above example it will be &#34;model-name.exe&#34; for Windows, and &#34;model-name&#34; for other OS) is created at the
 path <code>/path/to/model/</code>.</p>
 </li>
 <li>
@@ -1899,10 +1898,16 @@ path <code>/path/to/model/</code>.</p>
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  <span style="color:#ff5c57">cd</span> /path/to/model/
-</span></span><span style="display:flex;"><span>  model-name.exe model-name.ctl output -licfile<span style="color:#ff6ac1">=</span>/path/to/license/nonmem.lic</span></span></code></pre></td></tr></table>
+</span></span><span style="display:flex;"><span>  <span style="color:#78787e"># Windows</span>
+</span></span><span style="display:flex;"><span>  model-name.exe model-name.ctl output -licfile<span style="color:#ff6ac1">=</span>/path/to/license/nonmem.lic
+</span></span><span style="display:flex;"><span>  <span style="color:#78787e"># Linux &amp; MacOS</span>
+</span></span><span style="display:flex;"><span>  ./model-name model-name.ctl output -licfile<span style="color:#ff6ac1">=</span>/path/to/license/nonmem.lic</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
