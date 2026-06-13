@@ -2,9 +2,7 @@
 {{< katex >}}{{< /katex >}}
 
 * $PK
-Marks the beginning of abbreviated code for the PK Routine. The
-record  is  used to model the values of basic and additional
-pharmacokinetic parameters.
+PK abbreviated code block for PK parameter specifications.
 
 #+begin_src perl
 $PK
@@ -12,20 +10,16 @@ abbreviated code
 #+end_src
 
 ** Discussion
-This optional record specifies an abbreviated code for the PK routine.
-The record along with all its continuation records is called a ~$PK~
-block. If given it must only be with the first problem specification,
+The ~$PK~ code block must only be with the first problem specification,
 preceding any ~$ERROR~ records. It cannot be used with a user-supplied
 MODEL subroutine or [[file:/docs/reference-manual/api/subroutines/#trans][TRANS routine]].
 
-A ~$PK~ block must include assignment for every basic PK
-parameter for the given ADVAN and TRANS combination. It
-may also include assignment statements for
-the additional PK parameters. Basic parameters (see below) are typically the rate constants
+A ~$PK~ block must define all basic PK
+parameters according to specified ADVAN and TRANS. It
+may also define the additional PK parameters. The basic parameters (see below) are typically the rate constants
 ("micro-constants") for use in kinetic formulas, or
 parameters specified through transformation
-("TRANS"), such as clearance and volume. See [[file:/docs/reference-manual/control-records/subroutines][ADVAN and TRANS routines]]
-for corresponding additional parameters.
+("TRANS"), such as clearance and volume. For additional parameters see [[file:/docs/reference-manual/control-records/subroutines][ADVAN and TRANS routines]].
 
 See [[file:/docs/reference-manual/abbr/][abbreviated code]] for general syntax.
 
@@ -47,7 +41,7 @@ parameters listed below.
 See [[file:/docs/reference-manual/control-records/subroutines][ADVAN and TRANS routines]] for details of each routine.
 
 Additional optional PK parameters include PK-defined (i.e.,
-PRED-defined) items, and the ones listed below (the digit following the letter indicates compartment number).
+PRED-defined) quantities, and the ones listed below (~n~ denotes compartment number).
 **** Scale parameters Sn
 For each observation (or at any time other than  an  observation  time
 for which a prediction is needed), PREDPP computes a prediction
@@ -383,53 +377,53 @@ NMTRAN converts A_U() to A_0() during FSUBS code construction.  You
 may wish to ensure A_0FLG is 0 whenever A_UFLG is set to 1, as shown
 in the example above ([[https://github.com/nmusers/docs/tree/master/examples/a_uflg]["examples/a_uflg"]]).
 
-*** Forbidden Variable Names
+*** Reserved Variable Names
 #+begin_src f90
   IDEF IREV EVTREC NVNT INDXS IRGG GG NETAS DADT(n) E(n) EPS(n)
 #+end_src
 
-** Pseudo assignment statements
-  - COMRES=-1
-*** CALLFL=n
-The special pseudo assignment statement
-uses different permissible values for n for different PK calling-protocols. A calling protocol phrase can
-be used instead of the CALLFL pseudostatement. The phrase must be enclosed in parentheses. Examples of phrases follow each value of CALLFL.
+** Storage and calling options
+  - ~COMRES=-1~. See [[file:/docs/reference-manual/control-records/abbrev/#headline-4][COMRES]].
+  - CALLFL, see [[file:/docs/reference-manual/abbr/#calling_protocol][Calling protocol]].
+    + CALLFL=-2: PK called with every event record and at every nonevent
+      dose time. Equivalently
+      #+begin_src perl
+	$PK (NON-EVENT)
+	$PK (ADDITIONAL OR LAGGED)
+      #+end_src
+    + CALLFL=-1: PK called with every event record (default).
+      #+begin_src perl
+	$PK (EVERY EVENT)
+	$PK (EVERY)
+      #+end_src
+    + CALLFL=0: PK called with first event record of the individual record
+      and with every subsequent event record where the time data item
+      differs from the time data item of the previous event record.
+      Equivalently:
+      #+begin_src perl
+	$PK (NEW TIME)
+	$PK (NEW EVENT TIME)
+      #+end_src
+    + CALLFL=1: Call once per individual record. Equivalently:
+      #+begin_src perl
+	$PK (ONCE PER INDIVIDUAL RECORD)
+	$PK (ONCE/IND.REC.)
+      #+end_src
 
-- CALLFL=-2: PK called with every event record and at every nonevent
-  dose time. Calling phrase: ~$PK (NON-EVENT)~, ~$PK (ADDITIONAL OR LAGGED)~.
-- CALLFL=-1: PK called with every event record (default). Calling
-  phrase:  ~$PK (EVERY EVENT)~, ~$PK (EVERY)~.
-- CALLFL=0: PK called with first event record of the individual record
-  and with every subsequent event record where the time data item
-  differs from the time data item of the previous event record.
-  Calling phrase: ~$PK (NEW TIME)~, ~$PK (NEW EVENT TIME)~.
-- CALLFL=1: Call once per individual record. Calling phrase: ~$PK (ONCE PER INDIVIDUAL RECORD)~, ~$PK (ONCE/IND.REC.)~.
+    ~CALLFL=-2~ is the default when DOSREC, DOSTIM, or MTIME are used  explicitly  in  the  abbreviated  code. Otherwise,
+    ~CALLFL=-1~ is the default. The use of ~$BIND~ mandates ~CALLFL=-2~.
 
-Of  the  last four, CALLFL=-2 is the default when DOSREC, DOSTIM, or
-MTIME are used  explicitly  in  the  abbreviated  code. Otherwise,
-CALLFL=-1 is the default. CALLFL must be -2 when the ~$BIND~ record is used.
-
-The  pseudo-assignments  statements  may be enclosed in
-  parentheses. If two of them are present in the same set of
-  parentheses,  separate them with a semicolon.  A calling protocol
-  phrase may be used within parentheses instead of a
-  pseudo-assignment  statement,  and  either upper or lower case may
-  be used. E.g.,
-  #+begin_src perl
-     $PK (ONCE PER IR)      ; same as CALLFL=1
-     $PK (NEW TIME)         ; same as CALLFL=0
-     $PK (EVERY EVENT)      ; same as CALLFL=-1
-     $PK (NONEVENT)         ; same as CALLFL=-2
-  #+end_src
-
-CALLFL=0 and CALLFL=1 are [[file:/docs/reference-manual/abbr/#calling_protocol][call-limiting protocols]]. Limiting calls to
-PK can improve model efficiency. The CALL data item can be used with a
-call-limiting protocol to override the protocol and force calls with specific event records. Using CALLFL=0 or CALLFL=1 with single-subject data means PK is called with the first event
-record of the data set, instead of the first event record of the individual record.
+We recommend enclose the options in parentheses. Use semicolon to separate multiple options.
+#+begin_src perl
+  $PK (COMRES=-1 ; ONCE PER IR)
+  $PK (NEW TIME)         ; same as CALLFL=0
+  $PK (EVERY EVENT)      ; same as CALLFL=-1
+  $PK (NONEVENT)         ; same as CALLFL=-2
+#+end_src
 
 ** Record order
-   Follows ~$SUBROUTINES~ and ~$INPUT~
-   Follows  ~$MODEL~  (with  General  Nonlinear  Kinetics  Models ADVAN6,
+   Follows ~$SUBROUTINES~ and ~$INPUT~,
+   ~$MODEL~  (with  General  Nonlinear  Kinetics  Models ADVAN6,
    ADVAN8,  ADVAN9,  ADVAN13,  ADVAN14,  ADVAN15,   ADVAN16,   ADVAN17,
-   ADVAN18).
-   Precedes ~$ERROR~ (if present).
+   ADVAN18),
+   precedes ~$ERROR~ (if present).

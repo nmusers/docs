@@ -120,7 +120,7 @@ also be:
 In simulation blocks, initialization blocks, finalization blocks, a label
 from ~$INPUT~ record can be on the left in an assignment statement.
 
-See also pseudo-assignment below.
+See also storage and calling options below.
 
 [fn:5] It can be used to evaluate factorials:
     #+begin_src f90
@@ -453,26 +453,25 @@ e.g.
 Note that ~VQI~ is shared by the two functions. As shown one can also
 use the old pattern.
 
-** Pseudo-assignment
-Pseudo-assignment statements provide special instructions and must
-appear at the beginning of a control record.  They may be enclosed in
-parentheses. Multiple pseudo-assignment statements enclosed by
-parentheses must be semicolon-separated. A common example (may be used
-in all records except ~$MIX~) is
+** Storage and calling options
+These options provide special instructions and must
+appear at the beginning of a control record. We recommend enclose them in
+parentheses, with multiple options separated with semicolons.
+
+A common example (may be used in all records except ~$MIX~) is
 #+begin_src f90
 COMRES=-1
 #+end_src
 It specifies that all quantities  defined in abbreviated code are to
-be stored locally instead of by default in the (global) MODULE NMPRD4.
-(Variables  in  MODULE  NMPRD4 can be used for communication between
-various user-routines, and can be displayed in tables and
-scatterplots.)
+be stored locally instead of with global scope.
+
+See CALLFL below for calling options example.
 
 ** Reserved variables
 Entries for ~$PRED~, ~$PK~,  ~$ERROR~,  ~$DES~,
 ~$AES~, ~$AESINITIAL~, and ~$TOL~ describe the reserved variable names for
-these abbreviated codes. A reserved variable name cannot be used for user-defined variables
-unless the pseudo-assignment statement ~COMRES=-1~ is used.
+these abbreviated codes. User-defined variables cannot collide with reserved variable names
+unless with ~COMRES=-1~.
 
 See a list of reserved variables in [[file:/docs/reference-manual/api/modules/#module-variables-list][Module variables]], and details in [[file:/docs/reference-manual/api/variables/][variables]].
 
@@ -592,9 +591,7 @@ Examples of their use are in the ..\examples\densities directory.
   ADVAN17  routine.
 
 The use of CALLFL in each of the three abbreviated codes is
-independent of its use in the others.  The pseudo-assignment statement
-may be enclosed in parentheses. The pseudo-assignment statement may take
-these forms:
+independent of its use in the others.
 
 - CALLFL=-2: call  the  PK subroutine with every event record, with
   additional and lagged doses, and at modeled event times.  It does  not
@@ -683,11 +680,9 @@ these forms:
     #+end_src
   With  CALLFL=1,  The  CALL data item may be used to request calls with additional event records.
 
-In a block of abbreviated code, the CALLFL=n pseudo-assignment
-statement  must precede all the other abbreviated code (except for
-verbatim code or other pseudo-assignment  statements). The
-pseudo-assignment statement  may not be used conditionally.  CALLFL
-may not be used as a variable elsewhere in the abbreviated code.
+In a block of abbreviated code, the ~CALLFL~ option
+must precede all the other abbreviated code (except for
+verbatim code or other storage & calling options). It may not be used conditionally.
 
 Note that if the ~$ERROR~ record consists  of  only one  of  these  four statements:
 #+begin_src f90
@@ -709,24 +704,12 @@ With  the  last  three  models above (proportional and exponential), NM-TRAN wil
 #+end_src
 This does not mean that a model is fit to Log Y data.
 
-A calling protocol phrase may be used
-within parentheses instead of a pseudo-assignment statement CALLFL.
-For example
+Alternative to ~CALLFL=n~ specification, one can use calling protocol phrases:
 #+begin_src perl
  $PK (ONCE PER INDIVIDUAL RECORD)
  $ERROR (ONCE PER INDIVIDUAL RECORD)
  $AESINITIAL (ONCE PER INDIVIDUAL RECORD)
 #+end_src
-A calling protocol phrase can be used instead of  the  CALLFL
-pseudo-statement  in  ~$PK~,  ~$ERROR~,  and  ~$AESINITIAL~ abbreviated
-codes.  The phrase must be enclosed in parentheses.  Either upper  or
-lower  case may  be used.  In an abbreviated code, the line of code
-containing the phrase must precede all the other abbreviated code
-(except for  verbatim  code  or  other  pseudo-assignment statements),
-and it may be the same line that marks the beginning of the code, as
-in the above  usage examples.   Pseudo-statements  defining COMRES may
-be coded within the same parentheses, separated by a semicolon ";".
-No  abbreviated  code may follow ")" on the same line as the ")".
 
 - Phrases equivalent to CALLFL=-2 for the ~$PK~ record:
 
