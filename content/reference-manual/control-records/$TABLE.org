@@ -35,119 +35,100 @@
 
 ** Options
 *** list1
-      A list of item labels (i.e., user-chosen item types) to be tabled
-      along with DV and the special items PRED, RES, and WRES. The
-      user may request the following additional special diagnostic items by including their name in the list.
+A list of quantities for table outputs. ~DV~, ~PRED~, ~RES~, and
+~WRES~ are always included. Additional permitted quantities are described below.
 
-  - NPRED, NRES, NWRES Calculated assuming non-conditional estimation and  no  etaepsilon  interaction.   NPRED  and NRES are same as PRED and RES. NWRES is same as WRES when INTERACTION is  not  set  in ~$EST~.
+**** Diagnostics
+  - NPRED, NRES, NWRES: calculated assuming non-conditional estimation
+    and  no \(\eta\)-\(\epsilon\) interaction:  NPRED and NRES are
+    same as PRED and RES; NWRES is WRES when ~$EST~ does not use ~INTERACTION~;
 
-  - PREDI, RESI, WRESI.
-           Calculated assuming  non-conditional  estimation  with  etaepsilon interaction.  Always same as PRED, RES, and WRES.
+  - PREDI, RESI, WRESI: calculated assuming non-conditional estimation
+    with \(\eta\)-\(\epsilon\) interaction. Same as PRED, RES, and WRES;
 
-  - CPRED, CRES, CWRES.
-           Calculated  assuming  conditional  estimation  and  no  etaepsilon interaction.
+  - CPRED, CRES, CWRES: calculated  assuming  conditional  estimation
+    and no \(\eta\)-\(\epsilon\) interaction;
 
-  - CPREDI, CRESI, CWRESI.
-           Calculated  assuming conditional estimation with eta-epsilon
-           interaction.
+  - CPREDI, CRESI, CWRESI: calculated  assuming conditional estimation with \(\eta\)-\(\epsilon\) interaction;
 
-  - CIPRED, CIRES,CIWRES.
-           Conditional individual values
+  - CIPRED, CIRES,CIWRES: conditional individual values;
 
-  - CIPREDI, CIRESI,CIWRESI.
-           Conditional individual values with eta-epsilon  interaction.
+  - CIPREDI, CIRESI,CIWRESI: conditional individual values with \(\eta\)-\(\epsilon\) interaction.
 
-  - EPRED, ERES, EWRES.
-           Monte-Carlo  generated  diagnostics  and  are not linearized
-           approximations like the other diagnostic types. EWRES is the
-           Monte-Carlo version of CWRESI.
+  - EPRED, ERES, EWRES:
+           diagnostics based on Monte-Carlo samples, assuming no linearized
+           approximations found in other diagnostics. EWRES is the Monte-Carlo version of CWRESI;
 
-  - ECWRES.
-           Monte-Carlo version of CWRES.
+  - ECWRES: Monte-Carlo version of CWRES;
 
-  - NPDE.
-           Monte-Carlo generated  normalized  probability  distribution
-           error.
+  - NPDE: normalized probability  distribution error based on Monte-Carlo samples;
 
-  - NPD.  The correlated (or non-decorrelated) NPDE value.
+  - NPD:  the correlated (or non-decorrelated) version of NPDE;
 
-  - OBJI.
-           Objective function values for each individual (same as given
-           in the root.phi file).  The sum of the individual  objective
+  - OBJI: OFV for each individual (same as in the ".phi" file).  The
+    total OFV is the sum of the individual  objective
            function values is equal to the total objective function.
 
- In addition the list may include:
-
 **** Data item labels.
-Labels ETA(1), ETA(2), ... ,ETA(10), ... , ETA(70), etc., or
-alternatively,  labels  ETA1, ETA2, ... ,ETA10, ... , ETA70, etc.,
-corresponding to eta(1), eta(2), etc. The labels in the output will be
-ETA1, ETA2, ...  ,  ET10,  ...  ET70, etc.
+- ~ETA(i)~ (or ~ETAi~), ~i=1,2,...~ for \(\eta(i)\). The labels in the output will be ETA1, ETA2,.... A range of ETAs may also be used (NM73):
+  #+begin_src perl
+    ETAS(k:n)
+    ETAS(k:LAST)
+  #+end_src
+  Keyword ~TO~ can be used in place of ":", along
+  with the ~BY~ expression (NM74)
+  #+begin_src f90
+    ETAS(1 TO 10 by 3)    ;! ETAs 1,4,7,10
+    ETAS(LAST TO 1 by -3) ;! ETAs 10,7,4,1 (assuming LAST=10)
+  #+end_src
+  A number list may be given:
+  #+begin_src f90
+    ETAS(1,5,12,4)  ;! prints out ETAs 1, 5, 12, 4.
+    ETAS(4:1)	  ;! prints ETAs 4, 3, 2, 1
+    ETAS(4:1 by -2) ;! prints ETAs 4, 2
+    ETAS(1:4 by -1) ;! prints ETAs 4, 3, 2, 1 (the by value sets the direction).
+  #+end_src
 
-With NONMEM 7.3, a range of ETAs may be requested:
-#+begin_src perl
-  ETAS(k:n)
-#+end_src
-is equivalent to
-#+begin_src perl
-  ETAk, ..., ETAn
-#+end_src
-where ~n > k~,  LAST can be used in place of ~n~, and requests the
-last (highest numbered) eta in the problem, e.g. ~ETAS(1:LAST)~.
-NONMEM v7.4+ provides keyword ~TO~ may be used in place of ":", along
-with the ~BY~ expression.
-#+begin_src f90
-  ETAS(1 TO 10 by 3)    ;! ETAs 1,4,7,10
-  ETAS(LAST TO 1 by -3) ;! ETAs 10,7,4,1 (assuming LAST=10)
-#+end_src
-A number list may be given:
-#+begin_src f90
-  ETAS(1,5,12,4)  ;! prints out ETAs 1, 5, 12, 4.
-  ETAS(4:1)	  ;! prints ETAs 4, 3, 2, 1
-  ETAS(4:1 by -2) ;! prints ETAs 4, 2
-  ETAS(1:4 by -1) ;! prints ETAs 4, 3, 2, 1 (the by value sets the direction).
-#+end_src
+  One can also use labels using ~$ABBR REPLACE~ (NM74):
+  #+begin_src perl
+    $ABBR REPLACE ETA(CL)=ETA(1)
+     ...
+    $TABLE ETA(CL)
+  #+end_src
 
-NONMEM v7.4+ also supports symbolic labels using ~$ABBR REPLACE~ :
-#+begin_src perl
-  $ABBR REPLACE ETA(CL)=ETA(1)
-   ...
-  $TABLE ETA(CL)
-#+end_src
+- Reserved positions of MODULE NMPRD4 (See [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]]).  ~COM(k)~ or
+  ~:k~ denotes the kth reserved position.  (There must be  exactly  4
+  digits after ":". Use leading 0's as necessary.)  E.g., ~COM(3)~ or
+  ~:003~. Labels of the form ~:k~ will be used in the output.
 
-Reserved  positions of MODULE NMPRD4 (See [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]]).  ~COM(k)~ or
-~:k~ denotes the kth reserved position.  (There must be  exactly  4
-digits after ":". Use leading 0's as necessary.)  E.g., ~COM(3)~ or
-~:003~. Labels of the form ~:k~ will be used in the output.
+- Labels of PRED-defined items in MODULE NMPRD4 if abbreviated code is
+  present (up to PDT distinct such labels in any one  problem,  for
+  all tables  and  scatterplots.  PDT is a constant in
+  "resource/SIZES.f90"; default value is 500.)  These  may  include
+  labels  of  the NM-TRANdefined items:
+  #+begin_src perl
+     0nnn     e.g., 0010   ;# stands for A00nnn
+     1nnn     e.g., 1010   ;# stands for A01nnn
+     2nnn     e.g., 2010   ;# stands for C00nnn
+     3nnn     e.g., 3010   ;# stands for D00nnn
+     4nnn     e.g., 4010   ;# stands for E00nnn
+     5nnn     e.g., 5010   ;# stands for F00nnn
+     6nnn     e.g., 6010   ;# stands for P00nnn
+  #+end_src
+  These may also include: labels  ~VECTRA(1)~,  ~VECTRA(2)~ ,  ...  ,
+  ~VECTRA(9)~ ,  or alternatively, labels ~VA_1~, ~VA_2~, ... , ~VA_9~
+  .
 
-Labels of PRED-defined items in MODULE NMPRD4 if abbreviated code is
-present (up to PDT distinct such labels in any one  problem,  for  all
-tables  and  scatterplots.  PDT is a constant in "resource/SIZES.f90";
-default value is 500.)  These  may  include  labels  of  the
-NM-TRANdefined items:
-#+begin_src perl
-   0nnn     e.g., 0010   ;# stands for A00nnn
-   1nnn     e.g., 1010   ;# stands for A01nnn
-   2nnn     e.g., 2010   ;# stands for C00nnn
-   3nnn     e.g., 3010   ;# stands for D00nnn
-   4nnn     e.g., 4010   ;# stands for E00nnn
-   5nnn     e.g., 5010   ;# stands for F00nnn
-   6nnn     e.g., 6010   ;# stands for P00nnn
-#+end_src
-These may also include:
-labels  ~VECTRA(1)~,  ~VECTRA(2)~ ,  ...  , ~VECTRA(9)~ ,  or
-alternatively, labels ~VA_1~, ~VA_2~, ... , ~VA_9~ .
-
-Synonyms  may  be  defined on either the ~$TABLE~ or ~$SCATTER~ record for
- special items PRED, RES, WRES; for PRED-defined  items;  for
- NM-TRANdefined items; and for reserved positions of MODULE NMPRD4.
- For example, assume that IWRES is a PRED-defined label, that at least 3
-positions of NMPRD4 are reserved, and that NM-TRAN has generated
-A00032 as the  label  for  a  derivative in the generated FSUBS
-routine.  Either ~$TABLE~ or ~$SCATTER~ records may include:
-#+begin_src perl
-  WRES=RES1,IWRES=RES2,COM(3)=ABC,0032=DK.
-#+end_src
+- Synonyms  may  be  defined on either the ~$TABLE~ or ~$SCATTER~
+  record for special items PRED, RES, WRES; for PRED-defined  items;
+  for NM-TRANdefined items; and for reserved positions of MODULE
+  NMPRD4. For example, assume that IWRES is a PRED-defined label, that
+  at least 3 positions of NMPRD4 are reserved, and that NM-TRAN has
+  generated A00032 as the  label  for  a  derivative in the generated
+  FSUBS routine.  Either ~$TABLE~ or ~$SCATTER~ records may include:
+  #+begin_src perl
+    WRES=RES1,IWRES=RES2,COM(3)=ABC,0032=DK.
+  #+end_src
 
 For a discussion of the values of ETAs and PRED-defined items, see
  [[file:/docs/reference-manual/files/#output-pred-defined-items][output quantities]].
