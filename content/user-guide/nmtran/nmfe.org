@@ -97,16 +97,21 @@ Some common additional options are listed below.
 The following applies to the experimental library release.
 See NONMEM Installation Guide for traditional installation instructions.
 
-* Use precompiled library
-As an experimental alternative, NONMEM is available as a precompiled library.
-One can download the library according to the OS and use the [[https://cmake.org/][cmake]] and
-[[https://ninja-build.org/][ninja]] build tools to build models. Currently this approach is
-available for GNU compilers.
+* Use precompiled NONMEM library
+NONMEM is also available as pre-compiled executibles and libraries. In
+this experimental form NONMEM requires [[https://cmake.org/][cmake]] and
+[[https://ninja-build.org/][ninja]] build tools to invoke NM-TRAN and build models.
 
 ** Toolchain
 *** Windows
-The easiest way to set up toolchain on Windows is through MSYS2
-and MinGW.
+**** Use pre-packaged WinLibs and NONMEM
+The easiest way to use NONMEM on Windows is through through MSYS2
+and MinGW. NONMEM release contains a suite with WinLibs that
+pre-packages MSYS2, MinGW, GCC compilers, cmake + ninja build tools,
+as well as NONMEM itself.
+
+**** Set up manually
+Follow steps below should you wish to setup MSYS2 and MinGW toolchain manually.
 1. Follow https://www.mingw-w64.org/getting-started/msys2/ to install
    MSYS2 and C/C++ compiler.
 2. Open MSYS2 MinGW64 command line and install the Fortran compiler
@@ -118,19 +123,10 @@ and MinGW.
      pacman -S mingw-w64-x86_64-cmake
      pacman -S mingw-w64-x86_64-ninja
    #+end_src
-# **** Intel compilers
-# 1. Install [[https://www.intel.com/content/www/us/en/developer/tools/oneapi/oneapi-toolkit-download.html][Intel oneAPI toolkit]] with Intel C/C++ and Fortran compilers.
-# 2. Download and install [[https://cmake.org/download/][cmake Windows binary]].
-# 3. Download and install [[https://github.com/ninja-build/ninja/releases][Ninja build Windows binary]].
-# 4. Add cmake and ninja binary path to Windows PATH, e.g., in Windows
-#    command line
-#    #+begin_src sh
-#      set PATH=%PATH%;C:\cmake\bin\path;C:\ninja-build\bin\path
-#    #+end_src
 
 *** Linux
-NONMEM has been tested on Ubuntu distribution. To install GNU compiler
-toolchain, do the following in shell.
+NONMEM has been tested on Ubuntu distributions. To install GNU
+compilers and build tools, do
 #+begin_src sh
   sudo apt update
   sudo apt install gcc
@@ -140,7 +136,7 @@ toolchain, do the following in shell.
 #+end_src
 
 *** MacOS
-NONMEM has been tested on MacOS with Apple silicon. To install GNU
+NONMEM has been tested on MacOS (Apple Silicon). To install GNU
 compilers, one can either use Xcode (assume Xcode installed)
 #+begin_src sh
   xcode-select --install
@@ -149,38 +145,35 @@ or homebrew
 #+begin_src sh
   brew install gcc
 #+end_src
-To install build toolchain, in terminal do
+To install build toolchain, do
 #+begin_src sh
   brew install cmake
   brew install ninja
 #+end_src
 
 ** Build and run
+To use the pre-compiled NONMEM, follow the common "configure-build-install" process.
 1. Create a build directory at, say ~/path/to/build~,
    #+begin_src sh
      mkdir /path/to/build && cd /path/to/build
    #+end_src
 2. Assume NONMEM is located at ~/path/to/nonmem~, to build a model at ~/path/to/model/model-name.ctl~, in the build directory, do
    #+begin_src sh
+     # configure
      cmake /path/to/nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl
-     cmake --build . -j4
+     # build
+     cmake --build . -j4		# -j4: use 4 cores for parallel build
+     # install
      cmake --install .
    #+end_src
-   The three commands above perform configuration, build, and
-   installation, respectively. One can use additional cmake options to
-   customize build. For example, assume multiple versions of compilers
-   are present in the system, and one would like to use a certain
-   version, say gcc-15, of the compilers. One can do
-   # For example, to use Intel compilers ~icx~ and
-   # ~ifx~, one can do (assume Intel compilers installed and oneAPI
-   # launched properly)
+   One can use additional cmake options to
+   customize build. For example, to use a specific compiler, say,
+   gcc-15, one can do
    #+begin_src sh
      cmake ../nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl -DCMAKE_Fortran_COMPILER=gfortran-15 -DCMAKE_C_COMPILER=gcc-15
    #+end_src
-   In the build command ~-j4~ requests four parallel processes. One may adjust
-   the number according to the hardware. After the last command,
-   an executible with the same name as the model (in the above example it will be "model-name.exe" for Windows, and "model-name" for other OS) is created at the
-   path ~/path/to/model/~.
+   After installation,
+   an executible with the same name as the model (in the above example it will be "model-name.exe" for Windows, and "model-name" for other OS) is available at path ~/path/to/model/~.
 3. To run the model, do
    #+begin_src sh
      cd /path/to/model/
@@ -189,4 +182,8 @@ To install build toolchain, in terminal do
      # Linux & MacOS
      ./model-name model-name.ctl output -licfile=/path/to/license/nonmem.lic
    #+end_src
-   Additional NONMEM executible options apply.
+
+   #+RESULTS:
+
+   Previously mentioned executible options apply.
+** MPI parallel runs
