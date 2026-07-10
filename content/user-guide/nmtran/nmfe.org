@@ -98,16 +98,15 @@ The following applies to the experimental library release.
 See NONMEM Installation Guide for traditional installation instructions.
 
 * Use precompiled NONMEM library
-NONMEM is also available as pre-compiled executibles and libraries. In
-this experimental form NONMEM requires [[https://cmake.org/][cmake]] and
-[[https://ninja-build.org/][ninja]] build tools to invoke NM-TRAN and build models.
+NONMEM is also available as pre-compiled executibles and libraries.
+This experimental features requires [[https://cmake.org/][cmake]] and
+[[https://ninja-build.org/][ninja]] build tools.
 
 ** Toolchain
 *** Windows
 **** Use pre-packaged WinLibs and NONMEM
-The easiest way to use NONMEM on Windows is through through MSYS2
-and MinGW. NONMEM release contains a suite with WinLibs that
-pre-packages MSYS2, MinGW, GCC compilers, cmake + ninja build tools,
+The easiest way to use NONMEM on Windows is through [[https://winlibs.com/][WinLibs]]. NONMEM release packages WinLibs that
+has MSYS2, MinGW, GCC compilers, cmake + ninja build tools,
 as well as NONMEM itself.
 
 **** Set up manually
@@ -183,7 +182,31 @@ To use the pre-compiled NONMEM, follow the common "configure-build-install" proc
      ./model-name model-name.ctl output -licfile=/path/to/license/nonmem.lic
    #+end_src
 
-   #+RESULTS:
-
    Previously mentioned executible options apply.
-** MPI parallel runs
+*** Custom build script
+User may choose to simplify build process by putting the above steps
+into a script. See below for simple examples of using linux Bash and Window batch
+script to configure, build, and run models.
+#+begin_src sh
+  #!/bin/sh
+
+  # path to nonmem license
+  lic=/Users/yi.zhang6/work/nm_dev_misc/nonmem.lic
+
+  file="$1"
+  model="${file##*/}"
+  model="${model%.*}"
+
+  dir=$(dirname "$(realpath $1)")	# dir of the model
+
+  echo "building $model at $dir"	# show model control stream
+
+  # assume building at current path
+  cmake ~/work/sandbox/build/nonmem-7.6.1-arm64-Darwin-GNU-15.2.0-dev/ -B. -GNinja -Dmodel=$1
+  cmake --build . -j2		# use 2 threads to build
+  cmake --install .		# install executible
+
+  pushd $dir
+  ./${model} $(basename $file) -licfile=${lic}
+  popd
+#+end_src
