@@ -21,14 +21,14 @@ https://github.com/alex-shpak/hugo-book
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="user-guide">
-		<meta property="article:modified_time" content="2026-06-11T10:46:57-07:00">
+		<meta property="article:modified_time" content="2026-07-10T11:00:31-07:00">
 
 
 	<meta itemprop="name" content="Running NONMEM">
 	<meta itemprop="description" content="Running NONMEM NONMEM runs can be invoked using the command line/shell script nmfe (NONMEM Front End). The script is appended with release version, e.g. nmfe75 for NONMEM v7.5. The basic use requires two arguments, model file and report file:
 1 2 nmfe75.bat model.ctl model.res # Windows nmfe75 model.ctl model.res # Linux/Unix The run will output status, information, and messages on screen, to re-direct/save them, one may use">
-	<meta itemprop="dateModified" content="2026-06-11T10:46:57-07:00">
-	<meta itemprop="wordCount" content="933">
+	<meta itemprop="dateModified" content="2026-07-10T11:00:31-07:00">
+	<meta itemprop="wordCount" content="1156">
 
 <title>Running NONMEM • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -37,7 +37,7 @@ https://github.com/alex-shpak/hugo-book
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.79736223d40b5412f913b1e6fa9d50257ff3dad61f88ee7c75d7c0018688060c.js" integrity="sha256-eXNiI9QLVBL5E7Hm&#43;p1QJX/z2tYfiO58ddfAAYaIBgw=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.1dbfb4455524bb304d463c9e0a83656b2b6af29c867524d8069c3b3f7c5ff5d2.js" integrity="sha256-Hb&#43;0RVUkuzBNRjyeCoNlaytq8pyGdSTYBpw7P3xf9dI=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -1516,19 +1516,35 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="#headline-1">Running NONMEM</a>
 </li>
-<li><a href="#headline-2">Use precompiled library</a>
+<li><a href="#headline-2">Use precompiled NONMEM library</a>
 <ul>
 <li><a href="#headline-3">Toolchain</a>
 <ul>
 <li><a href="#headline-4">Windows</a>
+<ul>
+<li><a href="#headline-5">Use WinLibs</a>
 </li>
-<li><a href="#headline-5">Linux</a>
-</li>
-<li><a href="#headline-6">MacOS</a>
+<li><a href="#headline-6">Set up manually</a>
 </li>
 </ul>
 </li>
-<li><a href="#headline-7">Build and run</a>
+<li><a href="#headline-7">Linux</a>
+</li>
+<li><a href="#headline-8">MacOS</a>
+</li>
+</ul>
+</li>
+<li><a href="#headline-9">Build and run</a>
+<ul>
+<li><a href="#headline-10">Custom build script</a>
+<ul>
+<li><a href="#headline-11"><code>build.sh</code></a>
+</li>
+<li><a href="#headline-12"><code>build.bat</code></a>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -1703,13 +1719,12 @@ See NONMEM Installation Guide for traditional installation instructions.</p>
 </div>
 <div id="outline-container-headline-2" class="outline-2">
 <h2 id="headline-2">
-Use precompiled library
+Use precompiled NONMEM library
 </h2>
 <div id="outline-text-headline-2" class="outline-text-2">
-<p>As an experimental alternative, NONMEM is available as a precompiled library.
-One can download the library according to the OS and use the <a href="https://cmake.org/">cmake</a> and
-<a href="https://ninja-build.org/">ninja</a> build tools to build models. Currently this approach is
-available for GNU compilers.</p>
+<p>NONMEM is also available as pre-compiled executibles and libraries.
+This experimental features requires <a href="https://cmake.org/">cmake</a> and
+<a href="https://ninja-build.org/">ninja</a> build tools.</p>
 <div id="outline-container-headline-3" class="outline-3">
 <h3 id="headline-3">
 Toolchain
@@ -1720,8 +1735,50 @@ Toolchain
 Windows
 </h4>
 <div id="outline-text-headline-4" class="outline-text-4">
-<p>The easiest way to set up toolchain on Windows is through MSYS2
-and MinGW.</p>
+<div id="outline-container-headline-5" class="outline-5">
+<h5 id="headline-5">
+Use WinLibs
+</h5>
+<div id="outline-text-headline-5" class="outline-text-5">
+<p>The easiest way to use NONMEM on Windows is through <a href="https://winlibs.com/">WinLibs</a>. Simply
+download the library and add its path to Windows&#39; PATH:</p>
+<ol>
+<li>Download WinLibs for GCC 15.3.0 <a href="https://github.com/brechtsanders/winlibs_mingw/releases/download/15.3.0posix-14.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-15.3.0-mingw-w64ucrt-14.0.0-r1.zip">here</a> and unzip;</li>
+<li>
+<p>Assume the unzipped library is at <code>C:\path\to\winlibs</code>, add path
+<code>C:\path\to\winlibs\mingw64\bin</code> to Windows PATH. This can be done in
+Windows cmd as</p>
+<div class="src src-sh">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  <span style="color:#ff5c57">set</span> <span style="color:#ff5c57">PATH</span><span style="color:#ff6ac1">=</span>C:<span style="color:#5af78e">\p</span>ath<span style="color:#5af78e">\t</span>o<span style="color:#5af78e">\w</span>inlibs<span style="color:#5af78e">\m</span>ingw64<span style="color:#5af78e">\b</span>in;%PATH%</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>or</p>
+<div class="src src-sh">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  setx PATH <span style="color:#5af78e">&#34;%PATH%;C:\path\to\winlibs\mingw64\bin</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-headline-6" class="outline-5">
+<h5 id="headline-6">
+Set up manually
+</h5>
+<div id="outline-text-headline-6" class="outline-text-5">
+<p>Follow steps below should you wish to setup MSYS2 and MinGW toolchain manually.</p>
 <ol>
 <li>Follow <a href="https://www.mingw-w64.org/getting-started/msys2/">https://www.mingw-w64.org/getting-started/msys2/</a> to install
 MSYS2 and C/C++ compiler.</li>
@@ -1756,13 +1813,15 @@ MSYS2 and C/C++ compiler.</li>
 </ol>
 </div>
 </div>
-<div id="outline-container-headline-5" class="outline-4">
-<h4 id="headline-5">
+</div>
+</div>
+<div id="outline-container-headline-7" class="outline-4">
+<h4 id="headline-7">
 Linux
 </h4>
-<div id="outline-text-headline-5" class="outline-text-4">
-<p>NONMEM has been tested on Ubuntu distribution. To install GNU compiler
-toolchain, do the following in shell.</p>
+<div id="outline-text-headline-7" class="outline-text-4">
+<p>NONMEM has been tested on Ubuntu distributions. To install GNU
+compilers and build tools, do</p>
 <div class="src src-sh">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1783,12 +1842,12 @@ toolchain, do the following in shell.</p>
 </div>
 </div>
 </div>
-<div id="outline-container-headline-6" class="outline-4">
-<h4 id="headline-6">
+<div id="outline-container-headline-8" class="outline-4">
+<h4 id="headline-8">
 MacOS
 </h4>
-<div id="outline-text-headline-6" class="outline-text-4">
-<p>NONMEM has been tested on MacOS with Apple silicon. To install GNU
+<div id="outline-text-headline-8" class="outline-text-4">
+<p>NONMEM has been tested on MacOS (Apple Silicon). To install GNU
 compilers, one can either use Xcode (assume Xcode installed)</p>
 <div class="src src-sh">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
@@ -1811,7 +1870,7 @@ compilers, one can either use Xcode (assume Xcode installed)</p>
 </div>
 </div>
 </div>
-<p>To install build toolchain, in terminal do</p>
+<p>To install build toolchain, do</p>
 <div class="src src-sh">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1828,11 +1887,12 @@ compilers, one can either use Xcode (assume Xcode installed)</p>
 </div>
 </div>
 </div>
-<div id="outline-container-headline-7" class="outline-3">
-<h3 id="headline-7">
+<div id="outline-container-headline-9" class="outline-3">
+<h3 id="headline-9">
 Build and run
 </h3>
-<div id="outline-text-headline-7" class="outline-text-3">
+<div id="outline-text-headline-9" class="outline-text-3">
+<p>To use the pre-compiled NONMEM, follow the common &#34;configure-build-install&#34; process.</p>
 <ol>
 <li>
 <p>Create a build directory at, say <code>/path/to/build</code>,</p>
@@ -1855,19 +1915,23 @@ Build and run
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  cmake /path/to/nonmem -B. -GNinja -Dmodel<span style="color:#ff6ac1">=</span>/path/to/model/model-name.ctl
-</span></span><span style="display:flex;"><span>  cmake --build . -j4
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  <span style="color:#78787e"># configure</span>
+</span></span><span style="display:flex;"><span>  cmake /path/to/nonmem -B. -GNinja -Dmodel<span style="color:#ff6ac1">=</span>/path/to/model/model-name.ctl
+</span></span><span style="display:flex;"><span>  <span style="color:#78787e"># build</span>
+</span></span><span style="display:flex;"><span>  cmake --build . -j4		<span style="color:#78787e"># -j4: use 4 cores for parallel build</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#78787e"># install</span>
 </span></span><span style="display:flex;"><span>  cmake --install .</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>The three commands above perform configuration, build, and
-installation, respectively. One can use additional cmake options to
-customize build. For example, assume multiple versions of compilers
-are present in the system, and one would like to use a certain
-version, say gcc-15, of the compilers. One can do</p>
+<p>One can use additional cmake options to
+customize build. For example, to use a specific compiler, say,
+gcc-15, one can do</p>
 <div class="src src-sh">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -1878,10 +1942,8 @@ version, say gcc-15, of the compilers. One can do</p>
 </div>
 </div>
 </div>
-<p>In the build command <code>-j4</code> requests four parallel processes. One may adjust
-the number according to the hardware. After the last command,
-an executible with the same name as the model (in the above example it will be &#34;model-name.exe&#34; for Windows, and &#34;model-name&#34; for other OS) is created at the
-path <code>/path/to/model/</code>.</p>
+<p>After installation,
+an executible with the same name as the model (in the above example it will be &#34;model-name.exe&#34; for Windows, and &#34;model-name&#34; for other OS) is available at path <code>/path/to/model/</code>.</p>
 </li>
 <li>
 <p>To run the model, do</p>
@@ -1903,9 +1965,140 @@ path <code>/path/to/model/</code>.</p>
 </div>
 </div>
 </div>
-<p>Additional NONMEM executible options apply.</p>
+<p>
+Previously mentioned executible options apply.</p>
 </li>
 </ol>
+<div id="outline-container-headline-10" class="outline-4">
+<h4 id="headline-10">
+Custom build script
+</h4>
+<div id="outline-text-headline-10" class="outline-text-4">
+<p>User can simplify the build process by putting the above steps
+into a script. See below for simple examples of using linux Bash and Window batch
+script to configure, build, and run models.</p>
+<div id="outline-container-headline-11" class="outline-5">
+<h5 id="headline-11">
+<code>build.sh</code>
+</h5>
+<div id="outline-text-headline-11" class="outline-text-5">
+<div class="src src-sh">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  <span style="color:#78787e">#!/bin/sh</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">lic</span><span style="color:#ff6ac1">=</span>/path/to/nonmem.lic
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">file</span><span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#34;</span><span style="color:#ff5c57">$1</span><span style="color:#5af78e">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">model</span><span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#34;</span><span style="color:#5af78e">${</span><span style="color:#ff5c57">file</span>##*/<span style="color:#5af78e">}</span><span style="color:#5af78e">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">model</span><span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#34;</span><span style="color:#5af78e">${</span><span style="color:#ff5c57">model</span>%.*<span style="color:#5af78e">}</span><span style="color:#5af78e">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">dir</span><span style="color:#ff6ac1">=</span><span style="color:#ff6ac1">$(</span>dirname <span style="color:#5af78e">&#34;</span><span style="color:#ff6ac1">$(</span>realpath <span style="color:#ff5c57">$1</span><span style="color:#ff6ac1">)</span><span style="color:#5af78e">&#34;</span><span style="color:#ff6ac1">)</span>	<span style="color:#78787e"># dir of the model</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">echo</span> <span style="color:#5af78e">&#34;building </span><span style="color:#ff5c57">$model</span><span style="color:#5af78e"> at </span><span style="color:#ff5c57">$dir</span><span style="color:#5af78e">&#34;</span>	<span style="color:#78787e"># show model control stream</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#78787e"># assume building at current path</span>
+</span></span><span style="display:flex;"><span>  cmake path/to/nonmem/ -B. -GNinja -Dmodel<span style="color:#ff6ac1">=</span><span style="color:#ff5c57">$1</span>
+</span></span><span style="display:flex;"><span>  cmake --build . -j2		<span style="color:#78787e"># use 2 threads to build</span>
+</span></span><span style="display:flex;"><span>  cmake --install .		<span style="color:#78787e"># install executible</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">pushd</span> <span style="color:#ff5c57">$dir</span>
+</span></span><span style="display:flex;"><span>  ./<span style="color:#5af78e">${</span><span style="color:#ff5c57">model</span><span style="color:#5af78e">}</span> <span style="color:#ff6ac1">$(</span>basename <span style="color:#ff5c57">$file</span><span style="color:#ff6ac1">)</span> -licfile<span style="color:#ff6ac1">=</span><span style="color:#5af78e">${</span><span style="color:#ff5c57">lic</span><span style="color:#5af78e">}</span>
+</span></span><span style="display:flex;"><span>  popd</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-headline-12" class="outline-5">
+<h5 id="headline-12">
+<code>build.bat</code>
+</h5>
+<div id="outline-text-headline-12" class="outline-text-5">
+<div class="src src-sh">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>@echo off
+</span></span><span style="display:flex;"><span>setlocal
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff6ac1">if</span> <span style="color:#5af78e">&#34;%~1&#34;</span><span style="color:#ff6ac1">==</span><span style="color:#5af78e">&#34;&#34;</span> <span style="color:#ff6ac1">(</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff5c57">echo</span> Usage: %~nx0 model_file
+</span></span><span style="display:flex;"><span>    <span style="color:#ff5c57">exit</span> /b <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff6ac1">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">set</span> <span style="color:#5af78e">&#34;lic=C:\path\to\nonmem.lic&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">set</span> <span style="color:#5af78e">&#34;file=%~f1&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">set</span> <span style="color:#5af78e">&#34;model=%~n1&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">set</span> <span style="color:#5af78e">&#34;dir=%~dp1&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">echo</span> building %model% at %dir%
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>cmake <span style="color:#5af78e">\p</span>ath<span style="color:#5af78e">\t</span>o<span style="color:#5af78e">\n</span>onmem -B. -GNinja -Dmodel<span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#34;%file%&#34;</span> <span style="color:#ff6ac1">||</span> <span style="color:#ff5c57">exit</span> /b <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>cmake --build . -j2 <span style="color:#ff6ac1">||</span> <span style="color:#ff5c57">exit</span> /b <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>cmake --install . <span style="color:#ff6ac1">||</span> <span style="color:#ff5c57">exit</span> /b <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">pushd</span> <span style="color:#5af78e">&#34;%dir%&#34;</span> <span style="color:#ff6ac1">||</span> <span style="color:#ff5c57">exit</span> /b <span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#5af78e">&#34;%model%.exe&#34;</span> <span style="color:#5af78e">&#34;%~nx1&#34;</span> -licfile<span style="color:#ff6ac1">=</span>%lic%
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">set</span> <span style="color:#5af78e">&#34;rc=%errorlevel%&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">popd</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">exit</span> /b %rc%</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -1919,9 +2112,9 @@ path <code>/path/to/model/</code>.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/e00941e900190e9f92a0aff03e11a35842a8f716" title='Last modified by Yi Zhang | 2026 Jun 11' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/9175f82388580202f6b592b80850ee3a9e7c5f3d" title='Last modified by Yi Zhang | 2026 Jul 10' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Jun 11</span>
+    <span>2026 Jul 10</span>
   </a>
 
 </div>
@@ -1983,19 +2176,35 @@ path <code>/path/to/model/</code>.</p>
 <ul>
 <li><a href="#headline-1">Running NONMEM</a>
 </li>
-<li><a href="#headline-2">Use precompiled library</a>
+<li><a href="#headline-2">Use precompiled NONMEM library</a>
 <ul>
 <li><a href="#headline-3">Toolchain</a>
 <ul>
 <li><a href="#headline-4">Windows</a>
+<ul>
+<li><a href="#headline-5">Use WinLibs</a>
 </li>
-<li><a href="#headline-5">Linux</a>
-</li>
-<li><a href="#headline-6">MacOS</a>
+<li><a href="#headline-6">Set up manually</a>
 </li>
 </ul>
 </li>
-<li><a href="#headline-7">Build and run</a>
+<li><a href="#headline-7">Linux</a>
+</li>
+<li><a href="#headline-8">MacOS</a>
+</li>
+</ul>
+</li>
+<li><a href="#headline-9">Build and run</a>
+<ul>
+<li><a href="#headline-10">Custom build script</a>
+<ul>
+<li><a href="#headline-11"><code>build.sh</code></a>
+</li>
+<li><a href="#headline-12"><code>build.bat</code></a>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 </ul>
 </li>
