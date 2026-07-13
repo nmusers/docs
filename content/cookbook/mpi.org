@@ -1,0 +1,64 @@
+---
+title: "MPI run on local machine"
+author: ["Yi Zhang"]
+draft: false
+bookCollapseSection: false
+---
+{{< katex >}}{{< /katex >}}
+
+* MPI run on a local machine
+NONMEM supports parallel computation through Message Passing Interface (MPI).
+As modern hardware advacement gifts destop computation with multicore
+processors, MPI runs can be executed locally to speed up computation.
+This article describes the steps for local parallel runs using the
+[[file:/docs/user-guide/nmtran/nmfe/#headline-2][precompiled NONMEM library]]. User need to follow the instructions there
+to make sure the build toolchain has been installed.
+
+To utilize the parallel feature one must have the MPI
+library available. User need to consult vendor documentation
+such as in [[https://www.open-mpi.org/][OpenMPI]] and [[https://www.mpich.org/][MPICH]].
+
+** Build
+To build a parallel NONMEM executable, follow the common
+"configure-build-install" process and use the relevant MPI options.
+1. Create a build directory at, say ~/path/to/build~,
+   #+begin_src sh
+     mkdir /path/to/build && cd /path/to/build
+   #+end_src
+2. Assume NONMEM is located at ~/path/to/nonmem~, to build a model at ~/path/to/model/model-name.ctl~, in the build directory, do
+   #+begin_src sh
+     # configure
+     cmake /path/to/nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl -Dmpi=ON
+   #+end_src
+   Here the additional option "-Dmpi=ON" requests for MPI builds. One can use additional cmake options to
+   [[https://cmake.org/cmake/help/latest/module/FindMPI.html][customize MPI build]]. For example, to help cmake locate the MPI
+   library, one can add
+   #+begin_src sh
+      -DMPI_HOME=/path/to/mpi/library
+   #+end_src
+3. The rest steps are the same as the sequential build:
+   #+begin_src sh
+     # build
+     cmake --build . -j4		# -j4: use 4 cores for parallel build
+     # install
+     cmake --install .
+   #+end_src
+
+*** Run
+To run the model in parallel, do
+   #+begin_src sh
+     cd /path/to/model/
+     # Windows
+     mpiexec.exe -n num_nodes model-name.exe model-name.ctl output -licfile=/path/to/license/nonmem.lic -parafile=LOCALNODE
+     # Linux & MacOS
+     ./mpiexec -n num_nodes model-name model-name.ctl output -licfile=/path/to/license/nonmem.lic -parafile=LOCALNODE
+   #+end_src
+Here ~-parafile=LOCALNODE~ requests a "local node" MPI run, and
+~num_nodes~ is the number of cores user needs to specify so that the
+subjects in the model will be distributed to the cores and calculated
+in paralle. For example,
+#+begin_src sh
+./mpiexec -n 4 model-name model-name.ctl output -licfile=/path/to/license/nonmem.lic -parafile=LOCALNODE
+#+end_src
+says the population will be distributed to four cores. This assumes
+there are more than four cores in the machine.
