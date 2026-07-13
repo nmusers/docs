@@ -9,14 +9,14 @@ bookCollapseSection: false
 * MPI run on a local machine
 NONMEM supports parallel computation through Message Passing Interface (MPI).
 As modern hardware advacement gifts destop computation with multicore
-processors, MPI runs can be executed locally to speed up computation.
+processors, MPI runs can be executed /locally/ to speed up
+computation, as opposite to dispatched remotely to a server.
 This article describes the steps for local parallel runs using the
-[[file:/docs/user-guide/nmtran/nmfe/#headline-2][precompiled NONMEM library]]. User need to follow the instructions there
-to make sure the build toolchain has been installed.
+[[file:/docs/user-guide/nmtran/nmfe/#headline-2][precompiled NONMEM library]]. User need to ensure the build toolchain has been installed.
 
 To utilize the parallel feature one must have the MPI
-library available. User need to consult vendor documentation
-such as in [[https://www.open-mpi.org/][OpenMPI]] and [[https://www.mpich.org/][MPICH]].
+library available. Please consult vendor documentation
+such as by [[https://www.open-mpi.org/][OpenMPI]] and [[https://www.mpich.org/][MPICH]].
 
 ** Build
 To build a parallel NONMEM executable, follow the common
@@ -30,16 +30,16 @@ To build a parallel NONMEM executable, follow the common
      # configure
      cmake /path/to/nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl -Dmpi=ON
    #+end_src
-   Here the additional option "-Dmpi=ON" requests for MPI builds. One can use additional cmake options to
-   [[https://cmake.org/cmake/help/latest/module/FindMPI.html][customize MPI build]]. For example, to help cmake locate the MPI
-   library, one can add
+   Here option ~-Dmpi=ON~ requests for MPI builds. One can use additional cmake options to
+   [[https://cmake.org/cmake/help/latest/module/FindMPI.html][customize MPI build]]. For example, one can use ~-DMPI_HOME=~ to help cmake locate the MPI
+   library:
    #+begin_src sh
-      -DMPI_HOME=/path/to/mpi/library
+     cmake /path/to/nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl -Dmpi=ON -DMPI_HOME=/path/to/mpi/library
    #+end_src
-3. The rest steps are the same as the sequential build:
+3. The other steps are the same as the sequential build:
    #+begin_src sh
      # build
-     cmake --build . -j4		# -j4: use 4 cores for parallel build
+     cmake --build . -j4	# -j4: use 4 cores for parallel build
      # install
      cmake --install .
    #+end_src
@@ -54,11 +54,20 @@ To run the model in parallel, do
      ./mpiexec -n num_nodes model-name model-name.ctl output -licfile=/path/to/license/nonmem.lic -parafile=LOCALNODE
    #+end_src
 Here ~-parafile=LOCALNODE~ requests a "local node" MPI run, and
-~num_nodes~ is the number of cores user needs to specify so that the
-subjects in the model will be distributed to the cores and calculated
+~num_nodes~ is the number of cores user needs to specify. The
+subjects in the model will be distributed to the specified cores and
+their contribution to OFV will be calculated
 in paralle. For example,
 #+begin_src sh
 ./mpiexec -n 4 model-name model-name.ctl output -licfile=/path/to/license/nonmem.lic -parafile=LOCALNODE
 #+end_src
-says the population will be distributed to four cores. This assumes
+says that the population will be distributed to four cores, assuming
 there are more than four cores in the machine.
+
+User can explore additional vendor-depedent options in MPI runs. For
+example, it is often desirable to use the ~--bind-to core~ option
+#+begin_src sh
+  ./mpiexec -n 4 --bind-to core #...
+#+end_src
+so that ~num_nodes~ would indicate the number of hardware cores, as
+opposite to hardware threads (vCPUs).
