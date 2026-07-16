@@ -194,61 +194,38 @@ To use the pre-compiled NONMEM, follow the common "configure-build-install" proc
 
    Previously mentioned executible options apply.
 *** Custom build script
-User can simplify the build process by putting the above steps
-into a script. See below for simple examples of using linux Bash and Window batch
-script to configure, build, and run models.
-**** ~build.sh~
+User can simplify the build process by using ~nonmem/util/nmf2.sh~
+(Linux/MacOS) or ~nonmem/util/nmf2.bat~ (Windows) scripts. These are
+thin wrappers of the ~cmake~ procedures. They support some ~nmfe76~
+options. The optinos are shown when scripts called without any
+argument:
 #+begin_src sh
-  #!/bin/sh
+C:\path\to\build>nmf2.bat
+Usage: nmf2.bat model_file [options]...
 
-  lic=/path/to/nonmem.lic
+Options:
 
-  file="$1"
-  model="${file##*/}"
-  model="${model%.*}"
-
-  dir=$(dirname "$(realpath $1)")	# dir of the model
-
-  echo "building $model at $dir"	# show model control stream
-
-  # assume building at current path
-  cmake path/to/nonmem/ -B. -GNinja -Dmodel=$1
-  cmake --build . -j2		# use 2 threads to build
-  cmake --install .		# install executible
-
-  pushd $dir
-  ./${model} $(basename $file) -licfile=${lic}
-  popd
-#+end_src
-**** ~build.bat~
-#+begin_src sh
-@echo off
-setlocal
-
-if "%~1"=="" (
-    echo Usage: %~nx0 model_file
-    exit /b 1
-)
-
-set "lic=C:\path\to\nonmem.lic"
-set "file=%~f1"
-set "model=%~n1"
-set "dir=%~dp1"
-
-echo building %model% at %dir%
-
-cmake \path\to\nonmem -B. -GNinja -Dmodel="%file%" || exit /b 1
-cmake --build . -j2 || exit /b 1
-cmake --install . || exit /b 1
-
-pushd "%dir%" || exit /b 1
-"%model%.exe" "%~nx1" -licfile=%lic%
-set "rc=%errorlevel%"
-popd
-
-exit /b %rc%
+-licfile=: specify license path. If not set nm_dir is used.
+-background: run in the background.
+-prdefault: use default arrays sizes.
+-tprdefault: test if '-prdefault' is applicable. If so, run with it.
+-maxlim=0|1|2|3: LIM size levels for array sizes.
+-nodes=: number of cores in MPI run. If given the run will assume '-parafile=LOCALNODE'.
+-xmloff: turn off xml file output.
+-parafprint=: iteration intervals between printing in parallel runs.
+-simparon: parallelize simulations in addition to estimations.
+-flushtime=: lower limit of output file update interval (seconds).
+-dde: augment control stream file for delay differential equation models.
+-do2test: check control stream for analytical 2nd derivatives.
+-nobuild: do not build executable.
+-mpi_home=: home dir of MPI library. Used by cmake to locate MPI.
 #+end_src
 
-** Parallel run using MPI
-See [[file:/docs/cookbook/mpi/][the Cookbook entry]] on parallel runs on a local (multicore)
-machine.
+To use the script, copy it from ~nonmem/util~ to your build path,
+and set the ~build_dir~ (cmake build path, default to current path),
+~nm_dir~ (NONMEM path), and ~lfile~ (NONMEM license path) by editing
+the file. To build and run a model, the only necessary argument is the
+model path:
+#+begin_src sh
+C:\path\to\build>nmf2.bat ..\run\model.ctl
+#+end_src

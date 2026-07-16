@@ -21,14 +21,14 @@ https://github.com/alex-shpak/hugo-book
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="user-guide">
-		<meta property="article:modified_time" content="2026-07-10T13:33:19-07:00">
+		<meta property="article:modified_time" content="2026-07-14T10:24:09-07:00">
 
 
 	<meta itemprop="name" content="Running NONMEM">
 	<meta itemprop="description" content="Running NONMEM NONMEM runs can be invoked using the command line/shell script nmfe (NONMEM Front End). The script is appended with release version, e.g. nmfe75 for NONMEM v7.5. The basic use requires two arguments, model file and report file:
 1 2 nmfe75.bat model.ctl model.res # Windows nmfe75 model.ctl model.res # Linux/Unix The run will output status, information, and messages on screen, to re-direct/save them, one may use">
-	<meta itemprop="dateModified" content="2026-07-10T13:33:19-07:00">
-	<meta itemprop="wordCount" content="1172">
+	<meta itemprop="dateModified" content="2026-07-14T10:24:09-07:00">
+	<meta itemprop="wordCount" content="1185">
 
 <title>Running NONMEM • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -37,7 +37,7 @@ https://github.com/alex-shpak/hugo-book
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.77963952df7a94fed3aec49f6d540fa8653dd1eca731e855ee296f9ab7047e1a.js" integrity="sha256-d5Y5Ut96lP7TrsSfbVQPqGU90eynMehV7ilvmrcEfho=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.85a2d048b8efa5aa93eef2944797a508aa5e80c2b2cd913e7bd7642e530f87a8.js" integrity="sha256-haLQSLjvpaqT7vKUR5elCKpegMKyzZE&#43;e9dkLlMPh6g=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -1530,7 +1530,7 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="#headline-1">Running NONMEM</a>
 </li>
-<li><a href="#headline-2">Use precompiled NONMEM library</a>
+<li><a href="#headline-2">Use precompiled NONMEM library (NM761)</a>
 <ul>
 <li><a href="#headline-3">Toolchain</a>
 <ul>
@@ -1551,16 +1551,8 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="#headline-9">Build and run</a>
 <ul>
 <li><a href="#headline-10">Custom build script</a>
-<ul>
-<li><a href="#headline-11"><code>build.sh</code></a>
-</li>
-<li><a href="#headline-12"><code>build.bat</code></a>
 </li>
 </ul>
-</li>
-</ul>
-</li>
-<li><a href="#headline-13">Parallel run using MPI</a>
 </li>
 </ul>
 </li>
@@ -1735,7 +1727,7 @@ See NONMEM Installation Guide for traditional installation instructions.</p>
 </div>
 <div id="outline-container-headline-2" class="outline-2">
 <h2 id="headline-2">
-Use precompiled NONMEM library
+Use precompiled NONMEM library (NM761)
 </h2>
 <div id="outline-text-headline-2" class="outline-text-2">
 <p>NONMEM is also available as pre-compiled executibles and libraries.
@@ -1939,7 +1931,7 @@ Build and run
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  <span style="color:#78787e"># configure</span>
 </span></span><span style="display:flex;"><span>  cmake /path/to/nonmem -B. -GNinja -Dmodel<span style="color:#ff6ac1">=</span>/path/to/model/model-name.ctl
 </span></span><span style="display:flex;"><span>  <span style="color:#78787e"># build</span>
-</span></span><span style="display:flex;"><span>  cmake --build . -j4		<span style="color:#78787e"># -j4: use 4 cores for parallel build</span>
+</span></span><span style="display:flex;"><span>  cmake --build . -j4		<span style="color:#78787e"># -j4: use 4 threads to build faster</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#78787e"># install</span>
 </span></span><span style="display:flex;"><span>  cmake --install .</span></span></code></pre></td></tr></table>
 </div>
@@ -1990,14 +1982,11 @@ Previously mentioned executible options apply.</p>
 Custom build script
 </h4>
 <div id="outline-text-headline-10" class="outline-text-4">
-<p>User can simplify the build process by putting the above steps
-into a script. See below for simple examples of using linux Bash and Window batch
-script to configure, build, and run models.</p>
-<div id="outline-container-headline-11" class="outline-5">
-<h5 id="headline-11">
-<code>build.sh</code>
-</h5>
-<div id="outline-text-headline-11" class="outline-text-5">
+<p>User can simplify the build process by using <code>nonmem/util/nmf2.sh</code>
+(Linux/MacOS) or <code>nonmem/util/nmf2.bat</code> (Windows) scripts. These are
+thin wrappers of the <code>cmake</code> procedures. They support some <code>nmfe76</code>
+options. The optinos are shown when scripts called without any
+argument:</p>
 <div class="src src-sh">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2020,110 +2009,48 @@ script to configure, build, and run models.</p>
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>  <span style="color:#78787e">#!/bin/sh</span>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>C:<span style="color:#5af78e">\p</span>ath<span style="color:#5af78e">\t</span>o<span style="color:#5af78e">\b</span>uild&gt;nmf2.bat
+</span></span><span style="display:flex;"><span>Usage: nmf2.bat model_file <span style="color:#ff6ac1">[</span>options<span style="color:#ff6ac1">]</span>...
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">lic</span><span style="color:#ff6ac1">=</span>/path/to/nonmem.lic
+</span></span><span style="display:flex;"><span>Options:
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">file</span><span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#34;</span><span style="color:#ff5c57">$1</span><span style="color:#5af78e">&#34;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">model</span><span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#34;</span><span style="color:#5af78e">${</span><span style="color:#ff5c57">file</span>##*/<span style="color:#5af78e">}</span><span style="color:#5af78e">&#34;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">model</span><span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#34;</span><span style="color:#5af78e">${</span><span style="color:#ff5c57">model</span>%.*<span style="color:#5af78e">}</span><span style="color:#5af78e">&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">dir</span><span style="color:#ff6ac1">=</span><span style="color:#ff6ac1">$(</span>dirname <span style="color:#5af78e">&#34;</span><span style="color:#ff6ac1">$(</span>realpath <span style="color:#ff5c57">$1</span><span style="color:#ff6ac1">)</span><span style="color:#5af78e">&#34;</span><span style="color:#ff6ac1">)</span>	<span style="color:#78787e"># dir of the model</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">echo</span> <span style="color:#5af78e">&#34;building </span><span style="color:#ff5c57">$model</span><span style="color:#5af78e"> at </span><span style="color:#ff5c57">$dir</span><span style="color:#5af78e">&#34;</span>	<span style="color:#78787e"># show model control stream</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#78787e"># assume building at current path</span>
-</span></span><span style="display:flex;"><span>  cmake path/to/nonmem/ -B. -GNinja -Dmodel<span style="color:#ff6ac1">=</span><span style="color:#ff5c57">$1</span>
-</span></span><span style="display:flex;"><span>  cmake --build . -j2		<span style="color:#78787e"># use 2 threads to build</span>
-</span></span><span style="display:flex;"><span>  cmake --install .		<span style="color:#78787e"># install executible</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">pushd</span> <span style="color:#ff5c57">$dir</span>
-</span></span><span style="display:flex;"><span>  ./<span style="color:#5af78e">${</span><span style="color:#ff5c57">model</span><span style="color:#5af78e">}</span> <span style="color:#ff6ac1">$(</span>basename <span style="color:#ff5c57">$file</span><span style="color:#ff6ac1">)</span> -licfile<span style="color:#ff6ac1">=</span><span style="color:#5af78e">${</span><span style="color:#ff5c57">lic</span><span style="color:#5af78e">}</span>
-</span></span><span style="display:flex;"><span>  popd</span></span></code></pre></td></tr></table>
+</span></span><span style="display:flex;"><span>-licfile<span style="color:#ff6ac1">=</span>: specify license path. If not <span style="color:#ff5c57">set</span> nm_dir is used.
+</span></span><span style="display:flex;"><span>-background: run in the background.
+</span></span><span style="display:flex;"><span>-prdefault: use default arrays sizes.
+</span></span><span style="display:flex;"><span>-tprdefault: <span style="color:#ff5c57">test</span> <span style="color:#ff6ac1">if</span> <span style="color:#5af78e">&#39;-prdefault&#39;</span> is applicable. If so, run with it.
+</span></span><span style="display:flex;"><span>-maxlim<span style="color:#ff6ac1">=</span>0|1|2|3: LIM size levels <span style="color:#ff6ac1">for</span> array sizes.
+</span></span><span style="display:flex;"><span>-nodes<span style="color:#ff6ac1">=</span>: number of cores in MPI run. If given the run will assume <span style="color:#5af78e">&#39;-parafile=LOCALNODE&#39;</span>.
+</span></span><span style="display:flex;"><span>-xmloff: turn off xml file output.
+</span></span><span style="display:flex;"><span>-parafprint<span style="color:#ff6ac1">=</span>: iteration intervals between printing in parallel runs.
+</span></span><span style="display:flex;"><span>-simparon: parallelize simulations in addition to estimations.
+</span></span><span style="display:flex;"><span>-flushtime<span style="color:#ff6ac1">=</span>: lower limit of output file update interval <span style="color:#ff6ac1">(</span>seconds<span style="color:#ff6ac1">)</span>.
+</span></span><span style="display:flex;"><span>-dde: augment control stream file <span style="color:#ff6ac1">for</span> delay differential equation models.
+</span></span><span style="display:flex;"><span>-do2test: check control stream <span style="color:#ff6ac1">for</span> analytical 2nd derivatives.
+</span></span><span style="display:flex;"><span>-nobuild: <span style="color:#ff6ac1">do</span> not build executable.
+</span></span><span style="display:flex;"><span>-mpi_home<span style="color:#ff6ac1">=</span>: home dir of MPI library. Used by cmake to locate MPI.</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-</div>
-</div>
-<div id="outline-container-headline-12" class="outline-5">
-<h5 id="headline-12">
-<code>build.bat</code>
-</h5>
-<div id="outline-text-headline-12" class="outline-text-5">
+<p>
+To use the script, copy it from <code>nonmem/util</code> to your build path,
+and set the <code>build_dir</code> (cmake build path, default to current path),
+<code>nm_dir</code> (NONMEM path), and <code>lfile</code> (NONMEM license path) by editing
+the file. To build and run a model, the only necessary argument is the
+model path:</p>
 <div class="src src-sh">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>@echo off
-</span></span><span style="display:flex;"><span>setlocal
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff6ac1">if</span> <span style="color:#5af78e">&#34;%~1&#34;</span><span style="color:#ff6ac1">==</span><span style="color:#5af78e">&#34;&#34;</span> <span style="color:#ff6ac1">(</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff5c57">echo</span> Usage: %~nx0 model_file
-</span></span><span style="display:flex;"><span>    <span style="color:#ff5c57">exit</span> /b <span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff6ac1">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">set</span> <span style="color:#5af78e">&#34;lic=C:\path\to\nonmem.lic&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">set</span> <span style="color:#5af78e">&#34;file=%~f1&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">set</span> <span style="color:#5af78e">&#34;model=%~n1&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">set</span> <span style="color:#5af78e">&#34;dir=%~dp1&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">echo</span> building %model% at %dir%
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>cmake <span style="color:#5af78e">\p</span>ath<span style="color:#5af78e">\t</span>o<span style="color:#5af78e">\n</span>onmem -B. -GNinja -Dmodel<span style="color:#ff6ac1">=</span><span style="color:#5af78e">&#34;%file%&#34;</span> <span style="color:#ff6ac1">||</span> <span style="color:#ff5c57">exit</span> /b <span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span>cmake --build . -j2 <span style="color:#ff6ac1">||</span> <span style="color:#ff5c57">exit</span> /b <span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span>cmake --install . <span style="color:#ff6ac1">||</span> <span style="color:#ff5c57">exit</span> /b <span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">pushd</span> <span style="color:#5af78e">&#34;%dir%&#34;</span> <span style="color:#ff6ac1">||</span> <span style="color:#ff5c57">exit</span> /b <span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span><span style="color:#5af78e">&#34;%model%.exe&#34;</span> <span style="color:#5af78e">&#34;%~nx1&#34;</span> -licfile<span style="color:#ff6ac1">=</span>%lic%
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">set</span> <span style="color:#5af78e">&#34;rc=%errorlevel%&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">popd</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">exit</span> /b %rc%</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>C:<span style="color:#5af78e">\p</span>ath<span style="color:#5af78e">\t</span>o<span style="color:#5af78e">\b</span>uild&gt;nmf2.bat ..<span style="color:#5af78e">\r</span>un<span style="color:#5af78e">\m</span>odel.ctl</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
 </div>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div id="outline-container-headline-13" class="outline-3">
-<h3 id="headline-13">
-Parallel run using MPI
-</h3>
-<div id="outline-text-headline-13" class="outline-text-3">
-<p>See <a href="/docs/cookbook/mpi/">the Cookbook entry</a> on parallel runs on a local (multicore)
-machine.</p>
 </div>
 </div>
 </div>
@@ -2137,9 +2064,9 @@ machine.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/d2ab5c56a92b7656ad342591d4c6b43a03b79f1a" title='Last modified by Yi Zhang | 2026 Jul 10' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/cd8ac1603a63cb880e1dad7d5d792909c17434d6" title='Last modified by Yi Zhang | 2026 Jul 14' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Jul 10</span>
+    <span>2026 Jul 14</span>
   </a>
 
 </div>
@@ -2201,7 +2128,7 @@ machine.</p>
 <ul>
 <li><a href="#headline-1">Running NONMEM</a>
 </li>
-<li><a href="#headline-2">Use precompiled NONMEM library</a>
+<li><a href="#headline-2">Use precompiled NONMEM library (NM761)</a>
 <ul>
 <li><a href="#headline-3">Toolchain</a>
 <ul>
@@ -2222,16 +2149,8 @@ machine.</p>
 <li><a href="#headline-9">Build and run</a>
 <ul>
 <li><a href="#headline-10">Custom build script</a>
-<ul>
-<li><a href="#headline-11"><code>build.sh</code></a>
-</li>
-<li><a href="#headline-12"><code>build.bat</code></a>
 </li>
 </ul>
-</li>
-</ul>
-</li>
-<li><a href="#headline-13">Parallel run using MPI</a>
 </li>
 </ul>
 </li>
