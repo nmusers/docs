@@ -9,14 +9,16 @@ bookCollapseSection: false
 * MPI run on a local machine
 NONMEM supports parallel computation through Message Passing Interface (MPI).
 As modern hardware advacement gifts destop computation with multicore
-processors, MPI runs can be executed /locally/ to speed up
+processors, so that MPI runs can be executed /locally/ to speed up
 computation, as opposite to dispatched remotely to a server.
 This article describes the steps for local parallel runs using the
 [[file:/docs/user-guide/nmtran/nmfe/#headline-2][precompiled NONMEM library]]. User need to ensure the build toolchain has been installed.
 
 To utilize the parallel feature one must have the MPI
 library available. Please consult vendor documentation
-such as by [[https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi][Microsoft MPI]], [[https://www.open-mpi.org/][OpenMPI]], and [[https://www.mpich.org/][MPICH]].
+such as by [[https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi][Microsoft MPI]], [[https://www.open-mpi.org/][OpenMPI]], and [[https://www.mpich.org/][MPICH]]. Note that NONMEM
+contains libraries for Microsoft MPI (MSMPI), so users need only install
+the MSMPI executable but not the SDK.
 
 ** Build
 To build a parallel NONMEM executable, follow the common
@@ -36,12 +38,16 @@ To build a parallel NONMEM executable, follow the common
    #+begin_src sh
      cmake /path/to/nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl -Dmpi=ON -DMPI_HOME=/path/to/mpi/library
    #+end_src
-   For example, if you followed [[file:/docs/user-guide/nmtran/nmfe/#headline-6][the instruction]] to install MSYS2, MinGW64,
-   and Microsoft MPI (msmpi), in MSYS2 MinGW64 shell
+   For example, assume MPICH2 is available at ~/path/to/mpich-4.3.2~,
    #+begin_src sh
-     cmake /path/to/nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl -Dmpi=ON -DMPI_HOME=/mingw64/include
+     cmake /path/to/nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl -Dmpi=ON -DMPI_HOME=/path/to/mpich-4.3.2
    #+end_src
-   enables MPI build and cmake will set up msmpi paths.
+   enables MPI build using the library.
+   For Windows users with Microsoft MPI (MSMPI), a special option ~mpi=MSMPI~
+   #+begin_src sh
+     cmake /path/to/nonmem -B. -GNinja -Dmodel=/path/to/model/model-name.ctl -Dmpi=MSMPI
+   #+end_src
+   enables MSMPI build, no ~MPI_HOME~ option needed.
 3. The other steps are the same as the sequential build:
    #+begin_src sh
      # build
@@ -77,3 +83,24 @@ example, it is often desirable to use the ~--bind-to core~ option
 #+end_src
 so that ~num_nodes~ would indicate the number of hardware cores, as
 opposite to hardware threads (vCPUs).
+
+* Run using ~nmf2~
+User can simplify the workflow by using ~nonmem/util/nmf2.sh~
+(Linux/MacOS) or ~nonmem/util/nmf2.bat~ (Windows) scripts. These are
+thin wrappers of the above ~cmake~ procedures. See more about the
+script [[file:/docs/user-guide/nmtran/nmfe/#headline-10][here]].
+
+The ~nodes=~ option of the ~nmf2~ script enable MPI build and run. It
+specifies the number of cores from your local machine to be used.  Note
+that by default ~nmf2~ uses Microsoft MPI (MSMPI) to build the
+executable. To use an alternative MPI library, specify it using
+~-mpi_home=~ option. Thus
+#+begin_src sh
+nmf2.bat /path/to/model.ctl /path/to/output.res -nodes=4
+#+end_src
+will build the model using MSMPI and run it with 4 cores; while
+#+begin_src sh
+nmf2.bat /path/to/model.ctl /path/to/output.res -nodes=4 -mpi_home=/path/to/mpich-4.3.2
+#+end_src
+will build the model using specified MPI library ~mpich-4.3.2~ and run
+it with 4 cores.

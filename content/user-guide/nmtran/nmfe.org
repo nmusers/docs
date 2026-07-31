@@ -100,28 +100,39 @@ See NONMEM Installation Guide for traditional installation instructions.
 * Use precompiled NONMEM library (NM761)
 NONMEM is also available as pre-compiled executibles and libraries.
 This experimental features requires [[https://cmake.org/][cmake]] and
-[[https://ninja-build.org/][ninja]] build tools.
+[[https://ninja-build.org/][ninja]] build tools. User can choose according to OS and gfortran
+compiler version when downloading NONMEM.
 
 ** Toolchain
-Note that gfortran compiler 8.x-14.x should use pre-built NONMEM
-release with "GNU-14.2.0" label, and 15.x+ shoud use release with
-"GNU-15.2.0" label. This is due to changes of gfortran module format versions.
-
 *** Windows
 **** Use WinLibs
-The easiest way to use NONMEM on Windows is through [[https://winlibs.com/][WinLibs]]. Simply
-download the library and add its path to Windows' PATH:
-1. Download WinLibs for GCC [[https://github.com/brechtsanders/winlibs_mingw/releases/download/14.2.0posix-12.0.0-ucrt-r3/winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r3.7z][here]] and unzip;
-2. Assume the unzipped library is at ~C:\path\to\winlibs~, add path
-   ~C:\path\to\winlibs\mingw64\bin~ to Windows PATH. This can be done in
-   Windows cmd as (per session)
-   #+begin_src sh
-     set PATH=C:\path\to\winlibs\mingw64\bin;%PATH%
-   #+end_src
-   or (permanently)
-   #+begin_src sh
-     setx PATH "%PATH%;C:\path\to\winlibs\mingw64\bin"
-   #+end_src
+The easiest way to use NONMEM on Windows is through [[https://winlibs.com/][WinLibs]]. NONMEM
+Windows release folder contains the ~winlibs~ package. Alternatively, user can
+download the library for GCC [[https://github.com/brechtsanders/winlibs_mingw/releases/download/14.2.0posix-12.0.0-ucrt-r3/winlibs-x86_64-posix-seh-gcc-14.2.0-mingw-w64ucrt-12.0.0-r3.7z][here]]. After obtaining the package,
+simply unpack it at your desired destination, then add it to Windows'
+PATH. That is, assume the library is at ~C:\path\to\winlibs~, add path
+~C:\path\to\winlibs\mingw64\bin~ to Windows PATH. This can be done in
+Windows cmd (per session)
+#+begin_src sh
+  set PATH=C:\path\to\winlibs\mingw64\bin;%PATH%
+#+end_src
+or (permanently)
+#+begin_src sh
+  setx PATH "%PATH%;C:\path\to\winlibs\mingw64\bin"
+#+end_src
+
+The NONMEM Windows release folder also contains Microsoft MPI (MSMPI)
+installer ~msmpisetup.exe~ should you choose to
+utilize MSMPI for parallel runs. You will also need to add it to the
+PATH. By default the installer will put ~mpiexec.exe~ to ~C:\Program
+Files\Microsoft MPI\Bin~, thus one needs to do
+#+begin_src sh
+  set PATH=C:\Program Files\Microsoft MPI\Bin;%PATH%
+#+end_src
+
+The NONMEM Windows release folder also contains Microsoft MPI SDK
+installer ~msmpisdk.msi~. This is not strictly needed for MSMPI runs
+but for future reference.
 
 **** Use MSYS2
 Follow steps below should you wish to setup MSYS2 and MinGW toolchain manually.
@@ -200,11 +211,10 @@ To use the pre-compiled NONMEM, follow the common "configure-build-install" proc
 
    Previously mentioned executible options apply.
 *** Custom build script
-User can simplify the build process by using ~nonmem/util/nmf2.sh~
+User can simplify the workflow by using ~nonmem/util/nmf2.sh~
 (Linux/MacOS) or ~nonmem/util/nmf2.bat~ (Windows) scripts. These are
-thin wrappers of the ~cmake~ procedures. They support some ~nmfe76~
-options. The optinos are shown when scripts called without any
-argument:
+thin wrappers of the above ~cmake~ procedures. One can look up the
+options by running script without arguments:
 #+begin_src Batchfile
 C:\path\to\build>nmf2.bat
 Usage: nmf2.bat model_file [options]...
@@ -230,8 +240,10 @@ Options:
 To use the script, copy it from ~nonmem/util~ to your build path,
 and set the ~build_dir~ (cmake build path, default to current path),
 ~nm_dir~ (NONMEM path), and ~lfile~ (NONMEM license path) by editing
-the file. To build and run a model, the only necessary argument is the
-model path:
+the file. To build and run a model, do
 #+begin_src Batchfile
-C:\path\to\build>nmf2.bat ..\run\model.ctl
+nmf2.bat \path\to\model.ctl \path\to\output_result.res
 #+end_src
+
+*** Parallel run with MPI
+See [[file:/docs/cookbook/mpi][MPI run entry]] regarding MPI build and parallel runs.
