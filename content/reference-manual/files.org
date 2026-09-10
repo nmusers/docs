@@ -546,6 +546,9 @@ named ~.ext~) which shows only  the  starting,  and final  values of
 the standard errors of population parameters, as extra information.
 
 *** msfroot_ETAS
+:PROPERTIES:
+:CUSTOM_ID: msfroot_ETAS
+:END:
 Let "root" be the input file stem. When MSF or MSFO option is used to specify an MSFO file in the ~$EST~ record:
 #+begin_src perl
 $EST … MSFO=msfroot.msf
@@ -564,6 +567,9 @@ example, do not change the data file structure or IGNORE/ACCEPT
 filtering between the two problems).
 
 *** msfroot_RMAT, msfroot_SMAT (NM73)
+:PROPERTIES:
+:CUSTOM_ID: msfroot_RMAT
+:END:
 When MSF or MSFO option is used to specify an MSFO file in the ~$EST~ record:
 #+begin_src perl
 $EST … MSFO=msfroot.msf
@@ -1592,52 +1598,40 @@ The reported shrinkage information from an MCMC Bayesian analysis is based on th
 :PROPERTIES:
 :CUSTOM_ID: msf
 :END:
-A Model Specification File (MSF) is an output file from NONMEM that
+A Model Specification File (MSF)
 stores Estimation and Covariance-step results, including initial,
 intermediate, and final parameter estimates and search information. It
-is requested in the estimation control record and can be used in later
-runs to resume a failed search, or as input for further estimation,
-simulation, covariance, table, scatterplot, or finalization steps,
+is used in later runs to resume a failed search or as input for further analysis,
 with final estimates in the MSF serving as initial values if desired.
 When an MSF is written and iteration summaries are requested, NONMEM
 also writes the corresponding parameter estimates to the INTER file.
 
-MSF files are used to avoid repeating estimation work already done in
-a previous NONMEM run. If a run crashes after the Estimation Step but
-an MSF was written, a later run can read that MSF and resume the
-parameter search from the last successfully saved iteration.
+MSFs are used to avoid repeating work already done. If a run crashes
+after the Estimation Step but an MSF is written, a later run resume
+parameter search from the last successfully saved iteration in the MSF.
 
-With  NM-TRAN, specification that an existing Model Specification File
-is to be input is done by placing the file's name on the [[file:/docs/reference-manual/control-records/msfi/][$MSFI record]].
+To use an MSF as input, use the [[file:/docs/reference-manual/control-records/msfi/][$MSFI record]]. To generate an MSF, use
+~$EST~'s [[file:/docs/reference-manual/control-records/estimation/#estm-msfo][~MSFO~ option]]. See also additional MSFs: [[file:/docs/reference-manual/files/#msfroot_ETAS][msfroot_ETAS]], [[file:/docs/reference-manual/files/#msfroot_RMAT][msfroot_RMAT]].
 
-With NONMEM 7.3, when MSF or MSFO option is used to  specify  an  MSFO file in the ~$EST~ record e.g.,
- #+begin_src perl
- $EST ... MSFO=msfroot.msf
- #+end_src
- then  in addition to the main MSF file msfroot.msf, an extra file msfroot_ETAS.msf will also be produced, and provide  additional  information  when  a  ~$MSFI~ record is used in a subsequent problem or control stream.  File msfroot_ETAS.msf contains individual ETAs and phis  gen- erated  during  estimation  (except FO method, which does not generate non-zero ETAs during estimation, and not POSTHOC evaluated ETAs.)  The use  of  an  extension  in the file name, e.g., .msf, is optional.  If file _ETAS does not exist, NONMEM issues a warning, e.g.,
-
- #+begin_src
- WARNING: EXTRA MSF FILE COULD NOT BE OPENED: c5msf2x_ETAS
- #+end_src
-
-If  the  Covariance  Step  is  also  implemented,  extra  files  ~msfroot_RMAT.msf~ and ~msfroot_SMAT.msf~ containing intermediate information on the R matrix and S matrix will also be produced.  These files  provide  information  when  a  ~$MSFI~  record along with a ~$COV ... RESUME~ record is used in a subsequent problem or control stream.  There is no warning if files ~_SMAT~ and/or ~_RMAT~ are missing.
-
-For an example see the fragment of the control stream for the first run below.  The Estimation Step is run for a limited  num- ber of evaluations of the objective function (200).
-
+For example, assume the Estimation Step is run for a limited  number (200):
 #+begin_src perl
  $THETA  (.1,3,5) (.008,.08,.5) (.004,.04,.9)
  $OMEGA BLOCK(3)  6 .005 .0002 .3 .006 .4
  $SIGMA  .4
  $EST     MAXEVAL=200  PRINT=5 MSFO=msf1
 #+end_src
- After  review  of  the  first  run's  output, it is decided to let the search continue.  The continuation will start from the iteration  during which the 200th objective function evaluation occurred in the previous search.  A fragment of the control stream  for  the  second  run follows.   ~$THETA~,  ~$OMEGA~,  and  ~$SIGMA~  need  not,  and  may not, be present.  The Estimation Step is allowed to  run  to  completion,  and standard  errors  and  a  table are requested.  A new MSF is obtained, which will allow additional tables and  scatterplots  to  be  obtained later.
-
- #+begin_src perl
- $MSFI msf1
- $EST PRINT=5 MSFO=msf2
- $COV
- $TABLE ID TIME
- #+end_src
+and after reviewing the output, we decide continue the search. The
+following control stream requests that the continuation start from the
+last (200th) iteration.
+#+begin_src perl
+  $MSFI msf1
+  $EST PRINT=5 MSFO=msf2
+  $COV
+  $TABLE ID TIME
+#+end_src
+In this second control stream, ~$THETA~,  ~$OMEGA~,  and  ~$SIGMA~
+should not be specified. It shows that a second MSF is generated,
+so that additional tables can be generated in the future.
 
 ** Error messages
 This  is  not  a  complete list.  It includes only commonly seen error messages.

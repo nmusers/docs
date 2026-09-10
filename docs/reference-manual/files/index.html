@@ -28,7 +28,7 @@ File name Relevant portion of NM-TRAN inputs How file is used FCON All NONMEM (c
 	<meta itemprop="description" content="Output files and quantities NM-TRAN output files NM-TRAN produces several output files, some of which are input files to NONMEM itself.
 File name Relevant portion of NM-TRAN inputs How file is used FCON All NONMEM (control stream) FDATA Data file, $DATA, $INPUT NONMEM (data file) FSTREAM Filenames from $DATA, $MSFI, $MSFO, $TABLE NONMEM (file control stream) FSUBS Abbreviated code Generated Fortran subroutines FREPORT $SUBROUTINES Input to whatever generates the commands that create the NONMEM executable. See also $SUBROUTINES. FORIG Abbreviated code, $ABBR When $ABBR REPLACE is used,this file contains the original abbreviated code. FREPL Abbreviated code, $ABBR When $ABBR REPLACE is used, this file contains the postreplacement abbreviated code. FWORK Data file NM-TRAN (work file) FWARN All Warning and informational messages. FSIZES Abbreviated code, $THETA, $OMEGA, $SIGMA, $SIZES, SIZES.f90 Dynamic array sizes for NONMEM. The file is for user consumption only. SUBROUTINE FSIZESR in FSUBS is what is actually used during the NONMEM run. prsizes Abbreviated code, $THETA, $OMEGA, $SIGMA, $SIZES, SIZES.f90 Static array sizes for PREDPP In NONMEM v7&#43;, files FSUBS2 and FSUBS_MU are used by NMTRAN as work files during the creation of FSUBS.">
 	<meta itemprop="dateModified" content="2026-07-07T15:02:13-07:00">
-	<meta itemprop="wordCount" content="12343">
+	<meta itemprop="wordCount" content="12077">
 
 <title>Output and files • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -37,7 +37,7 @@ File name Relevant portion of NM-TRAN inputs How file is used FCON All NONMEM (c
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.ecde5307d1953460f04aa3940386921c3a903a09143a4c8952abe7b995c7c969.js" integrity="sha256-7N5TB9GVNGDwSqOUA4aSHDqQOgkUOkyJUqvnuZXHyWk=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.105c4ca8bb510ed9ccb78daf57acb025bdf215a27e1d6b83ca5036c610333919.js" integrity="sha256-EFxMqLtRDtnMt42vV6ywJb3yFaJ&#43;HWuDylA2xhAzORk=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -1570,9 +1570,9 @@ File name Relevant portion of NM-TRAN inputs How file is used FCON All NONMEM (c
 </li>
 <li><a href="#headline-21">.bfm (NM75)</a>
 </li>
-<li><a href="#headline-22">msfroot_ETAS</a>
+<li><a href="#msfroot_ETAS">msfroot_ETAS</a>
 </li>
-<li><a href="#headline-23">msfroot_RMAT, msfroot_SMAT (NM73)</a>
+<li><a href="#msfroot_RMAT">msfroot_RMAT, msfroot_SMAT (NM73)</a>
 </li>
 </ul>
 </li>
@@ -2441,11 +2441,11 @@ named <code>.ext</code>) which shows only  the  starting,  and final  values of
 the standard errors of population parameters, as extra information.</p>
 </div>
 </div>
-<div id="outline-container-headline-22" class="outline-4">
-<h4 id="headline-22">
+<div id="outline-container-msfroot_ETAS" class="outline-4">
+<h4 id="msfroot_ETAS">
 msfroot_ETAS
 </h4>
-<div id="outline-text-headline-22" class="outline-text-4">
+<div id="outline-text-msfroot_ETAS" class="outline-text-4">
 <p>Let &#34;root&#34; be the input file stem. When MSF or MSFO option is used to specify an MSFO file in the <code>$EST</code> record:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
@@ -2471,11 +2471,11 @@ example, do not change the data file structure or IGNORE/ACCEPT
 filtering between the two problems).</p>
 </div>
 </div>
-<div id="outline-container-headline-23" class="outline-4">
-<h4 id="headline-23">
+<div id="outline-container-msfroot_RMAT" class="outline-4">
+<h4 id="msfroot_RMAT">
 msfroot_RMAT, msfroot_SMAT (NM73)
 </h4>
-<div id="outline-text-headline-23" class="outline-text-4">
+<div id="outline-text-msfroot_RMAT" class="outline-text-4">
 <p>When MSF or MSFO option is used to specify an MSFO file in the <code>$EST</code> record:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
@@ -4010,50 +4010,22 @@ The reported shrinkage information from an MCMC Bayesian analysis is based on th
 Model specification file
 </h3>
 <div id="outline-text-msf" class="outline-text-3">
-<p>A Model Specification File (MSF) is an output file from NONMEM that
+<p>A Model Specification File (MSF)
 stores Estimation and Covariance-step results, including initial,
 intermediate, and final parameter estimates and search information. It
-is requested in the estimation control record and can be used in later
-runs to resume a failed search, or as input for further estimation,
-simulation, covariance, table, scatterplot, or finalization steps,
+is used in later runs to resume a failed search or as input for further analysis,
 with final estimates in the MSF serving as initial values if desired.
 When an MSF is written and iteration summaries are requested, NONMEM
 also writes the corresponding parameter estimates to the INTER file.</p>
 <p>
-MSF files are used to avoid repeating estimation work already done in
-a previous NONMEM run. If a run crashes after the Estimation Step but
-an MSF was written, a later run can read that MSF and resume the
-parameter search from the last successfully saved iteration.</p>
+MSFs are used to avoid repeating work already done. If a run crashes
+after the Estimation Step but an MSF is written, a later run resume
+parameter search from the last successfully saved iteration in the MSF.</p>
 <p>
-With  NM-TRAN, specification that an existing Model Specification File
-is to be input is done by placing the file&#39;s name on the <a href="/docs/reference-manual/control-records/msfi/">$MSFI record</a>.</p>
+To use an MSF as input, use the <a href="/docs/reference-manual/control-records/msfi/">$MSFI record</a>. To generate an MSF, use
+<code>$EST</code>&#39;s <a href="/docs/reference-manual/control-records/estimation/#estm-msfo"><code>MSFO</code> option</a>. See also additional MSFs: <a href="/docs/reference-manual/files/#msfroot_ETAS">msfroot_ETAS</a>, <a href="/docs/reference-manual/files/#msfroot_RMAT">msfroot_RMAT</a>.</p>
 <p>
-With NONMEM 7.3, when MSF or MSFO option is used to  specify  an  MSFO file in the <code>$EST</code> record e.g.,</p>
-<div class="src src-perl">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$EST</span> <span style="color:#ff6ac1">...</span> MSFO<span style="color:#ff6ac1">=</span>msfroot<span style="color:#ff6ac1">.</span>msf</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
-<p>then  in addition to the main MSF file msfroot.msf, an extra file msfroot_ETAS.msf will also be produced, and provide  additional  information  when  a  <code>$MSFI</code> record is used in a subsequent problem or control stream.  File msfroot_ETAS.msf contains individual ETAs and phis  gen- erated  during  estimation  (except FO method, which does not generate non-zero ETAs during estimation, and not POSTHOC evaluated ETAs.)  The use  of  an  extension  in the file name, e.g., .msf, is optional.  If file _ETAS does not exist, NONMEM issues a warning, e.g.,</p>
-<div class="src src-text">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>WARNING: EXTRA MSF FILE COULD NOT BE OPENED: c5msf2x_ETAS</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
-<p>
-If  the  Covariance  Step  is  also  implemented,  extra  files  <code>msfroot_RMAT.msf</code> and <code>msfroot_SMAT.msf</code> containing intermediate information on the R matrix and S matrix will also be produced.  These files  provide  information  when  a  <code>$MSFI</code>  record along with a <code>$COV ... RESUME</code> record is used in a subsequent problem or control stream.  There is no warning if files <code>_SMAT</code> and/or <code>_RMAT</code> are missing.</p>
-<p>
-For an example see the fragment of the control stream for the first run below.  The Estimation Step is run for a limited  num- ber of evaluations of the objective function (200).</p>
+For example, assume the Estimation Step is run for a limited  number (200):</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -4070,7 +4042,9 @@ For an example see the fragment of the control stream for the first run below.  
 </div>
 </div>
 </div>
-<p>After  review  of  the  first  run&#39;s  output, it is decided to let the search continue.  The continuation will start from the iteration  during which the 200th objective function evaluation occurred in the previous search.  A fragment of the control stream  for  the  second  run follows.   <code>$THETA</code>,  <code>$OMEGA</code>,  and  <code>$SIGMA</code>  need  not,  and  may not, be present.  The Estimation Step is allowed to  run  to  completion,  and standard  errors  and  a  table are requested.  A new MSF is obtained, which will allow additional tables and  scatterplots  to  be  obtained later.</p>
+<p>and after reviewing the output, we decide continue the search. The
+following control stream requests that the continuation start from the
+last (200th) iteration.</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -4080,13 +4054,16 @@ For an example see the fragment of the control stream for the first run below.  
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span><span style="color:#ff5c57">$MSFI</span> msf1
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$EST</span> PRINT<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">5</span> MSFO<span style="color:#ff6ac1">=</span>msf2
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$COV</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$TABLE</span> ID TIME</span></span></code></pre></td></tr></table>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$MSFI</span> msf1
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$EST</span> PRINT<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">5</span> MSFO<span style="color:#ff6ac1">=</span>msf2
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$COV</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$TABLE</span> ID TIME</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
+<p>In this second control stream, <code>$THETA</code>,  <code>$OMEGA</code>,  and  <code>$SIGMA</code>
+should not be specified. It shows that a second MSF is generated,
+so that additional tables can be generated in the future.</p>
 </div>
 </div>
 <div id="outline-container-headline-39" class="outline-3">
@@ -4608,9 +4585,9 @@ use this term in this documentation.</p>
 </li>
 <li><a href="#headline-21">.bfm (NM75)</a>
 </li>
-<li><a href="#headline-22">msfroot_ETAS</a>
+<li><a href="#msfroot_ETAS">msfroot_ETAS</a>
 </li>
-<li><a href="#headline-23">msfroot_RMAT, msfroot_SMAT (NM73)</a>
+<li><a href="#msfroot_RMAT">msfroot_RMAT, msfroot_SMAT (NM73)</a>
 </li>
 </ul>
 </li>
