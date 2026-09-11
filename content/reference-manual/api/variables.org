@@ -2255,15 +2255,14 @@ normally distributed values for that subject.
   ! in the generated PK routine from FSUBS:
   USE PKERR_REAL,ONLY: MTIME
 #+end_src
-Model event times are additional PK parameters defined in the PK
-routine or ~$PK~ block. Similar to absorption lag times, a model event
-time MTIME(i) defines a time at which the system is modified or
-advanced (/i/ is not related to compartment but merely a counter).
-When MTIME(i) is reached, /read-only/ indicator variables MNOW(i),
-MPAST(i), MNEXT(i) change value and a call to PK is made.  The calls
+Defined in the PK routine or ~$PK~ block, Model event times are similar to absorption lag times.
+~MTIME(i)~ defines a time at which the system is modified or
+advanced ( ~i~ is not for compartment numbering but merely a counter).
+When time reaches ~MTIME(i)~, NONMEM updates indicator variables ~MNOW(i)~,
+~MPAST(i)~, ~MNEXT(i)~ and calls the ~PK~ subroutine.  The calls
 to PK,  DES, AES, and ERROR can use the indicator variables to change
 behavior of the system, such as adding a term in the differential
-equation or adjusting the rate of an infusion. This feature may be
+equations or adjusting the infusion rate. This feature can be
 used with any ADVAN routine.
 
 The indicator variables are defined as
@@ -2275,20 +2274,17 @@ The indicator variables are defined as
     USE SIZES, ONLY: PCT
     INTEGER(KIND=ISIZE) :: MTNOW,MTPAST(PCT),MTNEXT(PCT)
 #+end_src
-~PCT~ defines (in PSIZES and TSIZES) the maximum number of model event
+~PCT~ defines the maximum number of model event
 times. The default value is 30. They are all intialized to 0 at start
 of an IR and at RESET events.
 
 The indicator variables change value in the following way.
- - MNEXT: MNEXT(i)=1 during the advance from the previous time to MTIME(i).
-      Otherwise, MNEXT(i)=0.  The previous time may be an event time, a
-      non-event time, or a model event time.
+ - ~MNEXT~: ~MNEXT(i)=1~ during the advance from the previous time (an event time, a
+   non-event time, or a model event time) to ~MTIME(i)~; ~MNEXT(i)=0~ otherwise.
 
- - MPAST: MPAST(i)=0 until the call to PK subsequent to the one for
-   which MNEXT(i)=1.  At that call MPAST(i)=1. It then retains this
-   value, unless MTIME(i) is redefined, in which case MPAST will be
-   appropriately redefined as another step function. For example,
-   assume MTIME(1)<MTIME(2)<MTIME(3), then the MNEXT and MPAST values assume the following sequence.
+ - ~MPAST~: ~MPAST(i)=0~ until the call to PK subsequent to the one
+   when ~MNEXT(i)=1~.  At that call ~MPAST(i)=1~, and remains at ~1~ until ~MTIME(i)~ is redefined. For example,
+   assume ~MTIME(1)<MTIME(2)<MTIME(3)~, then ~MNEXT~ and ~MPAST~ assume the following sequence.
    #+begin_src r
               MTIME(1)       MTIME(2)       MTIME(3)
      ............|..............|..............|..................
@@ -2300,9 +2296,9 @@ The indicator variables change value in the following way.
      000000000000000000000000000000000000000000011111111 MPAST(3)
    #+end_src
 
- - MNOW: MNOW=i if MNEXT(i)=1 for some i.  MNOW=0 otherwise.
+ - ~MNOW~: ~MNOW=i~ if ~MNEXT(i)=1~;  ~MNOW=0~ otherwise.
 
-In addition, NONMEM provides variable MTDIFF
+In addition, NONMEM provides variable ~MTDIFF~
 #+begin_src f90
   ! USAGE:
     USE PRMOD_INT, ONLY: MTDIFF
@@ -2310,56 +2306,56 @@ In addition, NONMEM provides variable MTDIFF
   ! GLOBAL DECLARATION:
     INTEGER(KIND=ISIZE) :: MTDIFF
 #+end_src
-to flag that the values of MTIME have possibly been reset. The value
-of MTDIFF is 0 when PK is called. If PK sets MTDIFF to a value other
-than 0, then PREDPP will  understand  that with  that  call to PK, the
-values of one or more of the MTIME(i) have possibly been reset. It is
-not necessary to set MTDIFF at a call to PK with the first record of
-an individual  or with a reset record, because these record
-automatically reset all MTIME(i) to 0.
+to indicate that ~MTIME~ have been reset.
+~MTDIFF~ is 0 when ~PK~ is called; ~PK~ sets ~MTDIFF~ to a non-zero value
+to signal that with that ~PK~ call the
+one or more ~MTIME~ have been reset. All ~MTIME~ are
+automatically reset to 0 at the first record of
+an individual or with a reset record, thus no need to set ~MTDIFF~.
 
-MTIME does not have to be consecutive or in ascending order: PK may define MTIME(i) and
-MTIME(i+2) but not MTIME(i+1). In this case MTIME(i+1)=0. (Internally
-PK copies MTIME parameters and their ETA derivatives to GG. If there
-are gaps in the sequence of MTIME parameters, the corresponding
-positions in GG are left as-is. Since GG is initialized to 0 before
-calls to PK, the omitted MTIME parameters is 0. Since ETA derivatives
+~MTIME~ does not have to be consecutive or in ascending order: ~PK~ may define ~MTIME(1)~ and
+~MTIME(3)~ but not ~MTIME(2)~ ( ~MTIME(i)=0~ by default).
+~GG~ (the derivative array) values corresponding to missing ~MTIME~
+entries are set to 0. Since ETA derivatives
 are not included in MTIME, the ERROR routine should not use MTIME
 parameters in such a way as to influence the value of Y if those
-parameters have ETA derivatives.)
+parameters have ETA derivatives.
 
-The MTIME array is never listed in NMPRD4. Therefore, if an MTIME
-parameter is to be output it must be copied to a PK-defined variable in NMPRD4, e.g.,
-#+begin_src f90
+~MTIME~ is never listed in NMPRD4 for output. Therefore one must copy
+it to a PK-defined variable to output it, e.g.,
+#+begin_src perl
   MTIME(1)=...
   MT1=MTIME(1)
   ...
   $TABLE MT1
 #+end_src
 
-MTIME is independent of non-event dose times. In particular, MTIME is
+~MTIME~ is independent of non-event dose times. In particular, it is
 ignored during Steady-State calculation since it is intended for a
 single repeated dose with no changes in the status of the system.
 
-MTIME is in fact a random variable so may contain ETA in the
+~MTIME~ is in fact a random variable it may contain ETA in the
 definition. Therefore the indicator variables can be implicitly
 ETA-dependent. However, PREDPP does not consider the indicator
 variables as random variables, and their ETA-derivatives are always 0.
 
-For example,  consider an infusion with rate
+For example,  to model random infusion rate
   - ~400*EXP(ETA(1))~ from time 0 to 1.5;
   - ~300*EXP(ETA(2))~ from time 1.5 to 2.5;
-  - ~200*EXP(ETA(3))~ from time 2.5 till end of infusion.
-One can write ~$PK~ as
+  - ~200*EXP(ETA(3))~ from time 2.5 till end of infusion,
+one can do (recall ~Rn~ is [[file:/docs/reference-manual/control-records/pk/#infusion-rate][the infusion rate]])
 #+begin_src perl
-MTIME(1)=1.5
-MTIME(2)=2.5
-R1= 400*EXP(ETA(1))*(1-MPAST(1))
-R1=R1+300*EXP(ETA(2))*(MPAST(1)-MPAST(2))
-R1=R1+200*EXP(ETA(3))*MPAST(2)
-WRITE (82,*) TIME,MNOW,MNEXT(1),MNEXT(2),MPAST(1),MPAST(2),R1,TSTATE
+  $PK
+  ; ...
+  MTIME(1)=1.5
+  MTIME(2)=2.5
+  R1= 400*EXP(ETA(1))*(1-MPAST(1))
+  R1=R1+300*EXP(ETA(2))*(MPAST(1)-MPAST(2))
+  R1=R1+200*EXP(ETA(3))*MPAST(2)
+  WRITE (82,*) TIME,MNOW,MNEXT(1),MNEXT(2),MPAST(1),MPAST(2),R1,TSTATE
 #+end_src
-with events at time 0, 1, 3. Then the MTIME output (file fort.82) is
+with events at time 0, 1, 3. Then last line above writes to file
+"fort.82" with content
 #+begin_src r
 TIME    MNOW    MNEXT1  MNEXT2  MPAST1  MPAST2  R1        TSTATE
 0.00    0.00    0.00    0.00    0.00    0.00    400.00    0.00
@@ -3114,16 +3110,16 @@ as the NEWIND argument passed by NONMEM to PREDPP.
       USE SIZES, ONLY: DPSIZE
       REAL(KIND=DPSIZE) :: TSTATE
 #+end_src
-TSTATE = the time at which the state-vector (See [[file:/docs/reference-manual/api/variables/#state-vec-a][State Vector A]]) was
-last computed.  It is the previous event time (i.e. the  time on  the
-previous  event  record  passed to PK), or if at a later time, but
-before the time for which PK is being called, a  lagged or  additional
-dose  was given, or a regular infusion was terminated, or a modeled
-event occurred, then  TSTATE  is  the  latest such time.
+~TSTATE~ is the time corresponding to current the [[file:/docs/reference-manual/api/variables/#state-vec-a][state vector]] values.
+That is, it is the most recent time when the state vector was updated.
+It is one of the following time:
+- previous event time (i.e. the  time on  the previous  event  record  passed to PK);
+- a time after the most recent event, but before the time PK is called
+  with, such as when a lagged or additional dose was given, or a regular infusion was terminated, or a modeled event occurred.
 
 NM-TRAN  includes  this  global  variable in the PK and ERROR routines
 when ~$PK~ or ~$ERROR~ abbreviated code includes references  to  variables
-A(n) or when verbatim code is present.
+~A(n)~ or when verbatim code is present.
 
 ** State Vector: A
 :PROPERTIES:

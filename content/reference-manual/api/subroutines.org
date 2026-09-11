@@ -1167,18 +1167,16 @@ An initial steady state may be requested by routine MODEL;
 :CUSTOM_ID: PK
 :END:
 USAGE:
-before NONMEM 7.2:
 #+begin_src f90
+! before NONMEM 7.2:
   SUBROUTINE PK(ICALL,IDEF,THETA,IREV,EVTREC,NVNT,INDXS,IRGG,GG,NETAS)
     USE SIZES,     ONLY: DPSIZE,ISIZE,LVR
     REAL(KIND=DPSIZE) :: EVTREC
     INTEGER(KIND=ISIZE) :: ICALL,IDEF,IREV,NVNT,INDXS,IRGG,NETAS
     DIMENSION :: IDEF(7,*),THETA(*),EVTREC(IREV,*),INDXS(*)
     DIMENSION :: GG(IRGG,LVR+1,*)
-#+end_src
 
-With NONMEM 7.2 and higer:
-#+begin_src f90
+! NONMEM v7.2+:
   SUBROUTINE PK(ICALL,IDEF,THETA,IREV,EVTREC,NVNT,INDXS,IRGG,GG,NETAS)
     USE SIZES,     ONLY: DPSIZE,ISIZE
     USE PRDIMS,    ONLY: GPKD
@@ -1189,14 +1187,14 @@ With NONMEM 7.2 and higer:
     DIMENSION :: GG(IRGG,GPKD+1,*)
 #+end_src
 
-The  PK  subroutine is called by PREDPP to obtain values for basic and
+The  ~PK~  subroutine is called to obtain values for basic and
 additional pharmacokinetic parameters.  Basic PK parameters are
 typically the rate constants ("micro-constants") for use in kinetic
-formula.  PK can compute instead parameters such as clearance and
-volume, and  a translator ("TRANS") subroutine can be used to convert
-these to rate constants.  Additional PK parameters  include
-compartment  scale parameters,  which  PREDPP uses to convert
-compartment amounts to concentrations, and dose-related  parameters
+formula.  It can also compute "macro" parameters such as clearance and
+volume, converted by a translator (~TRANS~) subroutine
+to rate constants.  Additional PK parameters  include
+compartment  scale parameters (to convert
+compartment amounts to concentrations), and dose-related  parameters
 such  as  modeled  infusion rates.
 
 Input argument:
@@ -1215,20 +1213,20 @@ Input argument:
   + ~ICALL=5~: PK routine is being called for regular expectations
     computation. Multiple calls can occur. See [[file:/docs/reference-manual/abbr/#expectation-block][Expectation blocks]]. In this case no ETA derivatives are needed.
 
-If there is abbreviated code in the ~$PK~ block conditional on ~ICALL=0~, ~ICALL=1~, or ~ICALL=3~, the
-code is transcribed to the INFN routine as part of an ~$INFN~
-block.
+  If there is abbreviated code in the ~$PK~ block conditional on
+  ~ICALL=0~, ~ICALL=1~, or ~ICALL=3~, the code is transcribed to the
+  INFN routine as part of an ~$INFN~ block.
 
-  - THETA: the NONMEM THETA vector.
+- ~THETA~: NONMEM's ~THETA~ vector.
 
-  - EVTREC: the PREDPP event record. See [[file:/docs/reference-manual/api/variables/#evtrec][EVTREC]].
+- ~EVTREC~: the event record. See [[file:/docs/reference-manual/api/variables/#evtrec][EVTREC]].
 
-  - INDXS: the  values specified in the ~$INDEX~ record of the NM-TRAN
+- ~INDXS~: the  values specified in the ~$INDEX~ record of the NM-TRAN
     control stream.  (This is the NONMEM Index array starting at
     position 12, the first position beyond those positions used by
     PREDPP itself).
 
-  - NETAS: the number of population ETAs in the problem.
+- ~NETAS~: the number of population ETAs in the problem.
 
 Output argument:
 
