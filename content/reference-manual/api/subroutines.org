@@ -1912,32 +1912,20 @@ The ~$PRIOR~ statement can be used instead of a PRIOR subroutine.
     CALL NWPRI (NTHETA,NETA,NEPS,NTHP,NETP,NEPP,NPEXP,ITYP,PLEV, &
          NSAM,ISS,CNT)
 #+end_src
-NONMEM v7+'s new ~$ESTIMATION~ methods (BAYES,
-NUTS, SAEM, etc) can only use NWPRI to specify priors.
 
-The user-written PRIOR subroutine allows a penalty function based on a
-prior to be specified and  added  to  the  -2log  likelihood  function
-(Gisleskog et al, JPP, 2002, p. 473-505).  This serves as a constraint
-on THETA, OMEGA, and SIGMA estimates and thus  as  a  way  for  stable
-estimates  of  these parameters to be obtained with insufficient data.
-NWPRI  computes  a  function based  on  a  prior that has a multivariate normal form for THETA, and
-also, in the case of population data,  an  inverse  Wishart  form  for
-OMEGA  (independent  from  the  normal  for THETA).  The parameters of
-these forms are called "hyperparameters".
+Prior information adjusts OFV to [[https://link.springer.com/article/10.1023/A:1022972420004][stabilize]] the estimation of ~THETA~,
+~OMEGA~, and ~SIGMA~. ~NWPRI~  sets Multivariate Normal prior for
+~THETA~ and Inverse Wishart prior for ~OMEGA~. We call the prior's distribution parameters "hyperparameters".
 
-Using NWPRI, several penalties functions, each with a different set of
-values for the hyperparameters, may be used simultaneously.  Each  set
-of  values  may  be thought to arise from a different prior experiment
-(study).  In actuality, there is a way to combine the  several
-penalties  functions into one (see above reference), and this is what
-NWPRI computes.
-
-When NWPRI is used during a Simulation Step,  it  produces  a  random
-value of THETA and a random value of OMEGA from the prior.  (See
-Simulation example). (See nwpri example). If NWPRI is used at ~ICALL=2~,
-it need not be used at ~ICALL=4~, and vice-versa.
+~NWPRI~ in a Simulation Step produces a random
+sample of ~THETA~ and ~OMEGA~ from the prior (
+[[https://github.com/nmusers/docs/tree/master/examples/nwpri][examples/nwpri]]). ~NWPRI~ cannot be used with ~ICALL=2~
+and ~ICALL=4~ at the same time.
 
 NWPRI should always be called at ~ICALL=0~ or ~ICALL=1~.
+
+NONMEM7's new ~$ESTIMATION~ methods (BAYES, NUTS, SAEM, etc) can only use ~NWPRI~ to specify priors.
+
 
 Input arguments:
 

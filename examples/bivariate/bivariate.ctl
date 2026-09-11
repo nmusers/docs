@@ -1,3 +1,11 @@
+; This is a fully-worked out example of the use of the $ABBREVIATED FUNCTION
+; option to declare a user-defined function. In this example, the function BIVARIATE is
+; used to compute the integral of the bivariate normal distribution of two correlated data
+; points, DV1 and DV2, with correlation RHO
+
+; See reference manual
+; https://nmusers.github.io/docs/reference-manual/abbr/#abbreviated-function
+
 $PROB BIVARIATE EXAMPLE
 ; THESE DECLARATIONS ALLOW ANY FUNCTION TO HAVE ALTERNATIVE DIMENSIONS FOR THEIR ARRAYS
 ; BUT, USER DEFINED DIMENSIONS ARE PASSED AS THE LAST ARGUMENT TO FUNC, SUCH AS:
@@ -67,7 +75,7 @@ $PRED
   TIMEP=TIME
   PHIMXP=PHIMX
 
-$THETA     
+$THETA
       -1.7   ; 1  B1
        1.2   ; 2  B2
        2.9   ; 3  B3
