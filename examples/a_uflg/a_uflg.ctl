@@ -1,8 +1,9 @@
 ;Model Desc: Receptor Mediated Clearance model with Dynamic Change in Receptors
 ;Project Name: antibody
 ;Project ID: NO PROJECT DESCRIPTION
-
-;Project ID: NO PROJECT DESCRIPTION
+;
+; The example demos the use of A_UFLG, see
+; https://nmusers.github.io/docs/reference-manual/control-records/pk/#a_uflg
 
 $PROB RUN# wexample6x (from r2compl), using FAST
 $ABBR DERIV2=NO DERIV2=NOCOMMON ; DERIV1=NO
@@ -61,12 +62,12 @@ IF(CMT.NE.1) IPRE=CR
 Y = IPRE + IPRE*ETYPE*EPS(1) + IPRE*(1.0-ETYPE)*EPS(2)
 
 
-$THETA 
+$THETA
 ;Initial Thetas
 ( 4.0 )  ;[MU_1]
 ( -3.1 ) ;[MU_2]
 ( 0.5 )  ;[MU_3]
-( -0.2 );[MU_4]      
+( -0.2 );[MU_4]
 ( 3.2 ) ;[MU_5]
 ( 0.01 )  ;[MU_6]
 ( 4.0 )  ;[MU_7]
@@ -74,9 +75,9 @@ $THETA
 
 
 
-$SIGMA  
+$SIGMA
 0.1 ;[p]
 0.1 ;[p]
 
-$EST METHOD=1 INTERACTION PRINT=1 NOABORT NOPRIOR=1 SIGL=6 MAXEVAL=0 NSIG=2 MCETA=10 
+$EST METHOD=1 INTERACTION PRINT=1 NOABORT NOPRIOR=1 SIGL=6 MAXEVAL=0 NSIG=2 MCETA=10
      NOTHETABOUNDTEST NOOMEGABOUNDTEST NOSIGMABOUNDTEST FAST
