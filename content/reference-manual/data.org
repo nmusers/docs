@@ -504,27 +504,22 @@ NONMEM data set
  (See [[file:/docs/user-guide/predpp/exogenous/][exogenous supplementation example]]).
 
 ** L2
- L2  labels  level-two  (L2)  data  items.   The level two data item is
- optional.
+:PROPERTIES:
+:CUSTOM_ID: l2-data
+:END:
+The optional label ~L2~ specifies level-two data items. Observations
+within a same L2 level share a same level-two random effects
+(~EPSILON~). In other words, a subject's observations with a same ~L2~
+are corresponding to the same element in the \Sigma matrix.
 
- Recall that the ID data item  is  used  to  group  together  the  data
- records containing observations which have the same realization of the
- level-one random effects (ETAs).  Similarly, the L2 data item is  used
- to  group together the data records containing observations which have
- the same realization of the level-two random effects (EPSILONs).   The
- observations  of  such a group is called a level-two observation.  The
- group itself is called a level-two (L2) record.  Data records of an L2
- record  must  be  contiguous (and contained within the same individual
- record).  By default, level-two observations are treated as being statistically  independent multivariate observations.  (However, within a
- level-one observation, the level-two random effects can be made to  be
- correlated between level-two observations.)
+Same as records for a same ~ID~, records of an L2
+ record  must be contiguous (and contained within the same individual
+ record).
 
-Here  is  an  example of a fragment of a data set using L2 data items.
- There are two types of observations, designated by the  two  different
- values  of  the  user data item TYPE.  Note that the L2 data items are
- the same for both of the observations at TIME=2, and they are also the
- same for both of the observations at TIME=112.5.
-
+Below is an example of L2 data items
+ (see [[file:/docs/reference-manual/control-records/error/#two-obs][$ERROR control record]] for the full model).
+ There are two types of observations, designated by data item ~TYPE~. ~L2~ data items are
+ the same for both ~TYPE~ s at ~TIME=2~ and ~TIME=112.5~.
 #+begin_src r
   ID   TIME    AMT   APGR     WT     DV TYPE L2
    1    0.    25.0    1.4      7      .   .   1
@@ -542,6 +537,7 @@ Here  is  an  example of a fragment of a data set using L2 data items.
    1  112.5      .    1.4      7    8.0   1   2
    1  112.5      .    1.4      7   31.0   2   2
 #+end_src
+
 When  the  data  are single-subject and the L2 data item is defined to
  NM-TRAN in a ~$INPUT~ record, the ID data item is taken  to  be  the  L2
  data  item.   The  ID  item may be defined, but then it is not in turn
@@ -553,9 +549,6 @@ When  the  data  are single-subject and the L2 data item is defined to
  the designations: For NONMEM, the items labeled L1 are taken to be the
  ID data items, and the items labeled L2 are taken to be  the  L2  data
  items.
-
-See [[file:/docs/reference-manual/control-records/error/#two-obs][$ERROR control record]] on how to use L2 data to model the above
-data for two types of observations.
 
 ** MRG_
 :PROPERTIES:

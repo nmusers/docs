@@ -58,7 +58,6 @@ Instructions for the NONMEM Estimation Step.
               [LEVCENTER=[0|1]]
               [LEVOBJTYPE=[0|1]]
               [LEVWT=n]
-              [LIKELIHOOD|-2LOGLIKELIHOOD]
               [LNTWOPI]
               [MADAPT=n]
               [MAPCOV=n]
@@ -111,7 +110,7 @@ Instructions for the NONMEM Estimation Step.
               [PARAFPRINT=n]
               [PHITYPE=n]
               [POSTHOC|NOPOSTHOC]
-              [PREDICTION]
+              [PREDICTION|LIKELIHOOD|-2LOGLIKELIHOOD]
               [PRINT=n]
               [PRIORC]
               [PSAMPLE_M1=n]
@@ -1471,27 +1470,6 @@ See [[file:/docs/cookbook/nested/][Cookbook: Nested random effects]] for example
       LEVWT=0, and weights each level value equally, regardless of number of subjects per level value. To weight according to number of
       subjects for that value, set LEVWT=1.
 
-*** LIKELIHOOD | -2LOGLIKELIHOOD
-:PROPERTIES:
-:CUSTOM_ID: likelihood
-:END:
-- LIKELIHOOD: designed mainly for use with discrete observed
-  responses.  Indicates  that Y (with NM-TRAN
-  abbreviated code) or F (with a user-supplied PRED or ERROR code)
-  will be set to a (conditional)  likelihood.   Upon simulation  it
-  will be ignored, and the DV data item will be set directly to the
-  simulated value  in  abbreviated  or  user  code. Also ETAs, if any,
-  are understood to be population ETAs.  Epsilon variables and the
-  ~$SIGMA~ record may not be  used.   The  L2  data item  may not be
-  used.  The CONTR and CCONTR options of the ~$SUBROUTINES~ record may
-  not be used.  NONMEM cannot obtain  the  initial  estimate  for
-  omega.  If the data are population, and MAXEVALS=0 is not coded,
-  then  NOINTERACTION  is  required.   Compare with PREDICTION option.
-- -2LOGLIKELIHOOD: Y  (with  NM-TRAN abbreviated code) or F (with a
-  user-supplied PRED or ERROR code) is a -2 log (conditional)
-  likelihood.   All  remarks  for  LIKELIHOOD apply.  May also be
-  coded "-2LLIKELIHOOD".  Compare with PREDICTION option.
-
 *** MADAPT=n (NM74)
 If MADAPT/=-1 (also called PMADAPT), the mass matrix is accumulative
 average updated throughout the NUTS analysis during the burn-in
@@ -2214,15 +2192,33 @@ referred to as Conditional Parametric ETAs (CPE).
 
 NOPOSTHOC: ETAs  are not estimated.  This is the default with METHOD=0.  May not be used with METHOD=1.
 
-*** PREDICTION
-Indicates that ~Y~ (with NM-TRAN abbreviated code)  or  ~F~  (with  a
-user-supplied  PRED  or  ERROR  code)  will serve as a prediction
-variable, i.e., it will be set to a prediction.  Upon simulation, the
-simulated  observation is possibly also being set in Y or F. (However,
-the DV data item may instead be  set  directly  to  the simulated
-observation.)  Also, ETAs (if any) are population ETAs only if
-EPSILONs also appear.  This is the default.  Compare with
-~LIKELIHOOD | -2LOGLIKELIHOOD~ options.
+*** PREDICTION | LIKELIHOOD | -2LOGLIKELIHOOD
+:PROPERTIES:
+:CUSTOM_ID: likelihood
+:END:
+By the default ~PREDICTION~ option, ~Y~ (in NMTRAN abbreviated code)
+and ~F~ (in user-supplied ~PRED~ or ~ERROR~ subroutine) are
+predictions corresponding to ~DV~. In this case, ~ETA~ (if any) is for population only if
+~EPSILON~ is present.
+
+Alternatively, one can use (conditional) likelihood as predicted value
+in ~Y~ and ~F~. This option
+comes with two flavours: the actual likelihood (~LIKELIHOOD~) and the
+OFV (~-2LOGLIKELIHOOD~). This is mainly for models with discrete observed
+responses.
+
+Because ~LIKELIHOOD~ and ~-2LOGLIKELIHOOD~ specify likelihood directly,
+it is not compatible with some modeling options:
+- ~EPSILON~ variable and ~$SIGMA~ record are not allowed;
+
+- [[file:/docs/reference-manual/data/#l2-data][L2 data item]] are not allowed;
+
+- ~$SUBROUTINES~'s ~CONTR~ and ~CCONTR~ options are not allowed;
+
+- initial estimate for ~OMEGA~ is not allowed;
+
+- for population data without ~MAXEVALS=0~, ~NOINTERACTION~ must be used.
+
 
 *** PRINT=n
 Iteration summaries are printed for the 0th, every nth iteration, and
