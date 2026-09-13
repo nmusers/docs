@@ -297,30 +297,11 @@ For use with PREDPP's ADVAN9 and ADVAN15 and ADVAN17.
  REAL(KIND=DPSIZE) :: A,P,E,DA,DP,DT
  DIMENSION :: A(*),P(*),E(*),DA(IR,*),DP(IR,*),DT(*)
 #+end_src
-In general, a system of differential-algebraic equations has the form
-$$
-\frac{dA(t)}{dt}=g(A(t), p, t),\quad 0=h(A(t), p, t)
-$$
-For both equations the left-hand-side (LHS) and right-hand-size (RHS)
-are vectors in general,
-\(A=[A_1, \dots, A_{n_1}]^T\), \(g=[g_1, \dots, g_{n_1}]^T\), \(h=[h_1, \dots, h_{n_2}]^T\).
-/A/ denotes the drug amount in all compartments except the output
-compartment, \(p\) the internal PK parameters, and \(t\) the time.
-This is used to describe a system with \(n_1\) compartments in
-nonequilibrium and \(n_2\) compartments in equilibrium.
+See [[file:/docs/reference-manual/control-records/aes/][$AES record]] for the mathematical description of differential-algebraic equations.
 
-For example,
-$$
-p=[K_e, K_a, R]^T,\quad g_1=-K_aA_1, \quad g_2=K_aA_1-K_2A_2, \quad h_1=A_3-RA_2
-$$
-describes the one compartment model with linear elimination and
-absorption from a drug depot (ADVAN2), coupled with a third
-compartment in equilibrium with the central central compartment.
-Constant R is the ratio of the drug amount.
-
-The AES subroutine is called by PREDPP to evaluate  algebraic  expressions for ADVAN9, ADVAN15, and ADVAN17.
-It evaluates \(h()\) functions and store the results in vector /E/.
-The evaluation \(g()\) is delegated to the DES routine.
+The AES subroutine is called by PREDPP to evaluate  algebraic expressions for
+[[file:/docs/reference-manual/control-records/subroutines/#advan9-15-17][ADVAN9, ADVAN15 and ADVAN17]]. It evaluates \(h()\) functions and store
+the results in vector /E/. The evaluation \(g()\) is delegated to the DES routine.
 
 Input argument:
 
@@ -376,36 +357,19 @@ evaluate right-sides of differential equations.
  REAL(KIND=DPSIZE) :: A,P,DADT,DA,DP,DT
  DIMENSION :: A(*),P(*),DADT(*),DA(IR,*),DP(IR,*),DT(*)
 #+end_src
-In general, a system of differential equations has the form
-
-$$
-\frac{dA(t)}{dt}=g(A(t), p, t).
-$$
-
-Here both left-hand-side (LHS) and right-hand-size (RHS) are vectors
-of dimention /n/: \(A=[A_1, \dots, A_n]^T\), \(g=[g_1, \dots, g_n]^T\).
-/A/ denotes the drug amount in all compartments except the output
-compartment, \(p\) the internal PK parameters, and \(t\) the time.
-For example, for the one compartment model with linear elimination and
-absorption from a drug depot (ADVAN2) we have
-$$
-n=2,\quad p=[K_e, K_a]^T,\quad g_1=-K_aA_1,\quad g_2=K_aA_1-K_eA_2
-$$
-
-The above arguments are the input arguments for  the DES routine. The
-routine's output argument DADT stores the evaluation of \(g()\).
+See [[file:/docs/reference-manual/control-records/des/][$DES record]] for the mathematical description of differential equations.
 
 Input argument:
 
-  - A(n): the amount in the nth compartment at time T.
+  - ~A(n)~: the amount in the nth compartment at time T.
 
-  - P(n): the value of the nth PK parameter.
+  - ~P(n)~: the value of the nth PK parameter.
 
-  - T: time. T takes values continuously over an integration interval.
+  - ~T~: time. T takes values continuously over an integration interval.
 
 Output argument:
 
-  - DADT(n)
+  - ~DADT(n)~
     The derivative with respect to T of the nth compartment's amount.
     It is important to note that PREDPP itself adds in the rates  for
     any infusions that may be active.
@@ -416,7 +380,7 @@ Output argument:
       DADT(2)= P(2)*A(1)-P(1)*A(2)
     #+end_src
 
-  - DA(i,j)
+  - ~DA(i,j)~
     The  derivative of \(g_i()\) with respect to A(j). Continuing the above example,
     #+begin_src f90
       DA(1,1)=-P(2)
@@ -424,14 +388,14 @@ Output argument:
       DA(2,2)=-P(1)
     #+end_src
 
-  - DP(i,j)
+  - ~DP(i,j)~
     The derivative of \(g_i()\) with respect to  P(j).  Continuing  the above example,
     #+begin_src f90
       DP(1,2)=-A(1)
       DP(2,2)= A(1)
       DP(2,1)=-A(2)
     #+end_src
-  - DT(n)
+  - ~DT(n)~
     The derivative of \(g_i()\) with respect to T.
 
 The full implementation of the above example model is

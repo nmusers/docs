@@ -14,9 +14,29 @@ Marks the beginning of abbreviated code for the AES routine
 #+end_src
 
 ** Discussion
-The ~$AES~ record is used to compute algebraic expressions which can be
-regarded as specifying equilibrium kinetics. It is used with PREDPP's
-[[file:/docs/reference-manual/control-records/subroutines/#advan9-15-17][ADVAN9, ADVAN15 and ADVAN17]].
+The ~$AES~ record is used to specify a system of
+differential-algebraic equations (DAE) that describes equilibrium kinetics. It is used with
+[[file:/docs/reference-manual/control-records/subroutines/#advan9-15-17][ADVAN9, ADVAN15 and ADVAN17]]. In general, a DAE system has the form
+$$
+\frac{dA(t)}{dt}=g(A(t), p, t),\quad 0=h(A(t), p, t)
+$$
+For both equations the left-hand-side (LHS) and right-hand-size (RHS)
+are vectors in general,
+\(A=[A_1, \dots, A_{n_1}]^T\), \(g=[g_1, \dots, g_{n_1}]^T\), \(h=[h_1, \dots, h_{n_2}]^T\).
+/A/ denotes the drug amount in all compartments except the output
+compartment, \(p\) the internal PK parameters, and \(t\) the time.
+This is used to describe a system with \(n_1\) compartments in
+nonequilibrium and \(n_2\) compartments in equilibrium.
+
+For example,
+$$
+p=[K_e, K_a, R]^T,\quad g_1=-K_aA_1, \quad g_2=K_aA_1-K_2A_2, \quad h_1=A_3-RA_2
+$$
+describes the one compartment model with linear elimination and
+absorption from a drug depot (ADVAN2), coupled with a third
+compartment in equilibrium with the central central compartment.
+Constant R is the ratio of the drug amount.
+
 
 (See [[file:/docs/reference-manual/control-records/aesinit/][$AESINIT]]).
 
