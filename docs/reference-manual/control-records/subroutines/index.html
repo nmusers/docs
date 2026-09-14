@@ -21,14 +21,14 @@ https://github.com/alex-shpak/hugo-book
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="reference-manual">
-		<meta property="article:modified_time" content="2026-04-11T08:07:13-07:00">
+		<meta property="article:modified_time" content="2026-09-14T12:42:39-07:00">
 
 
 	<meta itemprop="name" content="$SUBROUTINES">
 	<meta itemprop="description" content="$SUBROUTINES Lists certain subroutine choices for the NONMEM Executable. Optional. Describes the choice of subroutines for the NONMEM executable (also called the NONMEM load module). May also be coded $SUBS.
 1 2 3 4 5 6 7 8 9 $SUBROUTINES [subname1 = name1] ... [SUBROUTINES=kind] [TOL=n] [ATOL=n] [SSTOL=n] [SSATOL=n] [DES=COMPACT|DES=FULL] ;# Examples $SUBROUTINES PRED=pred $SUBROUTINES ADVAN1 TRANS2 $SUBROUTINES ADVAN=ADVAN6 SS=SS6 One of the following is required:">
-	<meta itemprop="dateModified" content="2026-04-11T08:07:13-07:00">
-	<meta itemprop="wordCount" content="5112">
+	<meta itemprop="dateModified" content="2026-09-14T12:42:39-07:00">
+	<meta itemprop="wordCount" content="4948">
 
 <title>$SUBROUTINES • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -37,7 +37,7 @@ https://github.com/alex-shpak/hugo-book
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.eced161d218810bbf6b5389ece86a4a973d804365501ca47b2249645d9521939.js" integrity="sha256-7O0WHSGIELv2tTiezoakqXPYBDZVAcpHsiSWRdlSGTk=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.678e594f87be69770e807eafad927aab949982ea748d1a57dfe6c56af90f79a8.js" integrity="sha256-Z45ZT4e&#43;aXcOgH6vrZJ6q5SZgup0jRpX3&#43;bFavkPeag=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -1538,7 +1538,7 @@ https://github.com/alex-shpak/hugo-book
 </li>
 <li><a href="#headline-5">ADVAN4</a>
 </li>
-<li><a href="#headline-6">ADVAN5/7</a>
+<li><a href="#advan5_7">ADVAN5/7</a>
 </li>
 <li><a href="#advan6-8">ADVAN6/8/13/14/16/18</a>
 </li>
@@ -2111,65 +2111,56 @@ ADVAN4
 </ul>
 </div>
 </div>
-<div id="outline-container-headline-6" class="outline-3">
-<h3 id="headline-6">
+<div id="outline-container-advan5_7" class="outline-3">
+<h3 id="advan5_7">
 ADVAN5/7
 </h3>
-<div id="outline-text-headline-6" class="outline-text-3">
-<p>The general linear model is used for systems in which  a  drug is distributed between compartments according to linear processes.  ADVAN7 may be used when the eigenvalues of the  rate  constant  matrix are known to be real (which is true for many pharmacokinetic systems such as mammillary models). It is generally faster than ADVAN5.</p>
+<div id="outline-text-advan5_7" class="outline-text-3">
+<p>The general linear ODE model
+$$
+\frac{dA(t)}{dt} = K^TA(t)
+$$
+with \(A(t)\) an \(m\)-vector, including the <a href="/docs/user-guide/nmtran/data/#cmt">output compartment</a>, and
+the rate coefficient matrix \(K\) an \(m\times m\) matrix.
+<code>ADVAN5</code> is applicable to general \(K\), while <code>ADVAN7</code>
+assumes \(K\) has real eigenvalues, as in many PK systems such as
+mammillary models. In general <code>ADVAN7</code> is faster than <code>ADVAN5</code> in
+model fitting. See &#34;<a href="https://github.com/nmusers/docs/tree/master/examples/control6">examples/control6</a>&#34; for a model example.</p>
 <ul>
-<li>A  <code>$MODEL</code>  record  is  required to describe the compartments and their attributes.  The <code>$PK</code> record (or, if  a  user-supplied  PK  routine  is used, the <code>$MODEL</code> record) describes how the compartments are linked.</li>
-<li>TRANS routine: TRANS1</li>
+<li>The  <code>$MODEL</code>  record  is  required to describe the compartments and their attributes.  The <code>$PK</code> record (or, if  a  user-supplied  PK  routine  is used, the <code>$MODEL</code> record) describes how the compartments are linked.</li>
+<li>TRANS routine: <code>TRANS1</code></li>
+<li>Basic PK parameters: <code>Kij</code>: \(K_{ij}\), the rate constant compartment \(i\) to
+      \(j\). In particular, with \(m\) for the output compartment,
+      <code>Kim</code> can use alias <code>Ki0</code>. One can use separator <code>T</code> to
+      disambiguate <code>i</code> and <code>j</code>: <code>K1T12</code> for \(K_{1,12}\), and
+      <code>K11T2</code> for \(K_{11,2}\).</li>
 <li>
-<p>Basic PK parameters with TRANS1 (assum m compartments in the system, including the output compartment.)</p>
+<p>Additional PK parameters (for each compartment <code>n</code> in the system):</p>
 <ul>
-<li>Kij (rate constant from compartment i to compartment j)</li>
-<li>Ki0 (alternate name for Kim, where m is the output compartment.)</li>
-<li>The letter T may be used as a separator between the two
-compartment numbers, e.g., KiTj.  The letter T is optional
-when there is no ambiguity, but required when there are two
-possible  interpretations  of  the  numbers  that follow K.
-E.g., with 12 compartments, K111 is ambiguous.  It should be
-coded  K1T11  or  K11T1, depending  if  it symbolizes the rate
-constant from compartment 1 to compartment 11 or from
-compartment 11 to compartment 1.</li>
+<li><code>Sn</code> - Scale for the n&#39;th compartment;</li>
+<li><code>S0</code> - alias for the output compartment scaling <code>Sn</code>.</li>
 </ul>
 </li>
 <li>
-<p>Additional PK parameters (for each compartment n in the system (n=1, …, m)):</p>
+<p>For each dosable compartment <code>n</code> in the system:</p>
 <ul>
-<li>Sn - Scale for nth compartment</li>
-<li>S0 - Alternate name for scale for output compartment</li>
-</ul>
-</li>
-<li>
-<p>For each dosable compartment n in the system:</p>
-<ul>
-<li>Fn - Bioavailability for nth compartment</li>
-<li>Rn - Rate for nth compartment</li>
-<li>Dn - Duration for nth compartment</li>
-<li>ALAGn - Absorption lag for nth compartment</li>
+<li><code>Fn</code> - Bioavailability for the n&#39;th compartment;</li>
+<li><code>Rn</code> - Rate for y compartment;</li>
+<li><code>Dn</code> - Duration for the n&#39;th compartment;</li>
+<li><code>ALAGn</code> - Absorption lag for the n&#39;th compartment.</li>
 </ul>
 </li>
 <li>
 <p>Other additional PK parameters:</p>
 <ul>
-<li>F0 - Output fraction (also called Fm, FO)</li>
-<li>XSCALE - Time scale</li>
-<li>MTIME(i) - Model event times</li>
+<li><code>FO</code> - Output fraction (with alias <code>Fm</code>, <code>F0</code>)</li>
+<li><code>XSCALE</code> - Time scale</li>
+<li><code>MTIME(n)</code> - Model event times</li>
 </ul>
 </li>
-<li>
-<p>Required PREDPP Library subroutines:</p>
-<ul>
-<li>ADVAN5 - REXPON, RXSUBS</li>
-<li>ADVAN7 - RRXPON, RXSUBS</li>
-</ul>
-</li>
-<li>Steady-state subroutine: SS5</li>
-<li>Analytical second derivatives for the Laplacian method are not
-obtained  with  ADVAN5 and ADVAN7. Numerical differentiation are
-used.</li>
+<li>Steady-state subroutine: <code>SS5</code></li>
+<li><code>ADVAN5/ADVAN7</code> do not support analytical 2nd-order derivatives for
+the Laplacian method. Numerical differentiation are used instead.</li>
 </ul>
 </div>
 </div>
@@ -2178,32 +2169,26 @@ used.</li>
 ADVAN6/8/13/14/16/18
 </h3>
 <div id="outline-text-advan6-8" class="outline-text-3">
-<p>ADVAN6,  ADVAN8,  ADVAN13,  ADVAN14,  ADVAN16, ADVAN18 are for the
-general  nonlinear  models, used for systems in which a drug is
+<p><code>ADVAN6</code>,  <code>ADVAN8</code>,  <code>ADVAN13</code>,  <code>ADVAN14</code>,  <code>ADVAN16</code>, and <code>ADVAN18</code> are for
+general nonlinear  models, used for systems in which a drug is
 distributed between compartments according to first-order processes.
-The differences  are  in the package of code that performs the
-integration of the differential equations.</p>
+They differ in the numerical integration schemes used for the ODE solution.</p>
 <ul>
-<li>ADVAN6 uses IMSL&#39;s DVERK, a Runge-Kutta-Verner  fifth  and  sixth order method of integration, for nonstiff problems.</li>
-<li>ADVAN8 uses  IMSL&#39;s DGEAR, the Gear method of numerical integration, for stiff problems.</li>
-<li>ADVAN13 uses the LLNL solver for ordinary differential  equations (LSODA), with automatic method switching for stiff (BDF) and nonstiff (Adams method) problems. It is a decendent of ADVAN8.</li>
-<li>ADVAN14 uses CVODES from the LLNL SUNDIALS  system  for  ordinary
-differential  equations  and  is a descendent of LSODA (ADVAN13).
-ADVAN14 also has a root-finding algorithm. The user may choose to
+<li><code>ADVAN6</code>: IMSL&#39;s DVERK, a Runge-Kutta-Verner 5/6th
+order method, for nonstiff problems. See &#34;<a href="https://github.com/nmusers/docs/tree/master/examples/control7">examples/control7</a>&#34; for a model example.</li>
+<li><code>ADVAN8</code>: the Gear method from IMSL&#39;s DGEAR, for stiff problems.</li>
+<li><code>ADVAN13</code>: the LLNL solver for ordinary differential equations (LSODA), with automatic method switching for stiff (BDF) and nonstiff (Adams method) problems. It is a decendent of <code>ADVAN8</code>.</li>
+<li><code>ADVAN14</code>: <code>CVODES</code> from the SUNDIALS  library. it  is a descendent of LSODA.
+It also supports root-finding. The user may choose to
 make  modifications  to  <code>pr/CVODEU.f90</code>. See <a href="/docs/guides/cvs_guide.pdf">&#34;guides/cvs_guide.pdf&#34;</a>
 and <a href="/docs/guides/cv_guide.pdf">&#34;guides/cv_guide.pdf&#34;</a>.</li>
-<li>ADVAN16 uses the RADAR5 delay differential equation solver.
+<li><code>ADVAN16</code>: the RADAR5 delay differential equation solver.
 See &#34;INTRODUCTION TO NONMEM 7, Using the Delay differential equation
 Solvers with the ddexpand program&#34;, <a href="/docs/guides/manrad5-v2.pdf">&#34;guides/manrad5-v2.pdf&#34;</a>,
 and <a href="https://github.com/nmusers/docs/tree/master/examples/dde">&#34;examples/dde&#34;</a>.</li>
-<li>ADVAN18 uses the DDE_SOLVER delay differential equation solver. See
+<li><code>ADVAN18</code>: the DDE_SOLVER delay differential equation solver. See
 &#34;INTRODUCTION TO NONMEM 7, Using the Delay differential equation
 Solvers with the ddexpand program&#34;. See also <a href="/docs/guides/ddes_f90.pdf">&#34;guides/ddes_f90.pdf&#34;</a> and <a href="https://github.com/nmusers/docs/tree/master/examples/dde">&#34;examples/dde&#34;</a>.</li>
-<li>ADVAN8 may be used in preference to ADVAN6 when the differential
-equations describing the processes are stiff.  ADVAN13 may  be
-preferable with  a  mixed  system  (both stiff and non-stiff).  For
-discussion of ADVAN14 as well as changes to ADVAN13, see Guide
-INTRODUCTION TO  NONMEM 7.</li>
 <li>A  <code>$MODEL</code>  record  is  required to describe the compartments and
 their attributes.  The <code>$DES</code> record is required to describe the
 differential equations.</li>
@@ -2274,17 +2259,6 @@ event record with SS&gt;0 and AMT=0 and RATE=0, or using the  I_SS  (Initial Ste
 
 (See <a href="/docs/reference-manual/control-records/model/">$MODEL</a>, <a href="/docs/reference-manual/control-records/pk/">$PK</a>, <a href="/docs/reference-manual/api/subroutines/#model">MODEL</a>, <a href="/docs/reference-manual/api/subroutines/#PK">PK</a>, <a href="/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod">Initial Steady State: I_SS,ISSMOD</a>).</li>
 <li>Steady-state subroutine: SS5.</li>
-<li>
-<p>Required PREDPP Library subroutines:</p>
-<ul>
-<li>ADVAN6 - DVERK1, FCN1</li>
-<li>ADVAN8 - DGEAR1, FCN1, FCN3</li>
-<li>ADVAN13 - LSODA, FCN1, JAC2</li>
-<li>ADVAN14 - CVODE, FCN1, JAC2</li>
-<li>ADVAN16 - RADAR5NM, FCN1, JAC2</li>
-<li>ADVAN18 - ADDELSV, FCN1, JAC2</li>
-</ul>
-</li>
 </ul>
 </div>
 </div>
@@ -3166,9 +3140,9 @@ SSATOL=n
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/5caa3ba8526b274ea5164d39d9a8066c9e767941" title='Last modified by Yi Zhang | 2026 Apr 11' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/2a23e1b73a5dc89fb28ea3889ab374c47eec4ecc" title='Last modified by Yi Zhang | 2026 Sep 14' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Apr 11</span>
+    <span>2026 Sep 14</span>
   </a>
 
 </div>
@@ -3238,7 +3212,7 @@ SSATOL=n
 </li>
 <li><a href="#headline-5">ADVAN4</a>
 </li>
-<li><a href="#headline-6">ADVAN5/7</a>
+<li><a href="#advan5_7">ADVAN5/7</a>
 </li>
 <li><a href="#advan6-8">ADVAN6/8/13/14/16/18</a>
 </li>

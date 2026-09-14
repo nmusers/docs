@@ -256,8 +256,8 @@ The general linear ODE model
 $$
 \frac{dA(t)}{dt} = K^TA(t)
 $$
-with \(A(t)\) an \(n\)-vector, including the [[file:/docs/user-guide/nmtran/data/#cmt][output compartment]], and
-the rate coefficient matrix \(K\) an \(n\times n\) matrix.
+with \(A(t)\) an \(m\)-vector, including the [[file:/docs/user-guide/nmtran/data/#cmt][output compartment]], and
+the rate coefficient matrix \(K\) an \(m\times m\) matrix.
 ~ADVAN5~ is applicable to general \(K\), while ~ADVAN7~
 assumes \(K\) has real eigenvalues, as in many PK systems such as
 mammillary models. In general ~ADVAN7~ is faster than ~ADVAN5~ in
@@ -268,24 +268,24 @@ model fitting. See "[[https://github.com/nmusers/docs/tree/master/examples/contr
 - TRANS routine: ~TRANS1~
 
 - Basic PK parameters: ~Kij~: \(K_{ij}\), the rate constant compartment \(i\) to
-        \(j\). In particular, with \(n\) for the output compartment,
-        ~Kin~ can use alias ~Ki0~. One can use separator ~T~ to
+        \(j\). In particular, with \(m\) for the output compartment,
+        ~Kim~ can use alias ~Ki0~. One can use separator ~T~ to
         disambiguate ~i~ and ~j~: ~K1T12~ for \(K_{1,12}\), and
         ~K11T2~ for \(K_{11,2}\).
-- Additional PK parameters (for each compartment ~i~ in the system):
-      + ~Si~ - Scale for the i'th compartment;
+- Additional PK parameters (for each compartment ~n~ in the system):
+      + ~Sn~ - Scale for the n'th compartment;
       + ~S0~ - alias for the output compartment scaling ~Sn~.
 
-- For each dosable compartment ~i~ in the system:
-      + ~Fi~ - Bioavailability for the i'th compartment;
-      + ~Ri~ - Rate for y compartment;
-      + ~Di~ - Duration for the i'th compartment;
-      + ~ALAGi~ - Absorption lag for the i'th compartment.
+- For each dosable compartment ~n~ in the system:
+      + ~Fn~ - Bioavailability for the n'th compartment;
+      + ~Rn~ - Rate for y compartment;
+      + ~Dn~ - Duration for the n'th compartment;
+      + ~ALAGn~ - Absorption lag for the n'th compartment.
 
 - Other additional PK parameters:
-      + ~FO~ - Output fraction (with alias ~Fn~, ~F0~)
+      + ~FO~ - Output fraction (with alias ~Fm~, ~F0~)
       + ~XSCALE~ - Time scale
-      + ~MTIME(i)~ - Model event times
+      + ~MTIME(n)~ - Model event times
 
 - Steady-state subroutine: ~SS5~
 
@@ -296,38 +296,31 @@ model fitting. See "[[https://github.com/nmusers/docs/tree/master/examples/contr
 :PROPERTIES:
 :CUSTOM_ID: advan6-8
 :END:
-ADVAN6,  ADVAN8,  ADVAN13,  ADVAN14,  ADVAN16, ADVAN18 are for the
-general  nonlinear  models, used for systems in which a drug is
+~ADVAN6~,  ~ADVAN8~,  ~ADVAN13~,  ~ADVAN14~,  ~ADVAN16~, and ~ADVAN18~ are for
+general nonlinear  models, used for systems in which a drug is
 distributed between compartments according to first-order processes.
-The differences  are  in the package of code that performs the
-integration of the differential equations.
+They differ in the numerical integration schemes used for the ODE solution.
 
-- ADVAN6 uses IMSL's DVERK, a Runge-Kutta-Verner  fifth  and  sixth order method of integration, for nonstiff problems.
+- ~ADVAN6~: IMSL's DVERK, a Runge-Kutta-Verner 5/6th
+  order method, for nonstiff problems. See "[[https://github.com/nmusers/docs/tree/master/examples/control7][examples/control7]]" for a model example.
 
-- ADVAN8 uses  IMSL's DGEAR, the Gear method of numerical integration, for stiff problems.
+- ~ADVAN8~: the Gear method from IMSL's DGEAR, for stiff problems.
 
-- ADVAN13 uses the LLNL solver for ordinary differential  equations (LSODA), with automatic method switching for stiff (BDF) and nonstiff (Adams method) problems. It is a decendent of ADVAN8.
+- ~ADVAN13~: the LLNL solver for ordinary differential equations (LSODA), with automatic method switching for stiff (BDF) and nonstiff (Adams method) problems. It is a decendent of ~ADVAN8~.
 
-- ADVAN14 uses CVODES from the LLNL SUNDIALS  system  for  ordinary
-  differential  equations  and  is a descendent of LSODA (ADVAN13).
-  ADVAN14 also has a root-finding algorithm. The user may choose to
+- ~ADVAN14~: ~CVODES~ from the SUNDIALS  library. it  is a descendent of LSODA.
+  It also supports root-finding. The user may choose to
   make  modifications  to  ~pr/CVODEU.f90~. See [[file:/docs/guides/cvs_guide.pdf]["guides/cvs_guide.pdf"]]
   and [[file:/docs/guides/cv_guide.pdf]["guides/cv_guide.pdf"]].
 
-- ADVAN16 uses the RADAR5 delay differential equation solver.
+- ~ADVAN16~: the RADAR5 delay differential equation solver.
   See "INTRODUCTION TO NONMEM 7, Using the Delay differential equation
   Solvers with the ddexpand program", [[file:/docs/guides/manrad5-v2.pdf]["guides/manrad5-v2.pdf"]],
   and [[https://github.com/nmusers/docs/tree/master/examples/dde]["examples/dde"]].
 
-- ADVAN18 uses the DDE_SOLVER delay differential equation solver. See
+- ~ADVAN18~: the DDE_SOLVER delay differential equation solver. See
   "INTRODUCTION TO NONMEM 7, Using the Delay differential equation
   Solvers with the ddexpand program". See also [[file:/docs/guides/ddes_f90.pdf]["guides/ddes_f90.pdf"]] and [[https://github.com/nmusers/docs/tree/master/examples/dde]["examples/dde"]].
-
-- ADVAN8 may be used in preference to ADVAN6 when the differential
-  equations describing the processes are stiff.  ADVAN13 may  be
-  preferable with  a  mixed  system  (both stiff and non-stiff).  For
-  discussion of ADVAN14 as well as changes to ADVAN13, see Guide
-  INTRODUCTION TO  NONMEM 7.
 
 - A  ~$MODEL~  record  is  required to describe the compartments and
   their attributes.  The ~$DES~ record is required to describe the
@@ -397,14 +390,6 @@ integration of the differential equations.
  (See [[file:/docs/reference-manual/control-records/model/][$MODEL]], [[file:/docs/reference-manual/control-records/pk/][$PK]], [[file:/docs/reference-manual/api/subroutines/#model][MODEL]], [[file:/docs/reference-manual/api/subroutines/#PK][PK]], [[file:/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod][Initial Steady State: I_SS,ISSMOD]]).
 
 - Steady-state subroutine: SS5.
-
-- Required PREDPP Library subroutines:
-  + ADVAN6 - DVERK1, FCN1
-  + ADVAN8 - DGEAR1, FCN1, FCN3
-  + ADVAN13 - LSODA, FCN1, JAC2
-  + ADVAN14 - CVODE, FCN1, JAC2
-  + ADVAN16 - RADAR5NM, FCN1, JAC2
-  + ADVAN18 - ADDELSV, FCN1, JAC2
 
 ** ADVAN9/15/17
 :PROPERTIES:

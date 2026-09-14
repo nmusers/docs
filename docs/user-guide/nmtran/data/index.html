@@ -21,14 +21,14 @@ A NONMEM input data set consists of event records 1, representing temporal event
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="user-guide">
-		<meta property="article:modified_time" content="2026-02-11T11:39:12-08:00">
+		<meta property="article:modified_time" content="2026-09-14T12:42:39-07:00">
 
 
 	<meta itemprop="name" content="Data">
 	<meta itemprop="description" content="Data and event records In the earlier chapters we saw that the population data \(y_{ij}\), \(x_{ij}\), \(z_i\), etc, have a hierarchical (nested) structure: the data describe observations for each subject as well as varying subject information. Since NONMEM uses tabulated data to represent this intra- and inter-subject variability, we should expect certain redundancy in the encoding.
 A NONMEM input data set consists of event records 1, representing temporal events such as dosing, observation, and events as the beginning of a urine collection and a measured change in kidney function. Data records (rows in the data file) 2 correspond to different events, and must be in the order of time.">
-	<meta itemprop="dateModified" content="2026-02-11T11:39:12-08:00">
-	<meta itemprop="wordCount" content="5019">
+	<meta itemprop="dateModified" content="2026-09-14T12:42:39-07:00">
+	<meta itemprop="wordCount" content="5034">
 
 <title>Data • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -37,7 +37,7 @@ A NONMEM input data set consists of event records 1, representing temporal event
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.eced161d218810bbf6b5389ece86a4a973d804365501ca47b2249645d9521939.js" integrity="sha256-7O0WHSGIELv2tTiezoakqXPYBDZVAcpHsiSWRdlSGTk=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.678e594f87be69770e807eafad927aab949982ea748d1a57dfe6c56af90f79a8.js" integrity="sha256-Z45ZT4e&#43;aXcOgH6vrZJ6q5SZgup0jRpX3&#43;bFavkPeag=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -1566,7 +1566,7 @@ A NONMEM input data set consists of event records 1, representing temporal event
 </li>
 </ul>
 </li>
-<li><a href="#headline-17">Compartment: CMT and PCMT</a>
+<li><a href="#cmt">Compartment: CMT and PCMT</a>
 <ul>
 <li><a href="#headline-18">On/Off of compartments</a>
 </li>
@@ -2260,11 +2260,11 @@ Similarly, a steady-state constant infusion may be extended with a non-steady-st
 </div>
 </div>
 </div>
-<div id="outline-container-headline-17" class="outline-3">
-<h3 id="headline-17">
+<div id="outline-container-cmt" class="outline-3">
+<h3 id="cmt">
 Compartment: CMT and PCMT
 </h3>
-<div id="outline-text-headline-17" class="outline-text-3">
+<div id="outline-text-cmt" class="outline-text-3">
 <p>The <em>observation compartment</em> of a record contains the prediction for
 an observation. It can be either a scaled drug amount or a
 modification of this quantity. Every dose event is associated with a
@@ -2274,6 +2274,13 @@ these compartments, called <em>default observation compartment</em> and
 defaults built into the model definition, some can be user-specified
 (see <code>$MODEL</code> record). Hereon unless otherwise specified by
 observation/dose compartment we we their defaults.</p>
+<p>
+Additionally every NONMEM model assumes a non-dosing <em>output
+compartment</em>. Of the total drug amount eliminated by the system, a fraction goes into
+this compartment. NONMEM uses parameter <code>FO</code> (&#34;O&#34; for output) for this
+fraction. Thus <code>FO</code> should be between 0 and 1, with default value 1.
+This additional output kinetics exists only when the output compartment is turned on (see
+below).</p>
 <div id="outline-container-headline-18" class="outline-4">
 <h4 id="headline-18">
 On/Off of compartments
@@ -2325,17 +2332,13 @@ collection), then one should construct an <em>other-type</em> event record
 that simply turns the compartment on, by
 giving the compartment number in CMT.</p>
 <p>
-To turn a compartment off at a given time, one should construct
-an other-type event record that gives the negative value of the compartment
-number. This also applies to an observation record, provided the observation compartment is
-the output compartment or an <em>output-type</em> compartment. In this case the compartment
-must be on at the event time, but it is turned off &#34;immediately
-thereafter&#34;.  Thus one can record the observation of a urine concentration
-in an event record and conveniently turn off the urine collection
-using the same record <sup class="footnote-reference"><a id="footnote-reference-6" href="#footnote-6">6</a></sup>. An output-type  compartment is initally
-off, may be turned on and off, and may not receive a dose. It must be
-turned on with an other-type event record in order start accumulating
-drug.</p>
+To turn off compartment <code>i</code> at a given time, one should construct
+an other-type event (<code>EVID=2</code>) record with <code>CMT</code> equal to <code>-i</code>. When
+an observation record also happens to be the output compartment or an <em>output-type</em>
+compartment (a non-dosing and initially off compartment), turning off
+the compartment at the event time implies the compartment becomes off
+&#34;immediately thereafter&#34;. This enables recording the observation of a
+urine concentration and turning it off using the same record <sup class="footnote-reference"><a id="footnote-reference-6" href="#footnote-6">6</a></sup>.</p>
 <p>
 With a reset or reset-dose event record the on/off status of each
 compartment is reset to its initial status, and then if the
@@ -2566,9 +2569,9 @@ time data item.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/44accd6a3f38c3f65f58d12a3c6ef9ad64188109" title='Last modified by Yi Zhang | 2026 Feb 11' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/2a23e1b73a5dc89fb28ea3889ab374c47eec4ecc" title='Last modified by Yi Zhang | 2026 Sep 14' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Feb 11</span>
+    <span>2026 Sep 14</span>
   </a>
 
 </div>
@@ -2666,7 +2669,7 @@ time data item.</p>
 </li>
 </ul>
 </li>
-<li><a href="#headline-17">Compartment: CMT and PCMT</a>
+<li><a href="#cmt">Compartment: CMT and PCMT</a>
 <ul>
 <li><a href="#headline-18">On/Off of compartments</a>
 </li>
