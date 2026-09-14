@@ -574,30 +574,29 @@ Examples of their use are in the ..\examples\densities directory.
  VON MISES
 #+end_src
 
-** Calling protocol: CALLFL
+** CALLFL
 :PROPERTIES:
 :CUSTOM_ID: calling_protocol
 :END:
-
+The variable
 #+begin_src perl
  CALLFL=n
 #+end_src
-- In ~$PK~ abbreviated code: control when PREDPP calls the PK routine.
+specifies the /calling protocol/,  the behavior of calling PK, ERROR, and some ADVAN routines:
+- In ~$PK~ abbreviated code: control when PREDPP calls the [[file:/docs/reference-manual/api/subroutines/#PK][PK routine]].
 
-- In ~$ERROR~ abbreviated code: control when PREDPP calls the ERROR routine.
+- In ~$ERROR~ abbreviated code: control when PREDPP calls the [[file:/docs/reference-manual/api/subroutines/#error][ERROR routine]].
 
 - In ~$AESINITIAL~ abbreviated code: when the TIME data item is not
-  used, it controls when PREDPP calls the ADVAN9, ADVAN15,  or
-  ADVAN17  routine.
+  used, it controls when PREDPP calls the [[file:/docs/reference-manual/control-records/subroutines/#advan9-15-17][ADVAN9/ADVAN15/ADVAN17 routine]].
 
-The use of CALLFL in each of the three abbreviated codes is
-independent of its use in the others.
+The values of ~CALLFL~ and corresponding behavior:
 
-- CALLFL=-2: call  the  PK subroutine with every event record, with
-  additional and lagged doses, and at modeled event times.  It does  not
+- ~CALLFL=-2~: call  the  PK subroutine with every event record, with
+  [[file:/docs/reference-manual/data/#addl][additional]] and [[file:/docs/reference-manual/control-records/pk/#alagn][lagged]] doses, and at [[file:/docs/reference-manual/api/variables/#mtime][model event times]].  It does  not
   affect ERROR, ADVAN9, ADVAN15, or ADVAN17 routines.
 
-  The following messages will appear in the NONMEM output report:
+  Corresponding message in the output:
   #+begin_src
   PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
   PK SUBROUTINE CALLED AT NONEVENT (ADDITIONAL AND LAGGED) DOSE TIMES
@@ -606,9 +605,9 @@ independent of its use in the others.
   AND AT MODEL TIMES
   #+end_src
 
-- CALLFL=-1 (default): call the subroutine with every event record.
+- ~CALLFL=-1~ (default): call the subroutine with every event record.
 
-  Correspondingly messages will appear in the NONMEM output:
+  Corresponding message in the NONMEM output:
   #+begin_src
   PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
   PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES
@@ -620,7 +619,7 @@ independent of its use in the others.
   ADVAN17 CALLED WITH EVERY EVENT RECORD
   #+end_src
 
-- CALLFL=0
+- ~CALLFL=0~
   + For the PK subroutine: If the data are population data, call the
     subroutine with the first event record of each individual record;
     if the data  are  single-subject  data,  call  the subroutine with
@@ -628,35 +627,35 @@ independent of its use in the others.
     subroutine  with with  every event record where the event time
     differs from the previous event time.
 
-    The following messages will appear in the NONMEM output report:
+    Corresponding message in the NONMEM output:
     #+begin_src
     PK SUBROUTINE CALLED ONLY WITH NEW INDIVIDUAL OR NEW TIME
     PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL DOSE OR LAGGED) DOSE TIMES.
     #+end_src
 
-  + For the ERROR subroutine: When the Simulation Step  is  being
+  + For the ERROR subroutine: when the Simulation Step  is  being
     implemented, call the subroutine with every event record.
     Otherwise, call the subroutine only with observation event
     records.
 
-    The following messages will appear in the NONMEM output report:
+    Corresponding message in the NONMEM output:
     #+begin_src
     DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
     OTHERWISE, ERROR SUBROUTINE CALLED ONLY WITH OBSERVATION EVENTS
     #+end_src
 
-  + not applicable to the ADVAN9, ADVAN15, or ADVAN17 routine.
+  + Not applicable to the ADVAN9/ADVAN15/ADVAN17 routine.
 
-  With CALLFL=0, The CALL data item may be used to request  calls  with additional event records.
+  The [[file:/docs/reference-manual/data/#call][CALL data item]] may be used with ~CALLFL=0~ to request calls  with additional event records.
 
-- CALLFL=1:
-  + For  the  PK and ADVAN9, ADVAN15, or ADVAN17 subroutines: If the
+- ~CALLFL=1~:
+  + For  the  PK and ADVAN9/ADVAN15/ADVAN17 subroutines: if the
     data are population data, call the subroutine with the first event
     record of  each individual record; if the data are single-subject
     data, call the subroutine with the first event record of the data
     set.
 
-    The following messages appear in the NONMEM output report:
+    Corresponding message in the NONMEM output:
     #+begin_src
     PK SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
     PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL DOSE OR LAGGED) DOSE TIMES
@@ -666,19 +665,20 @@ independent of its use in the others.
     ADVAN17 CALLED ONCE PER INDIVIDUAL RECORD.
     #+end_src
 
-  + For the ERROR subroutine: When the Simulation Step  is  being
+  + For the ERROR subroutine: when the Simulation Step  is  being
     implemented,  call  the subroutine with every event record.
     Otherwise, if the data are population data, call  the  subroutine
     with  the  first event  record  of each individual record; if the
     data are single-subject data, call the subroutine with the first
     event  record  of  the data set.
 
-    The following messages appear in the NONMEM output report:
+    Corresponding message in the NONMEM output:
     #+begin_src
     DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
     OTHERWISE, ERROR SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
     #+end_src
-  With  CALLFL=1,  The  CALL data item may be used to request calls with additional event records.
+
+  The [[file:/docs/reference-manual/data/#call][CALL data item]] may be used with ~CALLFL=1~ to request calls  with additional event records.
 
 In a block of abbreviated code, the ~CALLFL~ option
 must precede all the other abbreviated code (except for
@@ -711,57 +711,28 @@ Alternative to ~CALLFL=n~ specification, one can use calling protocol phrases:
  $AESINITIAL (ONCE PER INDIVIDUAL RECORD)
 #+end_src
 
-- Phrases equivalent to CALLFL=-2 for the ~$PK~ record:
+- Phrases equivalent to ~CALLFL=-2~ for the ~$PK~ record:
 
   #+begin_src perl
   (NON-EVENT)
   (ADDITIONAL OR LAGGED)
   #+end_src
 
-  NONMEM will output the following messages:
-
-  #+begin_src
-  PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
-  PK SUBROUTINE CALLED AT NONEVENT (ADDITIONAL AND LAGGED) DOSE TIMES
-  or
-  PK SUBROUTINE CALLED AT NONEVENT (ADDITIONAL AND LAGGED) DOSE
-  TIMES AND AT MODEL TIMES
-  #+end_src
-
-- Phrases  equivalent to CALLFL=-1 for ~$PK~, ~$ERROR~ and ~$AESINITIAL~ records (the default):
+- Phrases equivalent to ~CALLFL=-1~ for ~$PK~, ~$ERROR~ and ~$AESINITIAL~ records (the default):
 
   #+begin_src perl
   (EVERY EVENT)
   (EVERY)
   #+end_src
 
-  NONMEM will output the following messages:
-
-  #+begin_src
-  PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
-  PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES
-
-  ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
-
-  ADVAN9 CALLED WITH EVERY EVENT RECORD.
-  ADVAN15 CALLED WITH EVERY EVENT RECORD.
-  #+end_src
-
-- Phrases equivalent to CALLFL=0 for the ~$PK~ record:
+- Phrases equivalent to ~CALLFL=0~ for the ~$PK~ record:
 
   #+begin_src perl
   (NEW TIME)
   (NEW EVENT TIME)
   #+end_src
 
-  NONMEM will output the following messages:
-
-  #+begin_src
-  PK SUBROUTINE CALLED ONLY WITH NEW INDIVIDUAL OR NEW TIME
-  PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
-  #+end_src
-
-- Phrases equivalent to CALLFL=0 for the ~$ERROR~ record:
+- Phrases equivalent to ~CALLFL=0~ for the ~$ERROR~ record:
 
   #+begin_src perl
   (OBSERVATION EVENT)
@@ -770,31 +741,11 @@ Alternative to ~CALLFL=n~ specification, one can use calling protocol phrases:
   (OBS ONLY)
   #+end_src
 
-  NONMEM will output the following messages:
-
-  #+begin_src
-  DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
-  OTHERWISE, ERROR SUBROUTINE CALLED ONLY WITH OBSERVATION EVENTS
-  #+end_src
-
-- Phrases  equivalent  to  CALLFL=1 for the ~$PK~, ~$ERROR~ and ~$AESINITIAL~:
+- Phrases  equivalent  to  ~CALLFL=1~ for the ~$PK~, ~$ERROR~ and ~$AESINITIAL~:
 
   #+begin_src perl
   (ONCE PER INDIVIDUAL RECORD)
   (ONCE/IND.REC.)
-  #+end_src
-
-  NONMEM will output the following messages:
-
-  #+begin_src
-  PK SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
-  PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES
-
-  DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
-  OTHERWISE, ERROR SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
-
-  ADVAN9 CALLED ONCE PER INDIVIDUAL RECORD.
-  ADVAN15 CALLED ONCE PER INDIVIDUAL RECORD.
   #+end_src
 
 ** Verbatim code

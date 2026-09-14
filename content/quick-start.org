@@ -9,51 +9,21 @@ weight: 9
 
 * Quick start
 ** A single-subject PK model
-*** Data
-The data file P2DATA below shows Theophylline plasma concentration-time observations
-in a single individual after a single dose of 320 mg.
-#+begin_src r
-         2     320.       0.        0.
-         2       0.        .27      1.71
-         2       0.        .52      7.91
-         2       0.       1.        8.31
-         2       0.       1.92      8.33
-         2       0.       3.5       6.85
-         2       0.       5.02      6.08
-         2       0.       7.03      5.4
-         2       0.       9.        4.55
-         2       0.      12.        3.01
-         2       0.      24.3        .90
-#+end_src
+Model example "[[https://github.com/nmusers/docs/tree/master/examples/control3][examples/control3]]" contains data file ~DATA3~ with
+Theophylline plasma concentration-time observations in a single individual after a single dose of 320 mg:
 
-*** Model
-Below is the NONMEM model.
-#+begin_src perl
-$PROB  SIMPLE NONLINEAR REGRESSION - THEOPHYLINE ; the problem in model.ctl
-$INPUT ID AMT TIME DV
-$DATA  P2DATA
-$SUBROUTINE ADVAN2
-$PK
- KA=THETA(1)
- K=THETA(2)
- V=THETA(3)
- S2=V
-$ERROR
- Y=F+ERR(1)
-$THETA  (0, 1.7)  (0, .102)  (0, 29.)
-$OMEGA  1.2
-$ESTIMATION PRINT=5
-$COVARIANCE
-$TABLE ID AMT TIME
-#+end_src
+#+INCLUDE: "/examples/control3/DATA3" src r
 
-Let us go through the /control stream/ input and data.
+The corresponding NONMEM model  /control stream/  is
+#+INCLUDE: "/examples/control3/CONTROL3" src perl
+
 - Control stream line 1 gives the NONMEM problem a name. NONMEM uses
-  ";" to indicate comment, thus it neglects everything after ";" on that line.
-- Control stream line 2 says that the data file column 1-4 contain subject ID, dosing amount (AMT, in mg here),
+  ";" for comments, thus everything after ";" one a line is neglected.
+- Control stream line 2 says that the data file column 1-4 contain
+  dosing amount (~AMT~, in mg here, with alias ~DOSE~),
   observation time, and the observed concentrations (dependent value
-  DV), respectively.
-- Control stream line 3 contains the data file name, P2DATA.
+  ~DV~, with alias ~CP~), respectively.
+- Control stream line 3 contains the data file name, ~DATA3~.
 - Line 4 says we use one-compartment model with first-order absorption
   from PREDPP. The model =ADVAN2= specifies a DEPOT compartment (where
   the dose goes, and), and a CENTRAL compartment. It also indicates
@@ -80,20 +50,20 @@ Let us go through the /control stream/ input and data.
      2         CENTRAL      ON         NO         YES        NO         YES
      3         OUTPUT       OFF        YES        NO         NO         NO
   #+end_src
-- Line 5-9 specify PK parameters (in ~$PK~ record) using THETA [fn:2], the
-  parameters to be estimated by NONMEM. They are:  first-order
-  absorption rate KA, rate constant of elimination K, and volume of
-  distribution V.
-- Line 10-11 specify the likelihood structure to be from a
-  normally-distributed additive error ERR(1) between observation and prediction.
-- Line 12 provides information about possible values of each element
-  of THETA in the format of (lower bound, initial estimate, upper
-  bound). The only two entries for each THETA implies no upper bound
-  (or upper bound=INFinity).
-- Line 13 gives sinitial estimate of the variance \(\sigma^2\) of =ERR(1)=.
-- Line 14 (~$ESTIMATION~) suggests NONMEM to obtain estimates of parameters. Line 15
+- Line 6-10 specify PK parameters (in ~$PK~ record) using ~THETA~ [fn:2], the
+  parameters to be estimated by NONMEM, consisting of first-order
+  absorption rate ~KA~, rate constant of elimination ~K~, and the
+  central compartment scaling parameter ~SC~. For now we ignore the special variable
+  ~CALLFL~ that is set to speed up this particular NONMEM run.
+- Line 12-13 specify the observation (~Y~) and prediction (~F~)
+  differ by a normally-distributed additive error ~ERR(1)~ .
+- Line 15 provides information about possible values of each element
+  of ~THETA~ in the format of (lower bound, initial estimate, upper
+  bound). The only two entries for each ~THETA~ implies no upper bound
+  (or upper bounded at INFinity).
+- Line 17 (~$ESTIMATION~) requests parameter estimation, and line 18
   (~$COVARIANCE~) requests standard error for the estimates.
-- Line 16 request a table output for the input data and certain computed quantities.
+- Line 19 request a table output for the input data and certain computed quantities.
 
 *** Run
 Assume the above model is stored in =model1.ctl= [fn:1]. We use

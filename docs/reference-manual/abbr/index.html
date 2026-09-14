@@ -28,7 +28,7 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
 	<meta itemprop="description" content="Abbreviated code Abbreviated code follows a subset of Fortran language syntax within an NM-TRAN control stream. A block of abbreviated code begins with control record $PRED, $PK, $ERROR, $DES, $AES, $AESINITIAL, $TOL, $MIX, or $INFN, and ends with either another record (that begins with &#34;$&#34;), or the end of the control stream. The code blocks are case-insensitive (NM72).
 Comments Semicolon character ; marks the beginning of comments so that the rest of the line is ignored.">
 	<meta itemprop="dateModified" content="2026-09-11T12:56:53-07:00">
-	<meta itemprop="wordCount" content="14258">
+	<meta itemprop="wordCount" content="14022">
 
 <title>Abbreviated code • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -37,7 +37,7 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.c2216a31dd052408293096430db75b422dced9a1f125c867b53d789230d3a1b4.js" integrity="sha256-wiFqMd0FJAgpMJZDDbdbQi3O2aHxJchntT14kjDTobQ=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.eced161d218810bbf6b5389ece86a4a973d804365501ca47b2249645d9521939.js" integrity="sha256-7O0WHSGIELv2tTiezoakqXPYBDZVAcpHsiSWRdlSGTk=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -1560,7 +1560,7 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
 </li>
 <li><a href="#headline-15">Probability density functions</a>
 </li>
-<li><a href="#calling_protocol">Calling protocol: CALLFL</a>
+<li><a href="#calling_protocol">CALLFL</a>
 </li>
 <li><a href="#verbatim">Verbatim code</a>
 </li>
@@ -2635,9 +2635,10 @@ Examples of their use are in the ..\examples\densities directory.</p>
 </div>
 <div id="outline-container-calling_protocol" class="outline-3">
 <h3 id="calling_protocol">
-Calling protocol: CALLFL
+CALLFL
 </h3>
 <div id="outline-text-calling_protocol" class="outline-text-3">
+<p>The variable</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2648,22 +2649,21 @@ Calling protocol: CALLFL
 </div>
 </div>
 </div>
+<p>specifies the <em>calling protocol</em>,  the behavior of calling PK, ERROR, and some ADVAN routines:</p>
 <ul>
-<li>In <code>$PK</code> abbreviated code: control when PREDPP calls the PK routine.</li>
-<li>In <code>$ERROR</code> abbreviated code: control when PREDPP calls the ERROR routine.</li>
+<li>In <code>$PK</code> abbreviated code: control when PREDPP calls the <a href="/docs/reference-manual/api/subroutines/#PK">PK routine</a>.</li>
+<li>In <code>$ERROR</code> abbreviated code: control when PREDPP calls the <a href="/docs/reference-manual/api/subroutines/#error">ERROR routine</a>.</li>
 <li>In <code>$AESINITIAL</code> abbreviated code: when the TIME data item is not
-used, it controls when PREDPP calls the ADVAN9, ADVAN15,  or
-ADVAN17  routine.</li>
+used, it controls when PREDPP calls the <a href="/docs/reference-manual/control-records/subroutines/#advan9-15-17">ADVAN9/ADVAN15/ADVAN17 routine</a>.</li>
 </ul>
-<p>The use of CALLFL in each of the three abbreviated codes is
-independent of its use in the others.</p>
+<p>The values of <code>CALLFL</code> and corresponding behavior:</p>
 <ul>
 <li>
-<p>CALLFL=-2: call  the  PK subroutine with every event record, with
-additional and lagged doses, and at modeled event times.  It does  not
+<p><code>CALLFL=-2</code>: call  the  PK subroutine with every event record, with
+<a href="/docs/reference-manual/data/#addl">additional</a> and <a href="/docs/reference-manual/control-records/pk/#alagn">lagged</a> doses, and at <a href="/docs/reference-manual/api/variables/#mtime">model event times</a>.  It does  not
 affect ERROR, ADVAN9, ADVAN15, or ADVAN17 routines.</p>
 <p>
-The following messages will appear in the NONMEM output report:</p>
+Corresponding message in the output:</p>
 <div class="src src-text">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2684,9 +2684,9 @@ The following messages will appear in the NONMEM output report:</p>
 </div>
 </li>
 <li>
-<p>CALLFL=-1 (default): call the subroutine with every event record.</p>
+<p><code>CALLFL=-1</code> (default): call the subroutine with every event record.</p>
 <p>
-Correspondingly messages will appear in the NONMEM output:</p>
+Corresponding message in the NONMEM output:</p>
 <div class="src src-text">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2713,7 +2713,7 @@ Correspondingly messages will appear in the NONMEM output:</p>
 </div>
 </li>
 <li>
-<p>CALLFL=0</p>
+<p><code>CALLFL=0</code></p>
 <ul>
 <li>
 <p>For the PK subroutine: If the data are population data, call the
@@ -2723,7 +2723,7 @@ the first event record of the data set.  In addition, call the
 subroutine  with with  every event record where the event time
 differs from the previous event time.</p>
 <p>
-The following messages will appear in the NONMEM output report:</p>
+Corresponding message in the NONMEM output:</p>
 <div class="src src-text">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2738,12 +2738,12 @@ The following messages will appear in the NONMEM output report:</p>
 </div>
 </li>
 <li>
-<p>For the ERROR subroutine: When the Simulation Step  is  being
+<p>For the ERROR subroutine: when the Simulation Step  is  being
 implemented, call the subroutine with every event record.
 Otherwise, call the subroutine only with observation event
 records.</p>
 <p>
-The following messages will appear in the NONMEM output report:</p>
+Corresponding message in the NONMEM output:</p>
 <div class="src src-text">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2757,21 +2757,21 @@ The following messages will appear in the NONMEM output report:</p>
 </div>
 </div>
 </li>
-<li>not applicable to the ADVAN9, ADVAN15, or ADVAN17 routine.</li>
+<li>Not applicable to the ADVAN9/ADVAN15/ADVAN17 routine.</li>
 </ul>
-<p>With CALLFL=0, The CALL data item may be used to request  calls  with additional event records.</p>
+<p>The <a href="/docs/reference-manual/data/#call">CALL data item</a> may be used with <code>CALLFL=0</code> to request calls  with additional event records.</p>
 </li>
 <li>
-<p>CALLFL=1:</p>
+<p><code>CALLFL=1</code>:</p>
 <ul>
 <li>
-<p>For  the  PK and ADVAN9, ADVAN15, or ADVAN17 subroutines: If the
+<p>For  the  PK and ADVAN9/ADVAN15/ADVAN17 subroutines: if the
 data are population data, call the subroutine with the first event
 record of  each individual record; if the data are single-subject
 data, call the subroutine with the first event record of the data
 set.</p>
 <p>
-The following messages appear in the NONMEM output report:</p>
+Corresponding message in the NONMEM output:</p>
 <div class="src src-text">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2794,14 +2794,14 @@ The following messages appear in the NONMEM output report:</p>
 </div>
 </li>
 <li>
-<p>For the ERROR subroutine: When the Simulation Step  is  being
+<p>For the ERROR subroutine: when the Simulation Step  is  being
 implemented,  call  the subroutine with every event record.
 Otherwise, if the data are population data, call  the  subroutine
 with  the  first event  record  of each individual record; if the
 data are single-subject data, call the subroutine with the first
 event  record  of  the data set.</p>
 <p>
-The following messages appear in the NONMEM output report:</p>
+Corresponding message in the NONMEM output:</p>
 <div class="src src-text">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2816,7 +2816,7 @@ The following messages appear in the NONMEM output report:</p>
 </div>
 </li>
 </ul>
-<p>With  CALLFL=1,  The  CALL data item may be used to request calls with additional event records.</p>
+<p>The <a href="/docs/reference-manual/data/#call">CALL data item</a> may be used with <code>CALLFL=1</code> to request calls  with additional event records.</p>
 </li>
 </ul>
 <p>In a block of abbreviated code, the <code>CALLFL</code> option
@@ -2877,7 +2877,7 @@ Alternative to <code>CALLFL=n</code> specification, one can use calling protocol
 </div>
 <ul>
 <li>
-<p>Phrases equivalent to CALLFL=-2 for the <code>$PK</code> record:</p>
+<p>Phrases equivalent to <code>CALLFL=-2</code> for the <code>$PK</code> record:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2890,29 +2890,9 @@ Alternative to <code>CALLFL=n</code> specification, one can use calling protocol
 </div>
 </div>
 </div>
-<p>
-NONMEM will output the following messages:</p>
-<div class="src src-text">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
-</span></span><span style="display:flex;"><span>PK SUBROUTINE CALLED AT NONEVENT (ADDITIONAL AND LAGGED) DOSE TIMES
-</span></span><span style="display:flex;"><span>or
-</span></span><span style="display:flex;"><span>PK SUBROUTINE CALLED AT NONEVENT (ADDITIONAL AND LAGGED) DOSE
-</span></span><span style="display:flex;"><span>TIMES AND AT MODEL TIMES</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
 </li>
 <li>
-<p>Phrases  equivalent to CALLFL=-1 for <code>$PK</code>, <code>$ERROR</code> and <code>$AESINITIAL</code> records (the default):</p>
+<p>Phrases equivalent to <code>CALLFL=-1</code> for <code>$PK</code>, <code>$ERROR</code> and <code>$AESINITIAL</code> records (the default):</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2925,33 +2905,9 @@ NONMEM will output the following messages:</p>
 </div>
 </div>
 </div>
-<p>
-NONMEM will output the following messages:</p>
-<div class="src src-text">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>PK SUBROUTINE CALLED WITH EVERY EVENT RECORD
-</span></span><span style="display:flex;"><span>PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>ADVAN9 CALLED WITH EVERY EVENT RECORD.
-</span></span><span style="display:flex;"><span>ADVAN15 CALLED WITH EVERY EVENT RECORD.</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
 </li>
 <li>
-<p>Phrases equivalent to CALLFL=0 for the <code>$PK</code> record:</p>
+<p>Phrases equivalent to <code>CALLFL=0</code> for the <code>$PK</code> record:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2964,23 +2920,9 @@ NONMEM will output the following messages:</p>
 </div>
 </div>
 </div>
-<p>
-NONMEM will output the following messages:</p>
-<div class="src src-text">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>PK SUBROUTINE CALLED ONLY WITH NEW INDIVIDUAL OR NEW TIME
-</span></span><span style="display:flex;"><span>PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
 </li>
 <li>
-<p>Phrases equivalent to CALLFL=0 for the <code>$ERROR</code> record:</p>
+<p>Phrases equivalent to <code>CALLFL=0</code> for the <code>$ERROR</code> record:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2997,23 +2939,9 @@ NONMEM will output the following messages:</p>
 </div>
 </div>
 </div>
-<p>
-NONMEM will output the following messages:</p>
-<div class="src src-text">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
-</span></span><span style="display:flex;"><span>OTHERWISE, ERROR SUBROUTINE CALLED ONLY WITH OBSERVATION EVENTS</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
 </li>
 <li>
-<p>Phrases  equivalent  to  CALLFL=1 for the <code>$PK</code>, <code>$ERROR</code> and <code>$AESINITIAL</code>:</p>
+<p>Phrases  equivalent  to  <code>CALLFL=1</code> for the <code>$PK</code>, <code>$ERROR</code> and <code>$AESINITIAL</code>:</p>
 <div class="src src-perl">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -3023,32 +2951,6 @@ NONMEM will output the following messages:</p>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>(ONCE PER INDIVIDUAL RECORD)
 </span></span><span style="display:flex;"><span>(ONCE<span style="color:#ff6ac1">/</span>IND<span style="color:#ff6ac1">.</span>REC<span style="color:#ff6ac1">.</span>)</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
-<p>
-NONMEM will output the following messages:</p>
-<div class="src src-text">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>PK SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
-</span></span><span style="display:flex;"><span>PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>DURING SIMULATION, ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD
-</span></span><span style="display:flex;"><span>OTHERWISE, ERROR SUBROUTINE CALLED ONCE PER INDIVIDUAL RECORD
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>ADVAN9 CALLED ONCE PER INDIVIDUAL RECORD.
-</span></span><span style="display:flex;"><span>ADVAN15 CALLED ONCE PER INDIVIDUAL RECORD.</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
@@ -6020,7 +5922,7 @@ routines.</p>
 </li>
 <li><a href="#headline-15">Probability density functions</a>
 </li>
-<li><a href="#calling_protocol">Calling protocol: CALLFL</a>
+<li><a href="#calling_protocol">CALLFL</a>
 </li>
 <li><a href="#verbatim">Verbatim code</a>
 </li>
