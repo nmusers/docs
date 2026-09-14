@@ -249,47 +249,48 @@ The kinetic equations for the  Two  Compartment  Linear  Model  with  First  Ord
 - Steady-state subroutine: SS4
 
 ** ADVAN5/7
-The general linear model is used for systems in which  a  drug is distributed between compartments according to linear processes.  ADVAN7 may be used when the eigenvalues of the  rate  constant  matrix are known to be real (which is true for many pharmacokinetic systems such as mammillary models). It is generally faster than ADVAN5.
+:PROPERTIES:
+:CUSTOM_ID: advan5_7
+:END:
+The general linear ODE model
+$$
+\frac{dA(t)}{dt} = K^TA(t)
+$$
+with \(A(t)\) an \(n\)-vector, including the [[file:/docs/user-guide/nmtran/data/#cmt][output compartment]], and
+the rate coefficient matrix \(K\) an \(n\times n\) matrix.
+~ADVAN5~ is applicable to general \(K\), while ~ADVAN7~
+assumes \(K\) has real eigenvalues, as in many PK systems such as
+mammillary models. In general ~ADVAN7~ is faster than ~ADVAN5~ in
+model fitting. See "[[https://github.com/nmusers/docs/tree/master/examples/control6][examples/control6]]" for a model example.
 
-- A  ~$MODEL~  record  is  required to describe the compartments and their attributes.  The ~$PK~ record (or, if  a  user-supplied  PK  routine  is used, the ~$MODEL~ record) describes how the compartments are linked.
+- The  ~$MODEL~  record  is  required to describe the compartments and their attributes.  The ~$PK~ record (or, if  a  user-supplied  PK  routine  is used, the ~$MODEL~ record) describes how the compartments are linked.
 
-- TRANS routine: TRANS1
+- TRANS routine: ~TRANS1~
 
-- Basic PK parameters with TRANS1 (assum m compartments in the system, including the output compartment.)
-      + Kij (rate constant from compartment i to compartment j)
-      + Ki0 (alternate name for Kim, where m is the output compartment.)
-      + The letter T may be used as a separator between the two
-        compartment numbers, e.g., KiTj.  The letter T is optional
-        when there is no ambiguity, but required when there are two
-        possible  interpretations  of  the  numbers  that follow K.
-        E.g., with 12 compartments, K111 is ambiguous.  It should be
-        coded  K1T11  or  K11T1, depending  if  it symbolizes the rate
-        constant from compartment 1 to compartment 11 or from
-        compartment 11 to compartment 1.
-- Additional PK parameters (for each compartment n in the system (n=1, ..., m)):
-      + Sn - Scale for nth compartment
-      + S0 - Alternate name for scale for output compartment
+- Basic PK parameters: ~Kij~: \(K_{ij}\), the rate constant compartment \(i\) to
+        \(j\). In particular, with \(n\) for the output compartment,
+        ~Kin~ can use alias ~Ki0~. One can use separator ~T~ to
+        disambiguate ~i~ and ~j~: ~K1T12~ for \(K_{1,12}\), and
+        ~K11T2~ for \(K_{11,2}\).
+- Additional PK parameters (for each compartment ~i~ in the system):
+      + ~Si~ - Scale for the i'th compartment;
+      + ~S0~ - alias for the output compartment scaling ~Sn~.
 
-- For each dosable compartment n in the system:
-      + Fn - Bioavailability for nth compartment
-      + Rn - Rate for nth compartment
-      + Dn - Duration for nth compartment
-      + ALAGn - Absorption lag for nth compartment
+- For each dosable compartment ~i~ in the system:
+      + ~Fi~ - Bioavailability for the i'th compartment;
+      + ~Ri~ - Rate for y compartment;
+      + ~Di~ - Duration for the i'th compartment;
+      + ~ALAGi~ - Absorption lag for the i'th compartment.
 
 - Other additional PK parameters:
-      + F0 - Output fraction (also called Fm, FO)
-      + XSCALE - Time scale
-      + MTIME(i) - Model event times
+      + ~FO~ - Output fraction (with alias ~Fn~, ~F0~)
+      + ~XSCALE~ - Time scale
+      + ~MTIME(i)~ - Model event times
 
-- Required PREDPP Library subroutines:
- + ADVAN5 - REXPON, RXSUBS
- + ADVAN7 - RRXPON, RXSUBS
+- Steady-state subroutine: ~SS5~
 
-- Steady-state subroutine: SS5
-
-- Analytical second derivatives for the Laplacian method are not
-  obtained  with  ADVAN5 and ADVAN7. Numerical differentiation are
-  used.
+- ~ADVAN5/ADVAN7~ do not support analytical 2nd-order derivatives for
+  the Laplacian method. Numerical differentiation are used instead.
 
 ** ADVAN6/8/13/14/16/18
 :PROPERTIES:

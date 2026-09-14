@@ -429,6 +429,9 @@ TIME     RATE     AMT     SS
 
 
 ** Compartment: CMT and PCMT
+:PROPERTIES:
+:CUSTOM_ID: cmt
+:END:
 The /observation compartment/ of a record contains the prediction for
 an observation. It can be either a scaled drug amount or a
 modification of this quantity. Every dose event is associated with a
@@ -438,6 +441,13 @@ these compartments, called /default observation compartment/ and
 defaults built into the model definition, some can be user-specified
 (see ~$MODEL~ record). Hereon unless otherwise specified by
 observation/dose compartment we we their defaults.
+
+Additionally every NONMEM model assumes a non-dosing /output
+compartment/. Of the total drug amount eliminated by the system, a fraction goes into
+this compartment. NONMEM uses parameter ~FO~ ("O" for output) for this
+fraction. Thus ~FO~ should be between 0 and 1, with default value 1.
+This additional output kinetics exists only when the output compartment is turned on (see
+below).
 
 *** On/Off of compartments
 Some compartments can be switched on or off at event record times.
@@ -480,17 +490,13 @@ collection), then one should construct an /other-type/ event record
 that simply turns the compartment on, by
 giving the compartment number in CMT.
 
-To turn a compartment off at a given time, one should construct
-an other-type event record that gives the negative value of the compartment
-number. This also applies to an observation record, provided the observation compartment is
-the output compartment or an /output-type/ compartment. In this case the compartment
-must be on at the event time, but it is turned off "immediately
-thereafter".  Thus one can record the observation of a urine concentration
-in an event record and conveniently turn off the urine collection
-using the same record [fn:5]. An output-type  compartment is initally
-off, may be turned on and off, and may not receive a dose. It must be
-turned on with an other-type event record in order start accumulating
-drug.
+To turn off compartment ~i~ at a given time, one should construct
+an other-type event (~EVID=2~) record with ~CMT~ equal to ~-i~. When
+an observation record also happens to be the output compartment or an /output-type/
+compartment (a non-dosing and initially off compartment), turning off
+the compartment at the event time implies the compartment becomes off
+"immediately thereafter". This enables recording the observation of a
+urine concentration and turning it off using the same record [fn:5].
 
 With a reset or reset-dose event record the on/off status of each
 compartment is reset to its initial status, and then if the
