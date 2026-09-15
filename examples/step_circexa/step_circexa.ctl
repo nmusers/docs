@@ -1,5 +1,5 @@
-; Use mtime to model periodic discontinuouities in $DES,
-; suggested by Sebastien Bihorel, Luann Phillips and Jill Fiedler-Kelly.
+;; Use mtime to model periodic discontinuouities in $DES,
+;; suggested by Sebastien Bihorel, Luann Phillips and Jill Fiedler-Kelly.
 $PROBLEM step_circadian
 ;; -----------------------------------------------------------------------------
 ;; PURPOSE:

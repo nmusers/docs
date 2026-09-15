@@ -6,12 +6,43 @@ bookCollapseSection: true
 weight: 14
 ---
 
-* Data and model
-In this part we go through NONMEM's data and model specification, as
-well as interpret sample outputs, using NM-TRAN (NONMEM
-TRANslator) syntax, a (standalone) NONMEM component for input parsing.
-Almost all modern NONMEM models are specified using NM-TRAN.
+* Mental model of NONMEM runs
+:PROPERTIES:
+:CUSTOM_ID: mental-model
+:END:
+In this part we go through NONMEM's data and model specification and
+outputs. We use the syntax of NM-TRAN (NONMEM TRANslator), a
+standalone component of NONMEM for input parsing that is
+essentially used in all modern models. However, before that we would
+like to present a /mental model/ to help user understand how NONMEM processes input.
 
+NONMEM treats input as a series of /events/. User can
+specify events through a data file or in the model. NONMEM processes
+these events one after another, in the order of the event time. After
+finishing one subject's events, it moves to next subject and repeat [fn:3].
+
+By "processing", we mean that NONMEM calls an internal program ~PRED~, or
+its specialized (for popPK models) version ~PK~ and ~ERROR~. These
+programs handle how subject-level and observation-level information are
+generated (in simulation) and assembled (in analysis, i.e. parameter
+estimation). They also move the system from one event to next. The
+bottom line is, NONMEM calls ~PRED~ (or ~PK~ & ~ERROR~) on every
+event, one after another. This is often referred in documentation as "~PK~
+call" and "~PRED~ call".
+
+When the subject-level and observation-level information changes, the
+above event-by-event calls will be repeated. This is typical during
+parameter estimation: when population parameters are
+be searched and updated, NONMEM will process the events over and over. The loop is repeated
+until the termination of the estimation. Therefore, during a run,
+NONMEM often calls ~PRED~ (or ~PK~ & ~ERROR~) many times.
+
+#+caption: Figure 3.0. NONMEM processes subject events ordered in time. On each event it calls program ~PK~ and ~ERROR~. The process is repeated during parameter estimation, symbolized here as the population parameter /\theta/ is updated through estimation iterations. At the moment NONMEM is processing event 4 of the first subject, during estimation iteration /i/.
+#+ATTR_HTML: :style margin:20px 20px 20px 0px;
+@@html:<img src="/docs/img/nm-process.png">@@
+@@latex:\includegraphics[width=0.8\textwidth]{nm-process.png}@@
+
+* Data and model
 NM-TRAN takes its input from two files:
 - NM-TRAN control stream,
 - NM-TRAN data set.
@@ -58,3 +89,7 @@ comma delimited file format, so you can check how NONMEM interprets
 the input data. The records in FDATA.csv may differ from those in
 FDATA in the following cases. If REPL/REPL_ is used, the replicated
 form of the data will appear in FDATA.csv.
+
+[fn:3] NONMEM allows customization of event processing: user can
+choose to skip events or treat events differently. This does not
+broadly change the mental picture we are describing.

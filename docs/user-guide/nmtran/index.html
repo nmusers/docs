@@ -8,28 +8,25 @@ https://github.com/alex-shpak/hugo-book
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content=" Data and model In this part we go through NONMEM&#39;s data and model specification, as well as interpret sample outputs, using NM-TRAN (NONMEM TRANslator) syntax, a (standalone) NONMEM component for input parsing. Almost all modern NONMEM models are specified using NM-TRAN.
-NM-TRAN takes its input from two files:
-NM-TRAN control stream, NM-TRAN data set. and creates three things: a NONMEM data set, a NONMEM control stream 1, and necessary subroutines. For example, it uses the data file input and creates NONMEM data file FDATA 2. The table below lists some files that NM-TRNA generates.
+<meta name="description" content=" Mental model of NONMEM runs In this part we go through NONMEM&#39;s data and model specification and outputs. We use the syntax of NM-TRAN (NONMEM TRANslator), a standalone component of NONMEM for input parsing that is essentially used in all modern models. However, before that we would like to present a mental model to help user understand how NONMEM processes input.
+NONMEM treats input as a series of events. User can specify events through a data file or in the model. NONMEM processes these events one after another, in the order of the event time. After finishing one subject&#39;s events, it moves to next subject and repeat 1.
 ">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#2e3440">
 <meta name="color-scheme" content="light dark"><meta property="og:url" content="https://nmusers.github.io/docs/user-guide/nmtran/">
 	<meta property="og:site_name" content="NONMEM Documentation">
 	<meta property="og:title" content="Data and model">
-	<meta property="og:description" content="Data and model In this part we go through NONMEM&#39;s data and model specification, as well as interpret sample outputs, using NM-TRAN (NONMEM TRANslator) syntax, a (standalone) NONMEM component for input parsing. Almost all modern NONMEM models are specified using NM-TRAN.
-NM-TRAN takes its input from two files:
-NM-TRAN control stream, NM-TRAN data set. and creates three things: a NONMEM data set, a NONMEM control stream 1, and necessary subroutines. For example, it uses the data file input and creates NONMEM data file FDATA 2. The table below lists some files that NM-TRNA generates.">
+	<meta property="og:description" content="Mental model of NONMEM runs In this part we go through NONMEM&#39;s data and model specification and outputs. We use the syntax of NM-TRAN (NONMEM TRANslator), a standalone component of NONMEM for input parsing that is essentially used in all modern models. However, before that we would like to present a mental model to help user understand how NONMEM processes input.
+NONMEM treats input as a series of events. User can specify events through a data file or in the model. NONMEM processes these events one after another, in the order of the event time. After finishing one subject&#39;s events, it moves to next subject and repeat 1.">
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="website">
 
 
 	<meta itemprop="name" content="Data and model">
-	<meta itemprop="description" content="Data and model In this part we go through NONMEM&#39;s data and model specification, as well as interpret sample outputs, using NM-TRAN (NONMEM TRANslator) syntax, a (standalone) NONMEM component for input parsing. Almost all modern NONMEM models are specified using NM-TRAN.
-NM-TRAN takes its input from two files:
-NM-TRAN control stream, NM-TRAN data set. and creates three things: a NONMEM data set, a NONMEM control stream 1, and necessary subroutines. For example, it uses the data file input and creates NONMEM data file FDATA 2. The table below lists some files that NM-TRNA generates.">
+	<meta itemprop="description" content="Mental model of NONMEM runs In this part we go through NONMEM&#39;s data and model specification and outputs. We use the syntax of NM-TRAN (NONMEM TRANslator), a standalone component of NONMEM for input parsing that is essentially used in all modern models. However, before that we would like to present a mental model to help user understand how NONMEM processes input.
+NONMEM treats input as a series of events. User can specify events through a data file or in the model. NONMEM processes these events one after another, in the order of the event time. After finishing one subject&#39;s events, it moves to next subject and repeat 1.">
 	<meta itemprop="dateModified" content="2026-02-10T13:43:04-08:00">
-	<meta itemprop="wordCount" content="393">
+	<meta itemprop="wordCount" content="683">
 
 <title>Data and model • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -38,7 +35,7 @@ NM-TRAN control stream, NM-TRAN data set. and creates three things: a NONMEM dat
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.7ba85f16e5b324692b0418c1f1f60dcde379d33c17c1fabf831dedd0309d5f78.js" integrity="sha256-e6hfFuWzJGkrBBjB8fYNzeN50zwXwfq/gx3t0DCdX3g=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.ce57905b2d1628e566ae32e1f4a9ee14c5467d73fdd5a7f6cd5b4e4603582db4.js" integrity="sha256-zleQWy0WKOVmrjLh9KnuFMVGfXP91af2zVtORgNYLbQ=" crossorigin="anonymous"></script>
 <link rel="alternate" type="application/rss+xml" href="https://nmusers.github.io/docs/user-guide/nmtran/index.xml" title="Data and model" />
 
   
@@ -1530,7 +1527,9 @@ NM-TRAN control stream, NM-TRAN data set. and creates three things: a NONMEM dat
   
 <nav id="TableOfContents">
 <ul>
-<li><a href="#headline-1">Data and model</a>
+<li><a href="#mental-model">Mental model of NONMEM runs</a>
+</li>
+<li><a href="#headline-2">Data and model</a>
 </li>
 </ul>
 </nav>
@@ -1545,24 +1544,59 @@ NM-TRAN control stream, NM-TRAN data set. and creates three things: a NONMEM dat
       
       
   <article class="markdown book-article">
-<div id="outline-container-headline-1" class="outline-2">
-<h2 id="headline-1">
+<div id="outline-container-mental-model" class="outline-2">
+<h2 id="mental-model">
+Mental model of NONMEM runs
+</h2>
+<div id="outline-text-mental-model" class="outline-text-2">
+<p>In this part we go through NONMEM&#39;s data and model specification and
+outputs. We use the syntax of NM-TRAN (NONMEM TRANslator), a
+standalone component of NONMEM for input parsing that is
+essentially used in all modern models. However, before that we would
+like to present a <em>mental model</em> to help user understand how NONMEM processes input.</p>
+<p>
+NONMEM treats input as a series of <em>events</em>. User can
+specify events through a data file or in the model. NONMEM processes
+these events one after another, in the order of the event time. After
+finishing one subject&#39;s events, it moves to next subject and repeat <sup class="footnote-reference"><a id="footnote-reference-1" href="#footnote-1">1</a></sup>.</p>
+<p>
+By &#34;processing&#34;, we mean that NONMEM calls an internal program <code>PRED</code>, or
+its specialized (for popPK models) version <code>PK</code> and <code>ERROR</code>. These
+programs handle how subject-level and observation-level information are
+generated (in simulation) and assembled (in analysis, i.e. parameter
+estimation). They also move the system from one event to next. The
+bottom line is, NONMEM calls <code>PRED</code> (or <code>PK</code> &amp; <code>ERROR</code>) on every
+event, one after another. This is often referred in documentation as &#34;<code>PK</code>
+call&#34; and &#34;<code>PRED</code> call&#34;.</p>
+<p>
+When the subject-level and observation-level information changes, the
+above event-by-event calls will be repeated. This is typical during
+parameter estimation: when population parameters are
+be searched and updated, NONMEM will process the events over and over. The loop is repeated
+until the termination of the estimation. Therefore, during a run,
+NONMEM often calls <code>PRED</code> (or <code>PK</code> &amp; <code>ERROR</code>) many times.</p>
+<figure>
+<p style="margin:20px 20px 20px 0px;"><img src="/docs/img/nm-process.png"/>
+</p>
+<figcaption>
+Figure 3.0. NONMEM processes subject events ordered in time. On each event it calls program <code>PK</code> and <code>ERROR</code>. The process is repeated during parameter estimation, symbolized here as the population parameter <em>θ</em> is updated through estimation iterations. At the moment NONMEM is processing event 4 of the first subject, during estimation iteration <em>i</em>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div id="outline-container-headline-2" class="outline-2">
+<h2 id="headline-2">
 Data and model
 </h2>
-<div id="outline-text-headline-1" class="outline-text-2">
-<p>In this part we go through NONMEM&#39;s data and model specification, as
-well as interpret sample outputs, using NM-TRAN (NONMEM
-TRANslator) syntax, a (standalone) NONMEM component for input parsing.
-Almost all modern NONMEM models are specified using NM-TRAN.</p>
-<p>
-NM-TRAN takes its input from two files:</p>
+<div id="outline-text-headline-2" class="outline-text-2">
+<p>NM-TRAN takes its input from two files:</p>
 <ul>
 <li>NM-TRAN control stream,</li>
 <li>NM-TRAN data set.</li>
 </ul>
 <p>and creates three things: a <em>NONMEM data set</em>, a <em>NONMEM control
-stream</em> <sup class="footnote-reference"><a id="footnote-reference-1" href="#footnote-1">1</a></sup>, and necessary subroutines. For example, it uses the data file input and creates NONMEM data file FDATA
-<sup class="footnote-reference"><a id="footnote-reference-2" href="#footnote-2">2</a></sup>. The table below lists some files that NM-TRNA generates.</p>
+stream</em> <sup class="footnote-reference"><a id="footnote-reference-2" href="#footnote-2">2</a></sup>, and necessary subroutines. For example, it uses the data file input and creates NONMEM data file FDATA
+<sup class="footnote-reference"><a id="footnote-reference-3" href="#footnote-3">3</a></sup>. The table below lists some files that NM-TRNA generates.</p>
 <table>
 <thead>
 <tr>
@@ -1625,6 +1659,14 @@ PREDPP in the next part.</p>
 <div class="footnote-definition">
 <sup id="footnote-1"><a href="#footnote-reference-1">1</a></sup>
 <div class="footnote-body">
+<p>NONMEM allows customization of event processing: user can
+choose to skip events or treat events differently. This does not
+broadly change the mental picture we are describing.</p>
+</div>
+</div>
+<div class="footnote-definition">
+<sup id="footnote-2"><a href="#footnote-reference-2">2</a></sup>
+<div class="footnote-body">
 <p>Before NM-TRAN was developed NONMEM requires input files in a
 less intuitive fashion. These files consist &#34;NONMEM control stream&#34;. Nowadays almost all NONMEM models are based on input
 files using NM-TRAN. Therefore in this document unless specified we
@@ -1634,7 +1676,7 @@ section and <a href="/docs/reference-manual/files/#nm_control_stream">Reference 
 </div>
 </div>
 <div class="footnote-definition">
-<sup id="footnote-2"><a href="#footnote-reference-2">2</a></sup>
+<sup id="footnote-3"><a href="#footnote-reference-3">3</a></sup>
 <div class="footnote-body">
 <p>With NONMEM 7.5, an additional file, FDATA.csv is produced that
 outputs the contents of its input data file (typically FDATA) in a
@@ -1717,7 +1759,9 @@ form of the data will appear in FDATA.csv.</p>
   
 <nav id="TableOfContents">
 <ul>
-<li><a href="#headline-1">Data and model</a>
+<li><a href="#mental-model">Mental model of NONMEM runs</a>
+</li>
+<li><a href="#headline-2">Data and model</a>
 </li>
 </ul>
 </nav>

@@ -546,33 +546,69 @@ Input argument:
 
 Output argument:
 
--  IDEF
-      ERROR  should store values in IDEF only when ~ICALL=1~.  A value of
-      1 in IDEF(1) indicates that ERROR will store the  derivatives  of
-      log  y  in HH (which causes PREDPP to multiply each element of HH
-      by F).  That is, PREDPP understands that the "error in log y"  is
-      modeled.
+- ~IDEF~: stores values only when ~ICALL=1~.  A value of
+  + ~IDEF(1)==1~ indicates that ERROR will store the  derivatives  of
+      \(\log(y)\)  in ~HH~ (which causes PREDPP to multiply each element of HH
+      by F).  That is, PREDPP understands that the error is
+      modeled in log scale.
+  + ~IDEF(2)~ specifies the [[file:/docs/reference-manual/abbr/#calling_protocol][calling protocol]] (see also [[file:/docs/user-guide/nmtran/#mental-model][NONMEM process
+    model]],  [[file:/docs/reference-manual/data/#call][~CALL~ data item]]), applicable only to calls with
+    ~ICALL=2~. Note that at ~ICALL=4~ (simulation) ~ERROR~ is always
+    called. This is different from ~PK~: ~PK~ with ~ICALL=4~ uses the same
+    calling-protocol of ~ICALL=2~. Note also a calling-protocol that
+    skips records should not be used when the ~ERROR~ call changes
+    ~F~.
 
-      The value in IDEF(2) describes when ERROR should be called:
-        + -1 call with every event record.
-        +  0 call once per observation record.
-        +  1 call once per individual record.
-        +  2 call once per problem.
+    # TODO:
+# Often, none of the EPS derivatives depend on concomitant variables
+# whose values vary within an individual record i.e. vary over time.
+# This is true if y is given by (1) or (6), for example, or if log y is
+# given by (5). This may not be true if y is given by (2); it depends on
+# whether the value of Z varies over time. Unless there is only one
+# observation per individual, this generally is not true if y is given
+# by (3) or (4), since when time varies, f(P) varies, and time itself is
+# to be regarded as a concomitant variable. When though this is true,
+# then the values stored in the HH array must be the same for each
+# observation event record of a given individual record (for THETA and
+# ETA fixed). Considerable computation time can be saved; PREDPP need
+# call ERROR only once per individual record, with the first event
+# record only (for any given values of the THETA and ETA arrays). The
+# user can request this calling-protocol by setting IDEF(2)=1. Since the
+# first event record need not be an observation record, care must be
+# taken that HH is indeed set with this record, and that any data items
+# needed for this purpose are contained in that record.
 
-      The  value in IDEF(3) describes whether ERROR uses derivatives of
+# Notice that with y given by (1), for example, the EPS-derivatives do
+# not depend on any concomitant variables, nor do they depend on ETA or
+# THETA. In such a case the values stored in the HH array must be the
+# same for each observation event record of the entire data set; indeed,
+# these values could be computed only once during the entire NONMEM
+# problem. If at ~ICALL=1~, IDEF(2) is set to 2, then at ~ICALL=2~ values
+# for HH will always be taken to be (constant) values stored in HH at
+# ~ICALL=1~. Note that the HH array is initialized to zero immediately
+# before the call to ERROR with ~ICALL=1~.
+
+# If log y is given by (5), the derivatives of log y with respect to the
+# EPS are particularly simple; they satisfy the requirement for using
+# IDEF(2)=2. By setting IDEF(1)=1, the user is specifying that when
+# ~ICALL=2~, the derivatives of log y are to be found in HH (see section
+# B.1). By also setting IDEF(2)=2, these derivatives are actually taken
+# to be the values stored in HH at ~ICALL=1~.
+
+
+  + ~IDEF(3)~ describes whether ERROR uses derivatives of
       compartment amounts (i.e. whether compartment amounts  themselves
       are used as random variables in arithmetic statements in ERROR).
-        + -1 ERROR may use derivatives of A.
-        +  0 ERROR does not use derivatives A.
-        +  1 ERROR does use derivatives of A.
+    - ~IDEF(3)=-1~ (default): ERROR may use derivatives of A.
+    - ~IDEF(3)= 0~: ERROR does not use derivatives A.
+    - ~IDEF(3)= 1~: ERROR does use derivatives of A.
 
-      The  default  used  by PREDPP is IDEF(3)=-1.  However, when ERROR
-      does not use A, then if IDEF(3) is set to  0,  PREDPP  can  avoid
-      some  time-consuming processing.  Indeed, when ~$ERROR~ abbreviated
-      code is supplied, and there is  no  reference  to  a  compartment
-      amount  A(n) (as a random variable in an arithmetic statement) in
-      the abbreviated code (or to its derivatives  in  verbatim  code),
-      then NM-TRAN sets IDEF(3)=0.
+    Note that when ERROR does not use A, then if IDEF(3) is set to  0,
+    PREDPP  can  avoid some  time-consuming processing.  Indeed, when
+    ~$ERROR~ abbreviated code is supplied, and there is  no  reference
+    to  a  compartment amount  A(n) (as a random variable in an
+    arithmetic statement) in the abbreviated code (or to its
+    derivatives  in  verbatim  code), then NM-TRAN sets IDEF(3)=0.
 
 Input/Output argument:
 
@@ -613,80 +649,7 @@ Input/Output argument:
 Also  see [[file:/docs/reference-manual/api/modules/][modules]] for NONMEM  read-only  modules (of the form ROCMn), NONMEM-PRED
  modules (of the form NMPRDn), and PREDPP  read-only  modules  (of the form PROCMn).
 
-*** Calling protocol
-:PROPERTIES:
-:CUSTOM_ID: error-calling-protocol
-:END:
-As the pharmacokinetic system is advanced, ERROR is called one or more
-times, each time with some argument record. The event records comprise
-these argument records, and are passed to ERROR in time order. The
-simulation and/or data analytic computations will normally be done
-correctly if routine ERROR is called with one event record after
-another (within an individual record), no event records being skipped,
-and no event record being repeated. This is the default. However,
-PREDPP can implement a few different protocols for calling ERROR. A
-protocol is specified by setting IDEF(2) to various values at ~ICALL=1~
-(for more about IDEF, see section B.1). The default is IDEF(2)=-1
-(call with every event record), described above. The ERROR routine can
-be called only with each observation event record of the individual
-record. If this more limited sequence of calls is desired, this can be
-accomplished by setting IDEF(2)=0. Note, though, that in this case,
-IDEF(2) must be explicitly set to 0.
 
-There are two general considerations to be remembered about
-calling-protocols with ERROR. First, no matter what calling-protocol
-is used, it applies only to calls to ERROR at ~ICALL=2~; at ~ICALL=4~
-(i.e. during simulation) ERROR is always called with every event
-record. [This differs from calling-protocols with PK, where whatever
-calling-protocol is used for PK at ~ICALL=2~ is the same as that used at
-~ICALL=4~.] Second, a calling-protocol that limits the sequence of calls
-to ERROR should not be requested when the value of F returned by ERROR
-may differ from the value input to ERROR.
-
-Often, none of the EPS derivatives depend on concomitant variables
-whose values vary within an individual record i.e. vary over time.
-This is true if y is given by (1) or (6), for example, or if log y is
-given by (5). This may not be true if y is given by (2); it depends on
-whether the value of Z varies over time. Unless there is only one
-observation per individual, this generally is not true if y is given
-by (3) or (4), since when time varies, f(P) varies, and time itself is
-to be regarded as a concomitant variable. When though this is true,
-then the values stored in the HH array must be the same for each
-observation event record of a given individual record (for THETA and
-ETA fixed). Considerable computation time can be saved; PREDPP need
-call ERROR only once per individual record, with the first event
-record only (for any given values of the THETA and ETA arrays). The
-user can request this calling-protocol by setting IDEF(2)=1. Since the
-first event record need not be an observation record, care must be
-taken that HH is indeed set with this record, and that any data items
-needed for this purpose are contained in that record.
-
-Notice that with y given by (1), for example, the EPS-derivatives do
-not depend on any concomitant variables, nor do they depend on ETA or
-THETA. In such a case the values stored in the HH array must be the
-same for each observation event record of the entire data set; indeed,
-these values could be computed only once during the entire NONMEM
-problem. If at ~ICALL=1~, IDEF(2) is set to 2, then at ~ICALL=2~ values
-for HH will always be taken to be (constant) values stored in HH at
-~ICALL=1~. Note that the HH array is initialized to zero immediately
-before the call to ERROR with ~ICALL=1~.
-
-If log y is given by (5), the derivatives of log y with respect to the
-EPS are particularly simple; they satisfy the requirement for using
-IDEF(2)=2. By setting IDEF(1)=1, the user is specifying that when
-~ICALL=2~, the derivatives of log y are to be found in HH (see section
-B.1). By also setting IDEF(2)=2, these derivatives are actually taken
-to be the values stored in HH at ~ICALL=1~.
-
-Even when IDEF(2)=0, 1, or 2, a call to ERROR with any given event record can be forced with
-the use of the CALL data item.
-
-IDEF(2) may be set to -1, or not set at all, i.e. this is the default. This results in ERROR being
-called with every event record (see above).
-
-NM-TRAN abbreviated code provides a reserved variable [[file:/docs/reference-manual/abbr/#calling_protocol][CALLFL]] and
-corresponding pseudo-statements to specify the value for
-IDEF.
 
 ** INFN
 :PROPERTIES:
@@ -1194,17 +1157,20 @@ Input argument:
 
 Output argument:
 
-- IDEF: stores values only when ~ICALL=1~. Values may be stored in the following elements:
+- ~IDEF~: stores values only when ~ICALL=1~. Values may be stored in the following elements:
   + ~IDEF(1,1)=-9~  (required)
-  + ~IDEF(1,2)~ is the call limiting element (compare ~$PK~'s CALLFL).
-    - ~IDEF(1,2)=-2~:  call  with every event record and at additional and lagged dose times.
-    - ~IDEF(1,2)=-1~: call with every event record (default)
-    - ~IDEF(1,2)= 0~: call with first event record and new TIME values
-    - ~IDEF(1,2)= 1~: call once per individual record
+  + ~IDEF(1,2)~ specifies the [[file:/docs/reference-manual/abbr/#calling_protocol][calling protocol]] (see also [[file:/docs/user-guide/nmtran/#mental-model][NONMEM
+    process model]],  [[file:/docs/reference-manual/data/#call][~CALL~ data item]]).
+    Setting ~IDEF(1,2)~ to one of the [[file:/docs/reference-manual/abbr/#calling_protocol][CALLFL]] values during ~ICALL=1~
+    enforces corresponding call protocol. For exampmle, often PK parameters do not vary over time. In this case array ~GG~, the PK output, remains the same for each
+    event record of an individual record (for fixed ~THETA~ and ~ETA~).
+    Thus we can save computation by calling PK only once per
+    individual record, on the first event record only. We can request this
+    calling-protocol by setting ~IDEF(1,2)=1~.
+
     Compartment initialization may be performed by routine PK.
 
-    An initial steady state may be requested by routine PK;
-
+    An initial steady state may be requested by routine PK.
     (See [[file:/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod][Initial Steady State: I_SS,ISSMOD]]).
 
   + ~IDEF(1,3)~ describes whether PK performs  compartment
@@ -1270,78 +1236,7 @@ Output argument:
     while GG(k,1,1)=1 indicates ~GG(k,1,1)~ will store a log-transformed
     parameter value.
 
-Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/#nm-pred-mod][NONMEM-PRED modules, and  PREDPP modules]].
-
-*** Calling protocol
-:PROPERTIES:
-:CUSTOM_ID: pk-calling-protocol
-:END:
-As the pharmacokinetic system is advanced, PK is called one or more
-times, each time with some argument record. The event records comprise
-these argument records, and are passed to PK in time order. The
-simulation and/or data analytic computations will normally be done
-correctly if routine PK is called with one event record after another
-(within an individual record), no event records being skipped, and no
-event record being repeated. This is the default. However, PREDPP can
-implement a few different protocols for calling PK. A protocol is
-specified by setting IDEF(1,2) to one of various values at ~ICALL=1~
-(for more about IDEF, see section G). For example, the PK routine can
-be called only with the first event record of the individual record
-and with every event record thereafter where the time data item
-differs from the time data item of the previous event record. If this
-more limited sequence of calls is desired, this can be accomplished by
-setting IDEF(1,2)=0. Note, though, that in this case, IDEF(1,2) must
-be explicitly set to 0 because 0 is not the default.
-
-Often, none of the basic or additional PK parameters depend on
-concomitant variables whose values vary within an individual record,
-i.e. vary over time. In this situation the information output by PK,
-i.e. the GG array, is the same for each event record of an individual
-record (for fixed THETA and ETA). Considerable computation time can be
-saved; PREDPP need call PK only once per individual record, with the
-first event record only (for any given values of the THETA and ETA
-arrays). The values of continuously acting PK parameters computed with
-this call can be assumed to hold over all state-time intervals for the
-individual record, and the values of discretely acting PK parameters
-can be assumed to hold at each state time for the record. The user can
-request this calling-protocol by setting IDEF(1,2)=1.
-
-When the data are from a single subject, PREDPP treats all event
-records in the entire data set as though they are associated with the
-same subject. (This is a consequence of the single-subject assumption;
-see section IV.A.) In particular, suppose that every call to PK with a
-different event record results in the same output from PK (for fixed
-THETA). Then only one call is necessary, a call with the first event
-record in the entire data set. The values of continuously acting PK
-parameters computed at this call can be assumed to hold over all
-state-time intervals for the entire data set, and the values of
-discretely acting PK parameters can be assumed to hold at all state
-times for the entire data set. Setting IDEF(1,2) to 1 has this effect.
-
-Even when IDEF(1,2)=0 or 1, a call to PK with any given event record can be forced with the use
-of the CALL data item.
-
-The protocol where PK is called once with every event record can be
-specified by setting IDEF(1,2) to -1, or by not setting IDEF(1,2) at
-all, i.e. this protocol is the default. If it is desired that, in
-addition, the values of PK parameters at any nonevent dose time t be
-computed with access to both the argument record associated with t and
-the event record describing the dose (see section B.2), set
-IDEF(1,2)=-2. This has the effect that PK may be called repeatedly
-with the same event record (for if t is a nonevent dose time, and s is
-the subsequent event time, PK is called with the event record for s at
-both times t and s). The primary use of this protocol is so that the
-values of certain discretely acting PK parameters, the bioavailability
-fractions and duration parameters, can always be computed with access
-to useful dose-related concomitant information contained in the dose
-record, such as the type of preparation, even when the dose is an
-additional or lagged dose. Another use of this protocol is to cause
-PREDPP to call PK at the time specified by a model event time
-parameter; this protocol is required with such parameters.
-
-NM-TRAN abbreviated code provides a reserved variable [[file:/docs/reference-manual/abbr/#calling_protocol][CALLFL]] and
-corresponding pseudo-statements to specify the value for
-IDEF.
+  Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/#nm-pred-mod][NONMEM-PRED modules, and  PREDPP modules]].
 
 ** PRED
 :PROPERTIES:

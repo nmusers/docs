@@ -31,7 +31,7 @@ CRIT Modifies the computation of the default objective function. CONTR Specifies
 User-defined subroutines in NONMEM
 CRIT Modifies the computation of the default objective function. CONTR Specifies the contribution to the objective function of a level 1 (&#34;L1&#34;) record. CCONTR Specifies the contribution to the objective function of a level 2 (&#34;L2&#34;) record. MIX Describes the mixing parameter of a mixture model. PRIOR Allows a Bayesian penalty to be included in the objective function. SPTWO SPTWO can be used to redefine the RES and WRES items for observation records. THETAI THETAI is used to transform initial THETAs. THETAR THETAR is used to transform final THETAs for reporting. User-defined subroutines for PREDPP">
 	<meta itemprop="dateModified" content="2026-09-12T17:17:23-07:00">
-	<meta itemprop="wordCount" content="18674">
+	<meta itemprop="wordCount" content="17313">
 
 <title>Subroutines • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -40,7 +40,7 @@ CRIT Modifies the computation of the default objective function. CONTR Specifies
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.7ba85f16e5b324692b0418c1f1f60dcde379d33c17c1fabf831dedd0309d5f78.js" integrity="sha256-e6hfFuWzJGkrBBjB8fYNzeN50zwXwfq/gx3t0DCdX3g=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.ce57905b2d1628e566ae32e1f4a9ee14c5467d73fdd5a7f6cd5b4e4603582db4.js" integrity="sha256-zleQWy0WKOVmrjLh9KnuFMVGfXP91af2zVtORgNYLbQ=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -1546,10 +1546,6 @@ CRIT Modifies the computation of the default objective function. CONTR Specifies
 <li><a href="#des-ref">DES</a>
 </li>
 <li><a href="#error">ERROR</a>
-<ul>
-<li><a href="#error-calling-protocol">Calling protocol</a>
-</li>
-</ul>
 </li>
 <li><a href="#infn">INFN</a>
 </li>
@@ -1558,10 +1554,6 @@ CRIT Modifies the computation of the default objective function. CONTR Specifies
 <li><a href="#model">MODEL</a>
 </li>
 <li><a href="#PK">PK</a>
-<ul>
-<li><a href="#pk-calling-protocol">Calling protocol</a>
-</li>
-</ul>
 </li>
 <li><a href="#pred">PRED</a>
 <ul>
@@ -1569,7 +1561,7 @@ CRIT Modifies the computation of the default objective function. CONTR Specifies
 </li>
 <li><a href="#simeta">SIMETA</a>
 </li>
-<li><a href="#headline-18">GETETA</a>
+<li><a href="#headline-16">GETETA</a>
 </li>
 <li><a href="#error-recovery">Error recovery</a>
 </li>
@@ -1595,15 +1587,15 @@ CRIT Modifies the computation of the default objective function. CONTR Specifies
 </li>
 </ul>
 </li>
-<li><a href="#headline-28">FSUBS</a>
+<li><a href="#headline-26">FSUBS</a>
 <ul>
-<li><a href="#headline-29"><code class="verbatim">FSIZESR</code></a>
+<li><a href="#headline-27"><code class="verbatim">FSIZESR</code></a>
 </li>
-<li><a href="#headline-30"><code class="verbatim">NMPRD4</code>, <code class="verbatim">PRINFN</code>, and <code class="verbatim">DECLAREVARIABLES</code></a>
+<li><a href="#headline-28"><code class="verbatim">NMPRD4</code>, <code class="verbatim">PRINFN</code>, and <code class="verbatim">DECLAREVARIABLES</code></a>
 </li>
-<li><a href="#headline-31"><code class="verbatim">THETAISUB</code>, <code class="verbatim">THETARSUB</code></a>
+<li><a href="#headline-29"><code class="verbatim">THETAISUB</code>, <code class="verbatim">THETARSUB</code></a>
 </li>
-<li><a href="#headline-32"><code class="verbatim">MUMODEL2</code></a>
+<li><a href="#headline-30"><code class="verbatim">MUMODEL2</code></a>
 </li>
 </ul>
 </li>
@@ -2460,35 +2452,40 @@ with  the  particular record.</li>
 <p>Output argument:</p>
 <ul>
 <li>
-<p>IDEF
-    ERROR  should store values in IDEF only when <code>ICALL=1</code>.  A value of
-    1 in IDEF(1) indicates that ERROR will store the  derivatives  of
-    log  y  in HH (which causes PREDPP to multiply each element of HH
-    by F).  That is, PREDPP understands that the &#34;error in log y&#34;  is
-    modeled.</p>
-<p>
-    The value in IDEF(2) describes when ERROR should be called:</p>
+<p><code>IDEF</code>: stores values only when <code>ICALL=1</code>.  A value of</p>
 <ul>
-<li>-1 call with every event record.</li>
-<li>0 call once per observation record.</li>
-<li>1 call once per individual record.</li>
-<li>2 call once per problem.</li>
+<li><code>IDEF(1)==1</code> indicates that ERROR will store the  derivatives  of
+  \(\log(y)\)  in <code>HH</code> (which causes PREDPP to multiply each element of HH
+  by F).  That is, PREDPP understands that the error is
+  modeled in log scale.</li>
+<li>
+<p><code>IDEF(2)</code> specifies the <a href="/docs/reference-manual/abbr/#calling_protocol">calling protocol</a> (see also <a href="/docs/user-guide/nmtran/#mental-model">NONMEM process
+model</a>,  <a href="/docs/reference-manual/data/#call"><code>CALL</code> data item</a>), applicable only to calls with
+<code>ICALL=2</code>. Note that at <code>ICALL=4</code> (simulation) <code>ERROR</code> is always
+called. This is different from <code>PK</code>: <code>PK</code> with <code>ICALL=4</code> uses the same
+calling-protocol of <code>ICALL=2</code>. Note also a calling-protocol that
+skips records should not be used when the <code>ERROR</code> call changes
+<code>F</code>.</p>
+</li>
 </ul>
-<p>The  value in IDEF(3) describes whether ERROR uses derivatives of
-    compartment amounts (i.e. whether compartment amounts  themselves
-    are used as random variables in arithmetic statements in ERROR).</p>
+</li>
+</ul>
 <ul>
-<li>-1 ERROR may use derivatives of A.</li>
-<li>0 ERROR does not use derivatives A.</li>
-<li>1 ERROR does use derivatives of A.</li>
+<li>
+<p><code>IDEF(3)</code> describes whether ERROR uses derivatives of
+  compartment amounts (i.e. whether compartment amounts  themselves
+  are used as random variables in arithmetic statements in ERROR).</p>
+<ul>
+<li><code>IDEF(3)=-1</code> (default): ERROR may use derivatives of A.</li>
+<li><code>IDEF(3)= 0</code>: ERROR does not use derivatives A.</li>
+<li><code>IDEF(3)= 1</code>: ERROR does use derivatives of A.</li>
 </ul>
-<p>The  default  used  by PREDPP is IDEF(3)=-1.  However, when ERROR
-    does not use A, then if IDEF(3) is set to  0,  PREDPP  can  avoid
-    some  time-consuming processing.  Indeed, when <code>$ERROR</code> abbreviated
-    code is supplied, and there is  no  reference  to  a  compartment
-    amount  A(n) (as a random variable in an arithmetic statement) in
-    the abbreviated code (or to its derivatives  in  verbatim  code),
-    then NM-TRAN sets IDEF(3)=0.</p>
+<p>Note that when ERROR does not use A, then if IDEF(3) is set to  0,
+PREDPP  can  avoid some  time-consuming processing.  Indeed, when
+<code>$ERROR</code> abbreviated code is supplied, and there is  no  reference
+to  a  compartment amount  A(n) (as a random variable in an
+arithmetic statement) in the abbreviated code (or to its
+derivatives  in  verbatim  code), then NM-TRAN sets IDEF(3)=0.</p>
 </li>
 </ul>
 <p>Input/Output argument:</p>
@@ -2527,83 +2524,6 @@ with  the  particular record.</li>
 </ul>
 <p>Also  see <a href="/docs/reference-manual/api/modules/">modules</a> for NONMEM  read-only  modules (of the form ROCMn), NONMEM-PRED
  modules (of the form NMPRDn), and PREDPP  read-only  modules  (of the form PROCMn).</p>
-<div id="outline-container-error-calling-protocol" class="outline-4">
-<h4 id="error-calling-protocol">
-Calling protocol
-</h4>
-<div id="outline-text-error-calling-protocol" class="outline-text-4">
-<p>As the pharmacokinetic system is advanced, ERROR is called one or more
-times, each time with some argument record. The event records comprise
-these argument records, and are passed to ERROR in time order. The
-simulation and/or data analytic computations will normally be done
-correctly if routine ERROR is called with one event record after
-another (within an individual record), no event records being skipped,
-and no event record being repeated. This is the default. However,
-PREDPP can implement a few different protocols for calling ERROR. A
-protocol is specified by setting IDEF(2) to various values at <code>ICALL=1</code>
-(for more about IDEF, see section B.1). The default is IDEF(2)=-1
-(call with every event record), described above. The ERROR routine can
-be called only with each observation event record of the individual
-record. If this more limited sequence of calls is desired, this can be
-accomplished by setting IDEF(2)=0. Note, though, that in this case,
-IDEF(2) must be explicitly set to 0.</p>
-<p>
-There are two general considerations to be remembered about
-calling-protocols with ERROR. First, no matter what calling-protocol
-is used, it applies only to calls to ERROR at <code>ICALL=2</code>; at <code>ICALL=4</code>
-(i.e. during simulation) ERROR is always called with every event
-record. [This differs from calling-protocols with PK, where whatever
-calling-protocol is used for PK at <code>ICALL=2</code> is the same as that used at
-<code>ICALL=4</code>.] Second, a calling-protocol that limits the sequence of calls
-to ERROR should not be requested when the value of F returned by ERROR
-may differ from the value input to ERROR.</p>
-<p>
-Often, none of the EPS derivatives depend on concomitant variables
-whose values vary within an individual record i.e. vary over time.
-This is true if y is given by (1) or (6), for example, or if log y is
-given by (5). This may not be true if y is given by (2); it depends on
-whether the value of Z varies over time. Unless there is only one
-observation per individual, this generally is not true if y is given
-by (3) or (4), since when time varies, f(P) varies, and time itself is
-to be regarded as a concomitant variable. When though this is true,
-then the values stored in the HH array must be the same for each
-observation event record of a given individual record (for THETA and
-ETA fixed). Considerable computation time can be saved; PREDPP need
-call ERROR only once per individual record, with the first event
-record only (for any given values of the THETA and ETA arrays). The
-user can request this calling-protocol by setting IDEF(2)=1. Since the
-first event record need not be an observation record, care must be
-taken that HH is indeed set with this record, and that any data items
-needed for this purpose are contained in that record.</p>
-<p>
-Notice that with y given by (1), for example, the EPS-derivatives do
-not depend on any concomitant variables, nor do they depend on ETA or
-THETA. In such a case the values stored in the HH array must be the
-same for each observation event record of the entire data set; indeed,
-these values could be computed only once during the entire NONMEM
-problem. If at <code>ICALL=1</code>, IDEF(2) is set to 2, then at <code>ICALL=2</code> values
-for HH will always be taken to be (constant) values stored in HH at
-<code>ICALL=1</code>. Note that the HH array is initialized to zero immediately
-before the call to ERROR with <code>ICALL=1</code>.</p>
-<p>
-If log y is given by (5), the derivatives of log y with respect to the
-EPS are particularly simple; they satisfy the requirement for using
-IDEF(2)=2. By setting IDEF(1)=1, the user is specifying that when
-<code>ICALL=2</code>, the derivatives of log y are to be found in HH (see section
-B.1). By also setting IDEF(2)=2, these derivatives are actually taken
-to be the values stored in HH at <code>ICALL=1</code>.</p>
-<p>
-Even when IDEF(2)=0, 1, or 2, a call to ERROR with any given event record can be forced with
-the use of the CALL data item.</p>
-<p>
-IDEF(2) may be set to -1, or not set at all, i.e. this is the default. This results in ERROR being
-called with every event record (see above).</p>
-<p>
-NM-TRAN abbreviated code provides a reserved variable <a href="/docs/reference-manual/abbr/#calling_protocol">CALLFL</a> and
-corresponding pseudo-statements to specify the value for
-IDEF.</p>
-</div>
-</div>
 </div>
 </div>
 <div id="outline-container-infn" class="outline-3">
@@ -3302,23 +3222,22 @@ INFN routine as part of an <code>$INFN</code> block.</p>
 <p>Output argument:</p>
 <ul>
 <li>
-<p>IDEF: stores values only when <code>ICALL=1</code>. Values may be stored in the following elements:</p>
+<p><code>IDEF</code>: stores values only when <code>ICALL=1</code>. Values may be stored in the following elements:</p>
 <ul>
 <li><code>IDEF(1,1)=-9</code>  (required)</li>
-<li>
-<p><code>IDEF(1,2)</code> is the call limiting element (compare <code>$PK</code>&#39;s CALLFL).</p>
-<ul>
-<li><code>IDEF(1,2)=-2</code>:  call  with every event record and at additional and lagged dose times.</li>
-<li><code>IDEF(1,2)=-1</code>: call with every event record (default)</li>
-<li><code>IDEF(1,2)= 0</code>: call with first event record and new TIME values</li>
-<li><code>IDEF(1,2)= 1</code>: call once per individual record</li>
-</ul>
-<p>Compartment initialization may be performed by routine PK.</p>
-<p>
-An initial steady state may be requested by routine PK;</p>
-<p>
-(See <a href="/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod">Initial Steady State: I_SS,ISSMOD</a>).</p>
-</li>
+<li><code>IDEF(1,2)</code> specifies the <a href="/docs/reference-manual/abbr/#calling_protocol">calling protocol</a> (see also <a href="/docs/user-guide/nmtran/#mental-model">NONMEM
+process model</a>,  <a href="/docs/reference-manual/data/#call"><code>CALL</code> data item</a>).
+Setting <code>IDEF(1,2)</code> to one of the <a href="/docs/reference-manual/abbr/#calling_protocol">CALLFL</a> values during <code>ICALL=1</code>
+enforces corresponding call protocol. For exampmle, often PK parameters do not vary over time. In this case array <code>GG</code>, the PK output, remains the same for each
+event record of an individual record (for fixed <code>THETA</code> and <code>ETA</code>).
+Thus we can save computation by calling PK only once per
+individual record, on the first event record only. We can request this
+calling-protocol by setting <code>IDEF(1,2)=1</code>.
+
+Compartment initialization may be performed by routine PK.
+
+An initial steady state may be requested by routine PK.
+(See <a href="/docs/reference-manual/api/variables/#initial-steady-state-i_ss-issmod">Initial Steady State: I_SS,ISSMOD</a>).</li>
 <li>
 <p><code>IDEF(1,3)</code> describes whether PK performs  compartment
   initialization,  i.e.,  whether or not PK initializes elements of
@@ -3399,82 +3318,9 @@ calls with <code>ICALL=2</code> or <code>ICALL=4</code>. <code>GG(k,1,1)=0</code
 while GG(k,1,1)=1 indicates <code>GG(k,1,1)</code> will store a log-transformed
 parameter value.</li>
 </ul>
+<p>Also see <a href="/docs/reference-manual/api/variables/">variables in NONMEM modules</a>, <a href="/docs/reference-manual/api/modules/#nm-pred-mod">NONMEM-PRED modules, and  PREDPP modules</a>.</p>
 </li>
 </ul>
-<p>Also see <a href="/docs/reference-manual/api/variables/">variables in NONMEM modules</a>, <a href="/docs/reference-manual/api/modules/#nm-pred-mod">NONMEM-PRED modules, and  PREDPP modules</a>.</p>
-<div id="outline-container-pk-calling-protocol" class="outline-4">
-<h4 id="pk-calling-protocol">
-Calling protocol
-</h4>
-<div id="outline-text-pk-calling-protocol" class="outline-text-4">
-<p>As the pharmacokinetic system is advanced, PK is called one or more
-times, each time with some argument record. The event records comprise
-these argument records, and are passed to PK in time order. The
-simulation and/or data analytic computations will normally be done
-correctly if routine PK is called with one event record after another
-(within an individual record), no event records being skipped, and no
-event record being repeated. This is the default. However, PREDPP can
-implement a few different protocols for calling PK. A protocol is
-specified by setting IDEF(1,2) to one of various values at <code>ICALL=1</code>
-(for more about IDEF, see section G). For example, the PK routine can
-be called only with the first event record of the individual record
-and with every event record thereafter where the time data item
-differs from the time data item of the previous event record. If this
-more limited sequence of calls is desired, this can be accomplished by
-setting IDEF(1,2)=0. Note, though, that in this case, IDEF(1,2) must
-be explicitly set to 0 because 0 is not the default.</p>
-<p>
-Often, none of the basic or additional PK parameters depend on
-concomitant variables whose values vary within an individual record,
-i.e. vary over time. In this situation the information output by PK,
-i.e. the GG array, is the same for each event record of an individual
-record (for fixed THETA and ETA). Considerable computation time can be
-saved; PREDPP need call PK only once per individual record, with the
-first event record only (for any given values of the THETA and ETA
-arrays). The values of continuously acting PK parameters computed with
-this call can be assumed to hold over all state-time intervals for the
-individual record, and the values of discretely acting PK parameters
-can be assumed to hold at each state time for the record. The user can
-request this calling-protocol by setting IDEF(1,2)=1.</p>
-<p>
-When the data are from a single subject, PREDPP treats all event
-records in the entire data set as though they are associated with the
-same subject. (This is a consequence of the single-subject assumption;
-see section IV.A.) In particular, suppose that every call to PK with a
-different event record results in the same output from PK (for fixed
-THETA). Then only one call is necessary, a call with the first event
-record in the entire data set. The values of continuously acting PK
-parameters computed at this call can be assumed to hold over all
-state-time intervals for the entire data set, and the values of
-discretely acting PK parameters can be assumed to hold at all state
-times for the entire data set. Setting IDEF(1,2) to 1 has this effect.</p>
-<p>
-Even when IDEF(1,2)=0 or 1, a call to PK with any given event record can be forced with the use
-of the CALL data item.</p>
-<p>
-The protocol where PK is called once with every event record can be
-specified by setting IDEF(1,2) to -1, or by not setting IDEF(1,2) at
-all, i.e. this protocol is the default. If it is desired that, in
-addition, the values of PK parameters at any nonevent dose time t be
-computed with access to both the argument record associated with t and
-the event record describing the dose (see section B.2), set
-IDEF(1,2)=-2. This has the effect that PK may be called repeatedly
-with the same event record (for if t is a nonevent dose time, and s is
-the subsequent event time, PK is called with the event record for s at
-both times t and s). The primary use of this protocol is so that the
-values of certain discretely acting PK parameters, the bioavailability
-fractions and duration parameters, can always be computed with access
-to useful dose-related concomitant information contained in the dose
-record, such as the type of preparation, even when the dose is an
-additional or lagged dose. Another use of this protocol is to cause
-PREDPP to call PK at the time specified by a model event time
-parameter; this protocol is required with such parameters.</p>
-<p>
-NM-TRAN abbreviated code provides a reserved variable <a href="/docs/reference-manual/abbr/#calling_protocol">CALLFL</a> and
-corresponding pseudo-statements to specify the value for
-IDEF.</p>
-</div>
-</div>
 </div>
 </div>
 <div id="outline-container-pred" class="outline-3">
@@ -3906,11 +3752,11 @@ the ETAs.</p>
 See also the analogous routine SIMEPS.</p>
 </div>
 </div>
-<div id="outline-container-headline-18" class="outline-4">
-<h4 id="headline-18">
+<div id="outline-container-headline-16" class="outline-4">
+<h4 id="headline-16">
 GETETA
 </h4>
-<div id="outline-text-headline-18" class="outline-text-4">
+<div id="outline-text-headline-16" class="outline-text-4">
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -5435,18 +5281,18 @@ be used as right-hand quantities in abbreviated code.</p>
 </div>
 </div>
 </div>
-<div id="outline-container-headline-28" class="outline-2">
-<h2 id="headline-28">
+<div id="outline-container-headline-26" class="outline-2">
+<h2 id="headline-26">
 FSUBS
 </h2>
-<div id="outline-text-headline-28" class="outline-text-2">
+<div id="outline-text-headline-26" class="outline-text-2">
 <p>NM-TRAN generates a special Fortran file &#34;FSUBS&#34; that contains
 subroutines and modules based on NM-TRAN input file.</p>
-<div id="outline-container-headline-29" class="outline-3">
-<h3 id="headline-29">
+<div id="outline-container-headline-27" class="outline-3">
+<h3 id="headline-27">
 <code class="verbatim">FSIZESR</code>
 </h3>
-<div id="outline-text-headline-29" class="outline-text-3">
+<div id="outline-text-headline-27" class="outline-text-3">
 <p>Since v7.2+, NONMEM employs dynamic memory allocation. Subroutine <code class="verbatim">FSIZESR</code> contains the constants
 for the allocation. The <code>$SIZES</code> record can be used to override some of
 the values in FSIZESR. Constants set to 0 cannot be determined or are
@@ -5454,11 +5300,11 @@ not given by NM-TRAN and will default to the values in
 resource/SIZES.f90 in NONMEM source code.</p>
 </div>
 </div>
-<div id="outline-container-headline-30" class="outline-3">
-<h3 id="headline-30">
+<div id="outline-container-headline-28" class="outline-3">
+<h3 id="headline-28">
 <code class="verbatim">NMPRD4</code>, <code class="verbatim">PRINFN</code>, and <code class="verbatim">DECLAREVARIABLES</code>
 </h3>
-<div id="outline-text-headline-30" class="outline-text-3">
+<div id="outline-text-headline-28" class="outline-text-3">
 <p>Module <code class="verbatim">NMPRD4</code> stores NONMEM runtime variables.
 It is also accessible in user-supplied routines and generated code,
 and also by NONMEM. User can use <code>$TABLE</code> to output the module variables.
@@ -5473,20 +5319,20 @@ NM-TRAN creates this module only when <code>$INFN</code> is used.</p>
 Module <code class="verbatim">DECLAREVARIABLES</code> stores variables in <code>$ABBREVIATED DECLARE</code> control record. (NM73)</p>
 </div>
 </div>
-<div id="outline-container-headline-31" class="outline-3">
-<h3 id="headline-31">
+<div id="outline-container-headline-29" class="outline-3">
+<h3 id="headline-29">
 <code class="verbatim">THETAISUB</code>, <code class="verbatim">THETARSUB</code>
 </h3>
-<div id="outline-text-headline-31" class="outline-text-3">
+<div id="outline-text-headline-29" class="outline-text-3">
 <p>The two subroutines implement the <code>$THETAI</code> and <code>$THETAR</code> records, respectively.
 They are created only when the corresponding record is used.</p>
 </div>
 </div>
-<div id="outline-container-headline-32" class="outline-3">
-<h3 id="headline-32">
+<div id="outline-container-headline-30" class="outline-3">
+<h3 id="headline-30">
 <code class="verbatim">MUMODEL2</code>
 </h3>
-<div id="outline-text-headline-32" class="outline-text-3">
+<div id="outline-text-headline-30" class="outline-text-3">
 <p>Subroutine <code class="verbatim">MUMODEL2</code> subroutine is based on the PRED or PK subroutine
 in FSUBS. It contains only statements (if any) for the MU model, which
 is used in the new (Bayseian) methods of NONMEM.</p>
@@ -5592,10 +5438,6 @@ used by NONMEM.</p>
 <li><a href="#des-ref">DES</a>
 </li>
 <li><a href="#error">ERROR</a>
-<ul>
-<li><a href="#error-calling-protocol">Calling protocol</a>
-</li>
-</ul>
 </li>
 <li><a href="#infn">INFN</a>
 </li>
@@ -5604,10 +5446,6 @@ used by NONMEM.</p>
 <li><a href="#model">MODEL</a>
 </li>
 <li><a href="#PK">PK</a>
-<ul>
-<li><a href="#pk-calling-protocol">Calling protocol</a>
-</li>
-</ul>
 </li>
 <li><a href="#pred">PRED</a>
 <ul>
@@ -5615,7 +5453,7 @@ used by NONMEM.</p>
 </li>
 <li><a href="#simeta">SIMETA</a>
 </li>
-<li><a href="#headline-18">GETETA</a>
+<li><a href="#headline-16">GETETA</a>
 </li>
 <li><a href="#error-recovery">Error recovery</a>
 </li>
@@ -5641,15 +5479,15 @@ used by NONMEM.</p>
 </li>
 </ul>
 </li>
-<li><a href="#headline-28">FSUBS</a>
+<li><a href="#headline-26">FSUBS</a>
 <ul>
-<li><a href="#headline-29"><code class="verbatim">FSIZESR</code></a>
+<li><a href="#headline-27"><code class="verbatim">FSIZESR</code></a>
 </li>
-<li><a href="#headline-30"><code class="verbatim">NMPRD4</code>, <code class="verbatim">PRINFN</code>, and <code class="verbatim">DECLAREVARIABLES</code></a>
+<li><a href="#headline-28"><code class="verbatim">NMPRD4</code>, <code class="verbatim">PRINFN</code>, and <code class="verbatim">DECLAREVARIABLES</code></a>
 </li>
-<li><a href="#headline-31"><code class="verbatim">THETAISUB</code>, <code class="verbatim">THETARSUB</code></a>
+<li><a href="#headline-29"><code class="verbatim">THETAISUB</code>, <code class="verbatim">THETARSUB</code></a>
 </li>
-<li><a href="#headline-32"><code class="verbatim">MUMODEL2</code></a>
+<li><a href="#headline-30"><code class="verbatim">MUMODEL2</code></a>
 </li>
 </ul>
 </li>
