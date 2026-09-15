@@ -1,3 +1,5 @@
+; Use mtime to model periodic discontinuouities in $DES,
+; suggested by Sebastien Bihorel, Luann Phillips and Jill Fiedler-Kelly.
 $PROBLEM step_circadian
 ;; -----------------------------------------------------------------------------
 ;; PURPOSE:
@@ -148,4 +150,3 @@ $TABLE REPID RMNOW TIME MT1 MT2 MP1 MP2 STS INTMTIME SHIFT DUR
   ;RFORMAT="(10F10.4)"  LFORMAT="(3x,10A10)"
 
 $SCAT FLAG VS TIME BY REPID OBSONLY
-

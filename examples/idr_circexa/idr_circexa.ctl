@@ -1,3 +1,5 @@
+; Use mtime to model periodic discontinuouities in $DES,
+; suggested by Sebastien Bihorel, Luann Phillips and Jill Fiedler-Kelly.
 $PROBLEM idr_circadian
 ;; -----------------------------------------------------------------------------
 ;; PURPOSE:
@@ -156,7 +158,7 @@ $ERROR
 
 $SIMULATION(12345) NSUB=10 ONLYSIM NOPREDICTION
 
-$TABLE REPID TIME RESPONSE SHIFT DUR ONEHEADER NOAPPEND NOPRINT 
+$TABLE REPID TIME RESPONSE SHIFT DUR ONEHEADER NOAPPEND NOPRINT
   FILE=idr_circexa.tab
 
 $SCAT FLAG VS TIME BY REPID

@@ -31,7 +31,7 @@ Consider the Enterohepatic Recycling (EHC) model below (&#34;examples/mtimehill&
 Consider the Enterohepatic Recycling (EHC) model below (&#34;examples/mtimehill&#34;).
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 $PROB EHC using MTIME for the flag $INPUT ID DOSE=AMT TIME CP=DV WT SS=DROP II ADDL EVID $DATA mtimess.dat $SUBROUTINES ADVAN6 TOL=6 $MODEL COMP=(DEPOT,INITIALOFF,DEFDOSE) COMP=(CENTRAL,DEFOBS,NOOFF) COMP=(PERIPH) COMP=(GALL ) $PK ;# Save the value of II from the dose record. if (ii&gt;0) inter=ii KA=THETA(1)*EXP(ETA(1)) KE=THETA(2)*EXP(ETA(2)) CL=THETA(3)*WT*EXP(ETA(3)) S2=CL/KE/WT K41=THETA(4)*EXP(ETA(4)) K23=THETA(5)*EXP(ETA(5)) K32=THETA(6)*EXP(ETA(6)) K1G=THETA(7)*EXP(ETA(7)) if (newind&lt;=1) then MTIME(1)=THETA(8) MTIME(2)=MTIME(1)&#43;THETA(9) else MTIME(1)=MTIME(1) MTIME(2)=MTIME(2) endif ;# Update mtime variables after mtime(2) is reached. ;# New values are for the next dosing interval (TIME&#43;II) IF (MNOW == 2) THEN MTIME(1) = MTIME(1)&#43;inter MTIME(2) = MTIME(2)&#43;inter MTDIFF=1 ENDIF $DES FLAG=MPAST(1)-MPAST(2) DADT(1)=-KA*A(1)&#43;K41*A(4)*FLAG DADT(2)= KA*A(1)-KE*A(2)-K23*A(2)&#43;K32*A(3)-K1G*A(2) DADT(3)= K23*A(2)-K32*A(3) DADT(4)= K1G*A(2)-K41*A(4)*FLAG $ERROR A1=A(1) ;# for display in table A2=A(2) A3=A(3) A4=A(4) Y=F&#43;EPS(1) $THETA 1 1 1 $THETA 10 ;# rate of gall bladder emptying is large vs. other k&#39;s $THETA 1 1 1 $THETA 3 5 ;# start emptying at T&#43;theta(8) ; lasts till T&#43;theta(9) $OMEGA 1 1 1 1 1 1 1 $SIGMA .4 $TABLE TIME A1 A2 A3 A4 NOAPPEND FILE=mtimess.tab NOPRINT The model has drug transfer from compartment 4 to 1 that only appears during a certain period of time (to reflect EHC). To estimate the beginning and end of this period, we model them as MTIME(1) and MTIME(2), respectively. Then values of the internal indicator variable MNEXT, MPAST, and MNOW is shown in the follow scheme.">
 	<meta itemprop="dateModified" content="2026-02-10T13:43:04-08:00">
-	<meta itemprop="wordCount" content="2500">
+	<meta itemprop="wordCount" content="3060">
 
 <title>Change $DES at given time • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -40,7 +40,7 @@ Consider the Enterohepatic Recycling (EHC) model below (&#34;examples/mtimehill&
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.678e594f87be69770e807eafad927aab949982ea748d1a57dfe6c56af90f79a8.js" integrity="sha256-Z45ZT4e&#43;aXcOgH6vrZJ6q5SZgup0jRpX3&#43;bFavkPeag=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.7ba85f16e5b324692b0418c1f1f60dcde379d33c17c1fabf831dedd0309d5f78.js" integrity="sha256-e6hfFuWzJGkrBBjB8fYNzeN50zwXwfq/gx3t0DCdX3g=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -2021,122 +2021,211 @@ rhythm. Consider the following model that has a change in <code>$DES</code> ever
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">106
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">107
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">108
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">109
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">110
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">111
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">112
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">113
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">114
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">115
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">116
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">117
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">118
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">119
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">120
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">121
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">122
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">123
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">124
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">125
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">126
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">127
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">128
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">129
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">130
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">131
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">132
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">133
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">135
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">137
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">138
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">139
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">140
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">141
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">142
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">143
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">144
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">146
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">147
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">148
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">149
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">150
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">151
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">152
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$PROBLEM</span> step_circadian
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$INPUT</span> ID TIME AMT CMT EVID DV MDV
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>; Use mtime to model periodic discontinuouities in <span style="color:#ff5c57">$DES</span>,
+</span></span><span style="display:flex;"><span>; suggested by Sebastien Bihorel, Luann Phillips <span style="color:#ff6ac1">and</span> Jill Fiedler<span style="color:#ff6ac1">-</span>Kelly<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PROBLEM</span> step_circadian
+</span></span><span style="display:flex;"><span>;; <span style="color:#ff6ac1">-----------------------------------------------------------------------------</span>
+</span></span><span style="display:flex;"><span>;; PURPOSE:
+</span></span><span style="display:flex;"><span>;; <span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span> Illustrate how to turn a step function on at a certain <span style="color:#ff5c57">time</span> of the day,
+</span></span><span style="display:flex;"><span>;;    SHIFT, every <span style="color:#ff9f43">24</span>h <span style="color:#ff6ac1">and</span> back off after a certain duration, DUR, using model
+</span></span><span style="display:flex;"><span>;;    event (MTIME) variables<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span>;;
+</span></span><span style="display:flex;"><span>;;            <span style="color:#ff6ac1">^</span>
+</span></span><span style="display:flex;"><span>;;         <span style="color:#ff9f43">1</span> <span style="color:#ff6ac1">-|</span>  <span style="color:#ff6ac1">---------</span>      <span style="color:#ff6ac1">---------</span>      <span style="color:#ff6ac1">---------</span>
+</span></span><span style="display:flex;"><span>;;            <span style="color:#ff6ac1">|</span>  <span style="color:#ff6ac1">|</span>       <span style="color:#ff6ac1">|</span>      <span style="color:#ff6ac1">|</span>       <span style="color:#ff6ac1">|</span>      <span style="color:#ff6ac1">|</span>       <span style="color:#ff6ac1">|</span>
+</span></span><span style="display:flex;"><span>;;            <span style="color:#ff6ac1">|</span>  <span style="color:#ff6ac1">|</span>       <span style="color:#ff6ac1">|</span>      <span style="color:#ff6ac1">|</span>       <span style="color:#ff6ac1">|</span>      <span style="color:#ff6ac1">|</span>       <span style="color:#ff6ac1">|</span>
+</span></span><span style="display:flex;"><span>;;         <span style="color:#ff9f43">0</span> <span style="color:#ff6ac1">-|---</span>       <span style="color:#ff6ac1">--------</span>       <span style="color:#ff6ac1">--------</span>       <span style="color:#ff6ac1">--------</span> FLAG
+</span></span><span style="display:flex;"><span>;;            <span style="color:#ff6ac1">|</span>
+</span></span><span style="display:flex;"><span>;;            <span style="color:#ff6ac1">---------------------------------------------------&gt;</span> TIME
+</span></span><span style="display:flex;"><span>;;               <span style="color:#ff6ac1">|</span>   <span style="color:#ff6ac1">|</span>              <span style="color:#ff6ac1">|</span>              <span style="color:#ff6ac1">|</span>
+</span></span><span style="display:flex;"><span>;;        SHIFT<span style="color:#ff6ac1">-</span><span style="color:#ff9f43">24</span>   <span style="color:#ff9f43">0</span>              <span style="color:#ff9f43">24</span>             <span style="color:#ff9f43">48</span>
+</span></span><span style="display:flex;"><span>;;                   <span style="color:#ff6ac1">&lt;-</span>  SHIFT <span style="color:#ff6ac1">-&gt;&lt;-</span> DUR <span style="color:#ff6ac1">-&gt;</span>
+</span></span><span style="display:flex;"><span>;;
+</span></span><span style="display:flex;"><span>;;    FLAG is used as the rate of the differential equation dA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">/</span>dt integrated
+</span></span><span style="display:flex;"><span>;;    over TIME<span style="color:#ff6ac1">.</span> A(<span style="color:#ff9f43">1</span>) increases by the amount DUR every day<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span>;;
+</span></span><span style="display:flex;"><span>;; <span style="color:#ff9f43">2</span><span style="color:#ff6ac1">-</span> Illustrate how NONMEM updates MTIME, MPAST, <span style="color:#ff6ac1">and</span> MNOW variables over TIME<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span>;;    <span style="color:#ff5c57">$TABLE</span> will only report the value of MTIME, MPAST, MNOW, <span style="color:#ff6ac1">and</span> any variable
+</span></span><span style="display:flex;"><span>;;    dependent on them at the TIME of event records<span style="color:#ff6ac1">.</span> Therefore, WRITE
+</span></span><span style="display:flex;"><span>;;    statements are implemented to document the update of these variables at
+</span></span><span style="display:flex;"><span>;;    <span style="color:#ff6ac1">and</span> in between event records<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span>;;
+</span></span><span style="display:flex;"><span>;; <span style="color:#ff6ac1">-----------------------------------------------------------------------------</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$DATA</span> circadian<span style="color:#ff6ac1">.</span>csv IGNORE<span style="color:#ff6ac1">=</span><span style="color:#ff5c57">@</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$INPUT</span> ID TIME AMT CMT EVID DV MDV
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$</span><span style="color:#ff5c57">THETA</span>
-</span></span><span style="display:flex;"><span>   (<span style="color:#ff9f43">0.0001</span>,<span style="color:#ff9f43">0.5</span>,<span style="color:#ff9f43">0.9999</span>)   ;<span style="color:#78787e">#-- typical shift as a fraction of 24h</span>
-</span></span><span style="display:flex;"><span>   (<span style="color:#ff9f43">0.0001</span>,<span style="color:#ff9f43">0.5</span>,<span style="color:#ff9f43">0.9999</span>)   ;<span style="color:#78787e">#-- typical duration as a fraction of 24h</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$DATA</span> circadian<span style="color:#ff6ac1">.</span>csv IGNORE<span style="color:#ff6ac1">=</span><span style="color:#ff5c57">@</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$OMEGA</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff9f43">3</span>                    ;<span style="color:#78787e">#-- IIV in shift (%CV=100*sqrt(1-th1)*eta1)</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff9f43">3</span>                    ;<span style="color:#78787e">#-- IIV in duration (%CV=100*sqrt(1-th2)*eta2)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$</span><span style="color:#ff5c57">THETA</span>
+</span></span><span style="display:flex;"><span> (<span style="color:#ff9f43">0.0001</span>,<span style="color:#ff9f43">0.5</span>,<span style="color:#ff9f43">0.9999</span>)   ;<span style="color:#ff6ac1">--</span> typical <span style="color:#ff5c57">shift</span> as a fraction of <span style="color:#ff9f43">24</span>h
+</span></span><span style="display:flex;"><span> (<span style="color:#ff9f43">0.0001</span>,<span style="color:#ff9f43">0.5</span>,<span style="color:#ff9f43">0.9999</span>)   ;<span style="color:#ff6ac1">--</span> typical duration as a fraction of <span style="color:#ff9f43">24</span>h
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$SUBROUTINE</span> ADVAN13 TOL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">9</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGA</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">3</span>                    ;<span style="color:#ff6ac1">--</span> IIV in <span style="color:#ff5c57">shift</span> (<span style="color:#ff5c57">%CV</span><span style="color:#ff6ac1">=</span><span style="color:#ff9f43">100</span><span style="color:#ff6ac1">*</span><span style="color:#ff5c57">sqrt</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>th1)<span style="color:#ff6ac1">*</span>eta1)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">3</span>                    ;<span style="color:#ff6ac1">--</span> IIV in duration (<span style="color:#ff5c57">%CV</span><span style="color:#ff6ac1">=</span><span style="color:#ff9f43">100</span><span style="color:#ff6ac1">*</span><span style="color:#ff5c57">sqrt</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>th2)<span style="color:#ff6ac1">*</span>eta2)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$MODEL</span> NCOMP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span>    COMP<span style="color:#ff6ac1">=</span>(FLAG)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SUBROUTINE</span> ADVAN13 TOL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">9</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$PK</span>
-</span></span><span style="display:flex;"><span>    REPID<span style="color:#ff6ac1">=</span>(IREP<span style="color:#ff6ac1">-</span><span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span><span style="color:#ff9f43">10</span> <span style="color:#ff6ac1">+</span> ID
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$MODEL</span> NCOMP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>  COMP<span style="color:#ff6ac1">=</span>(FLAG)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Define shift and duration parameters</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
+</span></span><span style="display:flex;"><span>  REPID<span style="color:#ff6ac1">=</span>(IREP<span style="color:#ff6ac1">-</span><span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span><span style="color:#ff9f43">10</span> <span style="color:#ff6ac1">+</span> ID
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    TVSHIFT <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">1</span>)                   ;<span style="color:#78787e"># typical shift on 24h scale;# (0,24)</span>
-</span></span><span style="display:flex;"><span>                                            ;<span style="color:#78787e"># where THETA(1) represents this typical shift as a fraction of 24h;# (0,1)</span>
-</span></span><span style="display:flex;"><span>    LGSHI <span style="color:#ff6ac1">=</span> LOG(THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>THETA(<span style="color:#ff9f43">1</span>)))      ;<span style="color:#78787e"># logit transformation of the typical fraction of 24h;# (-INF,+INF)</span>
-</span></span><span style="display:flex;"><span>    ILGSHI <span style="color:#ff6ac1">=</span> LGSHI<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">1</span>)                   ;<span style="color:#78787e"># addition of IIV;# (-INF,+INF)</span>
-</span></span><span style="display:flex;"><span>    SHIFT <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>EXP(ILGSHI)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">+</span>EXP(ILGSHI))  ;<span style="color:#78787e"># back-transformation and scale-up of individual shift to 24h scale;# (0,24)</span>
+</span></span><span style="display:flex;"><span>  ; Define <span style="color:#ff5c57">shift</span> <span style="color:#ff6ac1">and</span> duration parameters
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    TVDUR <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">2</span>)                     ;<span style="color:#78787e"># typical duration on 24h scale;# (0,24)</span>
-</span></span><span style="display:flex;"><span>                                            ;<span style="color:#78787e"># where THETA(1) represents this typical duration as a fraction of 24h;# (0,1)</span>
-</span></span><span style="display:flex;"><span>    LGDUR <span style="color:#ff6ac1">=</span> LOG(THETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>THETA(<span style="color:#ff9f43">2</span>)))      ;<span style="color:#78787e"># logit transformation of the typical fraction of 24h;# (-INF,+INF)</span>
-</span></span><span style="display:flex;"><span>    ILGDUR <span style="color:#ff6ac1">=</span> LGDUR<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">2</span>)                   ;<span style="color:#78787e"># addition of IIV;# (-INF,+INF)</span>
-</span></span><span style="display:flex;"><span>    DUR <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>EXP(ILGDUR)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">+</span>EXP(ILGDUR))    ;<span style="color:#78787e"># back-transformation and scale-up of individual duration to 24h scale;# (0,24)</span>
+</span></span><span style="display:flex;"><span>  TVSHIFT <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">1</span>)                   ; typical <span style="color:#ff5c57">shift</span> on <span style="color:#ff9f43">24</span>h scale; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">24</span>)
+</span></span><span style="display:flex;"><span>                                          ; where THETA(<span style="color:#ff9f43">1</span>) represents this typical <span style="color:#ff5c57">shift</span> as a fraction of <span style="color:#ff9f43">24</span>h; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  LGSHI <span style="color:#ff6ac1">=</span> LOG(THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>THETA(<span style="color:#ff9f43">1</span>)))      ; logit transformation of the typical fraction of <span style="color:#ff9f43">24</span>h; (<span style="color:#ff6ac1">-</span>INF,<span style="color:#ff6ac1">+</span>INF)
+</span></span><span style="display:flex;"><span>  ILGSHI <span style="color:#ff6ac1">=</span> LGSHI<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">1</span>)                   ; addition of IIV; (<span style="color:#ff6ac1">-</span>INF,<span style="color:#ff6ac1">+</span>INF)
+</span></span><span style="display:flex;"><span>  SHIFT <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>EXP(ILGSHI)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">+</span>EXP(ILGSHI))  ; back<span style="color:#ff6ac1">-</span>transformation <span style="color:#ff6ac1">and</span> scale<span style="color:#ff6ac1">-</span>up of individual <span style="color:#ff5c57">shift</span> to <span style="color:#ff9f43">24</span>h scale; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">24</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Define offset for the start of the circadian rhythm parameter (in case the</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># step function &#34;starts&#34; before TIME=0</span>
-</span></span><span style="display:flex;"><span>    IF ((SHIFT<span style="color:#ff6ac1">+</span>DUR) <span style="color:#ff6ac1">&gt;</span> <span style="color:#ff9f43">24</span>) THEN
-</span></span><span style="display:flex;"><span>      OFFSET <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span>
-</span></span><span style="display:flex;"><span>    ELSE
-</span></span><span style="display:flex;"><span>      OFFSET <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">0</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">END</span> IF
+</span></span><span style="display:flex;"><span>  TVDUR <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">2</span>)                     ; typical duration on <span style="color:#ff9f43">24</span>h scale; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">24</span>)
+</span></span><span style="display:flex;"><span>                                          ; where THETA(<span style="color:#ff9f43">1</span>) represents this typical duration as a fraction of <span style="color:#ff9f43">24</span>h; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  LGDUR <span style="color:#ff6ac1">=</span> LOG(THETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>THETA(<span style="color:#ff9f43">2</span>)))      ; logit transformation of the typical fraction of <span style="color:#ff9f43">24</span>h; (<span style="color:#ff6ac1">-</span>INF,<span style="color:#ff6ac1">+</span>INF)
+</span></span><span style="display:flex;"><span>  ILGDUR <span style="color:#ff6ac1">=</span> LGDUR<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">2</span>)                   ; addition of IIV; (<span style="color:#ff6ac1">-</span>INF,<span style="color:#ff6ac1">+</span>INF)
+</span></span><span style="display:flex;"><span>  DUR <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>EXP(ILGDUR)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">+</span>EXP(ILGDUR))    ; back<span style="color:#ff6ac1">-</span>transformation <span style="color:#ff6ac1">and</span> scale<span style="color:#ff6ac1">-</span>up of individual duration to <span style="color:#ff9f43">24</span>h scale; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">24</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    TX <span style="color:#ff6ac1">=</span> SHIFT<span style="color:#ff6ac1">-</span>OFFSET
+</span></span><span style="display:flex;"><span>  ; Define offset <span style="color:#ff6ac1">for</span> the start of the circadian rhythm parameter (in <span style="color:#ff6ac1">case</span> the
+</span></span><span style="display:flex;"><span>  ; step function <span style="color:#5af78e">&#34;starts&#34;</span> before TIME<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0</span>
+</span></span><span style="display:flex;"><span>  IF ((SHIFT<span style="color:#ff6ac1">+</span>DUR) <span style="color:#ff6ac1">&gt;</span> <span style="color:#ff9f43">24</span>) THEN
+</span></span><span style="display:flex;"><span>    OFFSET <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span>
+</span></span><span style="display:flex;"><span>  ELSE
+</span></span><span style="display:flex;"><span>    OFFSET <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">0</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">END</span> IF
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    IF (NEWIND <span style="color:#ff6ac1">&lt;=</span> <span style="color:#ff9f43">1</span>) THEN
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> TX
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> TX<span style="color:#ff6ac1">+</span>DUR
-</span></span><span style="display:flex;"><span>    ELSE
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">2</span>)
-</span></span><span style="display:flex;"><span>    ENDIF
+</span></span><span style="display:flex;"><span>  TX <span style="color:#ff6ac1">=</span> SHIFT<span style="color:#ff6ac1">-</span>OFFSET
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Defines of mtime(1) to use for integration during this interval</span>
-</span></span><span style="display:flex;"><span>    INTMTIME <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  IF (NEWIND <span style="color:#ff6ac1">&lt;=</span> <span style="color:#ff9f43">1</span>) THEN
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> TX
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> TX<span style="color:#ff6ac1">+</span>DUR
+</span></span><span style="display:flex;"><span>  ELSE
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>  ENDIF
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Update mtime variables after mtime(2) is reached</span>
-</span></span><span style="display:flex;"><span>    IF (MNOW <span style="color:#ff6ac1">==</span> <span style="color:#ff9f43">2</span>) THEN
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
-</span></span><span style="display:flex;"><span>      MTDIFF<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span>    ENDIF
+</span></span><span style="display:flex;"><span>  ; Defines of mtime(<span style="color:#ff9f43">1</span>) to <span style="color:#ff6ac1">use</span> for integration during this interval
+</span></span><span style="display:flex;"><span>  INTMTIME <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Save mtime(1), mtime(2), and tstate for the TABLE statement</span>
-</span></span><span style="display:flex;"><span>    MT1<span style="color:#ff6ac1">=</span>MTIME(<span style="color:#ff9f43">1</span>)
-</span></span><span style="display:flex;"><span>    MT2<span style="color:#ff6ac1">=</span>MTIME(<span style="color:#ff9f43">2</span>)
-</span></span><span style="display:flex;"><span>    MP1<span style="color:#ff6ac1">=</span>MPAST(<span style="color:#ff9f43">1</span>)
-</span></span><span style="display:flex;"><span>    MP2<span style="color:#ff6ac1">=</span>MPAST(<span style="color:#ff9f43">2</span>)
-</span></span><span style="display:flex;"><span>    STS<span style="color:#ff6ac1">=</span>TSTATE
+</span></span><span style="display:flex;"><span>  ; Update mtime variables after mtime(<span style="color:#ff9f43">2</span>) is reached
+</span></span><span style="display:flex;"><span>  IF (MNOW <span style="color:#ff6ac1">==</span> <span style="color:#ff9f43">2</span>) THEN
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
+</span></span><span style="display:flex;"><span>    MTDIFF<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>  ENDIF
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Save mnow as a real variable for the WRITE statement</span>
-</span></span><span style="display:flex;"><span>    RMNOW<span style="color:#ff6ac1">=</span>MNOW
+</span></span><span style="display:flex;"><span>  ; Save mtime(<span style="color:#ff9f43">1</span>), mtime(<span style="color:#ff9f43">2</span>), <span style="color:#ff6ac1">and</span> tstate <span style="color:#ff6ac1">for</span> the TABLE statement
+</span></span><span style="display:flex;"><span>  MT1<span style="color:#ff6ac1">=</span>MTIME(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  MT2<span style="color:#ff6ac1">=</span>MTIME(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>  MP1<span style="color:#ff6ac1">=</span>MPAST(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  MP2<span style="color:#ff6ac1">=</span>MPAST(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>  STS<span style="color:#ff6ac1">=</span>TSTATE
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Initialize the file used to output variables at and in-between records</span>
-</span></span><span style="display:flex;"><span>    IF (ICALL <span style="color:#ff6ac1">==</span> <span style="color:#ff9f43">1</span>) THEN
-</span></span><span style="display:flex;"><span>      <span style="color:#5af78e">&#34;OPEN (FILE=&#39;step_circexa.txt&#39;,UNIT=96)
-</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">      &#34;</span>WRITE (<span style="color:#ff9f43">96</span>,<span style="color:#5af78e">&#39;(10A14)&#39;</span>) <span style="color:#5af78e">&#39;REPID&#39;</span>,<span style="color:#5af78e">&#39;RMNOW&#39;</span>,<span style="color:#5af78e">&#39;TIME&#39;</span>,<span style="color:#5af78e">&#39;MT1&#39;</span>,<span style="color:#5af78e">&#39;MT2&#39;</span>,<span style="color:#5af78e">&#39;MP1&#39;</span>,<span style="color:#5af78e">&#39;MP2&#39;</span>,<span style="color:#5af78e">&#39;TSTATE&#39;</span>,<span style="color:#5af78e">&#39;INTMTIME&#39;</span>
-</span></span><span style="display:flex;"><span>    ENDIF
+</span></span><span style="display:flex;"><span>  ; Save mnow as a real variable <span style="color:#ff6ac1">for</span> the WRITE statement
+</span></span><span style="display:flex;"><span>  RMNOW<span style="color:#ff6ac1">=</span>MNOW
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Output variables in-between observation records using WRITE statement</span>
-</span></span><span style="display:flex;"><span>    WRITE (<span style="color:#ff9f43">96</span>,<span style="color:#ff9f43">991</span>) REPID,RMNOW,TIME,MT1,MT2,MP1,MP2,TSTATE,INTMTIME
+</span></span><span style="display:flex;"><span>  ; Initialize the file used to output variables at <span style="color:#ff6ac1">and</span> in<span style="color:#ff6ac1">-</span>between observation
+</span></span><span style="display:flex;"><span>  ; records
+</span></span><span style="display:flex;"><span>  IF (ICALL <span style="color:#ff6ac1">==</span> <span style="color:#ff9f43">1</span>) THEN
+</span></span><span style="display:flex;"><span>    <span style="color:#5af78e">&#34;OPEN (FILE=&#39;step_circexa.txt&#39;,UNIT=96)
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &#34;</span>WRITE (<span style="color:#ff9f43">96</span>,<span style="color:#5af78e">&#39;(10A14)&#39;</span>) <span style="color:#5af78e">&#39;REPID&#39;</span>,<span style="color:#5af78e">&#39;RMNOW&#39;</span>,<span style="color:#5af78e">&#39;TIME&#39;</span>,<span style="color:#5af78e">&#39;MT1&#39;</span>,<span style="color:#5af78e">&#39;MT2&#39;</span>,<span style="color:#5af78e">&#39;MP1&#39;</span>,<span style="color:#5af78e">&#39;MP2&#39;</span>,<span style="color:#5af78e">&#39;TSTATE&#39;</span>,<span style="color:#5af78e">&#39;INTMTIME&#39;</span>
+</span></span><span style="display:flex;"><span>  ENDIF
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$DES</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Define FLAG variable:</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># FLAG=1 when T is in [SHIFT+n*24, SHIFT+DUR+n*24], where n=0,1,2,3,...</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># FLAG=0 otherwise</span>
-</span></span><span style="display:flex;"><span>    FLAG <span style="color:#ff6ac1">=</span> MPAST(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">-</span>MPAST(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>  ; Output variables in<span style="color:#ff6ac1">-</span>between observation records using WRITE statement
+</span></span><span style="display:flex;"><span>  WRITE (<span style="color:#ff9f43">96</span>,<span style="color:#ff9f43">991</span>) REPID,RMNOW,TIME,MT1,MT2,MP1,MP2,TSTATE,INTMTIME
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Monitor FLAG:</span>
-</span></span><span style="display:flex;"><span>    DADT(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> FLAG
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$DES</span>
+</span></span><span style="display:flex;"><span>  ; Define FLAG variable:
+</span></span><span style="display:flex;"><span>  ; FLAG<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> when T is in [SHIFT<span style="color:#ff6ac1">+</span>n<span style="color:#ff6ac1">*</span><span style="color:#ff9f43">24</span>, SHIFT<span style="color:#ff6ac1">+</span>DUR<span style="color:#ff6ac1">+</span>n<span style="color:#ff6ac1">*</span><span style="color:#ff9f43">24</span>], where n<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">1</span>,<span style="color:#ff9f43">2</span>,<span style="color:#ff9f43">3</span>,<span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>  ; FLAG<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0</span> otherwise
+</span></span><span style="display:flex;"><span>  FLAG <span style="color:#ff6ac1">=</span> MPAST(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">-</span>MPAST(<span style="color:#ff9f43">2</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ERROR</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Output variables at observation records using WRITE statement and flagging</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># the output row with MNOW=9.</span>
-</span></span><span style="display:flex;"><span>    WRITE (<span style="color:#ff9f43">96</span>,<span style="color:#ff9f43">991</span>) REPID,<span style="color:#ff9f43">9.0</span>,TIME,MT1,MT2,MP1,MP2,TSTATE,INTMTIME
+</span></span><span style="display:flex;"><span>  ; Monitor FLAG:
+</span></span><span style="display:flex;"><span>  DADT(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> FLAG
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Define ouput for TABLE statement</span>
-</span></span><span style="display:flex;"><span>    FLAGCMT <span style="color:#ff6ac1">=</span> A(<span style="color:#ff9f43">1</span>)
-</span></span><span style="display:flex;"><span>    IF (ICALL <span style="color:#ff6ac1">==</span> <span style="color:#ff9f43">4</span>) THEN
-</span></span><span style="display:flex;"><span>      DV <span style="color:#ff6ac1">=</span> FLAGCMT
-</span></span><span style="display:flex;"><span>    ENDIF
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ERROR</span>
+</span></span><span style="display:flex;"><span>  ; Output variables at observation records using WRITE statement <span style="color:#ff6ac1">and</span> flagging
+</span></span><span style="display:flex;"><span>  ; the output row with MNOW<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">9</span><span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span>  ; Uncomment the following <span style="color:#ff9f43">3</span> lines of verbatim code when using nm7<span style="color:#ff9f43">.1</span> <span style="color:#ff6ac1">or</span> nm7<span style="color:#ff9f43">.2</span>,
+</span></span><span style="display:flex;"><span>  ; as TSTATE is <span style="color:#ff6ac1">not</span> a reserved variable in <span style="color:#ff5c57">$ERROR</span> prior to nm7<span style="color:#ff9f43">.3</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#5af78e">&#34;FIRST
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    &#34;</span>USE PROCM_REAL, ONLY: TSTATE
+</span></span><span style="display:flex;"><span>    <span style="color:#5af78e">&#34;WRITE (96,991) REPID,9.0,TIME,MT1,MT2,MP1,MP2,TSTATE,INTMTIME
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  ;
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  ; Uncomment the following line of code when using nm7.3
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  ;  WRITE (96,991) REPID,9.0,TIME,MT1,MT2,MP1,MP2,TSTATE,INTMTIME
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  ; Define ouput for TABLE statement
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  FLAGCMT = A(1)
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  IF (ICALL == 4) THEN
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">    DV = FLAGCMT
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  ENDIF
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">$SIMULATION(12345) NSUB=10 ONLYSIM NOPREDICTION
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">$TABLE REPID TIME FLAG FLAGCMT NOAPPEND NOPRINT ONEHEADER FILE=step_circexa.tab
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">$TABLE REPID RMNOW TIME MT1 MT2 MP1 MP2 STS INTMTIME SHIFT DUR
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  NOAPPEND NOPRINT ONEHEADER FILE=step_circexa_debug.tab
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  ; Uncomment the following line of code when using nm7.1 or nm7.2
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  FORMAT=s34F13.4
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  ; Uncomment the following line of code when using nm7.3
+</span></span></span><span style="display:flex;"><span><span style="color:#5af78e">  ;RFORMAT=&#34;</span>(<span style="color:#ff9f43">10</span>F10<span style="color:#ff9f43">.4</span>)<span style="color:#5af78e">&#34;  LFORMAT=&#34;</span>(<span style="color:#ff9f43">3</span>x,<span style="color:#ff9f43">10</span>A10)<span style="color:#ff5c57">&#34;</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$SIMULATION</span>(<span style="color:#ff9f43">12345</span>) NSUB<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">10</span> ONLYSIM NOPREDICTION
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$TABLE</span> REPID TIME FLAG FLAGCMT NOAPPEND NOPRINT ONEHEADER FILE<span style="color:#ff6ac1">=</span>step_circexa<span style="color:#ff6ac1">.</span>tab
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$TABLE</span> REPID RMNOW TIME MT1 MT2 MP1 MP2 STS INTMTIME SHIFT DUR
-</span></span><span style="display:flex;"><span>    NOAPPEND NOPRINT ONEHEADER FILE<span style="color:#ff6ac1">=</span>step_circexa_debug<span style="color:#ff6ac1">.</span>tab</span></span></code></pre></td></tr></table>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SCAT</span> FLAG VS TIME BY REPID OBSONLY</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>Simlar to the first model earlier, FLAG is the difference of MPAST
+<p>
+Simlar to the first model, <code>FLAG</code> is the difference of MPAST
 variables. The MTIME(1) and MTIME(2) variables respectively define the times at
-which FLAG is set to 1 and 0, such as <code>MTIME(2)-MTIME(1)=DUR</code>. After
+which <code>FLAG</code> is set to 1 and 0, such as <code>MTIME(2)-MTIME(1)=DUR</code>. After
 MTIME(2) is reached, both variables are incremented by 24, and the
 FLAG update process perpetuates itself every 24 hours. Compartment 1
 is a dummy compartment intended to monitor the
@@ -2313,144 +2402,211 @@ constant otherwise. Again we use a FLAG variable to model it (<a href="https://g
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">130
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">131
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">132
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">133
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">134
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">135
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">136
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">137
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">138
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">139
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">140
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">141
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">142
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">143
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">144
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">145
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">146
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">147
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">148
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">149
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">150
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">151
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">152
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">153
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">154
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">155
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">156
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">157
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">158
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">159
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">160
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">161
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">162
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">163
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">164
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">165
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$PROBLEM</span> idr_circadian
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$INPUT</span> ID TIME AMT CMT EVID DV MDV
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>; Use mtime to model periodic discontinuouities in <span style="color:#ff5c57">$DES</span>,
+</span></span><span style="display:flex;"><span>; suggested by Sebastien Bihorel, Luann Phillips <span style="color:#ff6ac1">and</span> Jill Fiedler<span style="color:#ff6ac1">-</span>Kelly<span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PROBLEM</span> idr_circadian
+</span></span><span style="display:flex;"><span>;; <span style="color:#ff6ac1">-----------------------------------------------------------------------------</span>
+</span></span><span style="display:flex;"><span>;; PURPOSE:
+</span></span><span style="display:flex;"><span>;; <span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span> Illustrate an indirect response model describing a baseline response with
+</span></span><span style="display:flex;"><span>;;    circadian rhythm<span style="color:#ff6ac1">.</span> The model implements a <span style="color:#ff5c57">time</span><span style="color:#ff6ac1">-</span>varying kin(t)<span style="color:#ff6ac1">=</span>dR<span style="color:#ff6ac1">/</span>dt<span style="color:#ff6ac1">+</span>Kout<span style="color:#ff6ac1">*</span>R(t)
+</span></span><span style="display:flex;"><span>;;    where R(t) is a modified sine function<span style="color:#ff6ac1">.</span> Every <span style="color:#ff9f43">24</span>h, this function increases
+</span></span><span style="display:flex;"><span>;;    from a minimum value, Rmin, at a certain <span style="color:#ff5c57">time</span>, SHIFT, reaches a maximum,
+</span></span><span style="display:flex;"><span>;;    Rmin<span style="color:#ff6ac1">+</span>Amp, <span style="color:#ff6ac1">then</span> decreases to <span style="color:#ff6ac1">return</span> to its minimum at <span style="color:#ff5c57">time</span> SHIFT<span style="color:#ff6ac1">+</span>DUR
+</span></span><span style="display:flex;"><span>;;
+</span></span><span style="display:flex;"><span>;;            <span style="color:#ff6ac1">^</span>
+</span></span><span style="display:flex;"><span>;;  Rmin<span style="color:#ff6ac1">+</span>Amp <span style="color:#ff6ac1">-|</span>     <span style="color:#ff6ac1">---</span>            <span style="color:#ff6ac1">---</span>            <span style="color:#ff6ac1">---</span>
+</span></span><span style="display:flex;"><span>;;            <span style="color:#ff6ac1">|</span>    <span style="color:#ff6ac1">|</span>   <span style="color:#ff6ac1">|</span>          <span style="color:#ff6ac1">|</span>   <span style="color:#ff6ac1">|</span>          <span style="color:#ff6ac1">|</span>   <span style="color:#ff6ac1">|</span>
+</span></span><span style="display:flex;"><span>;;            <span style="color:#ff6ac1">|</span>   <span style="color:#ff6ac1">|</span>     <span style="color:#ff6ac1">|</span>        <span style="color:#ff6ac1">|</span>     <span style="color:#ff6ac1">|</span>        <span style="color:#ff6ac1">|</span>     <span style="color:#ff6ac1">|</span>
+</span></span><span style="display:flex;"><span>;;            <span style="color:#ff6ac1">|</span>  <span style="color:#ff6ac1">|</span>       <span style="color:#ff6ac1">|</span>      <span style="color:#ff6ac1">|</span>       <span style="color:#ff6ac1">|</span>      <span style="color:#ff6ac1">|</span>       <span style="color:#ff6ac1">|</span>
+</span></span><span style="display:flex;"><span>;;  Rmin     <span style="color:#ff6ac1">-|---</span>       <span style="color:#ff6ac1">--------</span>       <span style="color:#ff6ac1">--------</span>       <span style="color:#ff6ac1">------</span> Response R
+</span></span><span style="display:flex;"><span>;;            <span style="color:#ff6ac1">|</span>
+</span></span><span style="display:flex;"><span>;;            <span style="color:#ff6ac1">---------------------------------------------------&gt;</span> TIME
+</span></span><span style="display:flex;"><span>;;               <span style="color:#ff6ac1">|</span>   <span style="color:#ff6ac1">|</span>              <span style="color:#ff6ac1">|</span>              <span style="color:#ff6ac1">|</span>
+</span></span><span style="display:flex;"><span>;;        SHIFT<span style="color:#ff6ac1">-</span><span style="color:#ff9f43">24</span>   <span style="color:#ff9f43">0</span>              <span style="color:#ff9f43">24</span>             <span style="color:#ff9f43">48</span>
+</span></span><span style="display:flex;"><span>;;                   <span style="color:#ff6ac1">&lt;-</span>  SHIFT <span style="color:#ff6ac1">-&gt;&lt;-</span> DUR <span style="color:#ff6ac1">-&gt;</span>
+</span></span><span style="display:flex;"><span>;;
+</span></span><span style="display:flex;"><span>;;    Response must oscillate between <span style="color:#ff9f43">0.5</span> <span style="color:#ff6ac1">and</span> <span style="color:#ff9f43">4.5</span>
+</span></span><span style="display:flex;"><span>;;
+</span></span><span style="display:flex;"><span>;; <span style="color:#ff9f43">2</span><span style="color:#ff6ac1">-</span> Illustrate how to create a <span style="color:#ff9f43">24</span>h clock <span style="color:#ff5c57">time</span> variable T24 in <span style="color:#ff5c57">$DES</span> by
+</span></span><span style="display:flex;"><span>;;    transforming the T variable ranging from <span style="color:#ff9f43">0</span> to infinity into repeating
+</span></span><span style="display:flex;"><span>;;    intervals of continuous <span style="color:#ff5c57">time</span> between <span style="color:#ff9f43">0</span> <span style="color:#ff6ac1">and</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">.</span>
+</span></span><span style="display:flex;"><span>;;
+</span></span><span style="display:flex;"><span>;; <span style="color:#ff6ac1">-----------------------------------------------------------------------------</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$DATA</span> circadian<span style="color:#ff6ac1">.</span>csv IGNORE<span style="color:#ff6ac1">=</span><span style="color:#ff5c57">@</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$INPUT</span> ID TIME AMT CMT EVID DV MDV
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$</span><span style="color:#ff5c57">THETA</span>
-</span></span><span style="display:flex;"><span>   (<span style="color:#ff9f43">0.0001</span>,<span style="color:#ff9f43">0.5</span>,<span style="color:#ff9f43">0.9999</span>)   ;<span style="color:#78787e">#-- typical scaled-down shift</span>
-</span></span><span style="display:flex;"><span>   (<span style="color:#ff9f43">0.0001</span>,<span style="color:#ff9f43">0.5</span>,<span style="color:#ff9f43">0.9999</span>)   ;<span style="color:#78787e">#-- typical scaled-down duration</span>
-</span></span><span style="display:flex;"><span>   (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">4</span>)                 ;<span style="color:#78787e">#-- typical amplitude of response</span>
-</span></span><span style="display:flex;"><span>   (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">0.5</span>)               ;<span style="color:#78787e">#-- typical minimum response</span>
-</span></span><span style="display:flex;"><span>   (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">0.1</span>)               ;<span style="color:#78787e">#-- typical elimination rate</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$DATA</span> circadian<span style="color:#ff6ac1">.</span>csv IGNORE<span style="color:#ff6ac1">=</span><span style="color:#ff5c57">@</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$OMEGA</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff9f43">3</span>                    ;<span style="color:#78787e">#-- IIV in shift (%CV=100*sqrt(1-th1)*eta1)</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff9f43">3</span>                    ;<span style="color:#78787e">#-- IIV in duration (%CV=100*sqrt(1-th2)*eta2)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$</span><span style="color:#ff5c57">THETA</span>
+</span></span><span style="display:flex;"><span> (<span style="color:#ff9f43">0.0001</span>,<span style="color:#ff9f43">0.5</span>,<span style="color:#ff9f43">0.9999</span>)   ;<span style="color:#ff6ac1">--</span> typical scaled<span style="color:#ff6ac1">-</span>down <span style="color:#ff5c57">shift</span>
+</span></span><span style="display:flex;"><span> (<span style="color:#ff9f43">0.0001</span>,<span style="color:#ff9f43">0.5</span>,<span style="color:#ff9f43">0.9999</span>)   ;<span style="color:#ff6ac1">--</span> typical scaled<span style="color:#ff6ac1">-</span>down duration
+</span></span><span style="display:flex;"><span> (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">4</span>)                 ;<span style="color:#ff6ac1">--</span> typical amplitude of response
+</span></span><span style="display:flex;"><span> (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">0.5</span>)               ;<span style="color:#ff6ac1">--</span> typical minimum response
+</span></span><span style="display:flex;"><span> (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">0.1</span>)               ;<span style="color:#ff6ac1">--</span> typical elimination rate
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$SUBROUTINE</span> ADVAN13 TOL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">9</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$OMEGA</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">3</span>                    ;<span style="color:#ff6ac1">--</span> IIV in <span style="color:#ff5c57">shift</span> (<span style="color:#ff5c57">%CV</span><span style="color:#ff6ac1">=</span><span style="color:#ff9f43">100</span><span style="color:#ff6ac1">*</span><span style="color:#ff5c57">sqrt</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>th1)<span style="color:#ff6ac1">*</span>eta1)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff9f43">3</span>                    ;<span style="color:#ff6ac1">--</span> IIV in duration (<span style="color:#ff5c57">%CV</span><span style="color:#ff6ac1">=</span><span style="color:#ff9f43">100</span><span style="color:#ff6ac1">*</span><span style="color:#ff5c57">sqrt</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>th2)<span style="color:#ff6ac1">*</span>eta2)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$MODEL</span> NCOMP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span>    COMP<span style="color:#ff6ac1">=</span>(RESP)
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SUBROUTINE</span> ADVAN13 TOL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">9</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$PK</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$MODEL</span> NCOMP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>  COMP<span style="color:#ff6ac1">=</span>(RESP)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e">#------------------------</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Indirect response model</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e">#------------------------</span>
-</span></span><span style="display:flex;"><span>    PI <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">3.14159263</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$PK</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Define shift and duration parameters</span>
+</span></span><span style="display:flex;"><span>  ;<span style="color:#ff6ac1">------------------------</span>
+</span></span><span style="display:flex;"><span>  ; Indirect response model
+</span></span><span style="display:flex;"><span>  ;<span style="color:#ff6ac1">------------------------</span>
+</span></span><span style="display:flex;"><span>  PI <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">3.14159263</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    TVSHIFT <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">1</span>)                   ;<span style="color:#78787e"># typical shift on 24h scale;# (0,24)</span>
-</span></span><span style="display:flex;"><span>                                            ;<span style="color:#78787e"># where THETA(1) represents this typical shift as a fraction of 24h;# (0,1)</span>
-</span></span><span style="display:flex;"><span>    LGSHI <span style="color:#ff6ac1">=</span> LOG(THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>THETA(<span style="color:#ff9f43">1</span>)))      ;<span style="color:#78787e"># logit transformation of the typical fraction of 24h;# (-INF,+INF)</span>
-</span></span><span style="display:flex;"><span>    ILGSHI <span style="color:#ff6ac1">=</span> LGSHI<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">1</span>)                   ;<span style="color:#78787e"># addition of IIV;# (-INF,+INF)</span>
-</span></span><span style="display:flex;"><span>    SHIFT <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>EXP(ILGSHI)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">+</span>EXP(ILGSHI))  ;<span style="color:#78787e"># back-transformation and scale-up of individual shift to 24h scale;# (0,24)</span>
+</span></span><span style="display:flex;"><span>  ; Define <span style="color:#ff5c57">shift</span> <span style="color:#ff6ac1">and</span> duration parameters
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    TVDUR <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">2</span>)                     ;<span style="color:#78787e"># typical duration on 24h scale;# (0,24)</span>
-</span></span><span style="display:flex;"><span>                                            ;<span style="color:#78787e"># where THETA(1) represents this typical duration as a fraction of 24h;# (0,1)</span>
-</span></span><span style="display:flex;"><span>    LGDUR <span style="color:#ff6ac1">=</span> LOG(THETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>THETA(<span style="color:#ff9f43">2</span>)))      ;<span style="color:#78787e"># logit transformation of the typical fraction of 24h;# (-INF,+INF)</span>
-</span></span><span style="display:flex;"><span>    ILGDUR <span style="color:#ff6ac1">=</span> LGDUR<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">2</span>)                   ;<span style="color:#78787e"># addition of IIV;# (-INF,+INF)</span>
-</span></span><span style="display:flex;"><span>    DUR <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>EXP(ILGDUR)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">+</span>EXP(ILGDUR))    ;<span style="color:#78787e"># back-transformation and scale-up of individual duration to 24h scale;# (0,24)</span>
+</span></span><span style="display:flex;"><span>  TVSHIFT <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">1</span>)                   ; typical <span style="color:#ff5c57">shift</span> on <span style="color:#ff9f43">24</span>h scale; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">24</span>)
+</span></span><span style="display:flex;"><span>                                          ; where THETA(<span style="color:#ff9f43">1</span>) represents this typical <span style="color:#ff5c57">shift</span> as a fraction of <span style="color:#ff9f43">24</span>h; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  LGSHI <span style="color:#ff6ac1">=</span> LOG(THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>THETA(<span style="color:#ff9f43">1</span>)))      ; logit transformation of the typical fraction of <span style="color:#ff9f43">24</span>h; (<span style="color:#ff6ac1">-</span>INF,<span style="color:#ff6ac1">+</span>INF)
+</span></span><span style="display:flex;"><span>  ILGSHI <span style="color:#ff6ac1">=</span> LGSHI<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">1</span>)                   ; addition of IIV; (<span style="color:#ff6ac1">-</span>INF,<span style="color:#ff6ac1">+</span>INF)
+</span></span><span style="display:flex;"><span>  SHIFT <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>EXP(ILGSHI)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">+</span>EXP(ILGSHI))  ; back<span style="color:#ff6ac1">-</span>transformation <span style="color:#ff6ac1">and</span> scale<span style="color:#ff6ac1">-</span>up of individual <span style="color:#ff5c57">shift</span> to <span style="color:#ff9f43">24</span>h scale; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">24</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    AMP <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">3</span>)
-</span></span><span style="display:flex;"><span>    RMIN <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">4</span>)
-</span></span><span style="display:flex;"><span>    KOUT <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">5</span>)
-</span></span><span style="display:flex;"><span>    RMAX <span style="color:#ff6ac1">=</span> RMIN <span style="color:#ff6ac1">+</span> AMP
+</span></span><span style="display:flex;"><span>  TVDUR <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">2</span>)                     ; typical duration on <span style="color:#ff9f43">24</span>h scale; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">24</span>)
+</span></span><span style="display:flex;"><span>                                          ; where THETA(<span style="color:#ff9f43">1</span>) represents this typical duration as a fraction of <span style="color:#ff9f43">24</span>h; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  LGDUR <span style="color:#ff6ac1">=</span> LOG(THETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">-</span>THETA(<span style="color:#ff9f43">2</span>)))      ; logit transformation of the typical fraction of <span style="color:#ff9f43">24</span>h; (<span style="color:#ff6ac1">-</span>INF,<span style="color:#ff6ac1">+</span>INF)
+</span></span><span style="display:flex;"><span>  ILGDUR <span style="color:#ff6ac1">=</span> LGDUR<span style="color:#ff6ac1">+</span>ETA(<span style="color:#ff9f43">2</span>)                   ; addition of IIV; (<span style="color:#ff6ac1">-</span>INF,<span style="color:#ff6ac1">+</span>INF)
+</span></span><span style="display:flex;"><span>  DUR <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span><span style="color:#ff6ac1">*</span>EXP(ILGDUR)<span style="color:#ff6ac1">/</span>(<span style="color:#ff9f43">1</span><span style="color:#ff6ac1">+</span>EXP(ILGDUR))    ; back<span style="color:#ff6ac1">-</span>transformation <span style="color:#ff6ac1">and</span> scale<span style="color:#ff6ac1">-</span>up of individual duration to <span style="color:#ff9f43">24</span>h scale; (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">24</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Circadian rhythm</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Determine initial value of the response and time offset based upon whether</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># SHIFT and DUR are such that the response is flat or within the sinusoid</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># phase at time 0</span>
-</span></span><span style="display:flex;"><span>    IF ((SHIFT<span style="color:#ff6ac1">+</span>DUR)<span style="color:#ff6ac1">.</span>GT<span style="color:#ff9f43">.24</span>) THEN
-</span></span><span style="display:flex;"><span>      OFFSET <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span>
-</span></span><span style="display:flex;"><span>      INIT1 <span style="color:#ff6ac1">=</span> RMIN<span style="color:#ff6ac1">+</span>AMP<span style="color:#ff6ac1">*</span>SIN(PI<span style="color:#ff6ac1">*</span>(OFFSET<span style="color:#ff6ac1">-</span>SHIFT)<span style="color:#ff6ac1">/</span>DUR)
-</span></span><span style="display:flex;"><span>    ELSE
-</span></span><span style="display:flex;"><span>      OFFSET <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">0</span>
-</span></span><span style="display:flex;"><span>      INIT1 <span style="color:#ff6ac1">=</span> RMIN
-</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">END</span> IF
-</span></span><span style="display:flex;"><span>    TX <span style="color:#ff6ac1">=</span> SHIFT<span style="color:#ff6ac1">-</span>OFFSET
+</span></span><span style="display:flex;"><span>  AMP <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">3</span>)
+</span></span><span style="display:flex;"><span>  RMIN <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">4</span>)
+</span></span><span style="display:flex;"><span>  KOUT <span style="color:#ff6ac1">=</span> THETA(<span style="color:#ff9f43">5</span>)
+</span></span><span style="display:flex;"><span>  RMAX <span style="color:#ff6ac1">=</span> RMIN <span style="color:#ff6ac1">+</span> AMP
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    IF (NEWIND <span style="color:#ff6ac1">&lt;=</span> <span style="color:#ff9f43">1</span>) THEN
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> TX
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> TX<span style="color:#ff6ac1">+</span>DUR
-</span></span><span style="display:flex;"><span>    ELSE
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">2</span>)
-</span></span><span style="display:flex;"><span>    ENDIF
+</span></span><span style="display:flex;"><span>  ; Circadian rhythm
+</span></span><span style="display:flex;"><span>  ; Determine initial value of the response <span style="color:#ff6ac1">and</span> <span style="color:#ff5c57">time</span> offset based upon whether
+</span></span><span style="display:flex;"><span>  ; SHIFT <span style="color:#ff6ac1">and</span> DUR are such that the response is flat <span style="color:#ff6ac1">or</span> within the sinusoid
+</span></span><span style="display:flex;"><span>  ; phase at <span style="color:#ff5c57">time</span> <span style="color:#ff9f43">0</span>
+</span></span><span style="display:flex;"><span>  IF ((SHIFT<span style="color:#ff6ac1">+</span>DUR)<span style="color:#ff6ac1">.</span>GT<span style="color:#ff9f43">.24</span>) THEN
+</span></span><span style="display:flex;"><span>    OFFSET <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">24</span>
+</span></span><span style="display:flex;"><span>    INIT1 <span style="color:#ff6ac1">=</span> RMIN<span style="color:#ff6ac1">+</span>AMP<span style="color:#ff6ac1">*</span>SIN(PI<span style="color:#ff6ac1">*</span>(OFFSET<span style="color:#ff6ac1">-</span>SHIFT)<span style="color:#ff6ac1">/</span>DUR)
+</span></span><span style="display:flex;"><span>  ELSE
+</span></span><span style="display:flex;"><span>    OFFSET <span style="color:#ff6ac1">=</span> <span style="color:#ff9f43">0</span>
+</span></span><span style="display:flex;"><span>    INIT1 <span style="color:#ff6ac1">=</span> RMIN
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">END</span> IF
+</span></span><span style="display:flex;"><span>  TX <span style="color:#ff6ac1">=</span> SHIFT<span style="color:#ff6ac1">-</span>OFFSET
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Defines of mtime(1) to use for integration during this interval</span>
-</span></span><span style="display:flex;"><span>    INTMTIME <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  IF (NEWIND <span style="color:#ff6ac1">&lt;=</span> <span style="color:#ff9f43">1</span>) THEN
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> TX
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> TX<span style="color:#ff6ac1">+</span>DUR
+</span></span><span style="display:flex;"><span>  ELSE
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>  ENDIF
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Update mtime variables after mtime(2) is reached</span>
-</span></span><span style="display:flex;"><span>    IF (MNOW <span style="color:#ff6ac1">==</span> <span style="color:#ff9f43">2</span>) THEN
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
-</span></span><span style="display:flex;"><span>      MTDIFF<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span>    ENDIF
+</span></span><span style="display:flex;"><span>  ; Defines of mtime(<span style="color:#ff9f43">1</span>) to <span style="color:#ff6ac1">use</span> for integration during this interval
+</span></span><span style="display:flex;"><span>  INTMTIME <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Initialize the response compartment</span>
-</span></span><span style="display:flex;"><span>    IF (A_0FLG <span style="color:#ff6ac1">==</span> <span style="color:#ff9f43">1</span>) THEN
-</span></span><span style="display:flex;"><span>      A_0(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> INIT1
-</span></span><span style="display:flex;"><span>    ENDIF
+</span></span><span style="display:flex;"><span>  ; Update mtime variables after mtime(<span style="color:#ff9f43">2</span>) is reached
+</span></span><span style="display:flex;"><span>  IF (MNOW <span style="color:#ff6ac1">==</span> <span style="color:#ff9f43">2</span>) THEN
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">2</span>) <span style="color:#ff6ac1">=</span> MTIME(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
+</span></span><span style="display:flex;"><span>    MTDIFF<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>  ENDIF
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e">#---------------</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># 24h clock time</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e">#---------------</span>
+</span></span><span style="display:flex;"><span>  ; Initialize the response compartment
+</span></span><span style="display:flex;"><span>  IF (A_0FLG <span style="color:#ff6ac1">==</span> <span style="color:#ff9f43">1</span>) THEN
+</span></span><span style="display:flex;"><span>    A_0(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> INIT1
+</span></span><span style="display:flex;"><span>  ENDIF
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Use mtime(3) to scale the T variable in $DES from 0 to infinity to repeating</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># 0-24h intervals</span>
-</span></span><span style="display:flex;"><span>    IF (NEWIND<span style="color:#ff6ac1">&lt;=</span><span style="color:#ff9f43">1</span>) THEN
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">=</span>TIME<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
-</span></span><span style="display:flex;"><span>    ELSE
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">=</span>MTIME(<span style="color:#ff9f43">3</span>)
-</span></span><span style="display:flex;"><span>    ENDIF
+</span></span><span style="display:flex;"><span>  ;<span style="color:#ff6ac1">---------------</span>
+</span></span><span style="display:flex;"><span>  ; <span style="color:#ff9f43">24</span>h clock <span style="color:#ff5c57">time</span>
+</span></span><span style="display:flex;"><span>  ;<span style="color:#ff6ac1">---------------</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    INTMTIME3<span style="color:#ff6ac1">=</span>MTIME(<span style="color:#ff9f43">3</span>)
+</span></span><span style="display:flex;"><span>  ; Use mtime(<span style="color:#ff9f43">3</span>) to scale the T variable in <span style="color:#ff5c57">$DES</span> from <span style="color:#ff9f43">0</span> to infinity to repeating
+</span></span><span style="display:flex;"><span>  ; <span style="color:#ff9f43">0</span><span style="color:#ff6ac1">-</span><span style="color:#ff9f43">24</span>h intervals
+</span></span><span style="display:flex;"><span>  IF (NEWIND<span style="color:#ff6ac1">&lt;=</span><span style="color:#ff9f43">1</span>) THEN
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">=</span>TIME<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
+</span></span><span style="display:flex;"><span>  ELSE
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">=</span>MTIME(<span style="color:#ff9f43">3</span>)
+</span></span><span style="display:flex;"><span>  ENDIF
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    IF (MNOW<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">3</span>) THEN
-</span></span><span style="display:flex;"><span>      MTIME(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">=</span>MTIME(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
-</span></span><span style="display:flex;"><span>      MTDIFF<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span>    ENDIF
+</span></span><span style="display:flex;"><span>  INTMTIME3<span style="color:#ff6ac1">=</span>MTIME(<span style="color:#ff9f43">3</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$DES</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Define FLAG variable:</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># FLAG=1 when T is in [SHIFT+n*24,SHIFT+DUR+n*24], where n=0,1,2,3,...</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># FLAG=0 otherwise</span>
-</span></span><span style="display:flex;"><span>    FLAG <span style="color:#ff6ac1">=</span> MPAST(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">-</span>MPAST(<span style="color:#ff9f43">2</span>)
+</span></span><span style="display:flex;"><span>  IF (MNOW<span style="color:#ff6ac1">==</span><span style="color:#ff9f43">3</span>) THEN
+</span></span><span style="display:flex;"><span>    MTIME(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">=</span>MTIME(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">+</span><span style="color:#ff9f43">24</span>
+</span></span><span style="display:flex;"><span>    MTDIFF<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
+</span></span><span style="display:flex;"><span>  ENDIF
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Define time-varying kin:</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># * kin is constant (KOUT*RMIN) when FLAG=0</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># * kin is time-varying when FLAG=1, and function of TS, a transformation</span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e">#   function of T scaling time from 0 to infinity to repeating intervals [0,1]</span>
-</span></span><span style="display:flex;"><span>    TS <span style="color:#ff6ac1">=</span> (T<span style="color:#ff6ac1">-</span>INTMTIME)<span style="color:#ff6ac1">/</span>DUR
-</span></span><span style="display:flex;"><span>    KIN <span style="color:#ff6ac1">=</span> KOUT<span style="color:#ff6ac1">*</span>RMIN <span style="color:#ff6ac1">+</span> FLAG<span style="color:#ff6ac1">*</span>((AMP<span style="color:#ff6ac1">*</span>PI<span style="color:#ff6ac1">/</span>DUR)<span style="color:#ff6ac1">*</span>COS(PI<span style="color:#ff6ac1">*</span>TS) <span style="color:#ff6ac1">+</span> KOUT<span style="color:#ff6ac1">*</span>AMP<span style="color:#ff6ac1">*</span>SIN(PI<span style="color:#ff6ac1">*</span>TS))
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$DES</span>
+</span></span><span style="display:flex;"><span>  ; Define FLAG variable:
+</span></span><span style="display:flex;"><span>  ; FLAG<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span> when T is in [SHIFT<span style="color:#ff6ac1">+</span>n<span style="color:#ff6ac1">*</span><span style="color:#ff9f43">24</span>,SHIFT<span style="color:#ff6ac1">+</span>DUR<span style="color:#ff6ac1">+</span>n<span style="color:#ff6ac1">*</span><span style="color:#ff9f43">24</span>], where n<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">1</span>,<span style="color:#ff9f43">2</span>,<span style="color:#ff9f43">3</span>,<span style="color:#ff6ac1">...</span>
+</span></span><span style="display:flex;"><span>  ; FLAG<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0</span> otherwise
+</span></span><span style="display:flex;"><span>  FLAG <span style="color:#ff6ac1">=</span> MPAST(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">-</span>MPAST(<span style="color:#ff9f43">2</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># Response</span>
-</span></span><span style="display:flex;"><span>    DADT(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> KIN<span style="color:#ff6ac1">-</span>KOUT<span style="color:#ff6ac1">*</span>A(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  ; Define <span style="color:#ff5c57">time</span><span style="color:#ff6ac1">-</span>varying kin:
+</span></span><span style="display:flex;"><span>  ; <span style="color:#ff6ac1">*</span> kin is constant (KOUT<span style="color:#ff6ac1">*</span>RMIN) when FLAG<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0</span>
+</span></span><span style="display:flex;"><span>  ; <span style="color:#ff6ac1">*</span> kin is <span style="color:#ff5c57">time</span><span style="color:#ff6ac1">-</span>varying when FLAG<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>, <span style="color:#ff6ac1">and</span> function of TS, a transformation
+</span></span><span style="display:flex;"><span>  ;   function of T scaling <span style="color:#ff5c57">time</span> from <span style="color:#ff9f43">0</span> to infinity to repeating intervals [<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">1</span>]
+</span></span><span style="display:flex;"><span>  TS <span style="color:#ff6ac1">=</span> (T<span style="color:#ff6ac1">-</span>INTMTIME)<span style="color:#ff6ac1">/</span>DUR
+</span></span><span style="display:flex;"><span>  KIN <span style="color:#ff6ac1">=</span> KOUT<span style="color:#ff6ac1">*</span>RMIN <span style="color:#ff6ac1">+</span> FLAG<span style="color:#ff6ac1">*</span>((AMP<span style="color:#ff6ac1">*</span>PI<span style="color:#ff6ac1">/</span>DUR)<span style="color:#ff6ac1">*</span>COS(PI<span style="color:#ff6ac1">*</span>TS) <span style="color:#ff6ac1">+</span> KOUT<span style="color:#ff6ac1">*</span>AMP<span style="color:#ff6ac1">*</span>SIN(PI<span style="color:#ff6ac1">*</span>TS))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ;<span style="color:#78787e"># 24h clock time</span>
-</span></span><span style="display:flex;"><span>    T24 <span style="color:#ff6ac1">=</span> T<span style="color:#ff6ac1">-</span>(INTMTIME3<span style="color:#ff6ac1">-</span><span style="color:#ff9f43">24</span>)
+</span></span><span style="display:flex;"><span>  ; Response
+</span></span><span style="display:flex;"><span>  DADT(<span style="color:#ff9f43">1</span>) <span style="color:#ff6ac1">=</span> KIN<span style="color:#ff6ac1">-</span>KOUT<span style="color:#ff6ac1">*</span>A(<span style="color:#ff9f43">1</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ERROR</span>
-</span></span><span style="display:flex;"><span>    REPID <span style="color:#ff6ac1">=</span> (IREP<span style="color:#ff6ac1">-</span><span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span><span style="color:#ff9f43">10</span> <span style="color:#ff6ac1">+</span> ID
-</span></span><span style="display:flex;"><span>    RESPONSE <span style="color:#ff6ac1">=</span> A(<span style="color:#ff9f43">1</span>)
-</span></span><span style="display:flex;"><span>    IF (ICALL <span style="color:#ff6ac1">==</span> <span style="color:#ff9f43">4</span>) THEN
-</span></span><span style="display:flex;"><span>      DV <span style="color:#ff6ac1">=</span> RESPONSE
-</span></span><span style="display:flex;"><span>    ENDIF
+</span></span><span style="display:flex;"><span>  ; <span style="color:#ff9f43">24</span>h clock <span style="color:#ff5c57">time</span>
+</span></span><span style="display:flex;"><span>  T24 <span style="color:#ff6ac1">=</span> T<span style="color:#ff6ac1">-</span>(INTMTIME3<span style="color:#ff6ac1">-</span><span style="color:#ff9f43">24</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$SIMULATION</span>(<span style="color:#ff9f43">12345</span>) NSUB<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">10</span> ONLYSIM NOPREDICTION
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$ERROR</span>
+</span></span><span style="display:flex;"><span>  REPID <span style="color:#ff6ac1">=</span> (IREP<span style="color:#ff6ac1">-</span><span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span><span style="color:#ff9f43">10</span> <span style="color:#ff6ac1">+</span> ID
+</span></span><span style="display:flex;"><span>  RESPONSE <span style="color:#ff6ac1">=</span> A(<span style="color:#ff9f43">1</span>)
+</span></span><span style="display:flex;"><span>  IF (ICALL <span style="color:#ff6ac1">==</span> <span style="color:#ff9f43">4</span>) THEN
+</span></span><span style="display:flex;"><span>    DV <span style="color:#ff6ac1">=</span> RESPONSE
+</span></span><span style="display:flex;"><span>  ENDIF
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$TABLE</span> REPID TIME RESPONSE SHIFT DUR ONEHEADER NOAPPEND NOPRINT
-</span></span><span style="display:flex;"><span>    FILE<span style="color:#ff6ac1">=</span>idr_circexa<span style="color:#ff6ac1">.</span>tab</span></span></code></pre></td></tr></table>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SIMULATION</span>(<span style="color:#ff9f43">12345</span>) NSUB<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">10</span> ONLYSIM NOPREDICTION
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$TABLE</span> REPID TIME RESPONSE SHIFT DUR ONEHEADER NOAPPEND NOPRINT
+</span></span><span style="display:flex;"><span>  FILE<span style="color:#ff6ac1">=</span>idr_circexa<span style="color:#ff6ac1">.</span>tab
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SCAT</span> FLAG VS TIME BY REPID
+</span></span><span style="display:flex;"><span><span style="color:#ff5c57">$SCAT</span> RESPONSE VS TIME BY REPID</span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>The <code>$DES</code> block describes the response as the state variable. Line 120
+<p>
+The <code>$DES</code> block describes the response as the state variable. Line 120
 defines a continuous 24h clock time, through the circadian reset of
 the <code>MTIME(3)</code> variable in <code>$PK</code>. Note that here \(z(t)\) is implemented
 using the <code>INTMTIME</code> variable that records <code>MTIME(1)</code>.</p>

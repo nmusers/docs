@@ -402,19 +402,14 @@ $EST METHOD=BAYES INTERACTION
 #+end_src
 
 *** METHOD=DIRECT
-On rare occasions, direct Monte Carlo sampling may desired.  This method is the purest method for performing expectation maximization, in that it creates completely independent samples (unlike MCMC), and there is no chance of causing bias if the sampling density is not similar enough to the conditional density (unlike IMP).  However, it is very inefficient, requiring ISAMPLE values of 10000 to 300000 to properly estimate the problem.  The method can be implemented by issuing a command such as
-#+begin_src perl
-$EST METHOD=DIRECT INTERACTION ISAMPLE=10000 NITER=50
-#+end_src
-
-On occasion it can have some use in jump starting an importance sampling method, especially if the first iteration of importance sampling fails because it relies on MAP estimation, and the problem is too unstable for it.  Thus, one could perform the following, where just a few iterations of direct sampling begin the estimation process:
-
+This method implements the naive EM method by sampling the conditional
+density independently. This direct sampling can be very inefficient,
+requiring ~ISAMPLE>1E4~. It can have some use in jump starting an importance sampling method, especially if the first iteration of importance sampling fails:
 #+begin_src perl
 $EST METHOD=DIRECT INTERACTION ISAMPLE=10000 NITER=3
 $EST METHOD=IMP INTERACTION ISAMPLE=1000 NITER=50 MAPITER=0
 #+end_src
-Notice that since MAPITER=0, the first iteration of IMP method relies on starting parameters for its sampling density that came from the DIRECT sampling method.
-
+Notice that since MAPITER=0, the first iteration of IMP method relies on starting parameters for its sampling density that came from the direct sampling.
 
 *** METHOD=NUTS (NM74)
 The No-U-Turn Sampling (NUTS) algorithm is a limited version of NUTS
@@ -895,28 +890,22 @@ The user may modify the subroutine CONSTRAINT that  performs  the simulated anne
 (See [[file:/docs/reference-manual/files/#addi-output][additional output files]], [[file:/docs/reference-manual/files/#raw-output][raw_output_file]]).
 
 *** CTYPE=[0|1|2|3|4]
-CTYPE is used to define the termination test to be applied to the
-burn-in phases for SAEM and BAYES methods and to  the  estimation
-phases for the ITS, IMP, and IMPMAP methods.  (CTYPE=4 Applies to
-classical methods FO/FOCE/Laplacean.)
-  - CTYPE=0 indicates no termination test, the default.
-  - CTYPE=1 indicates that the test should be applied to  the
-    objective function value, THETA's and SIGMA's but not to the
-    OMEGA's.
+:PROPERTIES:
+:CUSTOM_ID: ctype
+:END:
+The option defines the termination test for
+- the burn-in phases of SAEM and BAYES methods;
+- the estimation phases of the ITS, IMP, and IMPMAP methods;
+- the estimation of classical (FO/FOCE/LAPLACE) methods.
 
-  - CTYPE=2  indicates  that the test should be applied to the
-    objective function value, THETA's, SIGMA's and  diagonal  elements
-    of OMEGA.
-
-  - CTYPE=3  indicates  that the test should be applied to the
-    objective function value, THETA's, SIGMA's and all OMEGA elements.
-
-  - CTYPE=4 indicates that NONMEM should test if the objective
-    function  has not changed by more then NSIG digits beyond the
-    decimal point over 10 iterations, even though a parameter  may
-    oscillate at  some  digit.   If this condition is satisfied, the
-    estimation will terminate successfully. Applies to
-    FO/FOCE/Laplacean  methods.
+The tests:
+- ~CTYPE=0~: no termination test, the default.
+- ~CTYPE=1~: test OFV, ~THETA~ and ~SIGMA~ but not ~OMEGA~.
+- ~CTYPE=2~: test OFV, ~THETA~, ~SIGMA~, and diagonal  elements of ~OMEGA~.
+- ~CTYPE=3~: test OFV, ~THETA~, ~SIGMA~, and all elements of ~OMEGA~.
+- ~CTYPE=4~: test if the OFV changes have remained within ~NSIG~ digits after the
+    decimal point over 10 iterations. This option applies to
+    FO/FOCE/LAPLACE  methods.
 
 *** DERCONT=[0|1] (NM73)
 The  derivative  continuity test (DERCONT) by default is off (0). When
@@ -937,20 +926,25 @@ works only for the Monte Carlo EM algorithms such as IMP, DIRECT,
 IMPMAP, and SAEM.
 
 *** DF=n
-The proposal density is to be a t-distribution with n the number of degrees  of
-freedom (DF).   Default DF=0, a normal density.  Used with the IMP and
-IMPMAP methods.
+:PROPERTIES:
+:CUSTOM_ID: df
+:END:
+Use t-distribution as the proposal density in IMP and
+IMPMAP methods, with degrees of
+freedom (DoF) equals to ~DF~. Default ~DF=0~, a normal density.
 
 *** DFS=n (NM73)
-Degrees of freedom for the SIGMA matrix for  simulation  purposes by CHAIN.
-  - DFS=-1: this  is  the  default.  The cholesky elements are
-    uniformly varied  over  the  interval
+:PROPERTIES:
+:CUSTOM_ID: dfs
+:END:
+Degrees of freedom (DoF) for \(\Sigma\), for simulations by ~CHAIN~.
+  - ~DFS=-1~ (default): uniformly sample the cholesky elements over interval
 
     ~[(1-accept)*initial  value, (1+accept)*initial value]~.
 
-  - DFS=n: the SIGMA matrix is randomly created with an inverse Wishart distribution centered about the initial SIGMA  values,  with degrees of freedom DFS for dispersion.
-  - DFS=0: as  above,  but  the  size  of  the  SIGMA matrix is used as degrees of freedom.
-  - DFS=>1000000: SIGMA is fixed at its initial value.
+  - ~DFS>0, DFS<1000000~: \(\Sigma\) is sampled from an Inverse Wishart distribution centered at the initial \(\Sigma\)  values,  with ~DFS~ for dispersion.
+  - ~DFS=0~: same as above,  but use the  size  of \(\Sigma\) for DoF.
+  - ~DFS=1000000~: fixed \(\Sigma\) at the initial value.
 
 *** EONLY=[0|1]
 Evaluate the IMP objective function by performing only the expectation step, without advancing the population parameters (default is 0, population parameters are updated).  When this method is used, NITER should equal 5 to 10, to allow proposal density to improve with each iteration, since mean and variance of parameters of normal or t distribution proposal density are obtained from the previous iteration.  Also it is good to get several objective function values to assess the Monte Carlo noise in it.
@@ -1047,10 +1041,14 @@ MAXEVAL=0, then set EVALSHRINK=1 on the ~$EST~ record.
 
 
 *** FILE=filename
-      Name for the [[file:/docs/reference-manual/files/#raw-output][raw output file]].  Parameter estimates and  objective
-      function  value will be printed to this file every printed
-      iteration as indicated by the PRINT option.  Default: ~.ext~ ("nmbayes" if the name is not specified on the nmfe  command line).   Note  that  the names of [[file:/docs/reference-manual/files/#addi-output][additional output files]] are not
-      affected by this option.
+:PROPERTIES:
+:CUSTOM_ID: est-file
+:END:
+Name for the [[file:/docs/reference-manual/files/#raw-output][raw output file]] for the parameter estimates and OFV,
+according to the PRINT option.  Default: ~.ext~ ("nmbayes" if the
+name is not specified on the nmfe command line).   This option does
+not affect the [[file:/docs/reference-manual/files/#addi-output][additional output files]].
+
 
 *** FNLETA=n (NM72)
 Set FNLETA to 0 if you do not want it to spend time performing the end
@@ -1148,15 +1146,15 @@ To summarize:
 
 - FNLETA=3 (as of nm74):  Like FNLETA=1, will call FNLETA, and all table outputs (diagnostics and user selected items) will use EBE’s from the FNLETA step (eta modes).
 
-*** DELIM, FORMAT
-Format  for  the raw output file and all additional output files. s
-defines the delimiter [,|s(pace)|t(ab)] followed by  a  Fortran format
-specification. The default is s1PE12.5. For more details, see [[file:/docs/reference-manual/control-records/#format-ref][FORMAT]]. May also be coded DELIM.
+*** FORMAT (DELIM)
+Format for the raw output file and all additional output files. See
+[[file:/docs/reference-manual/control-records/#format-ref][FORMAT]] for details.
+~FORMAT~ has alias ~DELIM~.
 
 *** FO | NOFO
-FO: requests that the First-Order Model be  used  with  METHOD=1  and CENTERING.  Cannot be used with LAPLACIAN.
+~FO~: requests that the First-Order Model be  used  with  ~METHOD=1~  and ~CENTERING~.  Cannot be used with ~LAPLACIAN~.
 
-NOFO: requests that the First-Order Model not be used with METHOD=1 and centering.  This is the default.
+~NOFO~ (default): requests that the First-Order Model not be used with METHOD=1 and centering.
 
 *** FPARAFILE (NM74)
 Final ETAs (empirical Bayes estimates; EBE's) are evaluated after
@@ -1229,20 +1227,24 @@ If  r1>.9999,  there is no tail region.  nr and ns should be integers.
 The default  values  are: GRID=(3,1,.6,.9).
 
 *** IACCEPT=[x|0]
-The function of IACCEPT depends on the method.
+:PROPERTIES:
+:CUSTOM_ID: iaccept
+:END:
+~IACCEPT~ controls different aspects of the sampling according ~METHOD~.
+- SAEM and BAYES method: the probabilty of accepting the proposals. This
+  is achieved by adjusting the scaling of \(\Omega\). Default
+  ~x=0.4~. See also ISAMPLE_M2.
 
-- SAEM and BAYES: the scaling of OMEGA  is  adjusted  so  that samples
-  are accepted x fraction of the time.  See ISAMPLE_M2 option. Default
-  is 0.4.
-
-- Importance sampling: expand proposal (sampling) density variance relative to conditional density  so  that on  average conditional density/proposal density=IACCEPT (default 0.4).  For very sparse data or highly non-linear posterior densities (such as with categorical data), consider IACCEPT=0.1 to 0.3.
-
-- IACCEPT=0: for importance sampling only. NONMEM will  determine  the
-  most appropriate IACCEPT level for each subject, and if necessary,
-  will use a t-distribution  (by  altering the  degrees of freedom of
-  the distribution for each subject) as well.  In this case, the
-  individual IACCEPT values and degrees of freedom (DF) values will be
-  listed in the ~.imp~ output file.
+- Importance sampling methods: the mean of the conditional
+  density/proposal density. This is achieved by expanding proposal
+  (sampling) density variance relative to the conditional density.
+  Default ~x=0.4~.  For very sparse data or highly nonlinear posterior
+  densities (such as with categorical data), consider ~x=0.1-0.3~.
+  Setting ~IACCEPT=0~ requests NONMEM to determine  the
+  most appropriate ~IACCEPT~ level for each subject.
+  This is done by assuming t-distribution and altering the DoF for each subject.
+  In this case the individual ~IACCEPT~ and DoF values will be
+  output in the ~.imp~ file.
 
 *** IACCEPTL=x (NM74)
 If IACCEPTL is set to greater than 0 then NONMEM uses this value as a
@@ -1303,13 +1305,16 @@ assesses a best ISAMPLE for each subject.  The ISAMPLE will not be higher than 1
 See also STDOBJ below.
 
 *** ISAMPLE=n
-When used with the IMP or IMPMAP methods n is the number of random
-samples  per subject used for the expectation step. Default n=300, but
-may require 1000-3000 for very sparse data.
+:PROPERTIES:
+:CUSTOM_ID: est-isample
+:END:
+IMP or IMPMAP method: the number of random
+samples  per subject used for the expectation step. Default ~n=300~. For very sparse data
+consider use ~n>1000~.
 
-When used with the SAEM or BAYES method n is the  number of  chains
-used by the Metropolis-Hastings algorithm for individual parameter
-estimation. The default n=2 for  SAEM  and  n=1  for BAYES.
+SAEM or BAYES method: the  number of chains
+for individual parameter
+sampling, using the Metropolis-Hastings algorithm. Default ~n=2~ (SAEM),  ~n=1~  (BAYES).
 
 A  kernel  is  the  Metropolis-Hastings sampling and testing mode
 used.  The ISAMPLE_Mx options define how many times  to  generate and
@@ -1689,17 +1694,18 @@ a given set of ETAs.
 When used with the BAYES method n is the maximum number of iterations
 used to perform the burn-in phase. Default n=4000. During this time, the advance of the parameters may be monitored by observing the results in file specified by the FILE parameter, and/or the objective function displayed at the console.  The objective function progress is also written in OFV.TXT, and the report file.  Full sets of population parameters and likelihood functions are also written in the file specified with the FILE option.  When all parameters and objective function do not appear to drift in a specific direction, but appear to bounce around in a stationary region, then it has sufficiently “burned” in.  A termination test may be implemented to perform a statistical assessment of stationarity for the objective function and parameters.  As mentioned earlier, the objective function (MCMCOBJ) that is displayed during BAYES analysis is not valid for assessing minimization or for hypothesis testing in the usual manner.  It does not represent a likelihood that is integrated over all possible ETA (marginal density), but the likelihood at a given set of ETAs.
 
-*** NITER=n
-When  used with the ITS, IMP, and IMPMAP methods n is the maximum
-number of iterations. Default n=50.
+*** NITER=n (NSAMPLE)
+:PROPERTIES:
+:CUSTOM_ID: est-niter
+:END:
+ITS, IMP, and IMPMAP methods: the maximum number of iterations. Default ~n=50~.
 
-When  used  with  the  SAEM
-method  n  is  the  number  of iterations for the non-stochastic
-accumulation phase. Default n=1000.
+SAEM method: the  number  of iterations for the non-stochastic accumulation phase. Default ~n=1000~.
 
-When  used  with  the  BAYES
-method n is the number of iterations used to obtain the stationary
-distribution.  Default n=10000.  NITER  may  also  be coded NSAMPLE.
+BAYES method: the number of iterations used to obtain the target
+distribution.  Default ~n=10000~
+
+~NSAMPLE~ is the alias of ~NITER~.
 
 *** NOCOV=[0|1] (NM73)
       If  covariance estimation is not desired for a particular estimation step, set NOCOV=1.  It may be turned on again for  the  next
@@ -1719,7 +1725,11 @@ distribution.  Default n=10000.  NITER  may  also  be coded NSAMPLE.
       turned off.
 
 *** NOLABEL=[0|1]
-1 indicates that the row of item names for FILE will not be written, otherwise 0, the default.  Affects the raw output  file  and all additional output files.
+:PROPERTIES:
+:CUSTOM_ID: nolabel
+:END:
+~NOLABEL=0~ (default): write item names in raw and additional output files;
+~NOLABEL=1~: do not write item names.
 
 *** NONINFETA=[0|1] (NM73)
 NONMEM has traditionally not assessed post-hoc eta hat (also known as
@@ -1768,8 +1778,11 @@ NOPRIOR=1 did not act on TNPRI priors.
 With NOSUB=0, label substitution  will  be  performed  for  final estimates  in  the NONMEM report file. (See [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]]).  This is the default.  With NOSUB=1, label  substitution  will  not  be performed.
 
 *** NOTITLE=[0|1]
-      1 indicates the header for FILE will not be written, otherwise 0,
-      the default.  Affects the raw output file and all additional output files.
+:PROPERTIES:
+:CUSTOM_ID: notitle
+:END:
+~NOTITLE=0~ (default): write table title in raw and additional output files;
+~NOTITLE=1~: do not write table title.
 
 *** NUMDER=[0|1|2|3] (NM73)
       NUMDER=1: NONMEM computes and displays numerically evaluated
@@ -2410,6 +2423,9 @@ SADDLE_RESET  is the number of times that a reset should occur in
       is 0.
 
 *** SEED=n, CLOCKSEED=[0|1] (NM75)
+:PROPERTIES:
+:CUSTOM_ID: est-seed
+:END:
 SEED (default 11456) sets the initial  seed  for  the random number generator used for the
       Monte-Carlo methods. Alternatively, one can set CLOCKSEED=1
       (default CLOCKSEED=0) so
