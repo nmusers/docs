@@ -21,14 +21,14 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="reference-manual">
-		<meta property="article:modified_time" content="2026-09-13T19:05:17-07:00">
+		<meta property="article:modified_time" content="2026-09-17T14:44:30-07:00">
 
 
 	<meta itemprop="name" content="Abbreviated code">
 	<meta itemprop="description" content="Abbreviated code Abbreviated code follows a subset of Fortran language syntax within an NM-TRAN control stream. A block of abbreviated code begins with control record $PRED, $PK, $ERROR, $DES, $AES, $AESINITIAL, $TOL, $MIX, or $INFN, and ends with either another record (that begins with &#34;$&#34;), or the end of the control stream. The code blocks are case-insensitive (NM72).
 Comments Semicolon character ; marks the beginning of comments so that the rest of the line is ignored.">
-	<meta itemprop="dateModified" content="2026-09-13T19:05:17-07:00">
-	<meta itemprop="wordCount" content="14038">
+	<meta itemprop="dateModified" content="2026-09-17T14:44:30-07:00">
+	<meta itemprop="wordCount" content="13748">
 
 <title>Abbreviated code • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -37,7 +37,7 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.ce57905b2d1628e566ae32e1f4a9ee14c5467d73fdd5a7f6cd5b4e4603582db4.js" integrity="sha256-zleQWy0WKOVmrjLh9KnuFMVGfXP91af2zVtORgNYLbQ=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.172c2c297200a579cff77ec23397ddaa22489039f149214c8061bf02b1e45023.js" integrity="sha256-FywsKXIApXnP937CM5fdqiJIkDnxSSFMgGG/ArHkUCM=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -375,6 +375,20 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
   
     <a href="/docs/user-guide/predpp/exogenous/" class="">
       Exogenous and endogenous doses</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/interoccasion/" class="">
+      Inter-occasion variability</a>
   
 
         </li>
@@ -1241,20 +1255,6 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
   
 
   
-    <a href="/docs/cookbook/mtime/" class="">
-      Change $DES at given time</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
     <a href="/docs/cookbook/accuracy/" class="">
       Accuracy control</a>
   
@@ -1271,6 +1271,20 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
   
     <a href="/docs/cookbook/prior/" class="">
       Bayesian Priors</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/mtime/" class="">
+      Change $DES at given time</a>
   
 
         </li>
@@ -2000,14 +2014,12 @@ or used in one line.</p>
 </div>
 </div>
 <p>
-See below for a restriction on ELSEIF.</p>
-<p>
-Conditions may include the operators .EQ., .NE., .LE.,  .GE.,  .LT.,
-.GT.,  .AND., and .OR..  The arthmetic operators may be coded as <code class="verbatim">=,
-/</code>, &lt;=, &gt;=, &lt;, and &gt;, respectively.  They  may  include  expressions
-that  can  be  used  as right-hand quantities with assignment
-statements.  They may not include parentheses except in such
-expressions.</p>
+Conditions can use Fortran&#39;s boolean expressions and operators: <code>.EQ.</code>
+(<code>==</code>), <code>.NE.</code> (<code>/=</code>), <code>.LE.</code> (<code>&lt;=</code>),  <code>.GE.</code> (<code>&gt;=</code>),  <code>.LT.</code> (<code>&lt;</code>),
+<code>.GT.</code> (<code>&gt;</code>),  <code>.AND.</code>, and <code>.OR.</code>.</p>
+<ul>
+<li>
+<p>Conditions may not include parentheses except RHS quantities allowed in assignment:</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2026,18 +2038,12 @@ expressions.</p>
 </div>
 </div>
 </div>
-<p>
-With <code>$PRED</code>, <code>$PK</code>, and <code>$ERROR</code> records, a condition may test the  ICALL
-argument.   However,  if  the test is IF (ICALL.EQ.2), then ELSE may
-not be used.  Special rules apply.  For  more  detail,  see  SPECIAL
-STATEMENTS (below), and help entries for these records.</p>
-<p>
-A condition may also test certain variables defined in modules (See
-<a href="/docs/reference-manual/api/variables/">variables in NONMEM modules</a>, <a href="/docs/reference-manual/api/modules/">NONMEM modules</a>).</p>
-<p>
-Abbreviated code in a particular THEN or ELSE clause may not contain
-multiple definitions of the same random variable.  The code below is
-invalid:</p>
+</li>
+<li>When testing  <code>ICALL</code> in <code>$PRED</code>, <code>$PK</code>, and <code>$ERROR</code> blocks a
+condition like  <code>IF (ICALL.EQ.2)</code>, may not use <code>ELSE</code> branch.</li>
+<li>A condition may also test certain variables defined in modules (See <a href="/docs/reference-manual/api/variables/">variables in NONMEM modules</a>, <a href="/docs/reference-manual/api/modules/">NONMEM modules</a>).</li>
+<li>
+<p>Repeated definition in a same branch is not permitted:</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2045,27 +2051,22 @@ invalid:</p>
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
 </span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>  <span style="color:#ff6ac1">IF</span> (condition) <span style="color:#ff6ac1">THEN</span>
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>  <span style="color:#78787e">! invalid
+</span></span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">IF</span> (condition) <span style="color:#ff6ac1">THEN</span>
 </span></span><span style="display:flex;"><span>  X<span style="color:#ff6ac1">=</span>...an expression involving a random variable
 </span></span><span style="display:flex;"><span>  X<span style="color:#ff6ac1">=</span> ....
 </span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">ENDIF</span></span></span></code></pre></td></tr></table>
 </div>
 </div>
 </div>
-<p>
-Random variables cannot be defined within nested conditionals, i.e.,
-within a conditional structure beginning with an IF  and  containing
-another  IF.   The  use  of  ELSEIF … THEN implies a nested conditional.</p>
-<p>
-A special rule applies when random variables are defined via
-conditional  statements.  If a random variable is multiply defined
-within a series of IF … THEN structures, but all  conditions  are
-false, then  the  value  of the random variable is set to zero.  If an
-ELSE appears, then not all conditions are false. Consider two cases in
-which the following statements  are  the  only ones defining TVK and
-K, respectively:</p>
+</li>
+<li>
+<p>Random variables (variables expressed by random effects) cannot be
+defined within nested conditionals. Additionally, random variables
+missed by conditionals assume zero values. Thus</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2076,7 +2077,8 @@ K, respectively:</p>
 </div>
 </div>
 </div>
-<p>If  the  condition is false, the non-random variable TVK retains the value set with the previous data record.</p>
+<p>implies the <code>TVK</code> with <code>WT.LE.0</code> retains the value set previously
+(since <code>TVK</code> does not depend on any <code>ETA</code>), while</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2087,10 +2089,9 @@ K, respectively:</p>
 </div>
 </div>
 </div>
-<p>If the condition is false, the value of the random variable K is set
-to zero. NM-TRAN prints a warning message when it detects such code.</p>
-<p>
-In  <code>$PK</code>, <code>$ERROR</code>, and <code>$PRED</code> records, recursion code may be used in an explicit manner, as in this example:</p>
+<p>would cause random variable <code>K</code> corresponding to <code>WT.LE.0</code> set to
+zero, and warning message from NM-TRAN. The proper way to encode the
+above scenario would be to explicitly cover all cases:</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2109,33 +2110,23 @@ In  <code>$PK</code>, <code>$ERROR</code>, and <code>$PRED</code> records, recur
 </div>
 </div>
 </div>
-<p>If the condition is false, <code class="verbatim">K</code> retains its value set with the previous
-data record. Recursion  code  can  be  used in <code>$PRED</code>, <code>$PK</code>, and <code>$ERROR</code>
-records for other purposes as well.  The following two fragments of
-code  illustrate how one can use abbreviated code to implement
-recursive kinetics in <code>$PRED</code>.  The first example works with a single
-bolus dose  and the second example works with single or multiple bolus
-doses.  Similar code can be used in <code>$PK</code> and <code>$ERROR</code>.</p>
+<p>so that the <code>K</code> with <code>WT.LE.0</code> retains the value set previously.</p>
+</li>
+</ul>
+<p>For example, to <em>manually</em> encode in <code>$PRED</code> the recursive
+one-compartment kinetics with a single
+bolus dose, we can do</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
 </span></code></pre></td>
 <td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
 <pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>  K<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span><span style="color:#ff5c57">EXP</span>(ETA(<span style="color:#ff9f43">1</span>))
@@ -2145,9 +2136,25 @@ doses.  Similar code can be used in <code>$PK</code> and <code>$ERROR</code>.</p
 </span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">ENDIF</span>
 </span></span><span style="display:flex;"><span>  A<span style="color:#ff6ac1">=</span>OLDA<span style="color:#ff6ac1">*</span><span style="color:#ff5c57">EXP</span>(<span style="color:#ff6ac1">-</span>K<span style="color:#ff6ac1">*</span>(<span style="color:#ff5c57">TIME</span><span style="color:#ff6ac1">-</span>T))
 </span></span><span style="display:flex;"><span>  OLDA<span style="color:#ff6ac1">=</span>A
-</span></span><span style="display:flex;"><span>  T<span style="color:#ff6ac1">=</span><span style="color:#ff5c57">TIME</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  K<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span><span style="color:#ff5c57">EXP</span>(ETA(<span style="color:#ff9f43">1</span>))
+</span></span><span style="display:flex;"><span>  T<span style="color:#ff6ac1">=</span><span style="color:#ff5c57">TIME</span></span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>Similarly, for multiple bolus doses, we can do</p>
+<div class="src src-f90">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>  K<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span><span style="color:#ff5c57">EXP</span>(ETA(<span style="color:#ff9f43">1</span>))
 </span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">IF</span> (<span style="color:#ff5c57">TIME</span>.EQ.<span style="color:#ff9f43">0</span>) <span style="color:#ff6ac1">THEN</span>
 </span></span><span style="display:flex;"><span>    A<span style="color:#ff6ac1">=</span>AMT
 </span></span><span style="display:flex;"><span>    T<span style="color:#ff6ac1">=</span><span style="color:#ff5c57">TIME</span>
@@ -2158,45 +2165,6 @@ doses.  Similar code can be used in <code>$PK</code> and <code>$ERROR</code>.</p
 </div>
 </div>
 </div>
-<p>The above forms of recursion work for recursion from one data record
-   to  the next (&#34;inter-record&#34; recursion).  It is also possible to use
-   recursion in a do-while loop (&#34;intra-record&#34;, or  &#34;do-while&#34;  recursion).</p>
-<p>
-Example of a DO-WHILE recursive loop using a random variable:</p>
-<div class="src src-f90">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>  TERM<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span><span style="color:#ff5c57">EXP</span>(ETA(<span style="color:#ff9f43">1</span>))
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">SUM</span><span style="color:#ff6ac1">=</span><span style="color:#ff9f43">0</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">DO</span> <span style="color:#ff6ac1">WHILE</span>(condition)
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">SUM</span><span style="color:#ff6ac1">=</span><span style="color:#ff5c57">SUM</span><span style="color:#ff6ac1">+</span>TERM
-</span></span><span style="display:flex;"><span>  ...
-</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">ENDDO</span></span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
-<p>A product loop such as</p>
-<div class="src src-f90">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span>  PROD<span style="color:#ff6ac1">=</span>PROD<span style="color:#ff6ac1">*</span>TERM</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
-<p>is  also  possible, as are other ways the dowhile recursive variable
-   can be used, so long as the variable appears on both  sides  of  the
-   equal sign within the DOWHILE loop: V= … V …</p>
 </div>
 </div>
 <div id="outline-container-abbreviated-function" class="outline-3">
@@ -5831,9 +5799,9 @@ routines.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/77c4f4cda8d8eec303f734849a734a3a4c87cce3" title='Last modified by Yi Zhang | 2026 Sep 13' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/947cd9c2cae0a425c24408f41243df5a41eb2805" title='Last modified by Yi Zhang | 2026 Sep 17' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Sep 13</span>
+    <span>2026 Sep 17</span>
   </a>
 
 </div>

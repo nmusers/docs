@@ -23,15 +23,15 @@ A control record may have options. Those options are also reserved keywords for 
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="user-guide">
-		<meta property="article:modified_time" content="2026-04-11T08:07:13-07:00">
+		<meta property="article:modified_time" content="2026-09-17T14:44:30-07:00">
 
 
 	<meta itemprop="name" content="Control records">
 	<meta itemprop="description" content="Model specification and control records NONMEM uses control records for model specification. Each record begins with a reserved keyword that starts with &#34;$&#34;. They follow a few general rules.
 A control record may have options. Those options are also reserved keywords for NONMEM. Some records and options have alias or abbreviations. For example record $COVARIANCE can have aliases such as
 1 2 $COV $COVAR the sections below and the reference manual for the alias of reocrds and options.">
-	<meta itemprop="dateModified" content="2026-04-11T08:07:13-07:00">
-	<meta itemprop="wordCount" content="6010">
+	<meta itemprop="dateModified" content="2026-09-17T14:44:30-07:00">
+	<meta itemprop="wordCount" content="5687">
 
 <title>Control records • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -40,7 +40,7 @@ A control record may have options. Those options are also reserved keywords for 
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.ce57905b2d1628e566ae32e1f4a9ee14c5467d73fdd5a7f6cd5b4e4603582db4.js" integrity="sha256-zleQWy0WKOVmrjLh9KnuFMVGfXP91af2zVtORgNYLbQ=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.172c2c297200a579cff77ec23397ddaa22489039f149214c8061bf02b1e45023.js" integrity="sha256-FywsKXIApXnP937CM5fdqiJIkDnxSSFMgGG/ArHkUCM=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -378,6 +378,20 @@ A control record may have options. Those options are also reserved keywords for 
   
     <a href="/docs/user-guide/predpp/exogenous/" class="">
       Exogenous and endogenous doses</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/interoccasion/" class="">
+      Inter-occasion variability</a>
   
 
         </li>
@@ -1244,20 +1258,6 @@ A control record may have options. Those options are also reserved keywords for 
   
 
   
-    <a href="/docs/cookbook/mtime/" class="">
-      Change $DES at given time</a>
-  
-
-        </li>
-      
-    
-      
-        <li>
-          
-  
-  
-
-  
     <a href="/docs/cookbook/accuracy/" class="">
       Accuracy control</a>
   
@@ -1274,6 +1274,20 @@ A control record may have options. Those options are also reserved keywords for 
   
     <a href="/docs/cookbook/prior/" class="">
       Bayesian Priors</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/cookbook/mtime/" class="">
+      Change $DES at given time</a>
   
 
         </li>
@@ -1590,8 +1604,6 @@ A control record may have options. Those options are also reserved keywords for 
 <li><a href="#headline-25">$SIMULATION</a>
 </li>
 <li><a href="#headline-26">$ETAS,$PHIS (NM73)</a>
-</li>
-<li><a href="#headline-27">Overview of a NONMEM run</a>
 </li>
 </ul>
 </li>
@@ -3142,58 +3154,6 @@ The first ITERATION&gt;0 is selected, unless a particular iteration is specified
 </div>
 </div>
 </div>
-<div id="outline-container-headline-27" class="outline-3">
-<h3 id="headline-27">
-Overview of a NONMEM run
-</h3>
-<div id="outline-text-headline-27" class="outline-text-3">
-<p>Each NONMEM run consists of a sequence of steps, listed below. NONMEM has an internal
-variable <code>ICALL</code> to flag the nature of step. Later we will see that
-user can use <code>ICALL</code> to selectively modify the runs.</p>
-<ol>
-<li>NONMEM  loads information from a model specification file, if <code>$MSFI</code>
-is present NONMEM makes a single call to  PRED  (with <code>ICALL=0</code>),
-at  the beginning  of  the  run, to allow PRED to undertake run
-initialization.</li>
-<li>NONMEM makes a single call to PRED (with <code>ICALL=1</code>), at the beginning
-of every  problem,  to  allow  PRED  to  undertake problem
-initialization.</li>
-<li>SIMULATION STEP: NONMEM inputs initial fixed effects parameters
-from  file  specified  by  <code>$CHAIN</code>, if record is present NONMEM
-performs simulation (with <code>ICALL=4</code>) (if <code>$SIMULATION</code> present).</li>
-<li>INITIAL ESTIMATE STEP (with <code>ICALL=2</code>): NONMEM obtains initial
-estimates for theta, omega, sigma (if  the control stream does not
-provide all initial estimates).</li>
-<li>ESTIMATION STEP (with <code>ICALL=2</code>): NONMEM inputs initial ETAs from
-file specified by <code>$ETAS</code> and <code>$PHIS</code>, if record is present NONMEM searches
-for parameter values that minimize the objective function (if
-<code>$ESTIMATION</code> present).  Multiple Estimation Steps
-can be implemented in  a single problem.   A  sequence  of  two
-or  more  Estimation Steps  will result in the sequential execution
-of each.</li>
-<li>COVARIANCE STEP (with <code>ICALL=2</code>) NONMEM obtains a variance-covariance
-matrix of the estimator  and related  information  such  as
-standard  errors  (if <code>$COVARIANCE</code> present).</li>
-<li>
-<p>FINALIZATION STEP (with <code>ICALL=2,5,6</code>) NONMEM obtains the following as needed:</p>
-<ul>
-<li>Classification into subpopulations (if a  MIXTURE  model  is used).</li>
-<li>POSTHOC estimates of ETA.</li>
-<li>Nonparametric  step  (NONPAR,  with <code>ICALL=2</code>): NONMEM obtains
-either marginal cumulatives or  conditional  (nonparametric)</li>
-<li>Estimates of ETAs for <code>$NONPARAMETRIC</code>.</li>
-<li>PRED-defined values from NMPRD4 (for tables and scatterplots).</li>
-</ul>
-</li>
-<li>NONMEM computes WRES and other diagnostics if they are to be
-displayed in tables or scatters.</li>
-<li>NONMEM makes a single call to PRED (with <code>ICALL=3</code>), at the end of
-every problem (and subproblem), to allow PRED to undertake problem
-finalization.</li>
-<li>Output STEP: NONMEM constructs tables (if <code>$TABLE</code> present).</li>
-</ol>
-</div>
-</div>
 </div>
 </div>
 <div class="footnotes">
@@ -3218,9 +3178,9 @@ finalization.</li>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/5caa3ba8526b274ea5164d39d9a8066c9e767941" title='Last modified by Yi Zhang | 2026 Apr 11' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/947cd9c2cae0a425c24408f41243df5a41eb2805" title='Last modified by Yi Zhang | 2026 Sep 17' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Apr 11</span>
+    <span>2026 Sep 17</span>
   </a>
 
 </div>
@@ -3339,8 +3299,6 @@ finalization.</li>
 <li><a href="#headline-25">$SIMULATION</a>
 </li>
 <li><a href="#headline-26">$ETAS,$PHIS (NM73)</a>
-</li>
-<li><a href="#headline-27">Overview of a NONMEM run</a>
 </li>
 </ul>
 </li>
