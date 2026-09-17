@@ -227,78 +227,59 @@ or used in one line.
     IF (condition) assignment statement
 #+end_src
 
-See below for a restriction on ELSEIF.
+Conditions can use Fortran's boolean expressions and operators: ~.EQ.~
+(~==~), ~.NE.~ (~/=~), ~.LE.~ (~<=~),  ~.GE.~ (~>=~),  ~.LT.~ (~<~),
+~.GT.~ (~>~),  ~.AND.~, and ~.OR.~.
 
-Conditions may include the operators .EQ., .NE., .LE.,  .GE.,  .LT.,
-.GT.,  .AND., and .OR..  The arthmetic operators may be coded as ==,
-/=, <=, >=, <, and >, respectively.  They  may  include  expressions
-that  can  be  used  as right-hand quantities with assignment
-statements.  They may not include parentheses except in such
-expressions.
-#+begin_src f90
-  ;! Valid:
-  IF (Q.EQ.(R+C)/D) ...
+- Conditions may not include parentheses except RHS quantities allowed in assignment:
+  #+begin_src f90
+    ;! Valid:
+    IF (Q.EQ.(R+C)/D) ...
 
-  ;!Invalid
-  IF (Q.EQ.R.AND.(C.GT.D.OR.E.EQ.F)) ...
-#+end_src
+    ;!Invalid
+    IF (Q.EQ.R.AND.(C.GT.D.OR.E.EQ.F)) ...
+  #+end_src
 
-With ~$PRED~, ~$PK~, and ~$ERROR~ records, a condition may test the  ICALL
-argument.   However,  if  the test is IF (ICALL.EQ.2), then ELSE may
-not be used.  Special rules apply.  For  more  detail,  see  SPECIAL
-STATEMENTS (below), and help entries for these records.
+- When testing  ~ICALL~ in ~$PRED~, ~$PK~, and ~$ERROR~ blocks a
+  condition like  ~IF (ICALL.EQ.2)~, may not use ~ELSE~ branch.
 
-A condition may also test certain variables defined in modules (See
-[[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/][NONMEM modules]]).
+- A condition may also test certain variables defined in modules (See [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/][NONMEM modules]]).
 
-Abbreviated code in a particular THEN or ELSE clause may not contain
-multiple definitions of the same random variable.  The code below is
-invalid:
+- Repeated definition in a same branch is not permitted:
+  #+begin_src f90
+    ! invalid
+    IF (condition) THEN
+    X=...an expression involving a random variable
+    X= ....
+    ENDIF
+  #+end_src
 
-#+begin_src f90
-  IF (condition) THEN
-  X=...an expression involving a random variable
-  X= ....
-  ENDIF
-#+end_src
+- Random variables (variables expressed by random effects) cannot be
+  defined within nested conditionals. Additionally, random variables
+  missed by conditionals assume zero values. Thus
+  #+begin_src f90
+    IF (WT.GT.0) TVK=THETA(1)*WT
+  #+end_src
+  implies the ~TVK~ with ~WT.LE.0~ retains the value set previously
+  (since ~TVK~ does not depend on any ~ETA~), while
+  #+begin_src f90
+    IF (WT.GT.0) K=THETA(1)*WT*EXP(ETA(1))
+  #+end_src
+  would cause random variable ~K~ corresponding to ~WT.LE.0~ set to
+  zero, and warning message from NM-TRAN. The proper way to encode the
+  above scenario would be to explicitly cover all cases:
+  #+begin_src f90
+    IF (WT.GT.0) THEN
+      K=THETA(1)*WT*EXP(ETA(1))
+    ELSE
+      K=K
+    ENDIF
+  #+end_src
+  so that the ~K~ with ~WT.LE.0~ retains the value set previously.
 
-Random variables cannot be defined within nested conditionals, i.e.,
-within a conditional structure beginning with an IF  and  containing
-another  IF.   The  use  of  ELSEIF ... THEN implies a nested conditional.
-
-A special rule applies when random variables are defined via
-conditional  statements.  If a random variable is multiply defined
-within a series of IF ... THEN structures, but all  conditions  are
-false, then  the  value  of the random variable is set to zero.  If an
-ELSE appears, then not all conditions are false. Consider two cases in
-which the following statements  are  the  only ones defining TVK and
-K, respectively:
-#+begin_src f90
-  IF (WT.GT.0) TVK=THETA(1)*WT
-#+end_src
-If  the  condition is false, the non-random variable TVK retains the value set with the previous data record.
-#+begin_src f90
-  IF (WT.GT.0) K=THETA(1)*WT*EXP(ETA(1))
-#+end_src
-If the condition is false, the value of the random variable K is set
-to zero. NM-TRAN prints a warning message when it detects such code.
-
-In  ~$PK~, ~$ERROR~, and ~$PRED~ records, recursion code may be used in an explicit manner, as in this example:
-
-#+begin_src f90
-  IF (WT.GT.0) THEN
-    K=THETA(1)*WT*EXP(ETA(1))
-  ELSE
-    K=K
-  ENDIF
-#+end_src
-If the condition is false, =K= retains its value set with the previous
-data record. Recursion  code  can  be  used in ~$PRED~, ~$PK~, and ~$ERROR~
-records for other purposes as well.  The following two fragments of
-code  illustrate how one can use abbreviated code to implement
-recursive kinetics in ~$PRED~.  The first example works with a single
-bolus dose  and the second example works with single or multiple bolus
-doses.  Similar code can be used in ~$PK~ and ~$ERROR~.
+For example, to /manually/ encode in ~$PRED~ the recursive
+one-compartment kinetics with a single
+bolus dose, we can do
 #+begin_src f90
   K=THETA(1)*EXP(ETA(1))
   IF (TIME.EQ.0) THEN
@@ -308,7 +289,9 @@ doses.  Similar code can be used in ~$PK~ and ~$ERROR~.
   A=OLDA*EXP(-K*(TIME-T))
   OLDA=A
   T=TIME
-
+#+end_src
+Similarly, for multiple bolus doses, we can do
+#+begin_src f90
   K=THETA(1)*EXP(ETA(1))
   IF (TIME.EQ.0) THEN
     A=AMT
@@ -318,27 +301,7 @@ doses.  Similar code can be used in ~$PK~ and ~$ERROR~.
   ENDIF
   T=TIME
 #+end_src
-The above forms of recursion work for recursion from one data record
-   to  the next ("inter-record" recursion).  It is also possible to use
-   recursion in a do-while loop ("intra-record", or  "do-while"  recursion).
 
-Example of a DO-WHILE recursive loop using a random variable:
-
-#+begin_src f90
-  TERM=THETA(1)*EXP(ETA(1))
-  SUM=0
-  DO WHILE(condition)
-  SUM=SUM+TERM
-  ...
-  ENDDO
-#+end_src
-A product loop such as
-#+begin_src f90
-  PROD=PROD*TERM
-#+end_src
-is  also  possible, as are other ways the dowhile recursive variable
-   can be used, so long as the variable appears on both  sides  of  the
-   equal sign within the DOWHILE loop: V= ... V ...
 
 ** Functions
 :PROPERTIES:

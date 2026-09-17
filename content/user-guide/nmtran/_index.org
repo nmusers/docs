@@ -23,18 +23,16 @@ finishing one subject's events, it moves to next subject and repeat [fn:3].
 
 By "processing", we mean that NONMEM calls an internal program ~PRED~, or
 its specialized (for popPK models) version ~PK~ and ~ERROR~. These
-programs handle how subject-level and observation-level information are
-generated (in simulation) and assembled (in analysis, i.e. parameter
-estimation). They also move the system from one event to next. The
-bottom line is, NONMEM calls ~PRED~ (or ~PK~ & ~ERROR~) on every
-event, one after another. This is often referred in documentation as "~PK~
-call" and "~PRED~ call".
+programs assemble subject-level and observation-level information
+and move the system from one event to next. They are called on every
+subject, one event after another. This is often referred in documentation as "~PK~
+call" or "~PRED~ call".
 
 When the subject-level and observation-level information changes, the
 above event-by-event calls will be repeated. This is typical during
 parameter estimation: when population parameters are
-be searched and updated, NONMEM will process the events over and over. The loop is repeated
-until the termination of the estimation. Therefore, during a run,
+be updated, NONMEM processes the events over and over,
+until the termination of the estimation. Therefore during a run
 NONMEM often calls ~PRED~ (or ~PK~ & ~ERROR~) many times.
 
 #+caption: Figure 3.0. NONMEM processes subject events ordered in time. On each event it calls program ~PK~ and ~ERROR~. The process is repeated during parameter estimation, symbolized here as the population parameter /\theta/ is updated through estimation iterations. At the moment NONMEM is processing event 4 of the first subject, during estimation iteration /i/.

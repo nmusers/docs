@@ -1,0 +1,96 @@
+---
+title: "Inter-occasion variability"
+author: ["Yi Zhang"]
+draft: false
+bookCollapseSection: false
+---
+{{< katex >}}{{< /katex >}}
+
+* Inter-occasion variability
+Usually random effects ~ETA~ are used to describe inter-individual
+variability (IIV). This is however sometimes not fine-grained enough for
+sources of uncertainties. For example, in a crossover design for
+bioequivalence studies, one needs to consider
+possible PK parameters variations due to different drug
+formulations. In this case, one may consider
+the time period corresponding to different formulations as
+different "occasions". This can be modeled by designating one ~ETA~
+for one occasion, similar to one ~ETA~ for one subject in handling
+IIV. In this sense, inter-occasion variability (IOV) sits between IIV
+and intra-individual variability: it can vary within an individual,
+but remain the same on multiple observations within a given occasion.
+
+Since IOV modeling uses a special type of ~ETA~, we can simply use an
+~OCC~ data item as flag to make selections, e.g.
+#+begin_src r
+  C, SET, ID, TIME, AMT, RATE, EVID, MDV, CMT, DV,      OCC
+  ,  30,  1,  0,    100, 0,    1,    1,   1,   0,       1
+  ,  30,  1,  0.1,  0,   0,    0,    0,   1,   1.9242,  1
+  ,  30,  1,  0.5,  0,   0,    0,    0,   1,   1.7729,  1
+  ,  30,  1,  1,    0,   0,    0,    0,   1,   1.2352,  1
+  ,  30,  1,  2,    0,   0,    0,    0,   1,   0.68534, 1
+  ,  30,  1,  4.5,  0,   0,    0,    0,   1,   0.16096, 1
+  ,  30,  1,  5,    100, 0,    1,    1,   1,   0,       2
+  ,  30,  1,  5.1,  0,   0,    0,    0,   1,   1.9674,  2
+  ,  30,  1,  5.5,  0,   0,    0,    0,   1,   1.8129,  2
+  ,  30,  1,  6,    0,   0,    0,    0,   1,   1.3819,  2
+  ,  30,  1,  7,    0,   0,    0,    0,   1,   0.62404, 2
+  ,  30,  1,  9.5,  0,   0,    0,    0,   1,   0.15414, 2
+  ,  30,  1,  10,   100, 0,    1,    1,   1,   0,       3
+  ,  30,  1,  10.1, 0,   0,    0,    0,   1,   2.1444,  3
+  ,  30,  1,  10.5, 0,   0,    0,    0,   1,   1.7823,  3
+  ,  30,  1,  11,   0,   0,    0,    0,   1,   1.3372,  3
+  ,  30,  1,  12,   0,   0,    0,    0,   1,   0.73276, 3
+  ,  30,  1,  14.5, 0,   0,    0,    0,   1,   0.14909, 3
+  ,  30,  2,  0,    100, 0,    1,    1,   1,   0,       1
+  ,  30,  2,  0.1,  0,   0,    0,    0,   1,   1.9385,  1
+  , ...
+#+end_src
+and use ~OCC~ to select ~ETA~ like below (assuming IOV in ~CL~).
+#+begin_src perl
+  $INPUT C SET ID  TIME  AMT RATE EVID MDV CMT DV OCC
+  $SUBROUTINES ADVAN1 TRANS2
+
+  $PK
+  MU_1=THETA(1)
+  MU_2=THETA(2)
+  V=DEXP(MU_1+ETA(1))
+  ;# ...
+  IF (OCC == 1) THEN
+      FLAG3=1
+      FLAG4=0
+      FLAG5=0
+  ELSEIF (OCC == 2) THEN
+      FLAG3=0
+      FLAG4=1
+      FLAG5=0
+  ELSEIF (OCC == 3) THEN
+      FLAG3=0
+      FLAG4=0
+      FLAG5=1
+  ENDIF
+
+  CL=DEXP(MU_2+ETA(2))*EXP(FLAG3*ETA(3)+FLAG4*ETA(4)+FLAG5*ETA(5))
+#+end_src
+Here ~ETA(1)~ and ~ETA(2)~ are for IIV, and ~ETA(3)~ to ~ETA(5)~ are
+for IOV. We use ~IF~ conditional to create flags to select
+random effect variable for ~CL~: ~ETA(3)~ when ~OCC==1~, ~ETA(4)~ when
+~OCC==2~,  and ~ETA(5)~ when ~OCC==3~.
+
+NM73+ provides a syntatic sugar ~_~ to imply that
+~OCC_CL~ uses data item ~OCC~ as /mask/ to select ~ETA~'s. Then the
+above IOV encoding can be simplified, without the ~FLAG~ variables
+("[[https://github.com/nmusers/docs/tree/master/examples/example7r/][examples/example7r]]").
+
+#+INCLUDE: "../../examples/example7r/example7r.ctl" src perl
+
+Lines
+#+begin_src perl
+$ABBR REPLACE ETA(OCC_CL)=ETA(3,4,5)
+;# ...
+CL=DEXP(MU_2+ETA(2))*EXP(ETA(OCC_CL))
+#+end_src
+indicate that ~ETA(OCC_CL)~ will be ~ETA(3)~, ~ETA(4)~, ~ETA(5)~, when
+~OCC=1~, ~OCC=2~, ~OCC=3~, respectively. Also note that the
+corresponding \(\Omega(3,3)\), \(\Omega(4,4)\), and \(\Omega(5,5)\)
+all have initial value ~0.1~, specified using the [[file:/docs/reference-manual/control-records/omega/#block-same][~SAME~ modifier]].
