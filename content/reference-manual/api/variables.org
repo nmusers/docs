@@ -1,10 +1,11 @@
 #+title: Variables
-* Module variables
-For every module variable documented here, Fortran code block "USAGE"
-shows how it can be used. "GLOBAL DECLARATION" block shows its
-definition to help advanced users understand the implementation.
 
 * NONMEM variables
+For every module variable documented here, Fortran code block ~USAGE~
+shows how it can be used; ~GLOBAL DECLARATION~ shows its
+definition.
+
+
 ** COM(n)
 COM, COMACT, COMSAV, and COMRES, these reserved labels starting COM are related to each other. They all refer in some manner to
 the module NMPRD4. (This module was originally a global COMMON; hence the use
@@ -355,20 +356,18 @@ These variables may be used as right-hand  quantities  in  abbreviated
 code blocks ~$PK~, ~$ERROR~, ~$INFN~ and ~$PRED~.
 
 
-** Objective function value
+** Objective function value (OFV)
 #+begin_src f90
  ! USAGE:
       USE ROCM_REAL, ONLY: OBJECT
 
- GLOBAL DECLARATION
+ ! GLOBAL DECLARATION
       USE SIZES, ONLY: DPSIZE
       REAL(KIND=DPSIZE) :: OBJECT
 #+end_src
-- OBJECT: the final value of the objective function. This value should
-  only be used at ICALL = 3 (finalization block). May be used as a
-  right-hand quantity in abbreviated code.
+~OBJECT~ contains the final OFV. It should only be used at ~ICALL=3~ (finalization block), as a right-hand quantity in abbreviated code.
 
-** Objective function value from individual
+** OFV from individual
 :PROPERTIES:
 :CUSTOM_ID: ofv-indi
 :END:
@@ -382,55 +381,18 @@ code blocks ~$PK~, ~$ERROR~, ~$INFN~ and ~$PRED~.
       INTEGER(KIND=ISIZE) :: IDVALX(MAXIDS)
       REAL(KIND=DPSIZE) :: OFV_IND(MAXIDS)
 #+end_src
-These variables contain values of the ID data item and individual
-contributions  to  the  objective  function.   The values are in
-data-set order.
+~OFV_IND~ contain values individual ~ID~ and
+contributions  to  OFV.  The values are in data-set order.
 
-- IIDX: values of the ID data item.
+- ~IIDX~: values of the ID data item.
 
-- CNTID:
-      Values of the individual contribution to the  objective  function
-      for the corresponding values of IIDX.
+- ~CNTID~: Values of the individual contribution to OFV for the
+  corresponding ~IIDX~ entry.
 
-Namely, IIDX(n) is the ID data item for the nth. individual
-record, and CNTID(n) is the contribution to the objective function
-for  the  nth. individual record.
+These values should  only  be  accessed with ~ICALL=3~ (finalization block).
 
-These  values  should  only  be  accessed  with ICALL = 3 (finalization block).
-
-With NONMEM VI 1.0, they can only be displayed using verbatim code.
-
-With NONMEM VI 2.0 and later releases, they can be used on  the  right
-and  displayed  using abbreviated code in ~$PRED~, ~$PK~, ~$ERROR~ and ~$INFN~
-blocks (See Individual objective function example).
-
-They may also be displayed in a table, using
-
-#+begin_src perl
- $ABBR COMRES=2
-#+end_src
-
-in the ~$ERROR~ or ~$PK~ block:
-
-#+begin_src perl
- IF (COMACT.EQ.1) THEN
-  COM(1)=IIDX(NIREC)
-  COM(2)=CNTID(NIREC)
- ENDIF
-#+end_src
-The following, for example,  will produced a separate  table  for  the values:
-
-#+begin_src perl
- $TABLE IID=COM(1) CNT=COM(2) FILE=comvals NOAPPEND NOPRINT FIRSTONLY
-#+end_src
-
-Note: With earlier versions than NONMEM 7.3, verbatim code is needed:
-#+begin_src perl
- "  COM(1)=IIDX(NIREC)
- "  COM(2)=CNTID(NIREC)
-#+end_src
-
-With NONMEM 7, the additional output file root.phi contains the same information. (See [[file:/docs/reference-manual/files/#addi-output][additional output files]]).
+With NONMEM 7, the information can be found in [[file:/docs/reference-manual/files/#phi][output file .phi]]
+ [fn:1].
 
 ** Pass new L2 record: NEWL2
 #+begin_src f90
@@ -807,7 +769,7 @@ abbreviated  code  that  test for ~ICALL=6~ and in ~$MIX~ blocks.  The "n"
 may be either a position in the data record or the label of  the  data
 item, e.g. TEMPLT(1) or TEMPLT(ID).
 
-** Parameters OMEGA SIGMA: CURRENT
+** Current OMEGA and SIGMA values
 :PROPERTIES:
 :CUSTOM_ID: parameters-omega-sigma-current
 :END:
@@ -819,36 +781,25 @@ item, e.g. TEMPLT(1) or TEMPLT(ID).
       USE SIZES, ONLY: LVR,DPSIZE
       REAL(KIND=DPSIZE) :: VARNF(LVR,LVR)
 
-#+end_src
--  OMEGA
-      The current value of OMEGA being used.
-
-The current value of SIGMA is also located in this array as follows:
-#+begin_src f90
+ ! SIGMA is stored after OMEGA:
       SIGMA(I,J)=OMEGA(NETAS_+I,NETAS_+J)
 #+end_src
-NETAS_ is described in Parameter dimensions.
+~NETAS_~ is the [[file:/docs/reference-manual/api/variables/#parameter-dimensions][parameter dimension]].
 
- (See [[file:/docs/reference-manual/api/variables/#parameter-dimensions][Parameter dimensions]]).
+- At initialization and finalization use variables [[file:/docs/reference-manual/api/variables/#parameter-values-init-final][OMEGAF and SIGMAF]]
 
-At  run and problem initialization and at problem finalization use the variables OMEGAF and SIGMAF.
- (See [[file:/docs/reference-manual/api/variables/#parameter-values-init-final][Parameter values: Initial and Final]]).
+- Should not be used if an initial estimate is being computed,  as the  value  is  just that of problem initialization (when ~ICALL=1~).
 
-Should not be used if an initial estimate is being computed.
+- Example: Compute individual weighted residuals using a slope-intercept residual error model:
 
-When an initial estimate is being computed, the  value  is  just  that
-found at problem initialization (when ~ICALL=1~).
-
-EXAMPLE: Compute individual weighted residuals using a slope-intercept residual error model:
-
-#+begin_src f90
- $ERROR
- Y=F+EPS(1)+F*EPS(2)
- IF (COMACT.GE.1) THEN
-    STD=SQRT(SIGMA(1)+F**2*SIGMA(2))
-    IWRES=(DV-F)/STD
- ENDIF
-#+end_src
+  #+begin_src perl
+   $ERROR
+   Y=F+EPS(1)+F*EPS(2)
+   IF (COMACT.GE.1) THEN
+      STD=SQRT(SIGMA(1)+F**2*SIGMA(2))
+      IWRES=(DV-F)/STD
+   ENDIF
+  #+end_src
 
 ** Non-active ETA list for PRED
 :PROPERTIES:
@@ -1004,7 +955,7 @@ or consequence from the estimation set by NONMEM.
 
  (See [[file:/docs/reference-manual/api/subroutines/#mix][MIX]], [[file:/docs/user-guide/predpp/population_model/#mixture][mixture model example]]).
 
-** Parameter values: initial and final
+** Initial/final parameter values
 :PROPERTIES:
 :CUSTOM_ID: parameter-values-init-final
 :END:
@@ -2240,7 +2191,7 @@ normally distributed values for that subject.
   ENDIF
   #+end_src
 
-** MTIME, MTDIFF, MNOW, MPAST, MNEXT
+** Model Event Time
 :PROPERTIES:
 :CUSTOM_ID: mtime
 :END:
@@ -2255,12 +2206,12 @@ normally distributed values for that subject.
   ! in the generated PK routine from FSUBS:
   USE PKERR_REAL,ONLY: MTIME
 #+end_src
-Defined in the PK routine or ~$PK~ block, Model event times are similar to absorption lag times.
-~MTIME(i)~ defines a time at which the system is modified or
-advanced ( ~i~ is not for compartment numbering but merely a counter).
-When time reaches ~MTIME(i)~, NONMEM updates indicator variables ~MNOW(i)~,
+Defined in the PK routine or ~$PK~ block, Model Event Times are
+similar to absorption lag times, in that
+~MTIME(i)~ with counter ~i~ defines a time at which the system is modified or
+advanced. When time reaches ~MTIME(i)~, NONMEM updates indicator variables ~MNOW(i)~,
 ~MPAST(i)~, ~MNEXT(i)~ and calls the ~PK~ subroutine.  The calls
-to PK,  DES, AES, and ERROR can use the indicator variables to change
+to ~PK~,  ~DES~, ~AES~, and ~ERROR~ can use the indicator variables to change
 behavior of the system, such as adding a term in the differential
 equations or adjusting the infusion rate. This feature can be
 used with any ADVAN routine.
@@ -3414,3 +3365,30 @@ explicitly limiting the HMAX_ or HINIT_ in the manner shown above.
 For a discussion of these variables,
  See INTRODUCTION  TO  NONMEM  7, "HMIN_, HINIT_,HMAX_: Avoiding missed
  short events in ADVAN9, ADVAN13, ADVAN14, and ADVAN15 (nm760)"
+
+[fn:1] In NONMEM VI 1.0, they can only be displayed using verbatim
+code; in NONMEM VI 2.0+ and later releases, they can be used on  the
+right and  displayed  using abbreviated code in ~$PRED~, ~$PK~, ~$ERROR~ and ~$INFN~
+blocks (See Individual objective function example).
+
+They may also be displayed in a table using
+#+begin_src perl
+ $ABBR COMRES=2
+#+end_src
+
+in the ~$ERROR~ or ~$PK~ block:
+#+begin_src perl
+ IF (COMACT.EQ.1) THEN
+  COM(1)=IIDX(NIREC)
+  COM(2)=CNTID(NIREC)
+ ENDIF
+#+end_src
+The following, for example,  will produced a separate  table  for  the values:
+#+begin_src perl
+ $TABLE IID=COM(1) CNT=COM(2) FILE=comvals NOAPPEND NOPRINT FIRSTONLY
+#+end_src
+Note: before NONMEM 7.3, verbatim code is needed:
+#+begin_src perl
+ "  COM(1)=IIDX(NIREC)
+ "  COM(2)=CNTID(NIREC)
+#+end_src

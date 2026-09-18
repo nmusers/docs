@@ -240,7 +240,7 @@ Right-hand quantities include
 
 Some special quantitie are described below.
 
-**** NEWIND
+** NEWIND
 Same as the NEWIND argument passed by NONMEM to PREDPP.
   + NEWIND=0: PK is called with the first record of the data set. THETA value may differ
     from value at last call with this record.
@@ -251,7 +251,7 @@ Same as the NEWIND argument passed by NONMEM to PREDPP.
     individual record.
   + NEWIND=2:  PK is called with the second or subsequent data record of an individual record.
 
-**** ICALL
+** ICALL
 Same as the ICALL argument passed by NONMEM to PREDPP.
   + ~ICALL=1~: Initialization.
   + ~ICALL=2~: Normal call.
@@ -271,8 +271,8 @@ will never have the value 0 or 3. ICALL has the value 1 if the call to PK is the
 problem. At this call, the THETA’s are the initial estimates; the ETA’s are undefined. Verbatim code is
 not moved to the INFN routine.
 
-*** Global Variables in Modules
-**** COMRES
+** Global Variables in Modules
+*** COMRES
 If COMRES=1 is not present in [[file:/docs/reference-manual/control-records/abbrev/][$ABBREVIATED]] or ~$PK~ records, then
 PK-defined variables are listed in NMPRD4 and may be used in other
 routines and blocks of abbreviated code. The symbol COM(n) may be used
@@ -283,7 +283,10 @@ code, on the left and on the right. Variables defined by ~$ABBREVIATED~
 DECLARE records are also global and may be used in ~$PK~ and other
 blocks of abbreviated code.
 
-**** DOSTIM DOSREC(n)
+See more at [[file:/docs/reference-manual/control-records/abbrev/#headline-4][COMRES]], in particular about ~COMRES=-1~.
+
+
+*** DOSTIM DOSREC(n)
   + If PK is not being called at an additional or lagged dose time,
     then DOSTIM = 0 and all elements of DOSREC are 0.
 
@@ -297,7 +300,7 @@ blocks of abbreviated code.
     have  values  from  the initiating  dose  event  record.   (The
     ~$BIND~ record may be used to override this.)
 
-**** ~A(n)~, ~TSTATE~
+*** ~A(n)~, ~TSTATE~
 ~A(n)~ are the latest computed compartment amounts, and TSTATE is  the
 time  at which they were computed.  That is, A(n) are the amounts at
 the previous event time, or if at a later time, but before the  time
@@ -312,11 +315,11 @@ there  is  no verbatim code and no explicit use of a sub- scripted
 variable A in the ~$PK~ record, then the symbol A can be used as a data
 item label or as a name of a PK-defined item.
 
-**** ~A_0FLG~, ~A_0(n)~
+*** ~A_0FLG~, ~A_0(n)~
 Signals a record to initialize a compartment amount.
 See [[file:/docs/reference-manual/abbr/#compartment-initialization][Compartment Initialization Block]], and ~A_UFLG~ below.
 
-**** ~A_UFLG~, ~A_U(n)~
+*** ~A_UFLG~, ~A_U(n)~
 :PROPERTIES:
 :CUSTOM_ID: a_uflg
 :END:
@@ -371,38 +374,39 @@ all ~A_U(n)~~ for compartments ~n~ should be defined.
   IDEF IREV EVTREC NVNT INDXS IRGG GG NETAS DADT(n) E(n) EPS(n)
 #+end_src
 
-** Storage and calling options
-  - ~COMRES=-1~. See [[file:/docs/reference-manual/control-records/abbrev/#headline-4][COMRES]].
-  - CALLFL, see [[file:/docs/reference-manual/abbr/#calling_protocol][Calling protocol]].
-    + CALLFL=-2: PK called with every event record and at every nonevent
-      dose time. Equivalently
-      #+begin_src perl
-	$PK (NON-EVENT)
-	$PK (ADDITIONAL OR LAGGED)
-      #+end_src
-    + CALLFL=-1: PK called with every event record (default).
-      #+begin_src perl
-	$PK (EVERY EVENT)
-	$PK (EVERY)
-      #+end_src
-    + CALLFL=0: PK called with first event record of the individual record
-      and with every subsequent event record where the time data item
-      differs from the time data item of the previous event record.
-      Equivalently:
-      #+begin_src perl
-	$PK (NEW TIME)
-	$PK (NEW EVENT TIME)
-      #+end_src
-    + CALLFL=1: Call once per individual record. Equivalently:
-      #+begin_src perl
-	$PK (ONCE PER INDIVIDUAL RECORD)
-	$PK (ONCE/IND.REC.)
-      #+end_src
+** Calling protocol]
+See [[file:/docs/reference-manual/abbr/#calling_protocol][Calling protocol]] for details. In short ~CALLFL~ controls when ~PK~
+is called:
+  + ~CALLFL=-2~: PK called with every event record and at every nonevent
+    dose time. Equivalently
+    #+begin_src perl
+      $PK (NON-EVENT)
+      $PK (ADDITIONAL OR LAGGED)
+    #+end_src
+  + ~CALLFL=-1~ (default): PK called with every event record.
+    #+begin_src perl
+      $PK (EVERY EVENT)
+      $PK (EVERY)
+    #+end_src
+  + ~CALLFL=0~: PK called with first event record of the individual record
+    and with every subsequent event record where the time data item
+    differs from the time data item of the previous event record.
+    Equivalently:
+    #+begin_src perl
+      $PK (NEW TIME)
+      $PK (NEW EVENT TIME)
+    #+end_src
+  + ~CALLFL=1~: Call once per individual record. Equivalently:
+    #+begin_src perl
+      $PK (ONCE PER INDIVIDUAL RECORD)
+      $PK (ONCE/IND.REC.)
+    #+end_src
 
-    ~CALLFL=-2~ is the default when DOSREC, DOSTIM, or MTIME are used  explicitly  in  the  abbreviated  code. Otherwise,
-    ~CALLFL=-1~ is the default. The use of ~$BIND~ mandates ~CALLFL=-2~.
+  ~CALLFL=-2~ is the default when DOSREC, DOSTIM, or MTIME are used
+  explicitly  in  the  abbreviated  code. Otherwise, ~CALLFL=-1~ is
+  the default. ~$BIND~ can only be used with ~CALLFL=-2~.
 
-We recommend enclose the options in parentheses. Use semicolon to separate multiple options.
+  We recommend enclose the options in parentheses. Use semicolon to separate multiple options.
 #+begin_src perl
   $PK (COMRES=-1 ; ONCE PER IR)
   $PK (NEW TIME)         ; same as CALLFL=0
