@@ -946,20 +946,32 @@ Degrees of freedom (DoF) for \(\Sigma\), for simulations by ~CHAIN~.
   - ~DFS=0~: same as above,  but use the  size  of \(\Sigma\) for DoF.
   - ~DFS=1000000~: fixed \(\Sigma\) at the initial value.
 
-*** EONLY=[0|1]
-Evaluate the IMP objective function by performing only the expectation step, without advancing the population parameters (default is 0, population parameters are updated).  When this method is used, NITER should equal 5 to 10, to allow proposal density to improve with each iteration, since mean and variance of parameters of normal or t distribution proposal density are obtained from the previous iteration.  Also it is good to get several objective function values to assess the Monte Carlo noise in it.
-
-As of NM74, if EONLY=2, then not only are the population parameters not updated with each iteration, neither are the individual conditional means/modes and conditional variances until the last iteration, if the variances of the population parameter estimates are estimated (~$COV~ is requested).  If EONLY=3, then the conditional modes and approximate variances from MAP estimation will be saved on the first iteration, and used for the sampling density of all subsequent iterations.  This improves efficiency when selecting MAPITER=1, MAPINTER=0, so that the MAP estimation did not need to be repeatedly performed.
+*** EONLY=[0|1|2|3]
+- ~EONLY=0~ (default): IMP method evaluates OFV in the expectation
+step, and advances the population parameters.
+- ~EONLY=1~: IMP will evaluate OFV but skip population parameter
+  update. This must be used with ~NITER~ between 5 and 10.  Also it is
+  good to get several OFV to assess the Monte Carlo noise.
+- ~EONLY=2~ (NM74): IMP will evaluate OFV but skip population
+  parameters update, and skip the individual conditional means/modes
+  or conditional variances, until the last iteration, if the variances
+  of the population parameter estimates are estimated (~$COV~ is
+  requested).
+- ~EONLY=3~ (NM74): IMP will evaluate OFV but skip population
+  parameters update. The conditional modes and approximate variances
+  from MAP estimation will be saved on the first iteration, and used
+  for the sampling density of all subsequent iterations.  This
+  improves efficiency when selecting ~MAPITER=1~, ~MAPINTER=0~, so
+  that the MAP estimation did not need to be repeatedly performed.
 
 *** ETABARCHECK | NOETABARCHECK
-ETABARCHECK: there is an ETABAR statistic (see [[file:/docs/reference-manual/files/#output-etabar][ETABAR]]) from a  previous  problem,
-and the P-value associated for the ETABAR statistic with the problem
-at hand relates to a hypothesis test that the true etabar is the same
-as that with the previous problem.
+~ETABARCHECK~: there is an ETABAR statistic (see [[file:/docs/reference-manual/files/#output-etabar][ETABAR]]) from a
+previous  problem, and the P-value associated for the ETABAR statistic
+with the problem at hand relates to a hypothesis test that the true
+etabar is the same as that with the previous problem.
 
-NOETABARCHECK: The  P-value associated  for  the  ETABAR statistic
-related to a hypothesis test that the true ETABAR is 0.
-This  is the default.
+~NOETABARCHECK~ (default): The  P-value associated  for  the  ETABAR
+statistic related to a hypothesis test that the true ETABAR is 0.
 
 *** ETADER=n (NM73)
 For evaluating individual variances by numerical derivative methods.
@@ -968,21 +980,22 @@ must  be evaluated to obtained the marginal or integrated posterior
 density, where V  is  the  eta  Variance  matrix based  on  the
 subject's  posterior density. With ETADER>0, SLOW option may be
 needed.
-  - ETADER=0: expected value V, using analytical first derivatives.
+  - ~ETADER=0~: expected value V, using analytical first derivatives.
 
-  - ETADER=1: expected value V, using forward finite difference
+  - ~ETADER=1~: expected value V, using forward finite difference
     numerical first  derivatives.  Needed if not all code evaluating F
     and Y derivatives with respect to eta are available for processing by NM-TRAN or in user supplied code.
 
-  - ETADER=2: expected  value V, using central finite difference
+  - `ETADER=2`: expected  value V, using central finite difference
     numerical first derivatives.  Needed if not all code evaluating F
     and Y derivatives with respect to eta are available for processing
     by NM-TRAN or in user supplied code.
 
-  - ETADER=3: 2nd derivative method of evaluating V, using numerical
+  - ~ETADER=3~: 2nd derivative method of evaluating V, using numerical
     second  derivatives  of  -log(L) with respect to ETAs.  This is
     equivalent to using the  "Laplace  NUMERICAL"  method,  even
     though FOCE may be selected.
+
 *** ETASAMPLES=[0|1] (NM74)
 :PROPERTIES:
 :CUSTOM_ID: ETAsamples
