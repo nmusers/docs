@@ -1,9 +1,8 @@
-;Model Desc: Population Mixture Problem in 1 Compartment model, with rate constant parameter
-;            mean modeled for two sub-populations, but its inter-subject variance is the same in both sub-populations
-;Project Name: nm7examples
-;Project ID: NO PROJECT DESCRIPTION
+;# Model Desc: Population Mixture Problem in 1 Compartment model, with rate constant parameter mean modeled for two sub-populations, but its inter-subject variance is the same in both sub-populations. See
+;#  https://nmusers.github.io/docs/reference-manual/control-records/mix/
+;# Project Name: nm7examples
 
-$PROB RUN# example5 (from ad1tr1m4t)
+$PROB RUN example5 (from ad1tr1m4t)
 $INPUT C SET ID JID TIME CONC=DV DOSE=AMT RATE EVID MDV CMT VC1 K101 VC2 K102 SIGZ PROB
 $DATA example5.csv IGNORE=C
 
@@ -14,13 +13,12 @@ P(1)=THETA(4)
 P(2)=1.0-THETA(4)
 NSPOP=2
 
-
 $PK
 Q=1
 IF(MIXNUM.EQ.2) Q=0
 MU_1=THETA(1)
-; Note that MU_2 can be modeled as THETA(2) or THETA(3), depending on the MIXNUM value.
-; Also, we are avoiding IF/THEN blocks.
+;# Note that MU_2 can be modeled as THETA(2) or THETA(3), depending on the MIXNUM value.
+;# Also, we are avoiding IF/THEN blocks.
 MU_2=Q*THETA(2)+(1.0-Q)*THETA(3)
 V=DEXP(MU_1+ETA(1))
 K=DEXP(MU_2+ETA(2))
@@ -40,15 +38,14 @@ $OMEGA BLOCK(2)
 0.01  ;[f]
 0.04 ;[p]
 
-$SIGMA 
+$SIGMA
 0.01 ;[p]
 
 $EST METHOD=ITS INTERACTION NITER=100 PRINT=1 NOABORT SIGL=8 FILE=example5.ext CTYPE=3
 $EST METHOD=IMPMAP INTERACTION NITER=20 ISAMPLE=300 PRINT=1 NOABORT SIGL=8
 $EST METHOD=IMP INTERACTION NITER=20 ISAMPLE=1000 PRINT=1 NOABORT SIGL=6
 $EST NBURN=500 NITER=500 METHOD=SAEM INTERACTION PRINT=10 SIGL=6 ISAMPLE=2
-$EST METHOD=IMP INTERACTION NITER=5 ISAMPLE=1000 PRINT=1 NOABORT SIGL=6 EONLY=1 MAPITER=0 
+$EST METHOD=IMP INTERACTION NITER=5 ISAMPLE=1000 PRINT=1 NOABORT SIGL=6 EONLY=1 MAPITER=0
 $EST METHOD=BAYES INTERACTION NBURN=2000 NITER=5000 PRINT=10  FILE=example5.txt SIGL=8
 $EST MAXEVAL=9999 NSIG=2 SIGL=8 PRINT=10 FILE=example5.ext METHOD=CONDITIONAL INTERACTION NOABORT
 $COV MATRIX=R
-

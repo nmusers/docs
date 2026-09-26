@@ -1,18 +1,18 @@
-;Model Desc: Population Mixture Problem in 1 Compartment model, 
-; with Volume and rate constant parameters and their inter-subject 
+;Model Desc: Population Mixture Problem in 1 Compartment model,
+; with Volume and rate constant parameters and their inter-subject
 ; variances modeled from two sub-populations
 ;Project Name: nm7examples
 ;Project ID: NO PROJECT DESCRIPTION
 
 $PROB RUN# example3 (from ad1tr1m2s)
-$INPUT C SET ID JID TIME CONC=DV DOSE=AMT RATE EVID MDV CMT VC1 K101 
+$INPUT C SET ID JID TIME CONC=DV DOSE=AMT RATE EVID MDV CMT VC1 K101
    VC2 K102 SIGZ PROB
 $DATA example3.csv IGNORE=C
 
 $SUBROUTINES ADVAN1 TRANS1
 
-; The mixture model uses THETA(5) as the mixture proportion parameter, 
-; defining the proportion of subjects in sub-population 1 (P(1), 
+; The mixture model uses THETA(5) as the mixture proportion parameter,
+; defining the proportion of subjects in sub-population 1 (P(1),
 ; and in sub-population 2 (P(2)
 
 $MIX
@@ -22,7 +22,7 @@ NSPOP=2
 
 
 $PK
-;  The MUs should always be unconditionally defined, that is, 
+;  The MUs should always be unconditionally defined, that is,
 ;  they should never be defined in IF/THEN blocks
 ; THETA(1) models the Volume of sub-population 1
 MU_1=THETA(1)
@@ -48,7 +48,7 @@ Y = F + F*EPS(1)
 ; Initial THETAs
 $THETA
 (-1000.0  4.3 1000.0) ;[MU_1]
-(-1000.0 -2.9 1000.0) ;[MU_2] 
+(-1000.0 -2.9 1000.0) ;[MU_2]
 (-1000.0 4.3 1000.0)  ;[MU_3]
 (-1000.0 -0.67 1000.0) ;[MU_4]
 (0.0001 0.667 0.9999)   ;[P(1)]
@@ -65,13 +65,13 @@ $OMEGA BLOCK(2)
  .01; [f]
  .06; [p]
 
-$SIGMA 
+$SIGMA
 0.01 ;[p]
 
 ; Prior information setup for OMEGAS only
 $PRIOR NWPRI
 
-; Prior OMEGA block 1.  Note that because the OMEGA is separated 
+; Prior OMEGA block 1.  Note that because the OMEGA is separated
 ; into blocks, so their priors should have the same block design.
 
 $OMEGAP BLOCK(2)
@@ -84,25 +84,25 @@ $OMEGAP BLOCK(2)
 0.05 FIX
 0.0 0.05
 
-; Degrees of Freedom defined for Priors. 
+; Degrees of Freedom defined for Priors.
 ; One for each OMEGA block defining each sub-popluation
 $OMEGAPD (2 FIX) (2 FIX)
 
 
-$EST METHOD=ITS INTERACTION NITER=20 PRINT=1 NOABORT SIGL=8 
+$EST METHOD=ITS INTERACTION NITER=20 PRINT=1 NOABORT SIGL=8
      FILE=example3.ext CTYPE=3 CITER=10
      CALPHA=0.05 NOPRIOR=1
 
-$EST NBURN=500 NITER=500 METHOD=SAEM INTERACTION PRINT=10 SIGL=6 
+$EST NBURN=500 NITER=500 METHOD=SAEM INTERACTION PRINT=10 SIGL=6
      ISAMPLE=2
 
-$EST METHOD=IMP INTERACTION NITER=5 ISAMPLE=1000 PRINT=1 NOABORT 
+$EST METHOD=IMP INTERACTION NITER=5 ISAMPLE=1000 PRINT=1 NOABORT
      SIGL=6 EONLY=1 MAPITER=0
 
-$EST METHOD=BAYES INTERACTION NBURN=2000 NITER=1000 PRINT=10  
-     FILE=example3.txt SIGL=8 NOPRIOR=0
+; $EST METHOD=BAYES INTERACTION NBURN=2000 NITER=1000 PRINT=10
+;      FILE=example3.txt SIGL=8 NOPRIOR=0
 
-$EST MAXEVAL=9999 NSIG=3 SIGL=12 PRINT=1 FILE=example3.ext 
+$EST MAXEVAL=9999 NSIG=3 SIGL=12 PRINT=1 FILE=example3.ext
      METHOD=CONDITIONAL INTERACTION NOABORT
      NOPRIOR=1
 

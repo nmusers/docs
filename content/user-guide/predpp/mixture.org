@@ -1,0 +1,47 @@
+---
+title: "Mixture model"
+author: ["Yi Zhang"]
+draft: false
+bookCollapseSection: false
+---
+{{< katex >}}{{< /katex >}}
+
+* Mixture models
+Sometimes we can postulate that the data constitute a
+random sample from a population comprised of multiple
+subpopulations, each with a distinct set of PK parameter typical values,
+and there are no covariates data recorded indicating to which subpopulation
+a subject belongs. For such as scenario, mixture models
+can be used to estimate \(P(m)\), the probability that a
+subject belongs to subpopulation \(m\). In other words,
+\(P(m)\) reflects the proportion of subpopulation \(m\) in the entire
+population. That is why it is known as /mixing proportions/. In general, assume \(M\)
+subpopulations, we have
+$$
+\sum_{m=1}^M P(m) = 1
+$$
+Namely, \(P\) is a \(M\)-simplex. The [[file:/docs/user-guide/fundamentals/likelihood/][individual likelihood]] is then
+replaced by the mixture likelihood:
+$$
+L_i=\sum_{m=1}^M p(y_i|\Sigma_i, \theta^{(m)}, \Omega)P(m).
+$$
+That is, the likelihood for subject \(i\) is now \(P\)-weighted
+average of invidual likelihood. The average is over all subpopulations, with \(\theta^{(m)}\)
+as \(\theta\) for subpopulation \(m\).
+
+
+NONMEM provides [[file:/docs/reference-manual/control-records/mix/][~$MIX~ record]] for mixture models. Take the following control
+stream for example ([[https://github.com/nmusers/docs/tree/master/examples/example5][examples/example5]]).
+
+#+INCLUDE: "../../examples/example5/example5.ctl" src perl
+
+In this model, ~NSPOP=2~ in the ~$MIX~ block indicates there are two subpopulations (\(K=2\)).
+Reserved variable ~P(m), m=1,2~ is for \(P(m)\), modeled by a ~THETA~
+element.
+
+# In order for NONMEM to compute the mixture likelihood, the
+# model must specify which set of THETAs is for which subpopulation.
+
+# Reserved variable ~MIXNUM~. Thus in the above model we use ~MIXNUM~ to
+# define an indicator variable ~Q~ and use it to define the typical
+# value of constant of elimination corresponding to this subject.?

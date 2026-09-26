@@ -2,7 +2,7 @@
 {{< katex >}}{{< /katex >}}
 
 * $MIX
-Marks the beginning of abbreviated code for the MIX routine.
+Marks the beginning of the [[file:/docs/reference-manual/abbr/][abbreviated code]] for the MIX routine.
 #+begin_src perl
  $MIX
  abbreviated code
@@ -18,62 +18,65 @@ Marks the beginning of abbreviated code for the MIX routine.
 The  ~$MIX~  record  is  used to describe the mixture probabilities of a
  mixture model. It is evaluated with individual records.
 
-See [[file:/docs/reference-manual/abbr/][abbreviated code]] for general  rules. Specific rules follow.
+~$MIX~ block may not include ~EXIT~, ~CALL~ , ~DO WHILE / ENDDO~
+statements, or ~COMRES~, ~CALLFL~ options.
 
 ** Assignment and conditional statements
 
 *** Left-hand quantities
+:PROPERTIES:
+:CUSTOM_ID: mixp
+:END:
 
-  - NSPOP: an integer variable.  The number of sub-populations. Must be given a value when ~ICALL=1~.
+  - ~NSPOP~: the number of sub-populations (mixture components). It must
+    be defined during problem initialization (when ~ICALL=1~ ).
 
-  - P(i): for each i (i=1, ... , NSPOP), P(i) is the modeled fraction
-    of  the population  in  the  ith  subpopulation.  The sum of the
-    P(i) should equal 1. In principle, the P(i) can change from
-    individual to  individual.  If for a given individual, the second
-    (for example) subpopulation doesn't apply, then set P(2)=0 for
-    that  individual.   MIXP may be coded instead of P; they are
-    synonymous in the context of the ~$MIX~ block.
+  - ~P(m)~,  ~m=1..., NSPOP~, the probability of certain subject
+    belonging to subpopulation ~m~. Thus ~P(m)~'s must sum to 1. ~P~
+    has alias ~MIXP~ in the ~$MIX~ block.
 
-*** Right-hand quantities in assignment statement and in conditions:
+*** Right-hand quantities and conditionals:
 
-  - THETA(n).
-
-  - MIX-defined items that appeared earlier as left-hand quantities.
-
-  - ICALL
-    + ~ICALL=0~: Run initialization.
-    + ~ICALL=1~: Problem initialization.
-    + ~ICALL=2~: Normal call.
-    + ~ICALL=4~: Simulation.
-  - Data items listed in DATA option of ~$CONTR~ record. E.g., assume
-    that the following  records  appear  in  the  control stream prior
-    to the ~$MIX~ block:
+  - ~THETA~.
+  - ~MIX~-defined variables.
+  - [[file:/docs/reference-manual/abbr/#icall][~ICALL~]].
+  - Data items listed in DATA option of the ~$CONTR~ record, e.g.,
     #+begin_src perl
      $INPUT ... STDY ...
      $CONTR DATA=(STDY)
     #+end_src
-    Then STDY may be used on the right in ~$MIX~.  STDY and STDY(1) both
-    refer to the value of STDY on the first observation record of  the
-    individual  record.  STDY(i) refers to the value of STDY on the i'th observation record of the individual record.   TEMPLT  may  be
-    used. (See [[file:/docs/reference-manual/api/variables/#var-templt][MIX CONTR: TEMPLT]]).
+    so that ~STDY~ can be used in ~$MIX~.  ~STDY(j)~ refers to the value of ~STDY~ on the ~j~'th observation record of the individual record. [[file:/docs/reference-manual/api/variables/#var-templt][TEMPLT]] may be used;
 
+  - ~MIXNUM~: global variable for subpopulation index. During ~ICALL=4~ (simulation),
+      ~MIXNUM~ is randomly selected.  During ~ICALL=3~ (estimation)
+      and the ~PASS~ subroutine used, or when ~ICALL=5~ or ~ICALL=6~,
+      ~MIXNUM~ equals to ~MIXEST~.
 
-*** Global Variables in Modules
-  Certain  variables  in  Fortran  modules  can  be  used.   (See [[file:/docs/reference-manual/api/variables/][Variables]])
+  - ~MIXEST~: global variable for the estimated index. when  ~ICALL=3,5,6~,  and at ~ICALL=2~ when ~COMACT \=
+      0~, ~MIXEST~ is the the estimated index ~m~ of the subpopulation
+      with highest ~P(m)~ for the individual. In NM73+, when
+    ~ICALL=4~, ~MIXEST~ equals to ~MIXNUM~. At other times the
+    variable is not meaningful.
 
- May not include:
+  - ~MIXP~: global array of probabilities of the mixture components,
+      as the internal storage of the ~P~ variable. ~MIXP~ may be encoded in one of
+      the three ways below:
+      #+begin_src f90
+        MIXP(MIXNUM)
+        MIXP                            ! index default to MIXNUM
+        MIXP(m)
+      #+end_src
+      The third encoding requires that the index ~m~ not exceed the value of ~MMX~ in [[file:/docs/reference-manual/control-records/sizes/][~SIZES~]].
 
-   EXIT, CALL , DO WHILE / ENDDO statements
+  - Some global [[file:/docs/reference-manual/api/variables/][Variables]] in addition to ~MIXNUM~, ~MIXEST~, and ~MIXP~.
 
-   COMRES, CALLFL pseudo-variables
+  - Reserved variable ~NEWIND~, ~ETA~, ~EPS~, ~ERR~, ~COM~.
 
-Reserved Variable Names: ~NEWIND~,~ETA(i)~,~EPS(i)~,~ERR(i)~, ~COM(i)~
-
-Variables defined in ~$MIX~ are not listed in module NMPRD4 and may  not
- be displayed in ~$TABLE~ and ~$SCATTER~.
+Variables defined in ~$MIX~ are not stored in module ~NMPRD4~ for
+ output thus may not be specified in ~$TABLE~.
 
 ** Record order
 
 Follows ~$SUBROUTINES~.
 
-See also [[file:/docs/reference-manual/api/variables/#mixnum-mixest-mixp][MIXNUM, MIXEST, and MIXP variables]]; [[file:/docs/reference-manual/api/variables/#comact][COMACT]];
+See also: [[file:/docs/reference-manual/api/variables/#comact][COMACT]];
