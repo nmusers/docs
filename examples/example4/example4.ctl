@@ -1,11 +1,12 @@
-;Model Desc: Population Mixture Problem in 1 Compartment model, 
-; with rate constant parameter and its inter-subject variances 
-; modeled as coming from two sub-populations
+;Model Desc: Population Mixture Problem in 1 Compartment model,
+; with rate constant parameter and its inter-subject variances
+; modeled as coming from two sub-populations. see
+; https://nmusers.github.io/docs/reference-manual/control-records/mix/
 ;Project Name: nm7examples
 ;Project ID: NO PROJECT DESCRIPTION
 
 $PROB RUN# example4 (from ad1tr1m2t)
-$INPUT C SET ID JID TIME CONC=DV DOSE=AMT RATE EVID MDV CMT VC1 
+$INPUT C SET ID JID TIME CONC=DV DOSE=AMT RATE EVID MDV CMT VC1
        K101 VC2 K102 SIGZ PROB
 $DATA example4.csv IGNORE=C
 
@@ -34,7 +35,7 @@ Y = F + F*EPS(1)
 
 $THETA
 (-1000.0  4.3 1000.0) ;[MU_1]
-(-1000.0 -2.9 1000.0) ;[MU_2] 
+(-1000.0 -2.9 1000.0) ;[MU_2]
 (-1000.0 -0.67 1000.0) ;[MU_3]
 (0.0001 0.667 0.9999)   ;[P(1)]
 
@@ -47,7 +48,7 @@ $OMEGA BLOCK(3)
  0.001 ;[f]
  0.06 ;[p]
 
-$SIGMA 
+$SIGMA
  0.01 ;[p]
 
 ; Prior information setup for OMEGAS only
@@ -62,22 +63,22 @@ $OMEGAP BLOCK(3)
 ; Degrees of Freedom defined for Priors.
 $OMEGAPD (3 FIX)
 
-$EST METHOD=ITS INTERACTION NITER=30 PRINT=5 NOABORT SIGL=6 
+$EST METHOD=ITS INTERACTION NITER=30 PRINT=5 NOABORT SIGL=6
      FILE=example4.ext NOPRIOR=1 CTYPE=3 CITER=10 CALPHA=0.05
 
-$EST METHOD=IMP INTERACTION NITER=20 ISAMPLE=300 PRINT=1 
+$EST METHOD=IMP INTERACTION NITER=20 ISAMPLE=300 PRINT=1
      NOABORT SIGL=6 NOPRIOR=1
 
-$EST NBURN=500 NITER=500 METHOD=SAEM INTERACTION PRINT=10 SIGL=6 
+$EST NBURN=500 NITER=500 METHOD=SAEM INTERACTION PRINT=10 SIGL=6
      ISAMPLE=2 NOPRIOR=1 MAPITER=0
 
-$EST METHOD=IMP INTERACTION EONLY=1 NITER=20 ISAMPLE=3000 PRINT=1 
+$EST METHOD=IMP INTERACTION EONLY=1 NITER=20 ISAMPLE=3000 PRINT=1
      NOABORT SIGL=6 NOPRIOR=1
 
-$EST METHOD=BAYES INTERACTION NBURN=2000 NITER=5000 PRINT=10  
+$EST METHOD=BAYES INTERACTION NBURN=2000 NITER=5000 PRINT=10
      FILE=example4.txt SIGL=6 NOPRIOR=0
 
-$EST MAXEVAL=9999 NSIG=3 SIGL=12 PRINT=1 
+$EST MAXEVAL=9999 NSIG=3 SIGL=12 PRINT=1
      METHOD=CONDITIONAL INTERACTION
      NOABORT FILE=example4.ext NOPRIOR=1
 

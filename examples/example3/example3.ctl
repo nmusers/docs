@@ -1,6 +1,7 @@
 ;Model Desc: Population Mixture Problem in 1 Compartment model,
 ; with Volume and rate constant parameters and their inter-subject
-; variances modeled from two sub-populations
+; variances modeled from two sub-populations. see
+; https://nmusers.github.io/docs/reference-manual/control-records/mix/
 ;Project Name: nm7examples
 ;Project ID: NO PROJECT DESCRIPTION
 

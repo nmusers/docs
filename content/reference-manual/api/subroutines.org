@@ -796,17 +796,38 @@ Output argument:
 - ~NSPOP~: the number of sub-populations (mixture components). See [[file:/docs/reference-manual/control-records/mix/#mixp][$MIX record]].
 - ~P~: an array of probabilities of the mixture components. See [[file:/docs/reference-manual/control-records/mix/#mixp][$MIX record]].
 
-Other  inputs  are  available  to MIX in NONMEM read-only global
-variables.  In particular, data items that are requested using the
-~$CONTR~ record, and the current value of THETA, as shown above. (See
-[[file:/docs/reference-manual/api/variables/#mix-data][MIX:DATA]], [[file:/docs/reference-manual/api/variables/#contr-mix-theta][CONTR_MIX:THETA]]).
+For an example, consider the first example from [[file:/docs/user-guide/predpp/mixture/][the mixture model]] in
+the User Guide. Insteading of using ~$MIX~, we can
+can supply the following Fortran routine.
+#+begin_src f90
+! filename: mix.f90
 
-The [[file:/docs/reference-manual/api/variables/#var-templt][MIX CONTR: TEMPLT]]  data  record  in  a NONMEM read-only global variable also
+  SUBROUTINE MIX (ICALL,NSPOP,P)
+    USE SIZES, ONLY: DPSIZE,ISIZE
+    USE ROCM_REAL, ONLY: THETA=>THETAC,DATA=>RDATA
+    IMPLICIT REAL(KIND=DPSIZE) (A-Z)
+    INTEGER(KIND=ISIZE) :: ICALL,NSPOP
+    REAL(KIND=DPSIZE) :: P(*)
+    NSPOP=2
+    P(1)=THETA(5)
+    P(2)=1.-THETA(5)
+    RETURN
+  END SUBROUTINE MIX
+#+end_src
+to the ~$SUBROUTINE~:
+#+begin_src perl
+  $SUBROUTINES ADVAN1 TRANS2 MIX=mix.f90
+#+end_src
+
+The above example shows that some additional global variables  are
+available to MIX, such as data items requested using the
+~$CONTR~ record and the current value of THETA ([[file:/docs/reference-manual/api/variables/#contr-mix-theta-data][CONTR_MIX:THETA,DATA]]).
+
+The [[file:/docs/reference-manual/api/variables/#var-templt][MIX CONTR: TEMPLT]]  data  record
 serves to provide an additional way for  individual-specific  information to be made available.
 
 See also [[file:/docs/reference-manual/api/variables/#mixnum-mixest-mixp][MIXNUM, MIXEST and MIXP]].
 
-See [[file:/docs/user-guide/predpp/population_model/#mixture][mixture model]] example for using ~$MIX~ and MIX.
 
 ** MODEL
 :PROPERTIES:
@@ -2420,7 +2441,7 @@ Other Inputs:
 
  NONMEM read-only global variables.
 
- (See [[file:/docs/reference-manual/api/variables/#mix-data][MIX:_DATA]])
+ (See [[file:/docs/reference-manual/api/variables/#contr-mix-theta-data][MIX/CONTR:THETA,DATA]])
 
  (See [[file:/docs/reference-manual/api/variables/#non-active-eta][Non-active ETA for PRED]])
 
