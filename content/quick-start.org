@@ -8,122 +8,9 @@ weight: 9
 {{< katex >}}{{< /katex >}}
 
 * Quick start
-** A single-subject PK model
-Model example "[[https://github.com/nmusers/docs/tree/master/examples/control3][examples/control3]]" contains data file ~DATA3~ with
-Theophylline plasma concentration-time observations in a single individual after a single dose of 320 mg:
 
-#+INCLUDE: "/examples/control3/DATA3" src r
-
-The corresponding NONMEM model  /control stream/  is
-#+INCLUDE: "/examples/control3/CONTROL3" src perl
-
-- Control stream line 1 gives the NONMEM problem a name. NONMEM uses
-  ";" for comments, thus everything after ";" one a line is neglected.
-- Control stream line 2 says that the data file column 1-4 contain
-  dosing amount (~AMT~, in mg here, with alias ~DOSE~),
-  observation time, and the observed concentrations (dependent value
-  ~DV~, with alias ~CP~), respectively.
-- Control stream line 3 contains the data file name, ~DATA3~.
-- Line 4 says we use one-compartment model with first-order absorption
-  from PREDPP. The model =ADVAN2= specifies a DEPOT compartment (where
-  the dose goes, and), and a CENTRAL compartment. It also indicates
-  that drug enters from DEPOT to CENTRAL compartment by a first order
-  process. Note, that the default compartment for doses (i.e., where
-  PREDPP will add doses if not otherwise instructed) is the DEPOT
-  compartment, as it should be.
-
-  This is confirmed by the model run output
-  #+begin_src
-  ONE COMPARTMENT MODEL WITH FIRST-ORDER ABSORPTION (ADVAN2)
-
-  MAXIMUM NO. OF BASIC PK PARAMETERS:   3
-
-  BASIC PK PARAMETERS (AFTER TRANSLATION):
-    ELIMINATION RATE (K) IS BASIC PK PARAMETER NO.:  1
-    ABSORPTION RATE (KA) IS BASIC PK PARAMETER NO.:  3
-
-
-  COMPARTMENT ATTRIBUTES
-  COMPT. NO.   FUNCTION   INITIAL    ON/OFF      DOSE      DEFAULT    DEFAULT
-                          STATUS     ALLOWED    ALLOWED    FOR DOSE   FOR OBS.
-     1         DEPOT        OFF        YES        YES        YES        NO
-     2         CENTRAL      ON         NO         YES        NO         YES
-     3         OUTPUT       OFF        YES        NO         NO         NO
-  #+end_src
-- Line 6-10 specify PK parameters (in ~$PK~ record) using ~THETA~ [fn:2], the
-  parameters to be estimated by NONMEM, consisting of first-order
-  absorption rate ~KA~, rate constant of elimination ~K~, and the
-  central compartment scaling parameter ~SC~. For now we ignore the special variable
-  ~CALLFL~ that is set to speed up this particular NONMEM run.
-- Line 12-13 specify the observation (~Y~) and prediction (~F~)
-  differ by a normally-distributed additive error ~ERR(1)~ .
-- Line 15 provides information about possible values of each element
-  of ~THETA~ in the format of (lower bound, initial estimate, upper
-  bound). The only two entries for each ~THETA~ implies no upper bound
-  (or upper bounded at INFinity).
-- Line 17 (~$ESTIMATION~) requests parameter estimation, and line 18
-  (~$COVARIANCE~) requests standard error for the estimates.
-- Line 19 request a table output for the input data and certain computed quantities.
-
-*** Run
-Assume the above model is stored in =model1.ctl= [fn:1]. We use
-NONMEM's Front End script =nmfe= to run the above model. The script in
-releases often has NONMEM version in its name. For
-example, with NONMEM v7.6.0, we do the following in command line.
-#+begin_src bash
-nmfe76 model1.ctl output.txt
-#+end_src
-You can see that =nmfe= requires two arguments, input model file and
-output plaintext file. In addition it supports many options to control
-the building and execution behavior. You may refer to its help (=nmfe76 --help=)
-printout for details.
-
-*** Results
-NONMEM will print a few pages in =output.txt=. For example, on page
-"FINAL PARAMETER ESTIMATE" it shows
-#+begin_src
- THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
-
-         TH 1      TH 2      TH 3
-         1.94E+00  1.02E-01  3.20E+01
-
-
- OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
-
-         ETA1
- ETA1    8.99E-01
-
-
- OMEGA - CORR MATRIX FOR RANDOM EFFECTS - ETAS  *******
-
-         ETA1
- ETA1    9.48E-01
-#+end_src
-
-and on "STANDARD ERROR OF ESTIMATE" it shows
-#+begin_src
- THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
-
-         TH 1      TH 2      TH 3
-         6.28E-01  7.37E-03  1.25E+00
-
- OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
-
-         ETA1
- ETA1    5.45E-01
-
- OMEGA - CORR MATRIX FOR RANDOM EFFECTS - ETAS  *******
-
-         ETA1
-  ETA1    2.87E-01
-#+end_src
-
-** A population model
-:PROPERTIES:
-:CUSTOM_ID: quick-start-ex2
-:END:
-*** Data
-About 60 infants were given phenobarbital therapeutically. A plasma
+** Data
+About 60 infants were given Phenobarbital therapeutically [fn:3]. A plasma
 concentration was measured in each some hours after the first
 (loading) dose, followed by multiple maintenance doses. A second, and
 sometimes a third concentration were measured later. In all, 155
@@ -143,75 +30,64 @@ concentrations were observed. The first subject's data is shown below.
       1  112.5      .    1.4      7   31.0
 #+end_src
 
-*** Model
-We use the following NM-TRAN control records to model the data.
-#+begin_src perl
-$PROBLEM PHENOBARB
-$INPUT   ID TIME AMT WT APGR DV
-$DATA    PHENO
-$SUBROUTINE ADVAN1
-$PK
-   TVCL=THETA(1)
-   CL=TVCL+ETA(1)
-   TVVD=THETA(2)
-   V=TVVD+ETA(2)
-   K=CL/V
-   S1=V
-$ERROR
-   Y=F+ERR(1)
-$THETA  (0,.0047) (0,.99)
-$OMEGA  .0000055, .04
-$SIGMA  25
-$ESTIMATION  PRINT=5
-$TABLE     ID TIME AMT WT APGR
-$COVARIANCE
-#+end_src
+** Model
+We use the following NM-TRAN  /control stream/ ("[[https://github.com/nmusers/docs/tree/master/examples/pheno][examples/pheno]]") to model the data.
+#+INCLUDE: "/examples/pheno/model.ctl" src perl
+
 Note that the ~$INPUT~ record now defines a new data item, WT, the
 patient weight.  It's value is given on every data record for an
 individual, in the column indicated.  This is so despite the fact that
 WT may not change within an individual. This is a bit repetitious, but
 convenient.
 
-The records are very similar to those for the theophylline problem,
-with notable differences:
-- The model is implemented using ADVAN1, not ADVAN2. ADVAN1 implements
-  the one-compartment (monoexponential) model, without one-compartment
-  model first order absorption.  No absorption model was needed for
+- Control stream line 1 gives the NONMEM problem a name.
+- NONMEM uses ";" for comments, thus everything after ";" one a line
+  is neglected, as shown in line 17-19.
+- Line 2 says that the data file column 1-5 contain
+  subject ID (~ID~), event time (~TIME~), dosing amount (~AMT~),
+  covariate ~WGT~ and ~APGR~,
+  and the observed concentrations (/dependent value/
+  ~DV~), respectively.
+- Line 3 specifies the data file name, ~PHENO~.
+- Line 4 says the model is implemented using ~ADVAN1~, namely
+  the one-compartment (monoexponential) model.  No absorption model was needed for
   this problem because all concentrations were measured many hours
   after the last (oral) dose, so absorption could be considered to be
-  complete, and, for the purposes of data analysis, immediate.
-- The data for each infant is similar to those shown. Now all of the
-  data records for each infant start with the same value for the ID
-  data item (column 1), but this value differs between infants.
-- The parameters of the one-compartment model are defined by the
-  abbreviated code following the ~$PK~ statement: elimination rate K,
-  based on Clearance (CL) and
-  Volume of Distribution (V).  However, here each parameter is not
-  simply equal to one of NONMEM's parameters (an element of THETA).
-  Rather, CL, for example, is equal to a parameter (THETA(1)) plus a
-  new term, ETA(1).  The latter expresses interindividual variable
-  variability, and stands for the deviation of the individual's true
-  clearance (CL) from the population value (TVCL, Typical Value of
-  CLearance, which, in turn, is simply THETA(1)). This way the model
-  incorporates the interindividual variability.
-- The initial estimate of the variance of =ERR(1)= was given on a
-  ~$OMEGA~ record for the single-subject model, while  here it is given
-  on a ~$SIGMA~ record.  This difference in NONMEM conventions between
-  individual type data and population type data will be discussed more
-  fully in User guide.
+  complete, and for the purposes of data analysis, immediate. ~TRANS2~
+  says that the parameters of the PK model are Clearance (~CL~) and
+  Volume of Distribution (~V~).
+- The code below ~$PK~ (~$PK block~)
+  says that PK parameters, such as ~CL~, are equal to a population
+  /typical value/ parameter
+  (~THETA(1)~) [fn:2]  modified by an ~ETA(1)~. ~ETA~'s describe interindividual variable
+  variability, the deviation of the individual's
+  PK parameters from the /typical values/ of the population.
+- The code below ~$ERROR~ (~$ERROR block~) describes how the
+  observations ~DV~ deviate from the prediction ~F~. Particular in
+  this example line 14-15 says they differ by a /proportional/ residual term.
+- ~$THETA~, ~$OMEGA~, and ~$SIGMA~ records specify the initial
+  estimation of the corresponding parameters. In particular, the zeros
+  in ~(0, .0105)~ and ~(0,1.05)~ specify the ~THETA~ parameters are
+  lower-bounded at 0.
+- Line 21 (~$ESTIMATION~) requests parameter estimation, and line 22
+  (~$COVARIANCE~) requests standard error for the estimates.
+- Line 23 uses ~$TABLE~ to output tables of the given variables. A
+  problem can have multiple tables output.
 
-NONMEM is again instructed to estimate the parameters and
-their standard errors.
-*** Run
-Stored the model file "model2.ctl", we do the same as in the previous example:
+** Run
+Assume the above model is stored in =model.ctl= [fn:1]. We use
+NONMEM's Front End script =nmfe= to run the above model. The script in
+releases often has NONMEM version in its name. For
+example, with NONMEM v7.6.0, we do the following in command line.
 #+begin_src bash
-nmfe76 model2.ctl output.txt
+nmfe76 model.ctl output.txt
 #+end_src
-Note that we issue a same output file name =output.txt=. If this is
-done in a same path as the previous model, NONMEM will overwrites the
-file. Therefore a good practice is to have a separate directory for
-each run.
-*** Results
+You can see that =nmfe= requires two arguments, input model file and
+output plaintext file. In addition it supports many options to control
+the building and execution behavior. You may refer to its help (=nmfe76 --help=)
+printout for details.
+
+** Results
 The results below are the output of the "FINAL PARAMETER ESTIMATE" page
 #+begin_src
  THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
@@ -261,19 +137,18 @@ and the "STANDARD ERROR OF ESTIMATE" page.
          EPS1
  EPS1    2.64E-01
 #+end_src
-Note that now there are estimates of the variances of the interindividual differences in CL (OMEGA - ETA1) and V (OMEGA - ETA2), as well as of the residual error variance (denoted by SIGMA in NONMEM output when the data SIGMA are from a population). There are also standard errors for these estimates.
+Note that there are estimates of the variances of the interindividual differences in CL (OMEGA - ETA1) and V (OMEGA - ETA2), as well as of the residual error variance (denoted by SIGMA in NONMEM output when the data SIGMA are from a population). There are also standard errors for these estimates.
 
-With the weight data, we can improve the above model by using it to
-explain away some variability of CL and V. Specifically, we can add WT to
-the regression of the typical values of CL and V:
+With the weight (~WGT~) data, we can improve the above model by using
+the covariate to explain away some variability of ~CL~ and ~V~, by using ~WGT~ to
+regress the typical values:
 #+begin_src perl
 ...
 $PK
-   TVCL=THETA(1)+THETA(3)*WT
-   CL=TVCL+ETA(1)
-   TVVD=THETA(2)+THETA(4)*WT
-   V=TVVD+ETA(2)
-...
+   TVCL=THETA(1)+THETA(3)*WGT
+;# ...
+   TVVD=THETA(2)+THETA(4)*WGT
+;# ...
 #+end_src
 The new model's output of estimates:
 #+begin_src
@@ -328,13 +203,12 @@ Note the decreases in the sizes of the estimates of the inter-individual
 variances: with weight in the model, there is less unexplained
 inter-individual variability.
 
-Note also the very small values estimated for THETA(1) and standard
-error. In fact the THETA(1) has virtually collapsed to 0. The
-intercept term of TVCL does not appear to be an important part of the
+Note also the very small values estimated for ~THETA(1)~ and standard
+error. In fact the ~THETA(1)~ has virtually collapsed to 0. The
+intercept term of ~TVCL~ does not appear to be an important part of the
 model.
 
-The examples highlight:
-- NONMEM can fit both individual and population models.
+The example highlights:
 
 - NONMEM has a menu of pharmacokinetic models from which the one
   appropriate to the problem at hand can be chosen.
@@ -353,7 +227,7 @@ The examples highlight:
 - NONMEM provides estimates (standard errors) of the precision of its
   parameter estimates, including those describing variability.
 
-** Futher reading
+* Futher reading
 We invite you to go through the User Guide of this documentation to
 learn more about NONMEM. We also include publication list below. It progresses from beginner to advanced levels.
 
@@ -406,3 +280,7 @@ Another popular extension is =.mod=. In this document we use =.ctl=.
 
 [fn:2] Symols such as THETA, OMEGA, SIGMA are NONMEM's built-in
 variables. See [[file:/docs/user-guide/fundamentals/population/][User Guide]] and Reference Manual for details.
+
+[fn:3] NONMEM can also fit single-subject data, see example
+"[[https://github.com/nmusers/docs/tree/master/examples/control3][examples/control3]]" for Theophylline plasma concentration-time data
+and model for a single individual after a single dose of 320 mg.
