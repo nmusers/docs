@@ -954,7 +954,7 @@ One can use the verbatim code to utilize this variable.
 
 These values should only be used with ICALL = 3.
 
-** Prior simulation: ICMAX
+** Prior simulation
 :PROPERTIES:
 :CUSTOM_ID: prior-simulation-icmax
 :END:
@@ -965,21 +965,56 @@ These values should only be used with ICALL = 3.
  ! GLOBAL DECLARATION:
       INTEGER(KIND=ISIZE) :: IMAXSIM
 #+end_src
-This variable allows the user to control the behavior of the NWPRI and
-TNPRI NONMEM utility routines.  It is relevant during simulation  when
-PRIOR  sets  ISS  to  a  non-zero  value.  By default, NWPRI and TNPRI
+By default, [[file:/docs/reference-manual/api/subroutines/#prior][NWPRI and TNPRI]]
 attempt at most 100 times to obtain a sample.  After  that  number  of
 attempts, they terminate with the message
 #+begin_src
  MAXIMUM ATTEMPTS TO OBTAIN SAMPLE EXCEEDED
 #+end_src
-
-- ICMAX: setting ICMAX overrides the default value of 100, e.g., in a PRIOR subroutine:
+~ICMAX~ overrides the default behavior, e.g., in a ~PRIOR~ subroutine:
   #+begin_src f90
-       USE NMPR_INT, ONLY: ICMAX=>IMAXSIM
-   ... other code ...
-       ICMAX=500
+        USE NMPR_INT, ONLY: ICMAX=>IMAXSIM
+    !... other code ...
+        ICMAX=500
   #+end_src
+
+~THETA~, ~OMEGA~, and ~SIGMA~ from a Simulation Step using the user-supplied
+~PRIOR~ must  be  stored  in ~THSIMP~, ~OMSIMP~, and ~SGSIMP~,
+respectively. This is done automatically when
+[[file:/docs/reference-manual/api/subroutines/#prior][NWPRI or TNPRI]] is for prior simulations. The entire parameter arrays are stored by ~NPWRI~ and
+~TNPRI~, not just the the  inital sub-vectors (prior-affected parts).
+These  variables  may be used as right-hand quantities in ~$PK~, ~$ERROR~,
+~$INFN~ and ~$PRED~ blocks.  After being set during the  Simulation  Step,
+they remain available during problem finalization (~ICALL=3~).
+
+#+begin_src f90
+ ! USAGE:
+      USE NMPR_REAL, ONLY: THSIMP=>THET_P,OMSIMP=>OMEG_P,SGSIMP=>SIGM_P,THSIMPR
+
+ ! GLOBAL DECLARATION:
+      USE SIZES, ONLY: LTH,LVR,DPSIZE
+      REAL(KIND=DPSIZE) :: THET_P(LTH),OMEG_P(LVR,LVR),SIGM_P(LVR,LVR)
+#+end_src
+
+- Without ~$THETAR~, ~THSIMPR~  contains  the  same  values  as  ~THSIMP~.
+- With ~$THETAR~, ~THSIMP~ contains the internal theta values, and ~THSIMPR~
+  the transformed ~THSIMP~ according to
+  the ~$THETAR~ record.
+
+For example, in order to output simulated individual parameters, one
+can define
+#+begin_src f90
+    IF (ICALL.EQ.4) THEN
+       T0=THSIMP(1)*EXP(ETA(1))
+       T2=THSIMP(2)*EXP(ETA(2))
+       T3=THSIMP(3)*W*EXP(ETA(3))
+    ELSE
+       T0=THETA(1)*EXP(ETA(1))
+       T2=THETA(2)*EXP(ETA(2))
+       T3=THETA(3)*W*EXP(ETA(3))
+    ENDIF
+#+end_src
+
 
 ** Simulation: SIMEPS error code
 :PROPERTIES:
@@ -1664,33 +1699,6 @@ In other words, the following three are equivalent:
   within a multiple-observation L2 record.  If the data are
   single-subject data, a nonzero value of F_FLAG cannot be used within
   a multi-ple-observation L1 record.
-
-** Prior Simulation: parameters
-#+begin_src f90
- ! USAGE:
-      USE NMPR_REAL, ONLY: THSIMP=>THET_P,OMSIMP=>OMEG_P,SGSIMP=>SIGM_P,THSIMPR
-
- ! GLOBAL DECLARATION:
-      USE SIZES, ONLY: LTH,LVR,DPSIZE
-      REAL(KIND=DPSIZE) :: THET_P(LTH),OMEG_P(LVR,LVR),SIGM_P(LVR,LVR)
-#+end_src
-THETA, OMEGA, and SIGMA from a Simulation Step using the user-supplied
-routine PRIOR must  be  stored  in THSIMP, OMSIMP, and SGSIMP,
-respectively. This is done automatically when NONMEM utility routines
-NWPRI or TNPRI is used to generate THETA, OMEGA, and SIGMA values.
-
-- Without ~$THETAR~, THSIMPR  contains  the  same  values  as  THSIMP
-- With ~$THETAR~, THSIMP contains the internal theta values, and THSIMPR
-  contains the reported values  (THSIMP  values  transformed  by
-  equations of the ~$THETAR~ record).
-
-The entire THETA, OMEGA and SIGMA arrays are stored by NPWRI and
-TNPRI, not just the the  inital sub-vectors (prior-affected parts).
-(See NWPRI, TNPRI).
-
-These  variables  may be used as right-hand quantities in ~$PK~, ~$ERROR~,
-~$INFN~ and ~$PRED~ blocks.  After being set during the  Simulation  Step,
-they remain available during problem finalization (i.e., ~ICALL=3~).
 
 ** YLO, YUP
 :PROPERTIES:
