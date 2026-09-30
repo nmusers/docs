@@ -21,14 +21,14 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="reference-manual">
-		<meta property="article:modified_time" content="2026-09-17T14:44:30-07:00">
+		<meta property="article:modified_time" content="2026-09-28T11:31:49-07:00">
 
 
 	<meta itemprop="name" content="Abbreviated code">
 	<meta itemprop="description" content="Abbreviated code Abbreviated code follows a subset of Fortran language syntax within an NM-TRAN control stream. A block of abbreviated code begins with control record $PRED, $PK, $ERROR, $DES, $AES, $AESINITIAL, $TOL, $MIX, or $INFN, and ends with either another record (that begins with &#34;$&#34;), or the end of the control stream. The code blocks are case-insensitive (NM72).
 Comments Semicolon character ; marks the beginning of comments so that the rest of the line is ignored.">
-	<meta itemprop="dateModified" content="2026-09-17T14:44:30-07:00">
-	<meta itemprop="wordCount" content="13748">
+	<meta itemprop="dateModified" content="2026-09-28T11:31:49-07:00">
+	<meta itemprop="wordCount" content="13671">
 
 <title>Abbreviated code • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -37,7 +37,7 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.172c2c297200a579cff77ec23397ddaa22489039f149214c8061bf02b1e45023.js" integrity="sha256-FywsKXIApXnP937CM5fdqiJIkDnxSSFMgGG/ArHkUCM=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.37db4a0fb84b95941962d78e648dd2d0cb0c5eaa7ec7b36c4a665ee54f3b0a64.js" integrity="sha256-N9tKD7hLlZQZYteOZI3S0MsMXqp&#43;x7NsSmZe5U87CmQ=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -389,6 +389,20 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
   
     <a href="/docs/user-guide/predpp/interoccasion/" class="">
       Inter-occasion variability</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/mixture/" class="">
+      Mixture model</a>
   
 
         </li>
@@ -1598,7 +1612,7 @@ Comments Semicolon character ; marks the beginning of comments so that the rest 
 </li>
 <li><a href="#code-blocks">Code blocks</a>
 <ul>
-<li><a href="#headline-27">ICALL</a>
+<li><a href="#icall">ICALL</a>
 </li>
 <li><a href="#compartment-initialization">Compartment initialization</a>
 </li>
@@ -3694,12 +3708,13 @@ Code blocks
 <p>
 The code blocks heavily utilize reserved variable <code class="verbatim">ICALL</code> to
 distinguish NONMEM executation stages.</p>
-<div id="outline-container-headline-27" class="outline-3">
-<h3 id="headline-27">
+<div id="outline-container-icall" class="outline-3">
+<h3 id="icall">
 ICALL
 </h3>
-<div id="outline-text-headline-27" class="outline-text-3">
-<p>ICALL is  an  argument  passed by NONMEM to user-supplied
+<div id="outline-text-icall" class="outline-text-3">
+<p>
+ICALL is  an  argument  passed by NONMEM to user-supplied
 subroutines CCONTR, CONTR, CRIT, PRED, PRIOR and MIX. It is also
 selectively passed to PK,  ERROR,  and  INFN. It can  be  used  in
 <code>$PK</code>, <code>$ERROR</code>, and <code>$PRED</code> abbreviated code.  The discussion below
@@ -4324,19 +4339,11 @@ PRED (ERROR) exits.</li>
 </div>
 </li>
 <li>During calls with <code>ICALL=6</code>, the template data record is  found  in
-NONMEM global variable TEMPLT.  Items in the template data record
+NONMEM global variable <code>TEMPLT</code>.  Items in the template data record
 may be referred to in abbreviated code of the data average  block by
-position or by label, e.g., TEMPLT(1) or TEMPLT(ID).</li>
+position or by label, e.g., <code>TEMPLT(1)</code> or <code>TEMPLT(ID)</code>.</li>
 <li>During  calls  with  <code>ICALL=6</code>,  the  repetition feature may not be used.</li>
-<li>If a mixture model is used, then during calls with <code>ICALL=6</code>,  both
-MIXNUM  and  MIXEST are the index of the subpopulation into which
-the individual (whose data record is being passed) has been
-classified.</li>
-<li>If a mixture model is being used, then during calls with <code>ICALL=6</code>,
-(the final estimates of)  the  mixture  probabilities  associated
-with  the  individual  record  containing the template record are
-found in NONMEM global variable  MIXPT.   Code  that  uses  these
-probabilities must be verbatim code. (See <a href="/docs/reference-manual/api/variables/#var-templt">MIX CONTR: TEMPLT</a>, <a href="/docs/reference-manual/api/variables/#mixpt">Mixture model: MIXPT</a>).</li>
+<li>See <a href="/docs/reference-manual/control-records/mix/">$MIX</a> for rules related to mixture models.</li>
 </ul>
 </div>
 </div>
@@ -5799,9 +5806,9 @@ routines.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/947cd9c2cae0a425c24408f41243df5a41eb2805" title='Last modified by Yi Zhang | 2026 Sep 17' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/1a2cbe78edb3f32bb1c526e0c67aaff5409d87a9" title='Last modified by Yi Zhang | 2026 Sep 28' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Sep 17</span>
+    <span>2026 Sep 28</span>
   </a>
 
 </div>
@@ -5917,7 +5924,7 @@ routines.</p>
 </li>
 <li><a href="#code-blocks">Code blocks</a>
 <ul>
-<li><a href="#headline-27">ICALL</a>
+<li><a href="#icall">ICALL</a>
 </li>
 <li><a href="#compartment-initialization">Compartment initialization</a>
 </li>

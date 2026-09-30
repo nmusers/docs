@@ -19,13 +19,13 @@ https://github.com/alex-shpak/hugo-book
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="user-guide">
-		<meta property="article:modified_time" content="2026-02-10T13:43:04-08:00">
+		<meta property="article:modified_time" content="2026-09-28T11:31:49-07:00">
 
 
 	<meta itemprop="name" content="PK parameter model">
 	<meta itemprop="description" content="PK parameter model Consider the following extension of the population model from introduction. Each of 59 neonates was given some loading dose of the drug, had a plasma drug level measured about 2 hours later, was given maintenance doses about every 12 hours thereafter, had possibly one trough level measured during maintenance dosing, and certainly one level measured some time after the last maintenance dose. Due to the long half-life of the drug, for the purposes of analysis all doses can be regarded as intravenous bolus doses. The weight and APGAR score of each individual are available as concomitant information. The APGAR score (1-10) is a measure of a neonate’s health at birth.">
-	<meta itemprop="dateModified" content="2026-02-10T13:43:04-08:00">
-	<meta itemprop="wordCount" content="704">
+	<meta itemprop="dateModified" content="2026-09-28T11:31:49-07:00">
+	<meta itemprop="wordCount" content="334">
 
 <title>PK parameter model • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -34,7 +34,7 @@ https://github.com/alex-shpak/hugo-book
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.172c2c297200a579cff77ec23397ddaa22489039f149214c8061bf02b1e45023.js" integrity="sha256-FywsKXIApXnP937CM5fdqiJIkDnxSSFMgGG/ArHkUCM=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.37db4a0fb84b95941962d78e648dd2d0cb0c5eaa7ec7b36c4a665ee54f3b0a64.js" integrity="sha256-N9tKD7hLlZQZYteOZI3S0MsMXqp&#43;x7NsSmZe5U87CmQ=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -386,6 +386,20 @@ https://github.com/alex-shpak/hugo-book
   
     <a href="/docs/user-guide/predpp/interoccasion/" class="">
       Inter-occasion variability</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/mixture/" class="">
+      Mixture model</a>
   
 
         </li>
@@ -1540,10 +1554,6 @@ https://github.com/alex-shpak/hugo-book
 <nav id="TableOfContents">
 <ul>
 <li><a href="#headline-1">PK parameter model</a>
-<ul>
-<li><a href="#mixture">A mixture model</a>
-</li>
-</ul>
 </li>
 </ul>
 </nav>
@@ -1649,156 +1659,9 @@ specify</p>
 </div>
 </div>
 </div>
-<div id="outline-container-mixture" class="outline-4">
-<h4 id="mixture">
-A mixture model
-</h4>
-<div id="outline-text-mixture" class="outline-text-4">
-<p>Consider the same data set above, and assume the weight is not
-measured. Without weight the
-model fitting will be unsatisfactory as Cl and Vd are poorly
-described. To remedy the problem we can postulate that the 59 neonates constitute a
-random sample from a population comprised of two subpopulations, one with one set of typical values of
-Cl and Vd, and a second with another set of typical values. This can
-be described by a mixture model that
-assumes that some fraction <em>p</em> of the population has one set of typical values, and
-the remaining fraction <em>1-p</em> has another set, specifically,
-$$
-\text{CL}=\theta_1e^{\eta_1}, \quad \text{Vd}=\theta_3e^{\eta_2}
-$$
-for subpopulation 1, and
-$$
-\text{CL}=\theta_2\theta_1e^{\eta_3}, \quad \text{Vd}=\theta_4\theta_3e^{\eta_4}
-$$
-for subpopulation 2. \(\theta_2\) and \(\theta_4\)
-are the fractional adjustments in the typical values for subpopulation 2. With a mixture model, different
-ETA variables on the same PK parameter must be used with different
-subpopulations.</p>
 <p>
-NONMEM provides control record <code>$MIX</code> for mixture models.</p>
-<div class="src src-perl">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$PROB</span> PHENOBARB POPULATION DATA MIXTURE MODEL
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$DATA</span> DATA2 (<span style="color:#ff9f43">6</span>F7<span style="color:#ff9f43">.0</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$INPUT</span> ID TIME AMT WT APGR CP<span style="color:#ff6ac1">=</span>DV
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$SUBROUTINES</span> ADVAN1 TRANS2
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$MIX</span>
-</span></span><span style="display:flex;"><span>  NSPOP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">2</span>
-</span></span><span style="display:flex;"><span>  P(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">5</span>)
-</span></span><span style="display:flex;"><span>  P(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span><span style="color:#ff6ac1">.-</span>THETA(<span style="color:#ff9f43">5</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$PK</span>
-</span></span><span style="display:flex;"><span>  CALLFL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span>
-</span></span><span style="display:flex;"><span>  EST<span style="color:#ff6ac1">=</span>MIXEST
-</span></span><span style="display:flex;"><span>  CL1<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">1</span>))
-</span></span><span style="display:flex;"><span>  V1<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">2</span>))
-</span></span><span style="display:flex;"><span>  CL2<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">3</span>))
-</span></span><span style="display:flex;"><span>  V2<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">4</span>)<span style="color:#ff6ac1">*</span>THETA(<span style="color:#ff9f43">3</span>)<span style="color:#ff6ac1">*</span>EXP(ETA(<span style="color:#ff9f43">4</span>))
-</span></span><span style="display:flex;"><span>  IF (MIXNUM<span style="color:#ff6ac1">.</span>EQ<span style="color:#ff9f43">.1</span>) THEN
-</span></span><span style="display:flex;"><span>    CL<span style="color:#ff6ac1">=</span>CL1
-</span></span><span style="display:flex;"><span>    V<span style="color:#ff6ac1">=</span>V1
-</span></span><span style="display:flex;"><span>  ELSE
-</span></span><span style="display:flex;"><span>    CL<span style="color:#ff6ac1">=</span>CL2
-</span></span><span style="display:flex;"><span>    V<span style="color:#ff6ac1">=</span>V2
-</span></span><span style="display:flex;"><span>  ENDIF
-</span></span><span style="display:flex;"><span>  S1<span style="color:#ff6ac1">=</span>V
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ERROR</span>
-</span></span><span style="display:flex;"><span>  Y<span style="color:#ff6ac1">=</span>F<span style="color:#ff6ac1">*</span>EXP(EPS(<span style="color:#ff9f43">1</span>))
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$THETA</span> (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">.0047</span>) (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">2.0</span>) (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">.99</span>) (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">2.0</span>) (<span style="color:#ff9f43">0</span>,<span style="color:#ff9f43">.5</span>,<span style="color:#ff9f43">1</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$OMEGA</span> BLOCK(<span style="color:#ff9f43">2</span>) <span style="color:#ff9f43">.05</span> <span style="color:#ff9f43">.01</span> <span style="color:#ff9f43">.03</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$OMEGA</span> BLOCK(<span style="color:#ff9f43">2</span>) SAME
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$SIGMA</span> <span style="color:#ff9f43">.02</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff5c57">$ESTM</span> MAXEVAL<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">500</span> PRINT<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">5</span> INTERACTION METHOD<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1</span></span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
-<p><code>NSPOP=2</code> in the <code>$MIX</code> record specifies that there are two
-subpopulations, and the vector P contains the fractions of the
-subpopulations. Reserved variables <code>MIXNUM</code> contains the subpopulation
-index and is used to select CL and V. By fitting the above model we
-estimate both sets of typical values and the mixing fraction <em>p</em>.</p>
-<p>
-Alternatively, one can supply a <a href="/docs/reference-guide/api/subroutines/#mix">MIX routine</a> instead of <code>$MIX</code>
-record. With the Fortran implementation</p>
-<div class="src src-f90">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span><span style="color:#78787e">! filename: mix.f90
-</span></span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">SUBROUTINE</span> MIX (ICALL,NSPOP,P)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">USE</span> SIZES, <span style="color:#ff6ac1">ONLY</span>: DPSIZE,ISIZE
-</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">USE</span> ROCM_REAL, <span style="color:#ff6ac1">ONLY</span>: THETA<span style="color:#ff6ac1">=&gt;</span>THETAC,<span style="color:#ff6ac1">DATA</span><span style="color:#ff6ac1">=&gt;</span>RDATA
-</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">IMPLICIT</span> <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE) (A<span style="color:#ff6ac1">-</span>Z)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">INTEGER</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>ISIZE) <span style="color:#ff5c57">::</span> ICALL,NSPOP
-</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE) <span style="color:#ff5c57">::</span> P(<span style="color:#ff6ac1">*</span>)
-</span></span><span style="display:flex;"><span>    NSPOP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">2</span>
-</span></span><span style="display:flex;"><span>    P(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">5</span>)
-</span></span><span style="display:flex;"><span>    P(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1.</span><span style="color:#ff6ac1">-</span>THETA(<span style="color:#ff9f43">5</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">RETURN</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">END</span> <span style="color:#ff6ac1">SUBROUTINE</span> MIX</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
-<p>one can replace the <code>$SUBROUTINE</code> and <code>$MIX</code> records in the above model as</p>
-<div class="src src-perl">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$SUBROUTINES</span> ADVAN1 TRANS2 MIX<span style="color:#ff6ac1">=</span>mix<span style="color:#ff6ac1">.</span>f90</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
-</div>
-</div>
+See <a href="/docs/user-guide/predpp/mixture/">mixture model</a> for a modeling approach when assuming the weight is not
+measured.</p>
 </div>
 </div>
 </article>
@@ -1810,9 +1673,9 @@ record. With the Fortran implementation</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/2ae4983e4fde9a10a5dcc4c04887e5b83a839b55" title='Last modified by Yi Zhang | 2026 Feb 10' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/1a2cbe78edb3f32bb1c526e0c67aaff5409d87a9" title='Last modified by Yi Zhang | 2026 Sep 28' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Feb 10</span>
+    <span>2026 Sep 28</span>
   </a>
 
 </div>
@@ -1873,10 +1736,6 @@ record. With the Fortran implementation</p>
 <nav id="TableOfContents">
 <ul>
 <li><a href="#headline-1">PK parameter model</a>
-<ul>
-<li><a href="#mixture">A mixture model</a>
-</li>
-</ul>
 </li>
 </ul>
 </nav>

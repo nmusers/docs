@@ -6,7 +6,7 @@
 :CUSTOM_ID: est_record
 :END:
 
-Instructions for the NONMEM Estimation Step.
+The optional records (alias ~$ESTM~ and ~$ESTIMATE~) requests an Estimation Step.
 
 #+begin_src perl
  $ESTIMATION
@@ -148,53 +148,34 @@ Instructions for the NONMEM Estimation Step.
  $ESTIMATION MAXEVAL=450 PRINT=5
 #+end_src
 
-** Discussion
-Optional.  Requests  that  the  NONMEM Estimation Step be implemented.
-May also be coded ~$ESTM~ or ~$ESTIMATE~.   The  Estimation  Step  obtains
-parameter estimates.
-
-In NONMEM v7+, multiple Estimation Steps can be implemented in a
-single problem.  A sequence of two or more Estimation Steps  will
-result in the sequential execution of each.  Options specified in an
-~$ESTIMATION~ record will carry over to the next ~$ESTIMATION~  record
-unless  a new  option  is  specified.  If a particular option is not
-used by the method then the option will be ignored.  The final
-parameter estimates from an Estimation Step will be passed on as the
-initial estimates for the next Estimation Step. For example,
+In NONMEM v7+, a problem can contain multiple Estimation Steps. The
+Estimation Steps are executed sequentially, with options from one
+ ~$ESTIMATION~  record carried over to the next, until an explicit
+override [fn:1]
+(an option is ignored if it is not applicable to the method). In this
+case, the final estimates from one Estimation Step will become the
+initial estimates for the next. For example,
 #+begin_src perl
 $THETA 0.3 0.5 6.0
 $OMEGA 0.2 0.2 0.2
 $SIGMA 0.2
-; First estimation step
-$EST METHOD=0 MAXEVAL=9999
-     PRINT=5 NSIG=3
-; Second estimation step
-$EST METHOD=CONDTIONAL
-     NSIG=4
+;# First estimation step
+$EST METHOD=0 MAXEVAL=9999 PRINT=5 NSIG=3
+;# Second estimation step
+$EST METHOD=CONDTIONAL NSIG=4
 #+end_src
-will first result in estimation of the problem by the first order
-method, using as initial parameters those defined by the ~$THETA~,
-~$OMEGA~, and ~$SIGMA~ statements.  Next, the first order conditional
-estimation method will be implemented, using as initial parameters the
-final estimates of THETA, OMEGA, and SIGMA from the previous analysis.
-Up to 20 estimations may be performed within a problem.  For all
-intermediate estimation steps, their final parameter values and
-objective function will be printed to the raw output file. Settings to
-options specified in a ~$EST~ method will by default carry over to the
-next ~$EST~ method, until a new option setting specified.  Thus, in the
-example above, PRINT will remain 5 and MAXEVAL will remain 9999 for
-the second ~$EST~ statement, whereas NSIG will be changed to 4 and
-METHOD becomes conditional. (NOTHETABOUND, NOOMEGABOUND, and
-NOSIGMABOUND are exceptions to this rule. They pertain to all of the
-estimations in the series within a ~$PROB~.  In NM710, NM712, and NM720,
-these options must be given with the very first ~$EST~ record in the
-problem.  With NM73, these options may be placed with any of the ~$EST~
-records, but will still apply to all ~$EST~ records in the problem.)
+requests the FO estimation, using as initial
+parameters those defined by the ~$THETA~, ~$OMEGA~, and ~$SIGMA~
+statements, followed by FOCE estimation that uses
+the FO estimates as initial parameters.
+The ~PRINT~ will remain 5 and ~MAXEVAL~ will remain 9999 for
+the second ~$EST~ statement, whereas ~NSIG~ will be changed to 4.
+Up to 20 estimations are allowed within a problem.
 
 We discuss the METHOD option first, since many other options are
 context-dependent on the estimation method used.
 
-*** METHOD=kind
+** METHOD=kind
   - kind=0 or ZERO: always set ETAs to 0 during the computation of the
     objective function.  Also called the "first order (FO) method."
     This is the default.
@@ -220,7 +201,7 @@ The  following  methods  are  new to NONMEM 7.  When any of these
 methods are used, the data are inferred  to  be  population,  and
 METHOD=1  is  supplied  if  it is not already present.  The first four
 methods are referred  to  as /Expectation-Maximization/ (EM) Methods.
-*** METHOD=ITS
+** METHOD=ITS
 ITS stands for  the  iterative two-stage method.  This method evaluates
     the conditional /mode/ and first order (expected) or second order
     (Laplace) approximation of the conditional variance of parameters
@@ -242,7 +223,7 @@ ITS stands for  the  iterative two-stage method.  This method evaluates
     NITER (default 50) sets maximum number of iterations.  For all new
     methods, it is essential to set INTERACTION if the residual error
     is heteroscedastic.
-*** METHOD=IMP
+** METHOD=IMP
 The Monte Carlo Importance Sampling EM
     evaluates the conditional (posterior) mean and variance of
     parameters of ETAs by Monte Carlo sampling
@@ -271,7 +252,7 @@ The Monte Carlo Importance Sampling EM
       ;# Usage
       $EST METHOD=IMP INTERACTION
     #+end_src
-*** METHOD=IMPMAP
+** METHOD=IMPMAP
 Sometimes for highly dimensioned PK/PD problems with very
     rich data the importance sampling method does not advance the
     objective function well or even diverges.  For this the IMPMAP
@@ -287,7 +268,7 @@ Sometimes for highly dimensioned PK/PD problems with very
       $EST METHOD=IMP INTERACTION MAPITER=1 MAPINTER=1
     #+end_src
 
-*** METHOD=SAEM
+** METHOD=SAEM
 :PROPERTIES:
 :CUSTOM_ID: method-saem
 :END:
@@ -390,7 +371,7 @@ $EST METHOD=SAEM EONLY=1 NBURN=200 ISAMPLE=2 NITER=1000
 $EST METHOD=IMP EONLY=2 ISAMPLE=1000 NITER=5 MAPITER=0
 #+end_src
 
-*** METHOD=BAYES
+** METHOD=BAYES
  The  Markov  Chain Monte Carlo (MCMC) Bayesian
     Analysis method.  The goal of the MCMC Bayesian analysis [12,13] is not to obtain the most likely THETAs, SIGMAs, and OMEGAs, but to obtain a large sample set of probable population parameters, usually 10000-30000.  The samples are not statistically independent, but when analysis is properly performed, they are uncorrelated overall. Various summary statistics of the population parameters may then be obtained, such as means, standard deviations, and even confidence (or credible) ranges.  The mean population parameter estimates and their variances are evaluated with considerable stability. Maximum likelihood parameters are not obtained, but with problems of sufficient data, these sample mean parameters are similar to maximum likelihood values, and the standard deviations of the samples are similar to standard errors obtained with maximum likelihood methods. A maximum likelihood objective function is also not obtained, but, a distribution of joint probability densities is obtained, from which 95% confidence bounds (assuming a type I error of 0.05 is desired) can be constructed and tested for overlap with those of alternative models.
 
@@ -401,7 +382,7 @@ The Bayesian method is specified by
 $EST METHOD=BAYES INTERACTION
 #+end_src
 
-*** METHOD=DIRECT
+** METHOD=DIRECT
 This method implements the naive EM method by sampling the conditional
 density independently. This direct sampling can be very inefficient,
 requiring ~ISAMPLE>1E4~. It can have some use in jump starting an importance sampling method, especially if the first iteration of importance sampling fails:
@@ -411,7 +392,7 @@ $EST METHOD=IMP INTERACTION ISAMPLE=1000 NITER=50 MAPITER=0
 #+end_src
 Notice that since MAPITER=0, the first iteration of IMP method relies on starting parameters for its sampling density that came from the direct sampling.
 
-*** METHOD=NUTS (NM74)
+** METHOD=NUTS (NM74)
 The No-U-Turn Sampling (NUTS) algorithm is a limited version of NUTS
 in Stan [1, 2], focused on analyzing population PK/PD models, with normally
 distributed THETA priors (or t-distributed theta priors, see TTDF),
@@ -458,31 +439,23 @@ To request NUTS as estimation method, use
 $ESTIMATION METHOD=NUTS
 #+end_src
 
-*** METHOD=CHAIN
+** METHOD=CHAIN
 :PROPERTIES:
 :CUSTOM_ID: method-chain
 :END:
-Allows  the user to create a series of random initial values of THETAs
-and OMEGA's, or for reading in initial population parameters  from a
-file of rectangular (rows/column) format. Applies only to the
-Estimation Step.
-
-Consider
+The method specifies initial parameters values through either random
+sampling , or reading from a file. The initial values will applied only to the Estimation Step. For example
 #+begin_src perl
 $EST METHOD=CHAIN FILE=example1.chn DELIM=,
      NSAMPLE=5 CTYPE=0 ISAMPLE=3 DF=100
      SEED=122234 RANMETHOD=2 IACCEPT=0.5
 #+end_src
-The NSAMPLE=5 random samples of THETAS and OMEGAS will be generated and
-written to file "example1.chn", using “comma” as a delimiter.  SEED sets the starting seed for the random number sequence.
-
-As of nm75, the actual starting seed can be set changed with
-CLOCKSEED=1, to produce different stochastic results for automated replications, without the need to modify the seed value in the control stream file in each replication.
-
-By default (CTYPE=0), random values of THETA are generated from a
-uniform distribution within the interval [lower bound, upper bound]
-from the ~$THETA~ record.  If bound not specified, then the default bounded
-interval is
+requests ~NSAMPLE=5~ sets of ~THETA~ and ~OMEGA~ samples. The samples
+will be written to file "example1.chn" in csv format (~DELIM=,~), with
+~SEED~ as the pRNG seed (see also the [[file:/docs/reference-manual/control-records/estimation/#est-seed][~CLOCKSEED~ option]]). The default
+~CTYPE=0~ option requests a uniform distribution for ~THETA~ sampling.
+The distribution uses the bounds from the ~$THETA~ record. If bounds
+not specified, then the interval is
 
 ~[(1-IACCEPT)*THETA, (1+IACCEPT)*THETA]~.
 
@@ -1321,13 +1294,12 @@ See also STDOBJ below.
 :PROPERTIES:
 :CUSTOM_ID: est-isample
 :END:
-IMP or IMPMAP method: the number of random
-samples  per subject used for the expectation step. Default ~n=300~. For very sparse data
+- ~METHOD=IMP~ and ~METHOD=IMPMAP~: the number of random
+samples  per subject used for the Expectation Step. Default ~n=300~. For very sparse data
 consider use ~n>1000~.
 
-SAEM or BAYES method: the  number of chains
-for individual parameter
-sampling, using the Metropolis-Hastings algorithm. Default ~n=2~ (SAEM),  ~n=1~  (BAYES).
+- ~METHOD=SAEM~ and ~METHOD=BAYES~: the  number of chains
+for individual parameter sampling, using the Metropolis-Hastings algorithm. Default ~n=2~ (SAEM),  ~n=1~  (BAYES).
 
 A  kernel  is  the  Metropolis-Hastings sampling and testing mode
 used.  The ISAMPLE_Mx options define how many times  to  generate and
@@ -2043,14 +2015,14 @@ The objective function is reported including the
       coded OBT or OBOUNDTEST; SIGMABOUNDTEST may also be coded SBT  or
       SBOUNDTEST.  These options are the defaults.
 
-*** NOTHETABOUNDTEST, NOOMEGABOUNDTEST, NOSIGMABOUNDTEST
+*** NOTHETABOUNDTEST | NOOMEGABOUNDTEST | NOSIGMABOUNDTEST
       Instructs  NONMEM  to  omit  the "default boundary test" for this
       type of variable, i.e., to behave like NONMEM V in  this  regard.
       Any  option  listed  above  may  be preceded by "NO".  The THETA,
       OMEGA, and SIGMA choices are independent of each other.  E.g., it
       is  possible  to  specify  NOOBT  (to  prevent the "default OMEGA
       boundary test") and permit both the "default THETA boundary test"
-      and "default SIGMA boundary test".
+      and "default SIGMA boundary test". In NM73+, these options may be placed with any of the ~$EST~ records, but will still apply to all ~$EST~ records in the problem.
 
 *** OMITTED
       The Estimation Step is not implemented.
@@ -2697,3 +2669,6 @@ OBJQUICK=1
 [4] W.H. Press, S.A. Teukolsky, W.T. Vettering, B.P. Flannery.  /Numerical Recipes, The Art Of Scientifc Programming./  2nd Edition, Cambridge University Press, New York, 1992, pp. 269-305.
 
 [5] M. Lavielle. /Monolix Users Manual/. Version 2.1. Orsay, France: Laboratoire de Mathematiques, U. Paris-Sud; 2007.
+
+[fn:1] The ~NOTHETABOUNDTEST/NOOMEGABOUNDTEST/NOSIGMABOUNDTEST~ option is
+the only exception.

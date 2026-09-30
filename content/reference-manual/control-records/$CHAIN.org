@@ -2,7 +2,7 @@
 {{< katex >}}{{< /katex >}}
 
 * $CHAIN
-Supplies initial estimates for an entire problem.
+The optional record specifies initial estimates for an entire [[file:/docs/reference-manual/control-records/problem/][problem]].
 
 #+begin_src perl
    $CHAIN  [FILE=filename]
@@ -22,14 +22,11 @@ Supplies initial estimates for an entire problem.
    $CHAIN FILE=example1_previous.txt NSAMPLE=0 ISAMPLE=-1000000000
 #+end_src
 
-** Discussion
-Any initial settings of THETA, OMEGA, and SIGMA set by
-[[file:/docs/reference-manual/control-records/estimation/#method-chain][$EST METHOD=CHAIN]] are only applied to the Estimation Step.  The ~$SIML~ command will not be affected, and will still use the initial settings given in ~$THETA~, ~$OMEGA~, and ~$SIGMA~ statements, or from an ~$MSFI~ file. To introduce initial THETAs OMEGAs and SIGMAs that will cover the entire scope of a given problem,  use the ~$CHAIN~ record:
-
-#+begin_src perl
-$CHAIN FILE=example1_previous.txt NSAMPLE=0
-     ISAMPLE=-1000000000
-#+end_src
+~$CHAIN~ record sets initial parameters persistant throughout the
+entire problem. This is different from initial values set by
+[[file:/docs/reference-manual/control-records/estimation/#method-chain][$EST METHOD=CHAIN]] which are only applied to the Estimation Step.
+The Simulation Step, on the other hand, is unaffected, and still uses
+the initial values an ~$MSFI~ file or from ~$THETA~, ~$OMEGA~, and ~$SIGMA~ records.
 
 ** Options
 ~$CHAIN~ share the following same options with ~$EST METHOD=CHAIN~:

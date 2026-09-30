@@ -23,15 +23,15 @@ CRIT Modifies the computation of the default objective function. CONTR Specifies
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="reference-manual">
-		<meta property="article:modified_time" content="2026-09-15T13:24:01-07:00">
+		<meta property="article:modified_time" content="2026-09-28T11:31:49-07:00">
 
 
 	<meta itemprop="name" content="Subroutines">
 	<meta itemprop="description" content="User-defined subroutines NONMEM supports subroutines and functions called by NONMEM, PREDPP or user code. NONMEM releases contain dummy implementations (that do nothing) of these routines, to be replaced by user-written code in advanced applications.
 User-defined subroutines in NONMEM
 CRIT Modifies the computation of the default objective function. CONTR Specifies the contribution to the objective function of a level 1 (&#34;L1&#34;) record. CCONTR Specifies the contribution to the objective function of a level 2 (&#34;L2&#34;) record. MIX Describes the mixing parameter of a mixture model. PRIOR Allows a Bayesian penalty to be included in the objective function. SPTWO SPTWO can be used to redefine the RES and WRES items for observation records. THETAI THETAI is used to transform initial THETAs. THETAR THETAR is used to transform final THETAs for reporting. User-defined subroutines for PREDPP">
-	<meta itemprop="dateModified" content="2026-09-15T13:24:01-07:00">
-	<meta itemprop="wordCount" content="17313">
+	<meta itemprop="dateModified" content="2026-09-28T11:31:49-07:00">
+	<meta itemprop="wordCount" content="17308">
 
 <title>Subroutines • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -40,7 +40,7 @@ CRIT Modifies the computation of the default objective function. CONTR Specifies
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.172c2c297200a579cff77ec23397ddaa22489039f149214c8061bf02b1e45023.js" integrity="sha256-FywsKXIApXnP937CM5fdqiJIkDnxSSFMgGG/ArHkUCM=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.37db4a0fb84b95941962d78e648dd2d0cb0c5eaa7ec7b36c4a665ee54f3b0a64.js" integrity="sha256-N9tKD7hLlZQZYteOZI3S0MsMXqp&#43;x7NsSmZe5U87CmQ=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -392,6 +392,20 @@ CRIT Modifies the computation of the default objective function. CONTR Specifies
   
     <a href="/docs/user-guide/predpp/interoccasion/" class="">
       Inter-occasion variability</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/docs/user-guide/predpp/mixture/" class="">
+      Mixture model</a>
   
 
         </li>
@@ -2712,32 +2726,70 @@ with one individual record after another.</p>
 <p>
 Input argument:</p>
 <ul>
-<li>ICALL
-    Similar to ICALL for PRED subroutine.</li>
+<li>ICALL: see <a href="/docs/reference-manual/abbr/#icall"><code>ICALL</code></a>.</li>
 </ul>
 <p>Output argument:</p>
 <ul>
-<li>NSPOP: an integer variable or integer constant.  The maximum  number
-of sub-populations  that  are  possible.  Must be given a value when
-<code>ICALL=1</code>.</li>
-<li>P: an array. For each i (i=1, … , NSPOP), P(i) gives  the
-modeled fraction  of the population in the ith subpopulation.  The
-sum of the P(i) should equal 1.  In principle, the P(i) can change
-from individual  to individual.  If for a given individual, the
-second (for example) subpopulation doesn&#39;t apply, then  set  P(2)=0
-for that individual.</li>
+<li><code>NSPOP</code>: the number of sub-populations (mixture components). See <a href="/docs/reference-manual/control-records/mix/#mixp">$MIX record</a>.</li>
+<li><code>P</code>: an array of probabilities of the mixture components. See <a href="/docs/reference-manual/control-records/mix/#mixp">$MIX record</a>.</li>
 </ul>
-<p>Other  inputs  are  available  to MIX in NONMEM read-only global
-variables.  In particular, data items that are requested using the
-<code>$CONTR</code> record, and the current value of THETA, as shown above. (See
-<a href="/docs/reference-manual/api/variables/#mix-data">MIX:DATA</a>, <a href="/docs/reference-manual/api/variables/#contr-mix-theta">CONTR_MIX:THETA</a>).</p>
+<p>For an example, consider the first example from <a href="/docs/user-guide/predpp/mixture/">the mixture model</a> in
+the User Guide. Insteading of using <code>$MIX</code>, we can
+can supply the following Fortran routine.</p>
+<div class="src src-f90">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-f90" data-lang="f90"><span style="display:flex;"><span><span style="color:#78787e">! filename: mix.f90
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">SUBROUTINE</span> MIX (ICALL,NSPOP,P)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">USE</span> SIZES, <span style="color:#ff6ac1">ONLY</span>: DPSIZE,ISIZE
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">USE</span> ROCM_REAL, <span style="color:#ff6ac1">ONLY</span>: THETA<span style="color:#ff6ac1">=&gt;</span>THETAC,<span style="color:#ff6ac1">DATA</span><span style="color:#ff6ac1">=&gt;</span>RDATA
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">IMPLICIT</span> <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE) (A<span style="color:#ff6ac1">-</span>Z)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">INTEGER</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>ISIZE) <span style="color:#ff5c57">::</span> ICALL,NSPOP
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">REAL</span>(<span style="color:#ff5c57">KIND</span><span style="color:#ff6ac1">=</span>DPSIZE) <span style="color:#ff5c57">::</span> P(<span style="color:#ff6ac1">*</span>)
+</span></span><span style="display:flex;"><span>    NSPOP<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">2</span>
+</span></span><span style="display:flex;"><span>    P(<span style="color:#ff9f43">1</span>)<span style="color:#ff6ac1">=</span>THETA(<span style="color:#ff9f43">5</span>)
+</span></span><span style="display:flex;"><span>    P(<span style="color:#ff9f43">2</span>)<span style="color:#ff6ac1">=</span><span style="color:#ff9f43">1.</span><span style="color:#ff6ac1">-</span>THETA(<span style="color:#ff9f43">5</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff6ac1">RETURN</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff6ac1">END</span> <span style="color:#ff6ac1">SUBROUTINE</span> MIX</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>to the <code>$SUBROUTINE</code>:</p>
+<div class="src src-perl">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-perl" data-lang="perl"><span style="display:flex;"><span>  <span style="color:#ff5c57">$SUBROUTINES</span> ADVAN1 TRANS2 MIX<span style="color:#ff6ac1">=</span>mix<span style="color:#ff6ac1">.</span>f90</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
 <p>
-The <a href="/docs/reference-manual/api/variables/#var-templt">MIX CONTR: TEMPLT</a>  data  record  in  a NONMEM read-only global variable also
+The above example shows that some additional global variables  are
+available to MIX, such as data items requested using the
+<code>$CONTR</code> record and the current value of THETA (<a href="/docs/reference-manual/api/variables/#contr-mix-theta-data">CONTR_MIX:THETA,DATA</a>).</p>
+<p>
+The <a href="/docs/reference-manual/api/variables/#var-templt">MIX CONTR: TEMPLT</a>  data  record
 serves to provide an additional way for  individual-specific  information to be made available.</p>
 <p>
 See also <a href="/docs/reference-manual/api/variables/#mixnum-mixest-mixp">MIXNUM, MIXEST and MIXP</a>.</p>
-<p>
-See <a href="/docs/user-guide/predpp/population_model/#mixture">mixture model</a> example for using <code>$MIX</code> and MIX.</p>
 </div>
 </div>
 <div id="outline-container-model" class="outline-3">
@@ -4872,7 +4924,7 @@ to 1.</li>
 <p>
  NONMEM read-only global variables.</p>
 <p>
- (See <a href="/docs/reference-manual/api/variables/#mix-data">MIX:_DATA</a>)</p>
+ (See <a href="/docs/reference-manual/api/variables/#contr-mix-theta-data">MIX/CONTR:THETA,DATA</a>)</p>
 <p>
  (See <a href="/docs/reference-manual/api/variables/#non-active-eta">Non-active ETA for PRED</a>)</p>
 <p>
@@ -5375,9 +5427,9 @@ used by NONMEM.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/a60b394485205cf5a112cc2c5c51bbcac2826bef" title='Last modified by Yi Zhang | 2026 Sep 15' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/1a2cbe78edb3f32bb1c526e0c67aaff5409d87a9" title='Last modified by Yi Zhang | 2026 Sep 28' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Sep 15</span>
+    <span>2026 Sep 28</span>
   </a>
 
 </div>

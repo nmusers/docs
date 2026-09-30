@@ -28,11 +28,11 @@ replaced by the mixture likelihood:
 $$
 L_i=\sum_{m=1}^M p(y_i|\Sigma_i, \theta^{(m)}, \Omega)P(m).
 $$
-That is, the likelihood for subject \(i\) is now \(P\)-weighted
+That is, the likelihood for subject \(i\) is now a \(P\)-weighted
 average of invidual likelihood. The average is over all subpopulations, with \(\theta^{(m)}\)
 as \(\theta\) for subpopulation \(m\).
 
-For example, assume the weight is not measured in [[file:/docs/user-guide/predpp/population_model/][the previous PopPK
+For example, assume the body weight is not measured in [[file:/docs/user-guide/predpp/population_model/][the previous PopPK
 problem]], we can postulate that
 the sample is from a population comprised of two subpopulations,
 denoted by superscript \((1)\) and \((2)\):
@@ -45,7 +45,7 @@ $$
 \theta^{(1)} = (\theta_1, \theta_3),\quad \theta^{(2)} = (\theta_1\theta_2, \theta_3\theta_4),
 $$
 
-This model be encoded using the [[file:/docs/reference-manual/control-records/mix/][~$MIX~ record]]:
+This model can be encoded using the [[file:/docs/reference-manual/control-records/mix/][~$MIX~ record]]:
 #+begin_src perl
   $PROB PHENOBARB POPULATION DATA MIXTURE MODEL
   $DATA DATA2 (6F7.0)
@@ -80,8 +80,8 @@ This model be encoded using the [[file:/docs/reference-manual/control-records/mi
 #+end_src
 ~NSPOP=2~ in the ~$MIX~ block indicates there are two subpopulations (\(K=2\)).
 Reserved variable ~P(m), m=1,2~ is for \(P(m)\), modeled by a ~THETA~
-element. The reserved variable ~MIXNUM~ contains the subpopulation
-index and is used to select ~CL~ and ~V~. By fitting the above model we
+element. User can use the reserved variable ~MIXNUM~ as subpopulation
+index to selectively specify ~CL~ and ~V~. By fitting the above model we
 estimate both sets of typical values and the mixing fraction \(P\).
 
 A slightly more succinct way to write mixture models is to use
@@ -91,10 +91,5 @@ stream for example ([[https://github.com/nmusers/docs/tree/master/examples/examp
 #+INCLUDE: "../../examples/example5/example5.ctl" src perl
 
 In this model,
-
-# In order for NONMEM to compute the mixture likelihood, the
-# model must specify which set of THETAs is for which subpopulation.
-
-# Reserved variable ~MIXNUM~. Thus in the above model we use ~MIXNUM~ to
-# define an indicator variable ~Q~ and use it to define the typical
-# value of constant of elimination corresponding to this subject.?
+indicator variable ~Q~ is set according to ~MIXNUM~, and used to define the typical
+value of \(K\).
