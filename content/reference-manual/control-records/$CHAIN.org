@@ -22,55 +22,93 @@ The optional record specifies initial estimates for an entire [[file:/docs/refer
    $CHAIN FILE=example1_previous.txt NSAMPLE=0 ISAMPLE=-1000000000
 #+end_src
 
-~$CHAIN~ record sets initial parameters persistant throughout the
-entire problem. This is different from initial values set by
-[[file:/docs/reference-manual/control-records/estimation/#method-chain][$EST METHOD=CHAIN]] which are only applied to the Estimation Step.
-The Simulation Step, on the other hand, is unaffected, and still uses
-the initial values an ~$MSFI~ file or from ~$THETA~, ~$OMEGA~, and ~$SIGMA~ records.
+Initial parameters set by ~$CHAIN~ are persistant throughout the
+entire problem. This is different from
+[[file:/docs/reference-manual/control-records/estimation/#method-chain][$EST METHOD=CHAIN]] that is for the Estimation Step;
+the Simulation Step is unaffected and still uses
+the initial values [[file:/docs/reference-manual/control-records/msfi/][from an ~MSF~ file]] or ~$THETA~, ~$OMEGA~, and ~$SIGMA~ records.
+
+If ISAMPLE=0, then the initial values are not set to any of
+the randomly generated samples, but will just be what was listed in
+~$THETA~ and ~$OMEGA~ of the control stream file.
+
+** Sample distributions
+*** ~THETA~
+The default ~CTYPE=0~ option requests a uniform distribution for ~THETA~ sampling.
+The distribution uses the bounds from the ~$THETA~ record. If bounds
+not specified, then the interval is
+
+~[(1-IACCEPT)*THETA, (1+IACCEPT)*THETA]~.
+
+If CTYPE=1, then the lower and upper bounds from ~$THETA~ are ignored
+and all THETAs are uniformly varied using the IACCEPT factor.  If
+CTYPE=2, then THETAs are initiated based on a normal distribution with
+the initial ~$THETA~ as the mean, and the second set of ~$OMEGA~s (or
+~$THETAPV~) as the variance, if there is a ~$PRIOR~ command with NTHP
+non-zero.  This is the best way and most complete way to define the
+sampling density for the THETAs.   Otherwise, if  NTHP=0 (or no
+~$THETAP~ are provided) , the variance for THETA is obtained from the
+first set of ~$OMEGA~, and requires that the THETAs be MU modeled, and
+those THETAs not MU modeled will follow the uniform distribution as if CTYPE=0.
+
+*** ~SIGMA~
+For the SIGMA values their Cholesky-decomposed values are uniformly
+varied  within (but see option DFS)
+
+~[(1-IACCEPT)*SIGMA, (1+IACCEPT)*SIGMA]~
+
+*** ~OMEGA~
+The OMEGAs are sampled using a Wishart distribution with variance from
+~$OMEGA~, and DF is the degrees of freedom for randomly creating the
+OMEGAS.  If DF=0, then the dimensionality of the entire OMEGA matrix
+is used as the degrees of freedom.  In NM73+, setting DF>1E6 fixes OMEGA elements at their initial values.
+
 
 ** Options
-~$CHAIN~ share the following same options with ~$EST METHOD=CHAIN~:
-[[file:/docs/reference-manual/control-records/estimation/#est-file][~FILE~]], [[file:/docs/reference-manual/control-records/estimation/#est-niter][NSAMPLE]], [[file:/docs/reference-manual/control-records/estimation/#est-isample][ISAMPLE]], [[file:/docs/reference-manual/control-records/estimation/#est-seed][SEED]], [[file:/docs/reference-manual/control-records/estimation/#est-seed][CLOCKSEED]], [[file:/docs/reference-manual/control-records/estimation/#estm-ranmethod][RANMETHOD]], [[file:/docs/reference-manual/control-records/#format-ref][FORMAT]], [[file:/docs/reference-manual/control-records/estimation/#order-option][ORDER]], [[file:/docs/reference-manual/control-records/estimation/#ctype][CTYPE]], [[file:/docs/reference-manual/control-records/estimation/#df][DF]], [[file:/docs/reference-manual/control-records/estimation/#dfs][DFS]], [[file:/docs/reference-manual/control-records/estimation/#iaccept][IACCEPT]], [[file:/docs/reference-manual/control-records/estimation/#nolabel][NOLABEL]], [[file:/docs/reference-manual/control-records/estimation/#notitle][NOTITLE]].
+~$CHAIN~ shares the following options with ~$EST METHOD=CHAIN~:
+[[file:/docs/reference-manual/control-records/estimation/#est-file][~FILE~]], [[file:/docs/reference-manual/control-records/estimation/#est-niter][~NSAMPLE~]], [[file:/docs/reference-manual/control-records/estimation/#est-isample][~ISAMPLE~]], ~ISAMPEND~, [[file:/docs/reference-manual/control-records/estimation/#est-seed][~SEED~]], [[file:/docs/reference-manual/control-records/estimation/#est-seed][~CLOCKSEED~]], [[file:/docs/reference-manual/control-records/estimation/#estm-ranmethod][~RANMETHOD~]],
+[[file:/docs/reference-manual/control-records/#format-ref][~FORMAT~]], [[file:/docs/reference-manual/control-records/estimation/#order-option][~ORDER~]], ~CTYPE~, ~DF~, [[file:/docs/reference-manual/control-records/estimation/#dfs][~DFS~]], ~IACCEPT~, [[file:/docs/reference-manual/control-records/estimation/#nolabel][~NOLABEL~]], and [[file:/docs/reference-manual/control-records/estimation/#notitle][~NOTITLE~]].
 
-Setting ~SEED~ or ~RANMETHOD~ in a ~$CHAIN~ record does not propagate to ~$EST METHOD=CHAIN~ or any other ~$EST~ record.
+- ~SEED~ and ~RANMETHOD~ in ~$CHAIN~ do not propagate to ~$EST METHOD=CHAIN~ or any other ~$EST~ record.
 
-~ISAMPEND~ (NM73) has a different action with ~$CHAIN~ than with ~$EST METHOD=CHAIN~.
-If the option ~ISAMPEND~ is set to a value greater than ~ISAMPLE~, then NONMEM uniformly randomly selects one of these samples between ~ISAMPLE~ and ~ISAMPEND~.  This is particularly useful in combination with the ~$SIML~ record:
+- ~ISAMPEND~ (NM73):  different from ~$EST METHOD=CHAIN~, with
+  ~$CHAIN~ NONMEM uses discrete uniform distribution  to sample in
+  ~ISAMPLE...ISAMPEND~.  This is useful for the ~$SIML~ record:
+  #+begin_src perl
+  $CHAIN FILE=test2.chn ISAMPLE=3 ISAMPEND=10 NSAMPLE=10 SEED=6234
+  $SIML (112345) (334567 NORMAL) SUBP=4
+  $EST METHOD=IMP INTERACTION NITER=40 PRINT=1 NOABORT SIGL=4
+  CTYPE=3 CITER=10
+  #+end_src
+  The example above shows that there are four (~SUBP=4~) subproblems.
+  For each subproblem, NONMEM samples uniformly from sample 3
+  (~ISAMPLE=3~) to sample 10 (~ISAMPEND=10~). These eight
+  samples are among the ten (~NSAMPLE=10~) randomly generated sets of
+  ~THETA~, ~OMEGA~, and ~SIGMA~.
+  The parameter set is than used for simulation, followed by an
+  estimation that fits the simulated data. This process is repeated
+  for four times (~SUBP=4~).
 
-#+begin_src perl
-$CHAIN FILE=test2.chn ISAMPLE=3 ISAMPEND=10 NSAMPLE=10 SEED=6234
-$SIML (112345) (334567 NORMAL) SUBP=4
-$EST METHOD=IMP INTERACTION NITER=40 PRINT=1 NOABORT SIGL=4
-CTYPE=3 CITER=10
-#+end_src
-In the above example, for the first subproblem, a file called
-test2.chn is created and stores NSAMPLE (10) randomly created sets of
-THETAs, OMEGAs, and SIGMAs, numbered 1 to NSAMPLE.  Then, a sample of
-parameters is selected from this file uniformly randomly between
-ISAMPLE (3) and ISAMPEND (10), and these parameters are used to create
-a data set for the first sub-problem, and an estimation is performed.
-For the second sub-problem, a new file of parameters does not need to
-be created, but another sample is selected randomly uniformly between
-samples 3 and 10, from which a new data set is created and estimation
-analysis performed.
+- ~NSAMPLE=0~ requests reading random samples from ~FILE~, generated
+  for example from a previous MCMC run:
+  #+begin_src perl
+  $CHAIN FILE=example1.chn ISAMPLE=0 ISAMPEND=10000 NSAMPLE=0 SEED=6234
+  $SIML (112345) (334567 NORMAL) SUBP=100
+  #+end_src
+  The "example1.chn" file above in fact the raw output file "example1.txt" from
+  the Bayesian estimation in "[[https://github.com/nmusers/docs/tree/master/examples/example1][examples/example1]]". In general
+  the uniform sampling is performed among ~ISAMPLE...ISAMPEND~, with
+  cutoff of the actual number of samples in the file. Therefore one can
+  use a large ~ISAMPEND~ as in the above example.
 
-The parameter file may already exist, perhaps as a raw output file from a previous MCMC Bayesian analysis, and it is desired to randomly selected sets of parameters:
+- One can use ~ISAMPLE=-1000000000~ to pick up the final estimates
+  from the [[file:/docs/reference-manual/files/#raw-output][raw output]]:
+  #+begin_src perl
+  $CHAIN  FILE=example1_previous.txt NSAMPLE=0 ISAMPLE=-1000000000 TBLN=4
+  #+end_src
+  In NM75+, one may also select the table number ~TBLN~, as raw output
+  files can contain multiples tables of results.  If not specified,
+  the first matching ~ISAMPLE~ number is selected. This provides an
+  approach to import values from a raw output.
 
-#+begin_src perl
-$CHAIN FILE=example1.chn ISAMPLE=0 ISAMPEND=10000 NSAMPLE=0 SEED=6234
-$SIML (112345) (334567 NORMAL) SUBP=100
-#+end_src
-In the above example, NSAMPLE=0, so this means the file example1.chn
-already exists, which is in fact the raw output file example1.txt from
-the MCMC Bayesian analysis of example1.  Samples from 0 to 10000 (the
-stationary distribution range) are selected randomly.  Even though
-samples in physically close proximity in the file may have some
-correlation, selecting randomly among the entire set assures
-de-correlation, while assuring the samples taken represent the
-empirical distribution of uncertainty of the parameters.  In general
-sampling is performed between the larger of ISAMPLE and the lowest
-iteration (sample) number of a raw output file, and the smaller of
-ISAMPEND and the largest iteration number in the file.  So, it is safe
-to make ~ISAMPEND=1000000~ for example, to cover most Bayesian sample
-set sizes.  If ISAMPEND is specified in the ~$CHAIN~ record, then
-~$SIML TRUE=PRIOR~ will be ignored.
+-  ~$CHAIN ... ISAMPEND~ overrides ~$SIML TRUE=PRIOR~.

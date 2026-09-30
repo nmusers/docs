@@ -444,7 +444,7 @@ $ESTIMATION METHOD=NUTS
 :CUSTOM_ID: method-chain
 :END:
 The method specifies initial parameters values through either random
-sampling , or reading from a file. The initial values will applied only to the Estimation Step. For example
+sampling or from a file. The initial values will applied only to the Estimation Step. For example
 #+begin_src perl
 $EST METHOD=CHAIN FILE=example1.chn DELIM=,
      NSAMPLE=5 CTYPE=0 ISAMPLE=3 DF=100
@@ -452,46 +452,12 @@ $EST METHOD=CHAIN FILE=example1.chn DELIM=,
 #+end_src
 requests ~NSAMPLE=5~ sets of ~THETA~ and ~OMEGA~ samples. The samples
 will be written to file "example1.chn" in csv format (~DELIM=,~), with
-~SEED~ as the pRNG seed (see also the [[file:/docs/reference-manual/control-records/estimation/#est-seed][~CLOCKSEED~ option]]). The default
-~CTYPE=0~ option requests a uniform distribution for ~THETA~ sampling.
-The distribution uses the bounds from the ~$THETA~ record. If bounds
-not specified, then the interval is
+~SEED~ as the pRNG seed (see also the [[file:/docs/reference-manual/control-records/estimation/#est-seed][~CLOCKSEED~ option]]).
 
-~[(1-IACCEPT)*THETA, (1+IACCEPT)*THETA]~.
-
-For the SIGMA values their Cholesky-decomposed values are uniformly
-varied  within (but see option DFS)
-
-~[(1-IACCEPT)*SIGMA, (1+IACCEPT)*SIGMA]~
-
-If CTYPE=1, then the lower and upper bounds from ~$THETA~ are ignored
-and all THETAs are uniformly varied using the IACCEPT factor.  If
-CTYPE=2, then THETAs are initiated based on a normal distribution with
-the initial ~$THETA~ as the mean, and the second set of ~$OMEGA~s (or
-~$THETAPV~) as the variance, if there is a ~$PRIOR~ command with NTHP
-non-zero.  This is the best way and most complete way to define the
-sampling density for the THETAs.   Otherwise, if  NTHP=0 (or no
-~$THETAP~ are provided) , the variance for THETA is obtained from the
-first set of ~$OMEGA~, and requires that the THETAs be MU modeled, and
-those THETAs not MU modeled will follow the uniform distribution as if CTYPE=0.
-
-The OMEGAs are sampled using a Wishart distribution with variance from
-~$OMEGA~, and DF is the degrees of freedom for randomly creating the
-OMEGAS.  If DF=0, then the dimensionality of the entire OMEGA matrix
-is used as the degrees of freedom.  As of NM73, setting DF>1E6 fixes OMEGA elements at their initial values.
-
-The format of the chain file that is created is exactly the same as
-the raw output files, including iteration numbers.  In the above
-example, after the 5 random samples are made, ISAMPLE=3 (the third
-randomly created sample) is selected, and brought in as the initial
-values.  If ISAMPLE=0, then the initial values are not set to any of
-the randomly generated samples, but will just be what was listed in
-~$THETA~ and ~$OMEGA~ of the control stream file.
-
-If NSAMPLE=0, but ISAMPLE=some number, then it is expected that FILE already exists, and its iteration number specified by ISAMPLE is to be read in for setting initial values:
-#+begin_src perl
-$EST METHOD=CHAIN FILE=example1.chn NSAMPLE=0 ISAMPLE=3
-#+end_src
+~$EST...CHAIN~ share the following options with ~$CHAIN~:
+~FILE~, ~NSAMPLE~, ~ISAMPLE~, ~ISAMPEND~, [[file:/docs/reference-manual/control-records/estimation/#est-seed][~SEED~]], [[file:/docs/reference-manual/control-records/estimation/#est-seed][~CLOCKSEED~]], [[file:/docs/reference-manual/control-records/estimation/#estm-ranmethod][~RANMETHOD~]],
+[[file:/docs/reference-manual/control-records/#format-ref][~FORMAT~]], [[file:/docs/reference-manual/control-records/estimation/#order-option][~ORDER~]], [[file:/docs/reference-manual/control-records/estimation/#ctype][~CTYPE~]], [[file:/docs/reference-manual/control-records/estimation/#df][~DF~]], [[file:/docs/reference-manual/control-records/estimation/#dfs][~DFS~]], [[file:/docs/reference-manual/control-records/estimation/#iaccept][~IACCEPT~]], [[file:/docs/reference-manual/control-records/estimation/#nolabel][~NOLABEL~]], and
+[[file:/docs/reference-manual/control-records/estimation/#notitle][~NOTITLE~]]. See [[file:/docs/reference-manual/control-records/chain/][~$CHAIN~]] for details.
 
 One could create a control stream file that first creates a random set
 of population parameters, and then sequentially uses them as initial
@@ -564,19 +530,10 @@ $EST METHOD=CHAIN FILE=example1.chn NSAMPLE=0 ISAMPLE=5 DF=20
 #+end_src
 
 Each control stream file points to a different ISAMPLE position in the
-.chn file, so each would use these as the respective initial
+".chn" file, so each would use these as the respective initial
 positions. Each of these "child" control stream files could be loaded
 on to a job queue, as separate processes.  If the user is running a
 multi-core computer, this would be quite straight forward.
-
-An existing chain file could actually be a raw output file from a
-previous analysis, with a list of iterations.  In the following
-example:
-#+begin_src perl
-$EST METHOD=CHAIN FILE=example1_previous.txt NSAMPLE=0
-     ISAMPLE=-1000000000 TBLN=4
-#+end_src
-could pick up the final result of the previous analysis, since ISAMPLE points to the iteration number, and -1000000000 is the iteration number for the final estimate. As of nm75, you may also select the table number TBLN, as raw output files can contain multiples tables of results, with similar sample numbers.  If TBLN is not specified, the first matching iteration (isample) number is selected among all the tables in the file. Thus, the CHAIN method in this usage is really just an input command to bring in values from a raw output-type file format.  Of course, users may have the chain file created by any program, not just NONMEM, so long as it has the raw output file format, with delimiter specified by DELIM/FORMAT (which is space by default).
 
 In NM73+, if the option ISAMPEND is set to a value greater than
 ISAMPLE, then NONMEM will evaluate the objective function (using FOCEI
@@ -588,15 +545,10 @@ $EST METHOD=CHAIN FILE=random.txt NSAMPLE=20 ISAMPLE=1 ISAMPEND=20
 #+end_src
 randomly creates 20 sets of initial parameters, and selects the one with the lowest objective function.
 
-If METHOD=CHAIN is used, it must be the first ~$EST~ command in the
-particular ~$PROB~.  Furthermore, because the settings it uses for FILE,
-NSAMPLE, ISAMPLE, IACCEPT, CTYPE, and DF are functionally different
-from the way the other ~$EST~ methods use them, these settings from
-METHOD=CHAIN are not passed on to the next ~$EST~ command, which must be
-an estimation method.  However, other parameters such as DELIM,
-FORMAT, SEED, AND RANMETHOD will be passed on as default
-delimiter/format to the next ~$EST~ command.  However, the RANMETHOD
-does not propagate to the ~$CHAIN~ record.
+When used ~METHOD=CHAIN~ must be the first ~$EST~ command in a
+~$PROBLEM~.  Furthermore, because ~FILE~,
+~NSAMPLE~, ~ISAMPLE~, ~IACCEPT~, ~CTYPE~, and ~DF~ options are used differently
+from the other ~$EST~ methods, they are not inherited by the next ~$EST~.
 
 ** Options
 Setting an option to "-100" will force NONMEM to select the default value for that parameter.
@@ -1275,7 +1227,10 @@ model  for intraindividual  random  error.   This  is  the default
 with non-EM and non-Bayes methods.
 
 *** ISAMPEND=n (NM73)
-For SAEM, if ISAMPEND is specified  as  an  upper  integer  value
+:PROPERTIES:
+:CUSTOM_ID: est-isampend
+:END:
+For SAEM:, if ISAMPEND is specified  as  an  upper  integer  value
 (usually  10),  then  NONMEM will perform a ISAMPLE preprocess to
 determine the best ISAMPLE value. For the ISAMPLE preprocessing the
 used entered ISAMPLE value must be at least 2.  It will perform 200

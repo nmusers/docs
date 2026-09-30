@@ -1,5 +1,5 @@
 ---
-title: "Mixture model"
+title: "Mixture models"
 author: ["Yi Zhang"]
 draft: false
 bookCollapseSection: false
@@ -30,25 +30,25 @@ replaced by
 $$
 L_i=\sum_{m=1}^M p(y_i|\Sigma_i, \theta^{(m)}, \Omega)P(m).
 $$
-This is \(P\)-weighted average of the invidual likelihood over all
-subpopulations is known the /mixture likelihood/. \(\theta^{(m)}\)
-indicates \(\theta\) for subpopulation \(m\).
+Here \(\theta^{(m)}\) is \(\theta\) for subpopulation \(m\).
+The above \(P\)-weighted average of the invidual likelihood (over all
+subpopulations) is known as the /mixture likelihood/. .
 
-Take [[file:/docs/user-guide/predpp/population_model/][the previous PopPK
-problem]] as an example. We assume instead the body weight is not measured and postulate that
-the sample is from a population comprised of two subpopulations
-(possibility due to some unknown body weight threhold),
+For example, assume the body weight in [[file:/docs/user-guide/predpp/population_model/][the previous PopPK
+problem]] is not measured, we postulate that
+the population comprised of two subpopulations
+(possibly due to some unknown body weight threshold),
 denoted by superscript \((1)\) and \((2)\):
+$$
+\theta^{(1)} = (\theta_1, \theta_3),\quad \theta^{(2)} = (\theta_1\theta_2, \theta_3\theta_4),
+$$
+so that
 $$
 \text{CL}^{(1)}=\theta_1e^{\eta_1}, \quad \text{Vd}^{(1)}=\theta_3e^{\eta_2},
 \quad \text{CL}^{(2)}=\theta_2\theta_1e^{\eta_3}, \quad \text{Vd}^{(2)}=\theta_4\theta_3e^{\eta_4}.
 $$
-Namely, we have
-$$
-\theta^{(1)} = (\theta_1, \theta_3),\quad \theta^{(2)} = (\theta_1\theta_2, \theta_3\theta_4),
-$$
 
-This model can be encoded using the [[file:/docs/reference-manual/control-records/mix/][~$MIX~ record]]:
+We can use [[file:/docs/reference-manual/control-records/mix/][~$MIX~ record]] to describe the model:
 #+begin_src perl
   $PROB PHENOBARB POPULATION DATA MIXTURE MODEL
   $DATA DATA2 (6F7.0)
