@@ -2,30 +2,24 @@
 {{< katex >}}{{< /katex >}}
 
 * User-defined subroutines
-NONMEM supports subroutines and functions called by
-NONMEM, PREDPP or user code.  NONMEM releases contain dummy
-implementations (that do nothing) of these routines, to be replaced by user-written code in advanced applications.
+NONMEM releases contain dummy
+implementations of the routines that can be replaced by user, through  ~$SUBROUTINES~:
+#+begin_src perl
+$SUBROUTINES ... OTHER=routine_file
+#+end_src
 
-- User-defined subroutines in NONMEM
+In addition to  [[file:/docs/reference-manual/abbr/#abbreviated-function][user-defined functions]] in abbreviated code,
+the following customizable subroutines are supported.
+
  | CRIT   | Modifies the computation of the default objective function.                         |
  | CONTR  | Specifies the contribution to the objective  function  of  a level 1 ("L1") record. |
  | CCONTR | Specifies  the  contribution  to the objective function of a level 2 ("L2") record. |
  | MIX    | Describes the mixing parameter of a mixture model.                                  |
  | PRIOR  | Allows a Bayesian penalty to be included  in  the  objective function.              |
- | SPTWO  | SPTWO  can  be  used  to redefine the RES and WRES items for observation records.   |
- | THETAI | THETAI is used to transform initial THETAs.                                         |
- | THETAR | THETAR is used to transform final THETAs for reporting.                             |
-
-- User-defined subroutines for PREDPP
-
- | INFN | Initialization/Finalization routine. |
-
-- User-defined subroutines for user functions in abbreviated code: =FUNCA=, =FUNCB=, =FUNCC=, ... .
-
-User-defined subroutines/functions should be placed in a file and provided to ~$SUBROUTINES~:
-#+begin_src perl
-$SUBROUTINES ... OTHER=funcacode
-#+end_src
+ | SPTWO  | Redefines the RES and WRES for observation records.                                 |
+ | THETAI | Transforms initial THETAs.                                                          |
+ | THETAR | Back-transforms final THETAs.                                                       |
+ | INFN   | Initialization/Finalization                                                         |
 
 ** ICALL
 ICALL is  an  argument  passed by NONMEM to user-supplied
