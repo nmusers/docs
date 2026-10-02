@@ -23,15 +23,15 @@ A $PK block must define all basic PK parameters according to specified ADVAN and
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="reference-manual">
-		<meta property="article:modified_time" content="2026-09-17T19:45:39-07:00">
+		<meta property="article:modified_time" content="2026-10-02T11:32:36-07:00">
 
 
 	<meta itemprop="name" content="$PK">
 	<meta itemprop="description" content="$PK PK abbreviated code block for PK parameter specifications.
 1 2 $PK abbreviated code Discussion The $PK code block must only be with the first problem specification, preceding any $ERROR records. It cannot be used with a user-supplied MODEL subroutine or TRANS routine.
 A $PK block must define all basic PK parameters according to specified ADVAN and TRANS. It may also define the additional PK parameters. The basic parameters (see below) are typically the rate constants (&#34;micro-constants&#34;) for use in kinetic formulas, or parameters specified through transformation (&#34;TRANS&#34;), such as clearance and volume. For additional parameters see ADVAN and TRANS routines.">
-	<meta itemprop="dateModified" content="2026-09-17T19:45:39-07:00">
-	<meta itemprop="wordCount" content="2725">
+	<meta itemprop="dateModified" content="2026-10-02T11:32:36-07:00">
+	<meta itemprop="wordCount" content="2585">
 
 <title>$PK • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -40,7 +40,7 @@ A $PK block must define all basic PK parameters according to specified ADVAN and
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.9ada74c455e97036e1cfaabadc75ccbaf500325cec488d0f46e90cc3c5387004.js" integrity="sha256-mtp0xFXpcDbhz6q63HXMuvUAMlzsSI0PRukMw8U4cAQ=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.594380814c773cb6ed7b9b3ea5d6827a2390a7b931a9dc6cb72c50565870fe6d.js" integrity="sha256-WUOAgUx3PLbte5s&#43;pdaCeiOQp7kxqdxstyxQVlhw/m0=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -1569,13 +1569,13 @@ A $PK block must define all basic PK parameters according to specified ADVAN and
 <ul>
 <li><a href="#headline-5">Scale parameters Sn</a>
 </li>
-<li><a href="#headline-6">Bio-availability fractions Fn</a>
+<li><a href="#bioavailability-frac">Bio-availability fractions Fn</a>
 </li>
 <li><a href="#headline-7">Output fractions <code>FO</code></a>
 </li>
 <li><a href="#infusion-rate">Infusion rates Rn</a>
 </li>
-<li><a href="#headline-9">Infusion durations Dn</a>
+<li><a href="#infusion-duration">Infusion durations Dn</a>
 </li>
 <li><a href="#alagn">Absorption lags <code>ALAGn</code></a>
 </li>
@@ -1749,11 +1749,11 @@ By default <code>S=1.0</code>.</p>
 compartment; <code>SC</code> is the alias of <code>S</code> for the central compartment.</p>
 </div>
 </div>
-<div id="outline-container-headline-6" class="outline-5">
-<h5 id="headline-6">
+<div id="outline-container-bioavailability-frac" class="outline-5">
+<h5 id="bioavailability-frac">
 Bio-availability fractions Fn
 </h5>
-<div id="outline-text-headline-6" class="outline-text-5">
+<div id="outline-text-bioavailability-frac" class="outline-text-5">
 <p>With each possible  dose  compartment  of  the  kinetic model (the output compartment is not a possible
  dose compartment), there is associated  one  bioavailability  fraction
  parameter Fn.</p>
@@ -1834,11 +1834,11 @@ parameter applies to the dose and to all the additional doses.</p>
 (See <a href="/docs/user-guide/predpp/exogenous/">exogenous supplementation example</a>).</p>
 </div>
 </div>
-<div id="outline-container-headline-9" class="outline-5">
-<h5 id="headline-9">
+<div id="outline-container-infusion-duration" class="outline-5">
+<h5 id="infusion-duration">
 Infusion durations Dn
 </h5>
-<div id="outline-text-headline-9" class="outline-text-5">
+<div id="outline-text-infusion-duration" class="outline-text-5">
 <p>There is one duration parameter associated with  every  possible  dose
 compartment of the kinetic model (the output compartment is not a
 possible dose compartment) and the duration parameter used  for  a
@@ -1874,24 +1874,16 @@ doses.</p>
 Absorption lags <code>ALAGn</code>
 </h5>
 <div id="outline-text-alagn" class="outline-text-5">
-<p>There is one absorption lag time  (parameter)  associated  with  every
-possible dose compartment of the kinetic model (the output compartment
-is not a possible dose compartment) and the absorption lag  time  used
-for  a  given  dose  is  that one associated with the compartment into
-which the dose is given (the dose compartment).</p>
+<p>The optional absorption lag time parameter for compartment <code>n</code>. <code>ALAGn&gt;0</code> indicates
+a &#34;lagged  dose&#34; in compartment <code>n</code>: the dose is actually introduced
+into the system at a &#34;lagged time&#34; at the time of event time +
+<code>ALAGn</code>. <code>ALAGn</code> applies to the dose and to all subsequent additional
+doses (if any), even if <code>ALAGn</code> changes value with a subsequent event
+record. By default <code>ALAGn=0</code>.</p>
 <p>
-The event time t on a dose record refers to the recorded time the dose
-was administered. In the case of a regular infusion, t is the time the
-infusion was initiated.  An absorption lag time  is  an  increment  of
-time  L  such  that  the time that the dose is regarded (by PREDPP) as
-entering (or starting to enter) the system is t+L.</p>
-<p>
-Absorption lag times are optional in the  sense  that  absorption  lag
-times associated with compartments never used as dose compartments may
-be ignored. The values of absorption lag times that are  not  computed
-in PK are always understood to be 0.</p>
-<p>
-An absorption lag time for a dose is computed by the PK routine using, if needed, information in the dose record.  When additional doses  are specified  on  a dose event record, the absorption lag time applies to the dose and to all the additional doses.  With a steady-state  multiple  dose  the  absorption lag time applies not only to this dose, but also to all the preceding implied doses. With a steady-state dose, the lag time should be less than the interdose interval.</p>
+With a steady-state  multiple  dose  the  absorption lag time applies
+to this dose as well as all the preceding implied doses. With a
+steady-state dose, the lag time should be less than the interdose interval.</p>
 <p>
 (See cmt, <a href="/docs/reference-manual/api/subroutines/#PK">PK</a>, <a href="/docs/reference-manual/data/#default_compartment">default compartment</a>).</p>
 </div>
@@ -2332,9 +2324,9 @@ Record order
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/3a4206f8772238f9bbe4f5f79afe527b4fad1f02" title='Last modified by Yi Zhang | 2026 Sep 17' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/81ec3cd2bb34ffcbb198cac942cc2759558c18c3" title='Last modified by Yi Zhang | 2026 Oct 2' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Sep 17</span>
+    <span>2026 Oct 2</span>
   </a>
 
 </div>
@@ -2404,13 +2396,13 @@ Record order
 <ul>
 <li><a href="#headline-5">Scale parameters Sn</a>
 </li>
-<li><a href="#headline-6">Bio-availability fractions Fn</a>
+<li><a href="#bioavailability-frac">Bio-availability fractions Fn</a>
 </li>
 <li><a href="#headline-7">Output fractions <code>FO</code></a>
 </li>
 <li><a href="#infusion-rate">Infusion rates Rn</a>
 </li>
-<li><a href="#headline-9">Infusion durations Dn</a>
+<li><a href="#infusion-duration">Infusion durations Dn</a>
 </li>
 <li><a href="#alagn">Absorption lags <code>ALAGn</code></a>
 </li>

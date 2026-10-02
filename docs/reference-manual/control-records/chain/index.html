@@ -21,14 +21,14 @@ https://github.com/alex-shpak/hugo-book
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="reference-manual">
-		<meta property="article:modified_time" content="2026-09-29T19:01:22-07:00">
+		<meta property="article:modified_time" content="2026-09-30T15:33:58-07:00">
 
 
 	<meta itemprop="name" content="$CHAIN">
 	<meta itemprop="description" content="$CHAIN The optional record specifies initial estimates for an entire problem.
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 $CHAIN [FILE=filename] [FORMAT=s] [ORDER=xxxf] [NOTITLE=[0|1]] [NOLABEL=[0|1]] [ISAMPLE=n][NSAMPLE=n] [SEED=n] [CLOCKSEED=[0|1]] [SELECT=n] [RANMETHOD=[n|S|m] ] [CTYPE=[0|1|2|3|4]] [DF=n] [DFS=n] [IACCEPT=x] [TBLN=n] ;# Example $CHAIN FILE=example1_previous.txt NSAMPLE=0 ISAMPLE=-1000000000 Initial parameters set by $CHAIN are persistant throughout the entire problem. This is different from $EST METHOD=CHAIN that is for the Estimation Step; the Simulation Step is unaffected and still uses the initial values from an MSF file or $THETA, $OMEGA, and $SIGMA records.">
-	<meta itemprop="dateModified" content="2026-09-29T19:01:22-07:00">
-	<meta itemprop="wordCount" content="647">
+	<meta itemprop="dateModified" content="2026-09-30T15:33:58-07:00">
+	<meta itemprop="wordCount" content="572">
 
 <title>$CHAIN • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -37,7 +37,7 @@ https://github.com/alex-shpak/hugo-book
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.9ada74c455e97036e1cfaabadc75ccbaf500325cec488d0f46e90cc3c5387004.js" integrity="sha256-mtp0xFXpcDbhz6q63HXMuvUAMlzsSI0PRukMw8U4cAQ=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.594380814c773cb6ed7b9b3ea5d6827a2390a7b931a9dc6cb72c50565870fe6d.js" integrity="sha256-WUOAgUx3PLbte5s&#43;pdaCeiOQp7kxqdxstyxQVlhw/m0=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -1650,22 +1650,22 @@ Sample distributions
 <code>THETA</code>
 </h4>
 <div id="outline-text-headline-3" class="outline-text-4">
-<p>The default <code>CTYPE=0</code> option requests a uniform distribution for <code>THETA</code> sampling.
-The distribution uses the bounds from the <code>$THETA</code> record. If bounds
-not specified, then the interval is</p>
-<p>
-<code>[(1-IACCEPT)*THETA, (1+IACCEPT)*THETA]</code>.</p>
-<p>
-If CTYPE=1, then the lower and upper bounds from <code>$THETA</code> are ignored
-and all THETAs are uniformly varied using the IACCEPT factor.  If
-CTYPE=2, then THETAs are initiated based on a normal distribution with
-the initial <code>$THETA</code> as the mean, and the second set of <code>$OMEGA~s (or
-~$THETAPV</code>) as the variance, if there is a <code>$PRIOR</code> command with NTHP
-non-zero.  This is the best way and most complete way to define the
-sampling density for the THETAs.   Otherwise, if  NTHP=0 (or no
-<code>$THETAP</code> are provided) , the variance for THETA is obtained from the
-first set of <code>$OMEGA</code>, and requires that the THETAs be MU modeled, and
-those THETAs not MU modeled will follow the uniform distribution as if CTYPE=0.</p>
+<ul>
+<li><code>CTYPE=0</code> (default): use a uniform distribution for <code>THETA</code>
+sampling, with the bounds from the <code>$THETA</code> record. If bounds not
+specified, then the interval is
+$$
+[(1-\text{IACCEPT})\theta, (1+\text{IACCEPT})\theta]
+$$</li>
+<li><code>CTYPE=1</code>: ignore the bounds from <code>$THETA</code> and sample THETAs uniformly using the <code>IACCEPT</code>.</li>
+<li><code>CTYPE=2</code>: use a multivariate normal distribution with the initial
+<code>$THETA</code> as the mean. When <code>$PRIOR</code> is used and <code>NTHP&gt;0</code>, the
+covariance matrix is from <a href="/docs/reference-manual/api/subroutines/#nwpri">the second set of</a> <code>$OMEGA</code> (equivalanetly
+<code>$THETAPV</code>); otherwise, the covariance matrix is from <code>$OMEGA</code>. The
+second scenario requires that the <code>THETA</code> be <code>MU</code> modeled: those
+that are not <code>MU</code> modeled follow the uniform distribution as if
+<code>CTYPE=0</code>.</li>
+</ul>
 </div>
 </div>
 <div id="outline-container-headline-4" class="outline-4">
@@ -1673,10 +1673,7 @@ those THETAs not MU modeled will follow the uniform distribution as if CTYPE=0.<
 <code>SIGMA</code>
 </h4>
 <div id="outline-text-headline-4" class="outline-text-4">
-<p>For the SIGMA values their Cholesky-decomposed values are uniformly
-varied  within (but see option DFS)</p>
-<p>
-<code>[(1-IACCEPT)*SIGMA, (1+IACCEPT)*SIGMA]</code></p>
+<p>See <a href="/docs/reference-manual/control-records/estimation/#dfs"><code>DFS</code></a>.</p>
 </div>
 </div>
 <div id="outline-container-headline-5" class="outline-4">
@@ -1684,10 +1681,10 @@ varied  within (but see option DFS)</p>
 <code>OMEGA</code>
 </h4>
 <div id="outline-text-headline-5" class="outline-text-4">
-<p>The OMEGAs are sampled using a Wishart distribution with variance from
-<code>$OMEGA</code>, and DF is the degrees of freedom for randomly creating the
-OMEGAS.  If DF=0, then the dimensionality of the entire OMEGA matrix
-is used as the degrees of freedom.  In NM73+, setting DF&gt;1E6 fixes OMEGA elements at their initial values.</p>
+<p><code>OMEGA</code> samples follow a Wishart distribution with covariance from
+<code>$OMEGA</code>, and Degrees of Freedom <code>DF</code>.  <code>DF=0</code> makes the dimension of
+the entire OMEGA matrix is used as the DoF.  In NM73+, setting DF&gt;1E6
+fixes <code>OMEGA</code> elements at their initial values.</p>
 </div>
 </div>
 </div>
@@ -1785,9 +1782,9 @@ approach to import values from a raw output.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/2bc206f34c8eb3f6b65399a38173f1df840765b6" title='Last modified by Yi Zhang | 2026 Sep 29' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/acf934c8931d9d2a883c15daf2851021b79f4d2c" title='Last modified by Yi Zhang | 2026 Sep 30' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Sep 29</span>
+    <span>2026 Sep 30</span>
   </a>
 
 </div>
