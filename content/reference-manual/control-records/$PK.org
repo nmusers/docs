@@ -55,6 +55,9 @@ By default ~S=1.0~.
 compartment; ~SC~ is the alias of ~S~ for the central compartment.
 
 **** Bio-availability fractions Fn
+:PROPERTIES:
+:CUSTOM_ID: bioavailability-frac
+:END:
 With each possible  dose  compartment  of  the  kinetic model (the output compartment is not a possible
  dose compartment), there is associated  one  bioavailability  fraction
  parameter Fn.
@@ -128,6 +131,9 @@ parameter applies to the dose and to all the additional doses.
 (See [[file:/docs/user-guide/predpp/exogenous/][exogenous supplementation example]]).
 
 **** Infusion durations Dn
+:PROPERTIES:
+:CUSTOM_ID: infusion-duration
+:END:
 There is one duration parameter associated with  every  possible  dose
 compartment of the kinetic model (the output compartment is not a
 possible dose compartment) and the duration parameter used  for  a
@@ -161,24 +167,16 @@ doses.
 :PROPERTIES:
 :CUSTOM_ID: alagn
 :END:
-There is one absorption lag time  (parameter)  associated  with  every
-possible dose compartment of the kinetic model (the output compartment
-is not a possible dose compartment) and the absorption lag  time  used
-for  a  given  dose  is  that one associated with the compartment into
-which the dose is given (the dose compartment).
+The optional absorption lag time parameter for compartment ~n~. ~ALAGn>0~ indicates
+a "lagged  dose" in compartment ~n~: the dose is actually introduced
+into the system at a "lagged time" at the time of event time +
+~ALAGn~. ~ALAGn~ applies to the dose and to all subsequent additional
+doses (if any), even if ~ALAGn~ changes value with a subsequent event
+record. By default ~ALAGn=0~.
 
-The event time t on a dose record refers to the recorded time the dose
-was administered. In the case of a regular infusion, t is the time the
-infusion was initiated.  An absorption lag time  is  an  increment  of
-time  L  such  that  the time that the dose is regarded (by PREDPP) as
-entering (or starting to enter) the system is t+L.
-
-Absorption lag times are optional in the  sense  that  absorption  lag
-times associated with compartments never used as dose compartments may
-be ignored. The values of absorption lag times that are  not  computed
-in PK are always understood to be 0.
-
-An absorption lag time for a dose is computed by the PK routine using, if needed, information in the dose record.  When additional doses  are specified  on  a dose event record, the absorption lag time applies to the dose and to all the additional doses.  With a steady-state  multiple  dose  the  absorption lag time applies not only to this dose, but also to all the preceding implied doses. With a steady-state dose, the lag time should be less than the interdose interval.
+With a steady-state  multiple  dose  the  absorption lag time applies
+to this dose as well as all the preceding implied doses. With a
+steady-state dose, the lag time should be less than the interdose interval.
 
 (See cmt, [[file:/docs/reference-manual/api/subroutines/#PK][PK]], [[file:/docs/reference-manual/data/#default_compartment][default compartment]]).
 
