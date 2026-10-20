@@ -21,14 +21,14 @@ https://github.com/alex-shpak/hugo-book
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="reference-manual">
-		<meta property="article:modified_time" content="2026-09-12T17:17:23-07:00">
+		<meta property="article:modified_time" content="2026-10-20T15:51:37-07:00">
 
 
 	<meta itemprop="name" content="$DES">
 	<meta itemprop="description" content="$DES Marks the beginning of abbreviated code for the DES routine
 1 2 3 4 5 6 7 $DES abbreviated code ;# Example: ODEs for ADVAN2 $DES DADT(1)=-P(3)*A(1) DADT(2)=P(3)*A(1)-P(1)*A(2) Discussion In general, a system of differential equations has the form">
-	<meta itemprop="dateModified" content="2026-09-12T17:17:23-07:00">
-	<meta itemprop="wordCount" content="837">
+	<meta itemprop="dateModified" content="2026-10-20T15:51:37-07:00">
+	<meta itemprop="wordCount" content="461">
 
 <title>$DES • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -37,7 +37,7 @@ https://github.com/alex-shpak/hugo-book
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.594380814c773cb6ed7b9b3ea5d6827a2390a7b931a9dc6cb72c50565870fe6d.js" integrity="sha256-WUOAgUx3PLbte5s&#43;pdaCeiOQp7kxqdxstyxQVlhw/m0=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.4f261279a04e92f2189fe6d17743a464316c9998bef12d874cbc57f0d65c224e.js" integrity="sha256-TyYSeaBOkvIYn&#43;bRd0OkZDFsmZi&#43;8S2HTLxX8NZcIk4=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -1574,8 +1574,6 @@ https://github.com/alex-shpak/hugo-book
 </li>
 <li><a href="#headline-9">Record order</a>
 </li>
-<li><a href="#headline-10">DISPLAYED VALUES</a>
-</li>
 </ul>
 </li>
 </ul>
@@ -1632,19 +1630,20 @@ Discussion
 $$
 \frac{dA(t)}{dt}=g(A(t), p, t).
 $$
-Here both left-hand-side (LHS) and right-hand-size (RHS) are vectors
+Both the left-hand-side (LHS) and right-hand-size (RHS) are vectors
 of dimention \(n\): \(A=[A_1, \dots, A_n]^T\), \(g=[g_1, \dots, g_n]^T\).
-<em>A</em> denotes the compartment drug amount except the output
-compartment, \(p\) the internal PK parameters and \(t\) the time.
+<em>A</em> denotes the drug amount in the compartments (except the output
+compartment), \(p\) the internal PK parameters and \(t\) the time.
 For example, for the one compartment model with linear elimination and
 absorption from a drug depot we have
 $$
 n=2,\quad p=[K_e, K_a]^T,\quad g_1=-K_aA_1,\quad g_2=K_aA_1-K_eA_2
 $$</p>
 <p>
-The <code>$DES</code> record is used to compute the right-hand-side of
-differential equations.  It is used with general nonlinear  models
-(ADVAN6,  ADVAN8, ADVAN9, ADVAN13, ADVAN14, ADVAN15, ADVAN16, ADVAN17,ADVAN18).
+The <code>$DES</code> record is used to specify \(g_i\)&#39;s, the RHS of
+differential equations.  It is used with general nonlinear models
+(<code>ADVAN6</code>,  <code>ADVAN8</code>, <code>ADVAN9</code>, <code>ADVAN13</code>, <code>ADVAN14</code>, <code>ADVAN15</code>,
+<code>ADVAN16</code>, <code>ADVAN17</code>, <code>ADVAN18</code>).
 See <a href="/docs/reference-manual/abbr/">abbreviated code</a> for general rules for abbreviated code.</p>
 </div>
 </div>
@@ -1659,13 +1658,12 @@ Left-hand quantities
 </h4>
 <div id="outline-text-headline-4" class="outline-text-4">
 <ul>
-<li>DADT(1),  DADT(2),  …   (Required.  Derivative of each
-compartment amount with respect to time.) It is important to note
-that PREDPP itself adds in the  rates  for any  infusions  that
-may  be active.  It is possible to introduce endogenous drug into
+<li><code>DADT(i)</code>: \(\frac{dA_i}{dt}\),
+\(i=1,2,\dots\), required. Note that NONMEM adds in the  rates  for any  infusions  that
+are be active at \(t\).  It is possible to introduce endogenous drug into
 a compartment by explicit terms in a differential  equation,
-rather than by PREDPP dose event records.  Drug introduced in
-this manner is not included by PREDPP in the  computation of
+rather than by dose event records.  Drug introduced in
+this manner is not included in the  computation of
 the output compartment.</li>
 <li>DES-defined (i.e., PRED-defined) items.</li>
 </ul>
@@ -1677,20 +1675,14 @@ Right-hand quantities
 </h4>
 <div id="outline-text-headline-5" class="outline-text-4">
 <ul>
-<li>A(1),  A(2), …   (Current compartment amounts; may be random vari- ables.)</li>
-<li>P(1), P(2), …   (Post-translation explicit  basic  PK  parameters; may be random variables.)</li>
-<li>PK-defined items (Post-translation implicit basic PK parameters; may be random variables.)</li>
-<li>T (Time; may be random variable. T takes values continuously over
-an integration interval.)  (Note that T may take values that are
-larger than the ending time of the interval.)</li>
-<li>DES-defined items that appeared earlier as left-hand  quantities  in <code>$DES</code>.</li>
-<li>Data  item  labels  specified  on  the  <code>$INPUT</code> statement may be
-used explicitly in DES and <code>$DES</code> abbbreviated code (rather  than
-obtained as  PK  parameters). This may improve run time.  As with
-<code>$PK</code>, values are those of the current event record (the event
-record to which the system is being advanced).</li>
-<li>THETA(n).</li>
-<li>Continuous Fortran functions such as <code>sin</code>, <code>exp</code>, and <code>cos</code>. For
+<li><code>A(i)</code>: \(A_i(t)\) current compartment amounts;</li>
+<li><code>P(i)</code>:  the \(i\)&#39;th post-translation explicit basic PK parameters;</li>
+<li>PK-defined items (Post-translation implicit basic PK parameters; may be random variables.);</li>
+<li><code>T</code>: time \(t\);</li>
+<li>DES-defined items that appeared earlier as left-hand  quantities  in <code>$DES</code>;</li>
+<li>Data  item  labels  specified  on  the  <code>$INPUT</code> statement;</li>
+<li><code>THETA</code>;</li>
+<li>continuous Fortran functions such as <code>sin</code>, <code>exp</code>, and <code>cos</code>. For
 discontinuous RHS, use <a href="/docs/reference-manual/api/variables/#mtime">model event times MTIME</a> in the <code>$PK</code>
 block. See <a href="/docs/cookbook/mtime/">model time examples</a>.</li>
 </ul>
@@ -1703,21 +1695,19 @@ Global Variables
 <div id="outline-text-headline-6" class="outline-text-4">
 <p>Certain variables in Fortran Modules can be used. The following are of particular interest.</p>
 <ul>
-<li>DOSTIM: DOSTIM  is  the time of a lagged dose or additional
+<li><code>DOSTIM</code>: the time of a lagged dose or additional
 dose to which the system is being advanced.  Abbreviated code
-in <code>$DES</code> may test  DOSTIM. It  may  use DOSTIM on the right,
-unless DOSTIM is a random variable. In this case, it may be
-used on the right in a <code>$PK</code> block to define  a random  variable
-which  may in turn be used on the right in the <code>$DES</code> block.</li>
-<li>DOSREC: DOSREC is the dose record corresponding to the dose
-entering at  DOS- TIM.   Abbreviated code in <code>$AES</code> may test
-items in DOSREC in a logical condition, and DOSREC may always
-be used on the right.</li>
-<li>ISFINL: During simulation or a copying pass, and during the
-advance to a particular  time  (event or non-event time),
-ISFINL=1 at a final call to DES at that time.  Otherwise,
-ISFINL=0.</li>
-<li>DES_DER, MITER, METH: See <a href="/docs/reference-manual/api/variables/#des-solver-settings">Diff Eq Solver Settings</a>.</li>
+in <code>$DES</code> may test <code>DOSTIM</code>. When <code>DOSTIM</code>
+is not a random variable (a function of \(\eta\)&#39;s), it can be
+used on the right in <code>$DES</code>. Otherwise, it should be
+used on the right in a <code>$PK</code> block to define a random  variable.
+This new variable can then be used on the right in the <code>$DES</code> block.</li>
+<li><code>DOSREC</code>: the dose record corresponding to the dose
+entering at time <code>DOSTIM</code>.  Abbreviated code in <code>$AES</code> may test
+items in <code>DOSREC</code>.</li>
+<li><code>ISFINL</code>: when advance to a particular time during simulation or a copying pass,
+<code>ISFINL=1</code> indicates a final call to <code>DES</code> at that time. Otherwise, <code>ISFINL=0</code>.</li>
+<li>See also <a href="/docs/reference-manual/api/variables/#des-solver-settings">Diff Eq Solver Settings</a>.</li>
 </ul>
 </div>
 </div>
@@ -1754,50 +1744,6 @@ Record order
 </h4>
 <div id="outline-text-headline-9" class="outline-text-4">
 <p>Follows <code>$SUBROUTINES</code>, <code>$INPUT</code>, <code>$MODEL</code>, <code>$PK</code>.</p>
-</div>
-</div>
-<div id="outline-container-headline-10" class="outline-4">
-<h4 id="headline-10">
-DISPLAYED VALUES
-</h4>
-<div id="outline-text-headline-10" class="outline-text-4">
-<p>DES-defined variables may be listed for display in <code>$TABLE</code> or <code>$SCATTER</code>.
-The  values  displayed  for the first event record of the data set are
-0&#39;s.  The values displayed  for the first event record  of  subsequent
-individuals are those from the last event record of the previous
-individual. This is because there is no call to DES with the  first
-event record  of  the individual record, or with any other event
-record with the same value of TIME.  NM-TRAN provides a warning
-message.</p>
-<div class="src src-text">
-<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
-</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>(WARNING  48) DES-DEFINED ITEMS ARE COMPUTED ONLY WHEN EVENT TIME
-</span></span><span style="display:flex;"><span> INCREASES. E.G., DISPLAYED VALUES ASSOCIATED  WITH  THE  FIRST  EVENT
-</span></span><span style="display:flex;"><span>RECORD OF  AN  INDIVIDUAL  RECORD ARE COMPUTED WITH (THE LAST ADVANCE TO) AN
-</span></span><span style="display:flex;"><span>EVENT TIME OF THE PRIOR INDIVIDUAL RECORD.</span></span></code></pre></td></tr></table>
-</div>
-</div>
-</div>
-<p>The values displayed for event records other than the first are
-evaluated  at  the event time (as are all other displayed items such
-as PK- defined values and data record items).</p>
-<p>
-Note that multiple calls to DES are associated with each event record.
-Some (including the final call during integration) may have a value of
-T that is larger than the end time of the integration interval.   When
-NONMEM is performing  simulation  or  a  copying  pass (COMACT&gt;0), DES
-is called immediately after the  advance to  an  event  time  or
-non-event  time,  with  a value of T equal to this time, so that
-displayed values are the final value of T.  Global variable  ISFINL
-is  set  by PREDPP  to  1  on  this  final call to DES.  ISFINL can be
-tested on a WRITE statement if such statements are used in DES.</p>
 <p>
 (See <a href="/docs/reference-manual/api/subroutines/#des-ref">DES</a>, <a href="/docs/reference-manual/control-records/subroutines/#advan6-8">ADVAN6, ADVAN8</a>, <a href="/docs/reference-manual/control-records/subroutines/#advan9-15-17">ADVAN9</a>)</p>
 </div>
@@ -1815,9 +1761,9 @@ tested on a WRITE statement if such statements are used in DES.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/17af470620aeef4615a3a6f55382aaf62df166bf" title='Last modified by Yi Zhang | 2026 Sep 12' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/86831b693fe7c21cddd3ee13c6359a3f3f4a24f4" title='Last modified by Yi Zhang | 2026 Oct 20' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Sep 12</span>
+    <span>2026 Oct 20</span>
   </a>
 
 </div>
@@ -1894,8 +1840,6 @@ tested on a WRITE statement if such statements are used in DES.</p>
 <li><a href="#headline-8">Storage and calling options</a>
 </li>
 <li><a href="#headline-9">Record order</a>
-</li>
-<li><a href="#headline-10">DISPLAYED VALUES</a>
 </li>
 </ul>
 </li>

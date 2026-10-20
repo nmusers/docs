@@ -23,15 +23,15 @@ CRIT Modifies the computation of the default objective function. CONTR Specifies
 	<meta property="og:locale" content="en_us">
 	<meta property="og:type" content="article">
 		<meta property="article:section" content="reference-manual">
-		<meta property="article:modified_time" content="2026-10-01T10:49:57-07:00">
+		<meta property="article:modified_time" content="2026-10-20T15:51:37-07:00">
 
 
 	<meta itemprop="name" content="Subroutines">
 	<meta itemprop="description" content="User-defined subroutines NONMEM releases contain dummy implementations of the routines that can be replaced by user, through $SUBROUTINES:
 1 $SUBROUTINES ... OTHER=routine_file In addition to user-defined functions in abbreviated code, the following customizable subroutines are supported.
 CRIT Modifies the computation of the default objective function. CONTR Specifies the contribution to the objective function of a level 1 (&#34;L1&#34;) record. CCONTR Specifies the contribution to the objective function of a level 2 (&#34;L2&#34;) record. MIX Describes the mixing parameter of a mixture model. PRIOR Allows a Bayesian penalty to be included in the objective function. SPTWO Redefines the RES and WRES for observation records. THETAI Transforms initial THETAs. THETAR Back-transforms final THETAs. INFN Initialization/Finalization ICALL ICALL is an argument passed by NONMEM to user-supplied subroutines CCONTR, CONTR, CRIT, PRED, PRIOR and MIX. It is also selectively passed to PK, ERROR, and INFN. It can be used in $PK, $ERROR, and $PRED abbreviated code. The discussion below describes the values of ICALL as seen by PRED.">
-	<meta itemprop="dateModified" content="2026-10-01T10:49:57-07:00">
-	<meta itemprop="wordCount" content="17256">
+	<meta itemprop="dateModified" content="2026-10-20T15:51:37-07:00">
+	<meta itemprop="wordCount" content="17430">
 
 <title>Subroutines • NONMEM Documentation</title>
 <link rel="icon" href="/docs/favicon.png" >
@@ -40,7 +40,7 @@ CRIT Modifies the computation of the default objective function. CONTR Specifies
 <link rel="stylesheet" href="/docs/book.min.3a37f24c5ad6361e8a667d87b443b0e9042f2d7b0fb0a6897445616f535375e2.css" integrity="sha256-OjfyTFrWNh6KZn2HtEOw6QQvLXsPsKaJdEVhb1NTdeI=" crossorigin="anonymous">
 
 
-  <script defer type="module" src="/docs/en.search.min.594380814c773cb6ed7b9b3ea5d6827a2390a7b931a9dc6cb72c50565870fe6d.js" integrity="sha256-WUOAgUx3PLbte5s&#43;pdaCeiOQp7kxqdxstyxQVlhw/m0=" crossorigin="anonymous"></script>
+  <script defer type="module" src="/docs/en.search.min.4f261279a04e92f2189fe6d17743a464316c9998bef12d874cbc57f0d65c224e.js" integrity="sha256-TyYSeaBOkvIYn&#43;bRd0OkZDFsmZi&#43;8S2HTLxX8NZcIk4=" crossorigin="anonymous"></script>
 
   
 </head>
@@ -2169,19 +2169,16 @@ evaluate right-sides of differential equations.</p>
 <p>
 Input argument:</p>
 <ul>
-<li><code>A(n)</code>: the amount in the nth compartment at time T.</li>
-<li><code>P(n)</code>: the value of the nth PK parameter.</li>
-<li><code>T</code>: time. T takes values continuously over an integration interval.</li>
+<li><code>A(i)</code>: \(A_i(t)\), the amount in the \(i\)&#39;th compartment at time \(t\).</li>
+<li><code>P(i)</code>: the \(i\)&#39;th PK parameter.</li>
+<li><code>T</code>: time \(t\).</li>
 </ul>
 <p>Output argument:</p>
 <ul>
 <li>
-<p><code>DADT(n)</code>
-The derivative with respect to T of the nth compartment&#39;s amount.
-It is important to note that PREDPP itself adds in the rates  for
-any infusions that may be active.</p>
-<p>
-For example, the above equations for ADVAN2 can be coded as:</p>
+<p><code>DADT(i)</code>:
+\(\frac{DA_i(t)}{Dt}\). Note that NONMEM adds the rates for the infusions that are active at \(t\).
+For example, <code>ADVAN2</code> corresponds to:</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2196,8 +2193,8 @@ For example, the above equations for ADVAN2 can be coded as:</p>
 </div>
 </li>
 <li>
-<p><code>DA(i,j)</code>
-The  derivative of \(g_i()\) with respect to A(j). Continuing the above example,</p>
+<p><code>DA(i,j)</code>: \(\frac{dg_i}{dA_j}\), where \(g_i\) is the
+right-hand-side of the \(i\)&#39;th ODE. Continuing the above example,</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2214,8 +2211,8 @@ The  derivative of \(g_i()\) with respect to A(j). Continuing the above example,
 </div>
 </li>
 <li>
-<p><code>DP(i,j)</code>
-The derivative of \(g_i()\) with respect to  P(j).  Continuing  the above example,</p>
+<p><code>DP(i,j)</code>:
+\(\frac{dg_i}{dP_j}\).  Continuing  the above example,</p>
 <div class="src src-f90">
 <div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
 <table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -2231,8 +2228,7 @@ The derivative of \(g_i()\) with respect to  P(j).  Continuing  the above exampl
 </div>
 </div>
 </li>
-<li><code>DT(n)</code>
-The derivative of \(g_i()\) with respect to T.</li>
+<li><code>DT(i)</code>: \(\frac{dg_i}{dt}\).</li>
 </ul>
 <p>The full implementation of the above example model is</p>
 <div class="src src-f90">
@@ -2359,9 +2355,45 @@ The derivative of \(g_i()\) with respect to T.</li>
 </div>
 <p>See <a href="/docs/reference-manual/api/variables">variables</a> for module variables involved in the code.</p>
 <p>
-The format  of arrays DA, DP, DT described above is called &#34;full
-format&#34;. It is the  default format. Alternately, compact format may be used.
-See Guide VI, Appendix IV. Compact Arrays in DES.</p>
+Alternative to the above <em>full format</em> of  <code>DA</code>, <code>DP</code>, <code>DT</code>,
+<em>compact format</em> is available for more efficient storage. Variable
+<a href="/docs/reference-manual/api/variables/#des-aes-icall">IDEFD(2)</a> controls the swith between the two formats.</p>
+<p>
+DES-defined variables may be output through <code>$TABLE</code>.
+The values for the first event record are zero (for the first individual)
+or from the last event record of the previous
+individual (for the subsequent individuals). This is because there is no call to DES with the  first
+event record  of  the individual record, or with any other event
+record with the same value of TIME.  NM-TRAN provides a warning
+message.</p>
+<div class="src src-text">
+<div class="highlight"><div style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>(WARNING  48) DES-DEFINED ITEMS ARE COMPUTED ONLY WHEN EVENT TIME
+</span></span><span style="display:flex;"><span> INCREASES. E.G., DISPLAYED VALUES ASSOCIATED  WITH  THE  FIRST  EVENT
+</span></span><span style="display:flex;"><span>RECORD OF  AN  INDIVIDUAL  RECORD ARE COMPUTED WITH (THE LAST ADVANCE TO) AN
+</span></span><span style="display:flex;"><span>EVENT TIME OF THE PRIOR INDIVIDUAL RECORD.</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</div>
+<p>Otherwise the output are
+from evaluations at the event time (as are all other displayed items such
+as PK-defined values and data record items).</p>
+<p>
+Note that with each event record <code>DES</code> can be called multiple times.
+Some may have \(t\) greater than the end time of the integration
+interval. For example, this is the case for the final call during integration.  When
+NONMEM is performing  simulation  or  a  copying  pass (COMACT&gt;0), <code>DES</code>
+is called immediately after the  advance to  an  event  time  or
+non-event  time,  with \(t\) equal to that time, so ensure the output
+corresponds to that time.  NONMEM sets flag variable <code>ISFINL=1</code>
+on  this  final call to <code>DES</code>.</p>
 <p>
 Also see <a href="/docs/reference-manual/api/variables/">variables in NONMEM modules</a>, <a href="/docs/reference-manual/api/modules/#nm-pred-mod">NONMEM-PRED modules, and  PREDPP modules</a>, particularly
  <a href="/docs/reference-manual/api/variables/#des-aes-icall">DES AES: ICALL,IDEFD,IDEFA</a>.</p>
@@ -5415,9 +5447,9 @@ used by NONMEM.</p>
   <div class="flex flex-wrap justify-between">
 
 <div>
-<a class="flex align-center" href="https://github.com/nmusers/docs/commit/39f7fa14a80abb7e27f71c5acecf57919231ce07" title='Last modified by Yi Zhang | 2026 Oct 1' target="_blank" rel="noopener">
+<a class="flex align-center" href="https://github.com/nmusers/docs/commit/86831b693fe7c21cddd3ee13c6359a3f3f4a24f4" title='Last modified by Yi Zhang | 2026 Oct 20' target="_blank" rel="noopener">
     <img src="/docs/icons/calendar.svg" class="book-icon" alt="Calendar" />
-    <span>2026 Oct 1</span>
+    <span>2026 Oct 20</span>
   </a>
 
 </div>
