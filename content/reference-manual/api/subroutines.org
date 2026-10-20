@@ -355,42 +355,38 @@ See [[file:/docs/reference-manual/control-records/des/][$DES record]] for the ma
 
 Input argument:
 
-  - ~A(n)~: the amount in the nth compartment at time T.
+  - ~A(i)~: \(A_i(t)\), the amount in the \(i\)'th compartment at time \(t\).
 
-  - ~P(n)~: the value of the nth PK parameter.
+  - ~P(i)~: the \(i\)'th PK parameter.
 
-  - ~T~: time. T takes values continuously over an integration interval.
+  - ~T~: time \(t\).
 
 Output argument:
 
-  - ~DADT(n)~
-    The derivative with respect to T of the nth compartment's amount.
-    It is important to note that PREDPP itself adds in the rates  for
-    any infusions that may be active.
-
-    For example, the above equations for ADVAN2 can be coded as:
+  - ~DADT(i)~:
+    \(\frac{DA_i(t)}{Dt}\). Note that NONMEM adds the rates for the infusions that are active at \(t\).
+    For example, ~ADVAN2~ corresponds to:
     #+begin_src f90
       DADT(1)=-P(2)*A(1)
       DADT(2)= P(2)*A(1)-P(1)*A(2)
     #+end_src
 
-  - ~DA(i,j)~
-    The  derivative of \(g_i()\) with respect to A(j). Continuing the above example,
+  - ~DA(i,j)~: \(\frac{dg_i}{dA_j}\), where \(g_i\) is the
+    right-hand-side of the \(i\)'th ODE. Continuing the above example,
     #+begin_src f90
       DA(1,1)=-P(2)
       DA(2,1)= P(2)
       DA(2,2)=-P(1)
     #+end_src
 
-  - ~DP(i,j)~
-    The derivative of \(g_i()\) with respect to  P(j).  Continuing  the above example,
+  - ~DP(i,j)~:
+    \(\frac{dg_i}{dP_j}\).  Continuing  the above example,
     #+begin_src f90
       DP(1,2)=-A(1)
       DP(2,2)= A(1)
       DP(2,1)=-A(2)
     #+end_src
-  - ~DT(n)~
-    The derivative of \(g_i()\) with respect to T.
+  - ~DT(i)~: \(\frac{dg_i}{dt}\).
 
 The full implementation of the above example model is
 #+begin_src f90
@@ -454,9 +450,35 @@ The full implementation of the above example model is
 #+end_src
 See [[file:/docs/reference-manual/api/variables][variables]] for module variables involved in the code.
 
-The format  of arrays DA, DP, DT described above is called "full
-format". It is the  default format. Alternately, compact format may be used.
-See Guide VI, Appendix IV. Compact Arrays in DES.
+Alternative to the above /full format/ of  ~DA~, ~DP~, ~DT~,
+/compact format/ is available for more efficient storage. Variable
+[[file:/docs/reference-manual/api/variables/#des-aes-icall][IDEFD(2)]] controls the swith between the two formats.
+
+DES-defined variables may be output through ~$TABLE~.
+The values for the first event record are zero (for the first individual)
+or from the last event record of the previous
+individual (for the subsequent individuals). This is because there is no call to DES with the  first
+event record  of  the individual record, or with any other event
+record with the same value of TIME.  NM-TRAN provides a warning
+message.
+#+begin_src
+(WARNING  48) DES-DEFINED ITEMS ARE COMPUTED ONLY WHEN EVENT TIME
+ INCREASES. E.G., DISPLAYED VALUES ASSOCIATED  WITH  THE  FIRST  EVENT
+RECORD OF  AN  INDIVIDUAL  RECORD ARE COMPUTED WITH (THE LAST ADVANCE TO) AN
+EVENT TIME OF THE PRIOR INDIVIDUAL RECORD.
+#+end_src
+Otherwise the output are
+from evaluations at the event time (as are all other displayed items such
+as PK-defined values and data record items).
+
+Note that with each event record ~DES~ can be called multiple times.
+Some may have \(t\) greater than the end time of the integration
+interval. For example, this is the case for the final call during integration.  When
+NONMEM is performing  simulation  or  a  copying  pass (COMACT>0), ~DES~
+is called immediately after the  advance to  an  event  time  or
+non-event  time,  with \(t\) equal to that time, so ensure the output
+corresponds to that time.  NONMEM sets flag variable ~ISFINL=1~
+on  this  final call to ~DES~.
 
 Also see [[file:/docs/reference-manual/api/variables/][variables in NONMEM modules]], [[file:/docs/reference-manual/api/modules/#nm-pred-mod][NONMEM-PRED modules, and  PREDPP modules]], particularly
  [[file:/docs/reference-manual/api/variables/#des-aes-icall][DES AES: ICALL,IDEFD,IDEFA]].

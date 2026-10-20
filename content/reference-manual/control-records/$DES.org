@@ -19,79 +19,71 @@ In general, a system of differential equations has the form
 $$
 \frac{dA(t)}{dt}=g(A(t), p, t).
 $$
-Here both left-hand-side (LHS) and right-hand-size (RHS) are vectors
+Both the left-hand-side (LHS) and right-hand-size (RHS) are vectors
 of dimention \(n\): \(A=[A_1, \dots, A_n]^T\), \(g=[g_1, \dots, g_n]^T\).
-/A/ denotes the compartment drug amount except the output
-compartment, \(p\) the internal PK parameters and \(t\) the time.
+/A/ denotes the drug amount in the compartments (except the output
+compartment), \(p\) the internal PK parameters and \(t\) the time.
 For example, for the one compartment model with linear elimination and
 absorption from a drug depot we have
 $$
 n=2,\quad p=[K_e, K_a]^T,\quad g_1=-K_aA_1,\quad g_2=K_aA_1-K_eA_2
 $$
 
-The ~$DES~ record is used to compute the right-hand-side of
-differential equations.  It is used with general nonlinear  models
-(ADVAN6,  ADVAN8, ADVAN9, ADVAN13, ADVAN14, ADVAN15, ADVAN16, ADVAN17,ADVAN18).
+The ~$DES~ record is used to specify \(g_i\)'s, the RHS of
+differential equations.  It is used with general nonlinear models
+(~ADVAN6~,  ~ADVAN8~, ~ADVAN9~, ~ADVAN13~, ~ADVAN14~, ~ADVAN15~,
+~ADVAN16~, ~ADVAN17~, ~ADVAN18~).
 See [[file:/docs/reference-manual/abbr/][abbreviated code]] for general rules for abbreviated code.
 
 ** Assignment and conditional statements
 
 *** Left-hand quantities
 
-   - DADT(1),  DADT(2),  ...   (Required.  Derivative of each
-     compartment amount with respect to time.) It is important to note
-     that PREDPP itself adds in the  rates  for any  infusions  that
-     may  be active.  It is possible to introduce endogenous drug into
+   - ~DADT(i)~: \(\frac{dA_i}{dt}\),
+     \(i=1,2,\dots\), required. Note that NONMEM adds in the  rates  for any  infusions  that
+     are be active at \(t\).  It is possible to introduce endogenous drug into
      a compartment by explicit terms in a differential  equation,
-     rather than by PREDPP dose event records.  Drug introduced in
-     this manner is not included by PREDPP in the  computation of
+     rather than by dose event records.  Drug introduced in
+     this manner is not included in the  computation of
      the output compartment.
 
    - DES-defined (i.e., PRED-defined) items.
 
 *** Right-hand quantities
 
-   - A(1),  A(2), ...   (Current compartment amounts; may be random vari- ables.)
+   - ~A(i)~: \(A_i(t)\) current compartment amounts;
 
-   - P(1), P(2), ...   (Post-translation explicit  basic  PK  parameters; may be random variables.)
+   - ~P(i)~:  the \(i\)'th post-translation explicit basic PK parameters;
 
-   - PK-defined items (Post-translation implicit basic PK parameters; may be random variables.)
+   - PK-defined items (Post-translation implicit basic PK parameters; may be random variables.);
 
-   - T (Time; may be random variable. T takes values continuously over
-     an integration interval.)  (Note that T may take values that are
-     larger than the ending time of the interval.)
+   - ~T~: time \(t\);
 
-   - DES-defined items that appeared earlier as left-hand  quantities  in ~$DES~.
+   - DES-defined items that appeared earlier as left-hand  quantities  in ~$DES~;
 
-   - Data  item  labels  specified  on  the  ~$INPUT~ statement may be
-     used explicitly in DES and ~$DES~ abbbreviated code (rather  than
-     obtained as  PK  parameters). This may improve run time.  As with
-     ~$PK~, values are those of the current event record (the event
-     record to which the system is being advanced).
+   - Data  item  labels  specified  on  the  ~$INPUT~ statement;
 
-   - THETA(n).
+   - ~THETA~;
 
-   - Continuous Fortran functions such as ~sin~, ~exp~, and ~cos~. For
+   - continuous Fortran functions such as ~sin~, ~exp~, and ~cos~. For
      discontinuous RHS, use [[file:/docs/reference-manual/api/variables/#mtime][model event times MTIME]] in the ~$PK~
      block. See [[file:/docs/cookbook/mtime/][model time examples]].
 
 *** Global Variables
 Certain variables in Fortran Modules can be used. The following are of particular interest.
-     + DOSTIM: DOSTIM  is  the time of a lagged dose or additional
-       dose to which the system is being advanced.  Abbreviated code
-       in ~$DES~ may test  DOSTIM. It  may  use DOSTIM on the right,
-       unless DOSTIM is a random variable. In this case, it may be
-       used on the right in a ~$PK~ block to define  a random  variable
-       which  may in turn be used on the right in the ~$DES~ block.
-     + DOSREC: DOSREC is the dose record corresponding to the dose
-       entering at  DOS- TIM.   Abbreviated code in ~$AES~ may test
-       items in DOSREC in a logical condition, and DOSREC may always
-       be used on the right.
-     + ISFINL: During simulation or a copying pass, and during the
-       advance to a particular  time  (event or non-event time),
-       ISFINL=1 at a final call to DES at that time.  Otherwise,
-       ISFINL=0.
-     + DES_DER, MITER, METH: See [[file:/docs/reference-manual/api/variables/#des-solver-settings][Diff Eq Solver Settings]].
+  + ~DOSTIM~: the time of a lagged dose or additional
+    dose to which the system is being advanced.  Abbreviated code
+    in ~$DES~ may test ~DOSTIM~. When ~DOSTIM~
+    is not a random variable (a function of \(\eta\)'s), it can be
+    used on the right in ~$DES~. Otherwise, it should be
+    used on the right in a ~$PK~ block to define a random  variable.
+    This new variable can then be used on the right in the ~$DES~ block.
+  + ~DOSREC~: the dose record corresponding to the dose
+    entering at time ~DOSTIM~.  Abbreviated code in ~$AES~ may test
+    items in ~DOSREC~.
+  + ~ISFINL~: when advance to a particular time during simulation or a copying pass,
+    ~ISFINL=1~ indicates a final call to ~DES~ at that time. Otherwise, ~ISFINL=0~.
+  + See also [[file:/docs/reference-manual/api/variables/#des-solver-settings][Diff Eq Solver Settings]].
 
 *** Reserved Variable names
 #+begin_src f90
@@ -103,34 +95,5 @@ IR DA DP E(n) ETA(n) EPS(n) ERR(n)
 
 *** Record order
 Follows ~$SUBROUTINES~, ~$INPUT~, ~$MODEL~, ~$PK~.
-
-*** DISPLAYED VALUES
-DES-defined variables may be listed for display in ~$TABLE~ or ~$SCATTER~.
-The  values  displayed  for the first event record of the data set are
-0's.  The values displayed  for the first event record  of  subsequent
-individuals are those from the last event record of the previous
-individual. This is because there is no call to DES with the  first
-event record  of  the individual record, or with any other event
-record with the same value of TIME.  NM-TRAN provides a warning
-message.
-#+begin_src
-(WARNING  48) DES-DEFINED ITEMS ARE COMPUTED ONLY WHEN EVENT TIME
- INCREASES. E.G., DISPLAYED VALUES ASSOCIATED  WITH  THE  FIRST  EVENT
-RECORD OF  AN  INDIVIDUAL  RECORD ARE COMPUTED WITH (THE LAST ADVANCE TO) AN
-EVENT TIME OF THE PRIOR INDIVIDUAL RECORD.
-#+end_src
-The values displayed for event records other than the first are
-evaluated  at  the event time (as are all other displayed items such
-as PK- defined values and data record items).
-
-Note that multiple calls to DES are associated with each event record.
-Some (including the final call during integration) may have a value of
-T that is larger than the end time of the integration interval.   When
-NONMEM is performing  simulation  or  a  copying  pass (COMACT>0), DES
-is called immediately after the  advance to  an  event  time  or
-non-event  time,  with  a value of T equal to this time, so that
-displayed values are the final value of T.  Global variable  ISFINL
-is  set  by PREDPP  to  1  on  this  final call to DES.  ISFINL can be
-tested on a WRITE statement if such statements are used in DES.
 
 (See [[file:/docs/reference-manual/api/subroutines/#des-ref][DES]], [[file:/docs/reference-manual/control-records/subroutines/#advan6-8][ADVAN6, ADVAN8]], [[file:/docs/reference-manual/control-records/subroutines/#advan9-15-17][ADVAN9]])
