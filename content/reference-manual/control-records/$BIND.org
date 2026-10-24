@@ -2,207 +2,54 @@
 {{< katex >}}{{< /katex >}}
 
 * $BIND
-Define data values used by ~$PK~, ~$DES~, and ~$AES~.
+Define which data record's value to use for a data item when the item is used in ~$PK~, ~$DES~, and ~$AES~.
 #+begin_src perl
 ;# Usage
 $BIND  value ...
 #+end_src
 
 ** Discussion
-~$BIND~  is  optional. This record is used in conjunction with the
-~$INPUT~ record to further define the meaning of certain data items
-occuring as right-hand quantities in an abbreviated code for PK when
-PK is called at nonevent dose times (see below and Guide VI, section
-III.B.2). (Normally, PK is not called at these times.) At such calls,
-PK has access to several different data items of the same type, from
-several different event records. The definitions in the ~$BIND~ record
-precisely determine which of these data items are represented by the
-label for the data item type used in the abbreviated code.
+NONMEM processes data [[file:/docs/user-guide/nmtran/#mental-model][by event record]] as well as additional /state
+times/. The time domain in a NONMEM model is discretized according to these
+times. One example of non-event state times is the termination time of
+an infusion. Another example is the time when a dose actually enters the
+system, when there is an absorption lag.
 
-A nonevent dose time is a time that a lagged dose or additional dose
-enters, or starts to enter, the system. It is some time after the
-event time occuring on the dose record. When PK is called at such a
-time, information from three event records is available. These are the
-dose record itself, the last event record, and the next event record.
-The last event record is the last event record with event time
-occuring before the nonevent dose time. The next event record is the
-first event record with event time occuring after the nonevent dose
-time. This event record is also called the argument record (see Guide
-VI, section III.B.2). PK is called at nonevent dose times only if a
-certain PK calling-protocol is requested (see section C.5).
+Unless modeled specifically, NONMEM assumes piece-wise constant value
+for user-specified data items used by ~$PK~: in a given state time interval \(t_{j}, t_{j+1}\), the
+data item used by ~$PK~ is constant and adopts its value at
+\(t_{j+1}\). This is referred to as "Last Observation Carry Backwards"
+(LOCB): the system advances from \(t_j\) to \(t_{j+1}\) using
+parameter values at \(t_{j+1}\). The intrinsic data items, such as
+~ID~, ~DV~, ~AMT~, ~RATE~, etc., are not affected by this behavior.
 
-~$BIND~  may  be  used  when ~$PK~ abbreviated code is present and this
-code requests that the PK  subroutine  be  called  at additional  or
-lagged dose times (CALLFL=-2).  It is used to override the default
-values of user-defined variables used in the code when the PK  routine
-is called at these particular dose times.  It is also used to override
-the default values of user-defined variables used in  ~$DES~ and ~$AES~
-abbreviated code during an advance to an additional or lagged dose
-time.
-
-NONMEM data item ID, L2, MDV, DV are not affected by the ~$BIND~
-definitions. At a nonevent dose time, these labels always represent
-the data items from the dose record; this is the mandatory
-representation. Some data items types are PREDPP data item types: AMT,
-RATE, SS, ADD, II, MT, CMT, CALL, EVID, and these are not affected by
-the ~$BIND~ definitions. These labels also always represent the data
-items from the dose record; this is the mandatory representation. The
-TIME data item type is a PREDPP data item type, and it is not affected
-by the ~$BIND~ definition; the label always represents the time data
-item from the next event record. The other data item types (labeled WT
-and PREP in the above example) are only recognized and responded to by
-the user’s PK routine. With the ~$BIND~ record the user may define the
-label of such a data item type to represent the data item from the
-dose record, the last event record, or the next event record. If a
-label definition for a data item type is not given explicitly, then by
-default the label represents the data item from the next event record.
-
-If the value is (explicitly) DOSE, LAST, or NEXT, the label represents
-the item from the dose record, the last event record, or the next
-event record, respectively. If one of these values is used, it should
-not contradict the mandatory representation for the label (of a NONMEM
-or PREDPP data item). The value ’-’ serves as a place holder; a value
-is assumed that corresponds to the mandatory or default
-representation. If the number n is less than the total number of
-labels listed on the ~$INPUT~ record, the values corresponding to the
-remaining labels are taken to correspond to the respective mandatory
-and default representations. If the ~$BIND~ record is not used, the
-values corresponding to all labels are taken to correspond to the
-respective mandatory and default representations.
-
-If n values are given, n should not exceed the total number of labels listed on the ~$INPUT~
-record, including all DROP and SKIP labels. The ith value corresponds to the ith label.
-
-~$BIND~ has no effect when PK is called at a model event time (MTIME).
-
-Let t be a time at which an additional or lagged dose enters the  system.   If t1 is the greatest event time not exceeding the time t, then
- the "last event record" is the last event record with event  time  t1,
- and  the  "next  event  record" is the event record following the last
- event record.
- (The term "last" is similar to the word "previous" in this context.)
- The event time on the next event record will exceed time t.
-
-** Options
-The positions of the values correspond to the positions of data  items
- in the ~$INPUT~ record in a 1-to-1 manner.  Each value is one of:
-   | DOSE | Use the value from the dose record.       |
-   | NEXT | Use the value from the next event record. |
-   | LAST | Use the value from the last event record. |
-   | SKIP | Ignore this data item.                    |
-   | DROP | Ignore this data item.                    |
-
-For  user  (concomitant)  data  items,  the default is NEXT but any of DOSE, NEXT, LAST may be specified.
-
-For the PREDPP data item TIME, the default is NEXT.  Only "--"  or  NEXT may be specified.
-
-For  all other PREDPP or NONMEM data items, the default is DOSE.  Only "--"  or DOSE may be specified.
-
-Option DROP in the ~$BIND~ record is optional.  It  is  ignored  by  NMTRAN,  but helps the user maintain a 1-to-1 relationship between positions in ~$BIND~ and positions in ~$INPUT~.
-
-A ~$BIND~ record with all defaults specified, such as
-#+begin_src perl
-$BIND - - - - - - -
+For example, consider the following records
+#+begin_src r
+TIME  WT
+40    70
+50    72
 #+end_src
-has the same effect as if no ~$BIND~ record were present.
+NONMEM would use ~WT~ values as the following:
+- \(t=40\): ~WT=70~;
+- \(t \in (40, 50]\): ~WT=72~;
 
-#+begin_src perl
- $INPUT ID TIME DATE=DROP AMT DV WGT  PREP  X   HGT
- $BIND   -   -    DROP     -   - NEXT DOSE LAST  -
-#+end_src
-ID, AMT, DV  have the values from the initiating dose record.
-     TIME has the value from the next event record.
-     WGT and HGT have values from the next event record.
-     PREP has the value from the initiating dose record.
-     X has the value from the last event record.  This record  will  be
-     the dose record if there is no other event record between the dose
-     record and the next event record.
-
-~$INPUT~ and ~$BIND~ records can be interleaved to help maintain a  visual relationship. The above example could have been coded:
-
-#+begin_src perl
-   $INPUT ID TIME DATE=DROP
-   $BIND   -   -    DROP
-   $INPUT AMT DV  WGT PREP X    HGT
-   $BIND  -   -  NEXT DOSE LAST  -
+A dummy record can be used to to force the "Last Observation Carry Forward" behavior:
+#+begin_src r
+TIME  WT
+40    70
+50    70
+50    72
 #+end_src
 
-~$BIND~  may not specify a position beyond the last position defined via ~$INPUT~.  It may specify fewer positions, in which case defaults  apply to the remaining data items.
-
-Changes  to  ~$BIND~, like changes to ~$INPUT~, cause changes to generated
-code.  Thus, an existing NONMEM executable cannot be re-used when  the
-~$BIND~ and/or ~$INPUT~ records are changed.
-
-The ~$BIND~ record only applies under the following circumstances:
-1. There exists a dose that is either one or both of the two following types of doses:
-      - An  additional  dose,  subsequent  to  the  initiating dose
-        (ADDL>0, II>0 in the dose event record).  Such a dose enters
-        the system at the "additional dose time."
-      - A lagged dose.  (with the corresponding dose  event record, PK
-        specifies ALAGi>0, where i is the index of the dose
-        compartment).  Such a dose enters the  system  at  the
-        "lagged dose time."
-2. The  PK  subroutine  computes parameters that depend on values in
-   the data record which are not constant for the individual,  i.e.,
-   parameters depend on time-varying data items.
-
-3. The PK subroutine is called when the dose enters the system. That
-   is, ~$PK~ contains the pseudo-statement CALLFL=-2, requesting that
-   the PK routine be called to compute values of the PK parameters at
-   additional and lagged dose times.  When ~$PK~ does not contain this
-   pseudo-statement, there is no  such  call,  and  at  an additional
-   or lagged dose time, the PK parameters have those values computed
-   with the next event record.
-
-When the ~$PK~ code is implemented with an event  record,  the  variable
-DOSTIM  is  0.  When it is implemented at an additional or lagged dose
-time, the value of this variable is the time in question.  By default,
-data items used in abbreviated code have values from either the
-initiating dose record (DOSREC) or the next event record (EVTREC),
-according to this rule:
-
-- NONMEM  data items and PREDPP data items (other than TIME) have
-  values from the original dose event record (DOSREC).  These are:
-  #+begin_src f90
-  DV MDV ID L2 MRG_ RAW_ REPL_ EVID AMT RATE SS II CMT  PCMT  CALL  CONT
-  ADDL DATE DAT1 DAT2 DAT3
-  #+end_src
-- TIME  and  all  user-defined  data items have the values from the
-  next event record (EVTREC).  This default can be overridden using
-  the ~$BIND~ record.
-
-** EXAMPLES
-The  ~$BIND~  record  is  a  convenience; it does nothing that cannot be
-accomplished with abbreviated code.  Suppose X is a user-defined  data
-item.  The following three fragments of code create a variable XB with
-the same values at calls with additional and lagged doses that X would
-have if there were a ~$BIND~ record specifying the following for X.
-
-#+begin_src f90
-;! DOSE:
-   IF (DOSTIM.EQ.0) THEN
-   XB=X
-   ELSE
-   XB=DOSREC(X)
-   ENDIF
-
-;! NEXT:
-   XB=X
-
-;! LAST:
-   IF (DOSTIM.EQ.0) THEN
-   XB=X
-   ENDIF
-#+end_src
-In this case, when DOSTIM>0, XB retains its value from the previous call to PK.
-
-For another example, suppose a fragment of the dose records looks like this:
+This default behavior could be problematic. For example, consider
 #+begin_src r
   TIME AMT PREP    X
     0  100    4    .
    10  100    1   90
    20    0    0   80
 #+end_src
-Also suppose the control stream includes:
+To encode different bioavailability for different preparation ~PRED~,
+it is tempting to do
 #+begin_src perl
  $INPUT ID TIME AMT DV PREP X
  $PK
@@ -211,23 +58,22 @@ Also suppose the control stream includes:
      ALAG1=THETA(5)
      CL=THETA(1)*X*EXP(ETA(1))
 #+end_src
-It  is  intended  that  THETA(3)  be the ratio of bioavailabilities of
-preparation 4 to preparation 1.  However, calls to PK are made only at
-event times 0, 10 and 20. Suppose THETA(5)=5 (lag time): the first
-dose enters the system after 5 time units.   The  value of PREP (dose
-preparation type) is taken from the event record at time 10, which
-is 1.  F1 is computed incorrectly.  If the Estimation  Step is run,
-the gradient with THETA(3) will be 0.
+so that ~THETA(3)~ describes ~F1~ for ~PREP=4~, at
+\(t \in [0, 10)\). However, with ~ALAG1~ the actual administration
+time of the first dose could be at \(t\in (0, 10]\) or \(t \in
+(10, 20)\), corresponding to ~PREP=1~ or ~PREP=0~, repectively, according to
+LOCB. This leads to incorrect ~F1~. Moreover, since the
+line of ~F1=THETA(3)~ will never be run, the Estimation step will
+produce zero gradient for ~THETA(3)~.
 
-Consider another example with multiple doses using the data record
-fragment below:
+A similar problem will occur when modeling data records
 #+begin_src r
   TIME AMT PREP    X  II  ADDL
     0  100    4    .   5     1
    10  100    1   90   5     1
    20    0    0   80   .     .
 #+end_src
-Suppose the control stream has:
+with
 #+begin_src perl
   $INPUT ID TIME AMT DV PREP X II ADDL
   $PK
@@ -235,32 +81,102 @@ Suppose the control stream has:
       IF (PREP.EQ.4) F1=THETA(3)
       CL=THETA(1)*X*EXP(ETA(1))
 #+end_src
-F1  is  computed  correctly for the initiating dose records at times 0
-and 10, and for the additional dose at time 15,  but  incorrectly  for
-the  additional  dose  at  time 5.  Theta(3) applies only to the first
-dose having PRED=4.  (The gradient for theta(3) is not 0.)   The  same
-problem  could  have occurred with the dose having PREP=1, except that
-by an accident of coding, PREP=0 (on the  record  having  TIME=20)  is
-treated the same as PREP=1, so that the additional dose at time 15 has
-F1=1 as it should.
+In this case ~THETA(3)~ applies only to the first
+dose when ~PRED=4~.
 
-On the other hand, the values of X are presumably recorded so that  90
-is  valid  for  the  time 0 through 10 and 80 is valid for the time 10
-through 20.  Therefore, the model for CL is correct in both examples.
+The optional ~$BIND~ record overrides the default LOCB behavior, when there are
+time-varying data items utilized at additional doses or lagged doses
+through [[file:/docs/reference-manual/abbr/#calling_protocol][~CALLFL=-2~]]. In other words, it is effective only when ~$PK~
+is used on non-event dose times. It has no effect at other times,
+including when ~PK~ is called at a model event time (~MTIME~).
 
-In either of these two examples, the model can  be  corrected  by  the insertion of ~$BIND~ and CALLFL=-2:
+** Options
+Given successive
+state times \(t_d \le t_1 \le t_a \le t_2\), for a dose event
+at \(t_d\), followed by another event at \(t_1\), then a non-event
+dose such as from ~ADDL~ and ~ALAG~, and at last another event at \(t_2\),
+~$BIND~ provides the following options for a time-varying data item \(x\):
+- ~DOSE~: use ~x=x(t_d)~ within interval \(t_1, t_2\);
+- ~LAST~: use ~x=x(t_1)~ within interval \(t_1, t_2\);
+- ~NEXT~ (default): use ~x=x(t_2)~ within interval \(t_1, t_2\);
+- ~DROP~ | ~SKIP~: ignore \(x\).
+- ~-~: a place holder, \(x\) assumes either NONMEM intrinsic data item
+  value or default behavior.
+
+~$BIND~  may not specify a position beyond the last position defined
+via ~$INPUT~.  It may specify fewer positions, and the remaining data
+items assume default behavior.
+
+** Examples
+A ~$BIND~ record with all defaults specified, such as
+#+begin_src perl
+$BIND - - - - - - -
+#+end_src
+is equivalent to no ~$BIND~ record.
 
 #+begin_src perl
- $INPUT ID TIME AMT DV PREP X II ADDL ; II & ADDL only in case 2
- $BIND   -    -   -  - DOSE NEXT
- $PK
-     CALLFL=-2
+ $INPUT ID TIME DATE=DROP AMT DV WGT  PREP  X   HGT
+ $BIND   -   -    DROP     -   - NEXT DOSE LAST  -
 #+end_src
-Because  of  CALLFL=-2 in the abbreviated code, additional calls to PK
-are made at the nonevent dose times (5 in case 1; 5 and 15 in case 2).
-Because  of  the  ~$BIND~ record, PREP has the value at these calls from
-the initiating dose record (4 at time 5, 1 at time 15).   F1  is
-computed  appropriately for the dose preparation. X still has values
-from the next event record, so the computation of CL is unchanged,
-e.g., it is the same from time=0 to time=5 as it is from  time=5 to
-time=10.
+~ID~, ~AMT~, ~DV~ have the values from the initiating dose record.
+~TIME~ has the value from the next event record. ~WGT~ and ~HGT~ have
+values from the next event record. ~PREP~ has the value from the
+initiating dose record. ~X~ has the value from the previous event
+record.
+
+~$INPUT~ and ~$BIND~ records can be interleaved to help maintain a  visual relationship. The above example could have been coded:
+#+begin_src perl
+   $INPUT ID TIME DATE=DROP
+   $BIND   -   -    DROP
+   $INPUT AMT DV  WGT PREP X    HGT
+   $BIND  -   -  NEXT DOSE LAST  -
+#+end_src
+
+The two above examples with problematic ~F1~ can be corrected by using ~$BIND~ and ~CALLFL=-2~:
+#+begin_src perl
+  $INPUT ID TIME AMT DV PREP X II ADDL ;# II & ADDL only in the 2nd example
+  $BIND   -    -   -  - DOSE NEXT
+  $PK
+      CALLFL=-2
+      ;#...
+#+end_src
+~CALLFL=-2~ requires additional calls to ~PK~
+at the non-event dose times.
+~$BIND~ requests ~PREP~ assume value from
+the initiating dose record, e.g. ~PREP=4~ at \(t=5\), ~PREP=1~ at \(t=15\)). ~F1~ is
+then computed  correctly for the dose preparation. ~X~ still assumes values
+from the next event record, so the computation of ~CL~ is unchanged,
+
+A more verbose alternative to ~$BIND~ is to utilize reserved variables.
+~DOSTIM~, ~DOSREC~, and ~EVTRES~.
+~DOSTIM=0~ when ~PK~ is called with an event record, and ~DOSTIM~ has the
+implied dose time when ~PK~ is called at an additional or lagged dose
+time; ~DOSREC~ stores the data items at the initiating dose record;
+~EVTREC~ stores the data items at the next event record. Therefore,
+the default LOCB behavior implies in each ~PK~ call
+- NONMEM  data items
+  #+begin_src f90
+  DV MDV ID L2 MRG_ RAW_ REPL_ EVID AMT RATE SS II CMT  PCMT  CALL  CONT
+  ADDL DATE DAT1 DAT2 DAT3
+  #+end_src
+  have values from the original dose event record ~DOSREC~;
+- ~TIME~  and  all user-defined  data items have the values from the
+  next event record ~EVTREC~.
+Using the above variables on can emulate ~$BIND~ behavior for a
+data item ~X~ by copying ~X~ at different times as follows.
+#+begin_src f90
+  ;! DOSE:
+  IF (DOSTIM.EQ.0) THEN
+     XB=X
+  ELSE
+     XB=DOSREC(X)
+  ENDIF
+
+  ;! NEXT:
+  XB=X
+
+  ;! LAST:
+  IF (DOSTIM.EQ.0) THEN
+     XB=X
+  ENDIF
+#+end_src
