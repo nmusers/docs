@@ -2403,9 +2403,17 @@ Used with METHOD=CHAIN and ~$CHAIN~ to specify how  the  sample  is selected.
 :PROPERTIES:
 :CUSTOM_ID: sigdigits
 :END:
-      Number  of  significant  digits  required  in the final parameter
-      estimate.  SIGDIGITS is not  used  by  the  Monte-Carlo  methods.
-      Default: 3.  May also be coded NSIGDIGITS.
+Number of significant  digits  required for the final parameter
+estimate. Alias: ~NSIGDIGITS~ and ~NSIG~.  Default: ~n=3~.
+
+~SIGDIGITS~ is not  used  by the EM or Bayesian methods.
+In the classical methods (FO, FOCE, and Laplace),
+it affects the estimation convergence:
+the optimization continues until all parameters varied by less than
+~SIGDIGIT~ significant digits. It thus affects the reletive finite
+difference step size \(h\) for ~THETA~, ~SIGMA~, and ~OMEGA~, during
+evaluating the OFV gradients, as NONMEM will adjust \(h\) according to
+the required accuracy.
 
 *** SLKJDF=n (NM74)
       Used  with  NUTS  method,  SLKJDF  stands  for  Sigma LKJ density
@@ -2421,10 +2429,12 @@ Used with METHOD=CHAIN and ~$CHAIN~ to specify how  the  sample  is selected.
       See [[file:/docs/reference-manual/control-records/slkjdf/][record $SLKJDF]] (NM75) to specify LKJ correlation degrees of freedom for each SIGMA block.
 
 *** SIGL=n
-      n is used to calculate the step-size for finite difference derivatives  independent of the SIGDIGITS value.  If n=0 or n=100 then
-      SIGL is ignored and SIGDIGITS is used as  in  versions  prior  to
-      NONMEM 7.  SIGL should usually be 2 to 3 times the value of NSIG.
-      It is not used by the SAEM or BAYES methods.
+~SIGL~ requires the significant digits of OFV. It thus controls finite
+      difference step-size \(h\) when NONMEM calculates derivatives,
+      independent of the ~SIGDIGITS~ option.  ~SIGL=0~ or ~SIGL=100~
+      sets the \(h\) estimation using ~SIGDIGITS~, the behavior prior to
+      NONMEM 7.  In NONMEM 7+, we recommend setting ~SIGL~ 2 to 3 times ~SIGDIGITS~.
+      ~SIGL~ is not used by EM or Bayesian methods.
 
 *** SIGLO=n (NM72)
 The precision to which the individual ETAs  are  optimized.   The SIGL
