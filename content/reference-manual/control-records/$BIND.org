@@ -18,8 +18,8 @@ system, when there is an absorption lag.
 Unless modeled specifically, NONMEM assumes piece-wise constant value
 for user-specified data items used by ~$PK~: in a given state time interval \(t_{j}, t_{j+1}\), the
 data item used by ~$PK~ is constant and adopts its value at
-\(t_{j+1}\). This is referred to as "Last Observation Carry Backwards"
-(LOCB): the system advances from \(t_j\) to \(t_{j+1}\) using
+\(t_{j+1}\). This is referred to as "Next Observation Carried Backwards"
+(NOCB): the system advances from \(t_j\) to \(t_{j+1}\) using
 parameter values at \(t_{j+1}\). The intrinsic data items, such as
 ~ID~, ~DV~, ~AMT~, ~RATE~, etc., are not affected by this behavior.
 
@@ -33,7 +33,8 @@ NONMEM would use ~WT~ values as the following:
 - \(t=40\): ~WT=70~;
 - \(t \in (40, 50]\): ~WT=72~;
 
-A dummy record can be used to to force the "Last Observation Carry Forward" behavior:
+A dummy record can be used to to force the "Last Observation Carried
+Forward" (LOCF) behavior:
 #+begin_src r
 TIME  WT
 40    70
@@ -62,7 +63,7 @@ so that ~THETA(3)~ describes ~F1~ for ~PREP=4~, at
 \(t \in [0, 10)\). However, with ~ALAG1~ the actual administration
 time of the first dose could be at \(t\in (0, 10]\) or \(t \in
 (10, 20)\), corresponding to ~PREP=1~ or ~PREP=0~, repectively, according to
-LOCB. This leads to incorrect ~F1~. Moreover, since the
+NOCB. This leads to incorrect ~F1~. Moreover, since the
 line of ~F1=THETA(3)~ will never be run, the Estimation step will
 produce zero gradient for ~THETA(3)~.
 
@@ -84,9 +85,9 @@ with
 In this case ~THETA(3)~ applies only to the first
 dose when ~PRED=4~.
 
-The optional ~$BIND~ record overrides the default LOCB behavior, when there are
+The optional ~$BIND~ record overrides the default NOCB behavior, when there are
 time-varying data items utilized at additional doses or lagged doses
-through [[file:/docs/reference-manual/abbr/#calling_protocol][~CALLFL=-2~]]. In other words, it is effective only when ~$PK~
+through [[file:/docs/reference-manual/abbr/#calling_protocol][~CALLFL=-2~]]. In other words, ~$BIND~ is effective only when ~$PK~
 is used on non-event dose times. It has no effect at other times,
 including when ~PK~ is called at a model event time (~MTIME~).
 
@@ -153,7 +154,7 @@ A more verbose alternative to ~$BIND~ is to utilize reserved variables.
 implied dose time when ~PK~ is called at an additional or lagged dose
 time; ~DOSREC~ stores the data items at the initiating dose record;
 ~EVTREC~ stores the data items at the next event record. Therefore,
-the default LOCB behavior implies in each ~PK~ call
+the default NOCB behavior implies in each ~PK~ call
 - NONMEM  data items
   #+begin_src f90
   DV MDV ID L2 MRG_ RAW_ REPL_ EVID AMT RATE SS II CMT  PCMT  CALL  CONT
